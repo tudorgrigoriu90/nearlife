@@ -72,6 +72,7 @@ Docs follow the Helix studio taxonomy. Start with the index: **[docs/README.md](
 | [USER-FLOWS](docs/USER-FLOWS.md) | Screen wireframes & journeys |
 | [DATA-SOURCING-LICENSING](docs/DATA-SOURCING-LICENSING.md) | **Go/no-go:** API licensing |
 | [PRIVACY-COMPLIANCE](docs/PRIVACY-COMPLIANCE.md) | **Go/no-go:** GDPR, location, kids (ads: none — resolved) |
+| [TASK-PLAN](docs/TASK-PLAN.md) | Delivery backlog — epics → features → stories → tasks, phased |
 
 ## Status
 

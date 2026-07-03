@@ -12,6 +12,7 @@ avoid duplication.
 | [ECONOMY.md](ECONOMY.md) | Economy Design — monetization model (no ads, no subscription), SKU ladder, free-catch taste, progression economy | Draft |
 | [TSD.md](TSD.md) | Technical Spec — stack, architecture, data model/schema, notification engine, pipeline | Draft |
 | [USER-FLOWS.md](USER-FLOWS.md) | Screen inventory + key user journeys | Outline |
+| [TASK-PLAN.md](TASK-PLAN.md) | Delivery backlog — epics/features/stories/tasks, phased, with acceptance criteria | Draft |
 | [DATA-SOURCING-LICENSING.md](DATA-SOURCING-LICENSING.md) | **Go/no-go:** API licensing for commercial use | Draft — needs legal verification |
 | [PRIVACY-COMPLIANCE.md](PRIVACY-COMPLIANCE.md) | **Go/no-go:** GDPR, location, kids (no ads ship — resolved) | Draft — needs legal verification |
 
