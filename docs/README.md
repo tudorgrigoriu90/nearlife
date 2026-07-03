@@ -9,11 +9,11 @@ avoid duplication.
 |-----|---------|--------|
 | [VISION.md](VISION.md) | The pitch / north star. Why this exists. | Stable (converted from original pitch) |
 | [GDD.md](GDD.md) | Game Design Document — core loop, three-tier collection, catch, timing, retention, game systems | Draft |
-| [ECONOMY.md](ECONOMY.md) | Economy Design — monetization model, SKU ladder, ads, progression economy | Draft |
+| [ECONOMY.md](ECONOMY.md) | Economy Design — monetization model (no ads, no subscription), SKU ladder, free-catch taste, progression economy | Draft |
 | [TSD.md](TSD.md) | Technical Spec — stack, architecture, data model/schema, notification engine, pipeline | Draft |
 | [USER-FLOWS.md](USER-FLOWS.md) | Screen inventory + key user journeys | Outline |
 | [DATA-SOURCING-LICENSING.md](DATA-SOURCING-LICENSING.md) | **Go/no-go:** API licensing for commercial use | Draft — needs legal verification |
-| [PRIVACY-COMPLIANCE.md](PRIVACY-COMPLIANCE.md) | **Go/no-go:** GDPR, location, kids, ads | Draft — needs legal verification |
+| [PRIVACY-COMPLIANCE.md](PRIVACY-COMPLIANCE.md) | **Go/no-go:** GDPR, location, kids (no ads ship — resolved) | Draft — needs legal verification |
 
 ## Governing principles
 1. **Cost ≈ $0** at MVP scale — free tiers only (see TSD for the honest cost floor).

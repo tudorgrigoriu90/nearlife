@@ -33,7 +33,9 @@ Every species can be collected along three independent axes:
 | **Helped** | Pledge a real action — *give* or *protect* — for the species | Low (honor system) | "This species and I have a relationship" |
 
 The gaps between the counts (e.g. *Spotted 140 / Caught 38 / Helped 12*) are the long-term
-motivation. A casual user can live entirely in **Spotted**.
+motivation. A casual user can live entirely in **Spotted** — but every free user gets
+**3 catches per season**, so the fun of Tier 2 is tasted before it's sold (rationale in
+[ECONOMY.md](ECONOMY.md)).
 
 ---
 
@@ -51,9 +53,28 @@ motivation. A casual user can live entirely in **Spotted**.
   where they actually live (water → waterfowl, woodland → woodpeckers, meadow → pollinators),
   derived from OpenStreetMap. This is honest ("this is its kind of place") and teaches real
   ecology as a mechanic — a defensible edge neither Pokémon GO nor iNaturalist has.
-- **Catch action is light and species-flavored** — a quick timing/skill minigame, not a
-  required photo. (Optional photo-capture is reserved for a future "confirmed sighting"
+- **Catch action is a per-category minigame.** Each species category gets its own style of
+  light skill game, so catching stays fresh across a whole almanac — and because the catch
+  is what the Full Game purchase actually sells, it must have real game feel, not feel like
+  scanning a QR code:
+
+  | Category | Minigame style |
+  |----------|----------------|
+  | Bird | **Timing** — tap the moment it dives / sings / takes off |
+  | Fish | **Rhythm & tension** — reel-style; keep the line in the sweet zone |
+  | Insect | **Trace** — follow the flight path without breaking the line |
+  | Mammal | **Stealth** — advance slowly; freeze when it looks up |
+  | Plant / fungus | **Spot & frame** — find it in the scene and frame it well |
+
+  Each is a 10–20 second, one-thumb interaction; species within a category reskin the same
+  mechanic (a kingfisher and a swift both "time the dive," but look and feel different).
+  No photo required. (Optional photo-capture is reserved for a future "confirmed sighting"
   hardcore tier — top of the pyramid, not the entry.)
+- **Free taste: 3 catches per season.** The catch loop is the fun we're selling; free users
+  must experience it before being asked to pay for it. Three per season is enough to feel
+  the full loop (travel → minigame → earned reward → contextual protect tip) and want more,
+  not enough to satisfy a collector. Conversion pitch: *"you loved catching — get
+  unlimited."* (SKU details in [ECONOMY.md](ECONOMY.md).)
 - **Safety & land rights are built into spawn logic from day one:** snap catch spots to
   public/accessible land; hard-exclude private property, protected reserves, roads, water
   hazards. This is a Pokémon-GO lesson, not a patch-later item. (Rules in [TSD.md](TSD.md).)
@@ -67,15 +88,22 @@ Two faces, both honor-system (consistent with the no-proof ethos):
 - **Protect (restraint):** don't pollute the water, don't litter the shore, don't disturb the
   nest, don't pick the rare flower, keep the dog leashed in nesting season.
 
-**Content rules — get these right or it becomes guilt-noise:**
-1. **Specific & threat-driven, not generic.** Not "don't pollute water" but *"this frog
-   breathes through its skin — a drop of oil in its pond can kill it."* Threats sourced from
-   the **IUCN Red List** (pollution, disturbance, invasives, pesticides, habitat loss).
-2. **Positive & knowledge-first, never scolding.** Teach the consequence; let behavior follow.
-3. **Seasonal.** "Don't trim the hedge now — birds are nesting." "Late winter is nest-box season."
-4. **Framed as a code, not a chore list.** Model on Leave No Trace / the Countryside Code —
-   adopting a creed is identity; ticking tasks is homework.
-5. **Contextual delivery — the killer moment:** fire protect-guidance *during the catch*, in
+**Helped is deliberately light: one tap + genuinely useful info.** No proof, no chores, no
+guilt. Content rules:
+
+1. **Species-level and basic.** Short, useful advice tied to the species — not an activism
+   program. Threat framing (why it matters) still makes it land: *"this frog breathes
+   through its skin — a drop of oil in its pond can kill it."*
+2. **Default to universally safe actions.** Put out water, don't disturb nests, keep the dog
+   leashed in nesting season, leave wild flowers, take litter home. These are correct
+   everywhere, so advice reuses across regions without heavy local vetting.
+3. **"Follow local law" is always highlighted.** Access rights, protected species, and
+   feeding rules differ by country — the app informs, local rules decide. A standing line on
+   every help card.
+4. **Avoid risky specifics.** Never recommend planting or releasing a particular species
+   without an invasives check for that region; when unsure, stay generic.
+5. **Positive & knowledge-first, never scolding.** Teach the consequence; let behavior follow.
+6. **Contextual delivery — the killer moment:** fire protect-guidance *during the catch*, in
    the same habitat, same season: "You're catching a skylark — it nests on the ground here
    through June, keep to the path."
 
@@ -103,6 +131,11 @@ migrant genuinely isn't here in winter; offering to catch it then would break th
 
 Passive collecting saturates (you fill your local list, then notifications repeat). The engine:
 
+- **"Active this week" pull surface** — an always-available screen listing what's plausibly
+  active in the user's area right now (screen in [USER-FLOWS.md](USER-FLOWS.md) §3). The app
+  has a reason to open even with notifications declined or muted; the almanac is never
+  notification-dependent. Costs nothing extra — same seasonal data the notification engine
+  samples (TSD §4).
 - **Seasonal windows** — migrants only catchable when actually passing through; scarcity
   grounded in reality, not gacha.
 - **Live events** — "first swift of spring," salmon run, mushroom bloom. Real events on a real
@@ -122,8 +155,11 @@ Passive collecting saturates (you fill your local list, then notifications repea
   [ECONOMY.md](ECONOMY.md).
 - **Badges & completion:** by category (birds, insects, plants…), by season, by habitat, by
   Helped-count.
-- **Family shared progression:** in a household, almanac + Caught + Helped are shared — a team,
-  not separate players (see [ECONOMY.md](ECONOMY.md) for the Family SKU).
+- **Family shared progression (post-validation, v2):** in a household, almanac + Caught +
+  Helped are shared — a team, not separate players. **Cut from v1:** it is the most complex
+  build in the spec (households, invites, child accounts, parental consent) and tests nothing
+  about the core thesis. Returns with the Family SKU once single-player conversion is proven
+  (see [ECONOMY.md](ECONOMY.md)).
 
 ---
 

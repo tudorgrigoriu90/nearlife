@@ -8,7 +8,7 @@
 ---
 
 ## Why this is gating
-The app is **commercial** (paid unlock + ads). Most biodiversity data is published by
+The app is **commercial** (paid unlock; no ads). Most biodiversity data is published by
 conservation institutions under licenses written for *research and non-commercial* use.
 "It has a public API" ≠ "we may build a paid product on it." This doc separates the two.
 
@@ -39,9 +39,11 @@ conservation institutions under licenses written for *research and non-commercia
   generate honest, specific protect-actions.
 - **License:** Red List API terms restrict commercial use; **commercial use requires
   permission.** Attribution required.
-- **Action:** apply for commercial/permission use; **or** source threat framing from
-  permissively-licensed material and expert/region review instead of the API. Verdict:
-  **seek permission; have a non-API fallback for threat content.**
+- **Action:** the Helped tier is now **basic species-level advice** (universally safe
+  actions + a "follow local law" line — GDD §5), which does **not** require the IUCN API;
+  hand-written threat framing from permissively-licensed material covers it. The API becomes
+  **optional enrichment** — apply for permission only if/when richer threat data is wanted.
+  Verdict: **not needed for launch; non-API content is the default.**
 
 ### 4. OpenStreetMap (via Overpass API) — habitat features for catch spots
 - **What we use:** land/water/vegetation features → habitat classification → catch spots.
@@ -60,7 +62,7 @@ conservation institutions under licenses written for *research and non-commercia
 |--------|-------------|--------------|
 | GBIF (CC0/CC-BY only) | Yes, if NC filtered | **Use — primary occurrence source** |
 | eBird | Only with agreement | **Defer — GBIF covers birds for MVP** |
-| IUCN Red List | Only with permission | **Seek permission; non-API fallback for threat text** |
+| IUCN Red List | Only with permission | **Not needed for launch — basic Helped advice is hand-written; API = optional enrichment later** |
 | OSM / Overpass | Yes (ODbL, attribution) | **Use — catch-spot habitat** |
 
 **Net:** the MVP can launch on **GBIF (filtered) + OSM**, with hand-curated/region-reviewed
@@ -76,6 +78,7 @@ threat content — **no blocking dependency on eBird or the IUCN API.** That is 
 ## Open actions
 - [ ] Enforce CC0/CC-BY-only filter in GBIF pipeline; verify no NC data leaks in.
 - [ ] Written confirmation on GBIF commercial use of filtered subset.
-- [ ] Apply for IUCN Red List commercial permission (parallel track).
+- [ ] IUCN Red List permission: deferred — only if richer threat data is wanted later (basic
+      Helped advice is hand-written; see GDD §5).
 - [ ] Decide eBird agreement application (post-MVP, only if birds need richer data).
 - [ ] Legal review of ODbL derived-database obligations before any data export/publish.
