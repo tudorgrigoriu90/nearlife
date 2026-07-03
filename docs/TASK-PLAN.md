@@ -673,10 +673,11 @@ locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INT
   - ✅ `lib/species/localized.ts`: `commonNameFor`/`contentFor` keyed by locale with English
     fallback; `lib/species/names.sv.ts`: Swedish common names for all 54 species (coverage-tested);
     8 tests. Swedish *content* (fact/when-how/give/protect) is T-127.
-- **T-127 · Swedish species content translation** — *Claude + Director · L · deps: T-122 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
-  - Translate fact/when-how/give/protect into Swedish for all 54 species; register `SV_CONTENT`
-    in `CONTENT_BY_LOCALE`. Claude first pass → **native review before shipping** (give/protect
-    are law-sensitive). Same rule for every subsequent EU language.
+- **T-127 · Swedish species content translation** — *Claude + Director · L · `DONE` (first pass; native review pending) · deps: T-122 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - ✅ `lib/species/content.sv.ts`: fact/when-how/give/protect in Swedish for all 54 species,
+    registered in `CONTENT_BY_LOCALE`; `content.sv.test.ts` (4 tests: full parity, no orphans,
+    all fields, Swedish honesty rule). **Status `machine` — native review required before sv
+    ships (T-125)**; `sv` stays not-live in the coverage matrix until reviewed.
 - **T-124 · EU locale coverage matrix + status tracking** — *Claude · S · `DONE` · deps: T-122 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
   - ✅ `lib/i18n/coverage.ts`: `LOCALE_STATUS` (missing/machine/reviewed) for all 24 locales;
     `isLiveForUsers`/`liveLocales` (reviewed-only gate), `translationProgress`; 5 tests. en

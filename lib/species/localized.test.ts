@@ -39,8 +39,15 @@ describe('contentFor', () => {
     expect(contentFor('common-swift', 'en')).toBe(KRONOBERG_CONTENT['common-swift']);
   });
 
-  it('falls back to English content for sv until Swedish content is registered (T-127)', () => {
-    expect(contentFor('common-swift', 'sv')).toBe(KRONOBERG_CONTENT['common-swift']);
+  it('returns Swedish content for sv (T-127)', () => {
+    const sv = contentFor('common-swift', 'sv');
+    expect(sv).toBeDefined();
+    expect(sv).not.toBe(KRONOBERG_CONTENT['common-swift']);
+    expect(sv?.fact).toContain('Tornseglare');
+  });
+
+  it('still falls back to English content for an untranslated locale', () => {
+    expect(contentFor('common-swift', 'de')).toBe(KRONOBERG_CONTENT['common-swift']);
   });
 
   it('returns undefined for an unknown species', () => {

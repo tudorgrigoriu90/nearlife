@@ -1,5 +1,6 @@
 import type { Locale } from '../i18n';
 import { KRONOBERG_CONTENT, type SpeciesContent } from './content';
+import { SV_CONTENT } from './content.sv';
 import { SV_NAMES } from './names.sv';
 import type { Species } from './types';
 
@@ -11,7 +12,7 @@ import type { Species } from './types';
 
 const CONTENT_BY_LOCALE: Partial<Record<Locale, Record<string, SpeciesContent>>> = {
   en: KRONOBERG_CONTENT,
-  // sv: SV_CONTENT,  // registered by T-127
+  sv: SV_CONTENT, // T-127 — machine status, native review pending (INTERNATIONALIZATION.md)
 };
 
 const NAMES_BY_LOCALE: Partial<Record<Locale, Record<string, string>>> = {
