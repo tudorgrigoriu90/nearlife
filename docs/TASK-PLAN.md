@@ -685,9 +685,10 @@ locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INT
 attribution. Photos are language-independent (one set serves all locales). Licensing:
 [DATA-SOURCING-LICENSING.md](DATA-SOURCING-LICENSING.md) §5.
 
-- **T-118 · Media schema + attribution model** — *Claude · S · deps: T-019 · [TSD §3](TSD.md), [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
-  - `SpeciesMedia` type (`url`, `license`, `author`, `sourceUrl`, `isPrimary`) + attribution
-    formatting; prototype falls back to the category emoji until photos are sourced. Unit-tested.
+- **T-118 · Media schema + attribution model** — *Claude · S · `DONE` · deps: T-019 · [TSD §3](TSD.md), [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
+  - ✅ `lib/species/media.ts`: `SpeciesMedia` type; `isCommercialUseAllowed`/`assertAllowedLicense`
+    (only CC0/CC-BY/CC-BY-SA — NC/ND rejected), `attributionFor`, `primaryPhoto`; empty
+    `KRONOBERG_MEDIA` manifest (emoji fallback until T-119); 7 tests.
 - **T-119 · Source Wikimedia Commons photos (Kronoberg set)** — *Claude + Director · L · deps: T-118 · [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
   - One CC0/CC-BY/CC-BY-SA photo per species, unmodified, with author + license + source URL
     recorded; exclude NC/ND. Director spot-checks licensing. (Needs web sourcing + Supabase
