@@ -14,12 +14,8 @@ else
   echo "pre-push: no package.json yet — code checks activate after T-010 (app scaffold)."
 fi
 
-# Python pipeline checks activate once pipeline/ has a test runner (E3).
-if [ -f pipeline/pyproject.toml ] || [ -f pipeline/requirements.txt ]; then
-  if [ -f pipeline/Makefile ]; then
-    echo "pre-push: running pipeline checks..."
-    make -C pipeline verify
-  fi
-fi
+# The Python pipeline (pipeline/) is gated in CI (.github/workflows/ci.yml), not here:
+# the local hook stays JS/TS-only so it needs no Python/pytest/make toolchain on the
+# developer machine (portable across Windows Git Bash). CI is the backstop for pipeline code.
 
 echo "pre-push: quality gate passed."

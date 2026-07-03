@@ -145,9 +145,12 @@ The go/no-go items from the licensing and privacy docs. **These gate Phase 2, no
     with a passing smoke test. Both the pre-push hook (T-109) and CI now have teeth.
 - **T-014 · EAS build profiles (dev / preview / prod)** — *Claude · M · deps: T-006, T-010*
   - `eas.json` with three profiles; a `preview` build installs on a real device.
-- **T-015 · Python pipeline CI skeleton (scheduled)** — *Claude · S · deps: T-012 · [TSD §6](TSD.md)*
-  - GitHub Actions workflow with Python env, dependency install, and a placeholder scheduled
-    job (cron) that runs green. Real jobs land in E3.
+- **T-015 · Python pipeline CI skeleton (scheduled)** — *Claude · S · `DONE` · deps: T-012 · [TSD §6](TSD.md)*
+  - ✅ `pipeline/` skeleton (`run.py` + `tests/` + `requirements.txt`);
+    `.github/workflows/pipeline.yml` runs it on a monthly cron + manual dispatch; `ci.yml`
+    runs `pytest` on push/PR (pip, not make).
+  - Portability fix: the local pre-push hook is JS/TS-only (no `make`/Python needed on
+    Windows); pipeline code is gated in CI as the backstop. Real jobs land in E3.
 
 ### S1.2.3 — Quality gate & repo governance
 The enforced quality gate. **Direct-push-to-main is kept**, with a local pre-push hook as the

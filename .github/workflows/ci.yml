@@ -32,11 +32,14 @@ jobs:
           fi
 
       - name: Set up Python
-        if: hashFiles('pipeline/requirements.txt', 'pipeline/pyproject.toml') != ''
+        if: hashFiles('pipeline/requirements.txt') != ''
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
 
-      - name: Run pipeline checks
-        if: hashFiles('pipeline/Makefile') != ''
-        run: make -C pipeline verify
+      - name: Run pipeline checks (lint + test)
+        if: hashFiles('pipeline/requirements.txt') != ''
+        run: |
+          pip install -r pipeline/requirements.txt
+          python -m pytest pipeline -q

@@ -1,0 +1,29 @@
+name: Data pipeline
+
+# Scheduled runner for the Python data pipeline (T-015 skeleton).
+# Cadence is a placeholder — monthly refresh + season transitions are tuned in E3.
+# Also runnable on demand via the Actions "Run workflow" button.
+
+on:
+  schedule:
+    - cron: '0 3 1 * *' # 03:00 UTC on the 1st of each month (placeholder)
+  workflow_dispatch:
+
+jobs:
+  run:
+    name: Run pipeline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Run pipeline
+        run: python pipeline/run.py
