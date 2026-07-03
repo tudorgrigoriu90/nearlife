@@ -120,19 +120,28 @@ The go/no-go items from the licensing and privacy docs. **These gate Phase 2, no
 ## F1.2 — Repository, Tooling & CI/CD
 
 ### S1.2.1 — Expo app scaffold
-- **T-010 · Initialize Expo (React Native + TypeScript) app** — *Claude · S · deps: — · [TSD §1](TSD.md)*
-  - `expo` app boots on iOS + Android simulators; TS strict mode on.
-  - Committed with a working "hello" screen and app config (name/slug/scheme).
-- **T-011 · Configure lint/format/typecheck** — *Claude · XS · deps: T-010*
-  - ESLint + Prettier + `tsc --noEmit` all pass on a clean checkout; scripts in `package.json`.
+> **Bootstrap note:** T-010, T-011, T-013 landed together in one commit. The pre-push gate
+> runs `npm run verify` the instant a `package.json` exists, so scaffolding into a *gated,
+> green* state is one atomic unit — splitting it across pushes would deadlock. Quality gate
+> wins over one-task-per-push here (per [CLAUDE.md](../CLAUDE.md): "quality over everything").
+
+- **T-010 · Initialize Expo (React Native + TypeScript) app** — *Claude · S · `DONE` · deps: — · [TSD §1](TSD.md)*
+  - ✅ Expo SDK 57 app (blank-typescript template), TS strict mode on; branded minimal
+    `App.tsx`; `app.json` name/slug/scheme set to Nearby/nearby.
+  - Chose the minimal template over the heavy default (which shipped web/CSS-module demo code
+    that didn't typecheck clean); router/structure added as screens arrive.
+- **T-011 · Configure lint/format/typecheck** — *Claude · XS · `DONE` · deps: T-010*
+  - ✅ ESLint (flat, `eslint-config-expo` + `eslint-config-prettier`), Prettier, and
+    `tsc --noEmit` (strict) all green; `lint`/`typecheck` scripts in `package.json`.
+
 - **T-012 · Establish repo structure** — *Claude · XS · deps: T-010*
   - Clear top-level layout: `app/` (screens), `components/`, `lib/` (client, data access),
     `pipeline/` (Python), `supabase/` (migrations). Documented in a short `CONTRIBUTING`/README note.
 
 ### S1.2.2 — Continuous integration & builds
-- **T-013 · CI: lint + typecheck + test (`verify` script)** — *Claude · S · deps: T-011 · [TSD §1](TSD.md)*
-  - Define an npm `verify` script (`lint && typecheck && test`) that both the pre-push hook
-    (T-109) and CI (`.github/workflows/ci.yml`) invoke; once defined, the gate has teeth.
+- **T-013 · CI: lint + typecheck + test (`verify` script)** — *Claude · S · `DONE` · deps: T-011 · [TSD §1](TSD.md)*
+  - ✅ `verify` = `lint && typecheck && test` defined; Jest via `jest-expo` + `babel-preset-expo`
+    with a passing smoke test. Both the pre-push hook (T-109) and CI now have teeth.
 - **T-014 · EAS build profiles (dev / preview / prod)** — *Claude · M · deps: T-006, T-010*
   - `eas.json` with three profiles; a `preview` build installs on a real device.
 - **T-015 · Python pipeline CI skeleton (scheduled)** — *Claude · S · deps: T-012 · [TSD §6](TSD.md)*
