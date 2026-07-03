@@ -598,6 +598,15 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
 ---
 ---
 
+## Logic-first tasks (built ahead of their integration tasks)
+Pure, unit-tested domain logic in `lib/`, extracted so it can be built and verified through the
+quality gate **without** the Supabase/EAS accounts (Director-blocked) or a running simulator.
+Each feeds a later integration task (UI wiring / Edge Function) that consumes it unchanged.
+
+- **T-110 · Season & active-window helpers** — *Claude · S · `DONE` · deps: T-019 · [GDD §6](GDD.md), [TSD §4](TSD.md)*
+  - ✅ `lib/season.ts`: `monthOf`, `seasonOf`, `seasonKeyOf` (winter spans the year boundary),
+    `isActiveInMonth`, `activeSpecies`; 7 tests. Feeds T-111, T-112, T-113.
+
 ## Cross-cutting acceptance rules (apply to every UI/content task)
 These are global invariants from the design docs; a task that violates one is not `DONE`:
 
