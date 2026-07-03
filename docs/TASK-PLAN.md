@@ -609,6 +609,10 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
 - **T-111 · "Active this week" selection logic** — *Claude · S · `DONE` · deps: T-110 · [USER-FLOWS §3](USER-FLOWS.md), [TSD §4b](TSD.md)*
   - ✅ `lib/thisWeek.ts`: active species ordered new-to-user first, then rarer-before-common,
     stable tie-break; NEW flag per entry; 5 tests. Consumed by T-028/T-078 UI.
+- **T-112 · Notification candidate selection & weighting** — *Claude · S · `DONE` · deps: T-110 · [TSD §4](TSD.md)*
+  - ✅ `lib/notification.ts`: season-gate → dedupe → `rarity_flavor` weighting → weighted
+    sample with an injected RNG; `candidateSpecies`, `weightFor`, `pickWeighted`,
+    `selectNotificationSpecies`; 9 tests. Core of T-030 (prototype) and T-062 (production).
 
 ## Cross-cutting acceptance rules (apply to every UI/content task)
 These are global invariants from the design docs; a task that violates one is not `DONE`:
