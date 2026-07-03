@@ -667,9 +667,14 @@ locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INT
   - `expo-localization` device locale → nearest supported locale; Settings override; persists.
 
 ## F13.2 — Localized species content
-- **T-122 · Locale-aware species content + Swedish** — *Claude · L · deps: T-020, T-120 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md), [TSD §3](TSD.md)*
-  - Restructure content to be keyed by `(species_id, locale)` with English base + fallback;
-    localized common names; add **Swedish** for all species (alpha). `review_status` per entry.
+- **T-122 · Locale-aware content architecture + Swedish names** — *Claude · M · `DONE` · deps: T-020, T-120 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md), [TSD §3](TSD.md)*
+  - ✅ `lib/species/localized.ts`: `commonNameFor`/`contentFor` keyed by locale with English
+    fallback; `lib/species/names.sv.ts`: Swedish common names for all 54 species (coverage-tested);
+    8 tests. Swedish *content* (fact/when-how/give/protect) is T-127.
+- **T-127 · Swedish species content translation** — *Claude + Director · L · deps: T-122 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - Translate fact/when-how/give/protect into Swedish for all 54 species; register `SV_CONTENT`
+    in `CONTENT_BY_LOCALE`. Claude first pass → **native review before shipping** (give/protect
+    are law-sensitive). Same rule for every subsequent EU language.
 - **T-124 · EU locale coverage matrix + status tracking** — *Claude · S · deps: T-122 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
   - Encode the 24 EU locales and a `missing/machine/reviewed` status per (species, locale, field)
     so a market only goes live when its content is `reviewed`.
