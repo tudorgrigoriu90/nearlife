@@ -2,7 +2,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { monthOf } from '../lib/season';
 import { thisWeek, type ThisWeekEntry } from '../lib/thisWeek';
-import { KRONOBERG_CONTENT } from '../lib/species/content';
+import { commonNameFor, contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import type { SpeciesCategory } from '../lib/species/types';
 
@@ -20,15 +20,24 @@ const CATEGORY_EMOJI: Record<SpeciesCategory, string> = {
   fungus: '🍄',
 };
 
-function Row({ entry, newLabel }: { entry: ThisWeekEntry; newLabel: string }) {
+function Row({
+  entry,
+  locale,
+  newLabel,
+}: {
+  entry: ThisWeekEntry;
+  locale: Locale;
+  newLabel: string;
+}) {
   const { species, isNew } = entry;
-  const content = KRONOBERG_CONTENT[species.id];
+  const name = commonNameFor(species, locale);
+  const content = contentFor(species.id, locale);
   return (
     <View style={styles.row}>
       <Text style={styles.emoji}>{CATEGORY_EMOJI[species.category]}</Text>
       <View style={styles.rowText}>
         <View style={styles.rowHeader}>
-          <Text style={styles.name}>{species.commonName}</Text>
+          <Text style={styles.name}>{name}</Text>
           {isNew ? <Text style={styles.newBadge}>{newLabel}</Text> : null}
         </View>
         <Text style={styles.detail}>{content?.whenAndHow ?? species.scientificName}</Text>
@@ -51,7 +60,9 @@ export default function ThisWeekScreen({ locale = 'en' }: { locale?: Locale }) {
       <FlatList
         data={entries}
         keyExtractor={(e) => e.species.id}
-        renderItem={({ item }) => <Row entry={item} newLabel={tr('thisWeek.new')} />}
+        renderItem={({ item }) => (
+          <Row entry={item} locale={locale} newLabel={tr('thisWeek.new')} />
+        )}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.detail}>{tr('thisWeek.empty')}</Text>}
       />
