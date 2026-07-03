@@ -197,11 +197,11 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
   - ✅ 55 real species (`lib/species/kronoberg.ts`) across birds/mammals/insects/plants/fish,
     each with category, rarity, and per-month active window; typed schema in
     `lib/species/types.ts`; 7 data-integrity tests in `kronoberg.test.ts`.
-- **T-020 · Write card content for each species** — *Claude · L · deps: T-019 · [GDD §3,§5,§6](GDD.md), [USER-FLOWS §4](USER-FLOWS.md)*
-  - Per species: fact, trivia ("when & how to see it"), a **give** action, a **protect** action.
-  - Give/protect follow the light rules: universally safe, "follow local law" line, no risky
-    plant/release specifics ([GDD §5](GDD.md)).
-  - Copy obeys the honesty rule — "active this season," never "here right now."
+- **T-020 · Write card content for each species** — *Claude · L · `DONE` · deps: T-019 · [GDD §3,§5,§6](GDD.md), [USER-FLOWS §4](USER-FLOWS.md)*
+  - ✅ `lib/species/content.ts`: fact + when/how + give + protect for all 54 species, plus a
+    shared `FOLLOW_LOCAL_LAW` line. `content.test.ts` (6 tests) enforces full coverage, the
+    honesty rule (no "right now" claims), and the invasive-risk rule (no "plant/release a
+    specific species" in give actions). Prototype content — Director review before public use.
 - **T-021 · Source & attribute placeholder imagery** — *Claude · S · deps: T-019*
   - Each species has a hero image from a license-clear source; attribution recorded.
 
