@@ -621,6 +621,13 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
   - ✅ `lib/minigame/timing.ts`: `evaluateTiming` grades a tap (perfect/good/miss) against the
     perfect moment with tunable windows, early/late symmetric; 5 tests. Render-free core of the
     bird timing minigame (T-033 prototype, T-069 framework).
+- **T-115 · Collection domain model & progress logic** — *Claude · S · `DONE` · deps: — · [TSD §3](TSD.md), [USER-FLOWS §2](USER-FLOWS.md)*
+  - ✅ `lib/collection.ts`: `tierStateOf`/`tierStateFor` (● Spotted ◐ Caught ◑ Helped overlay),
+    `progressSummary` (3-tier counts), `spottedIds` (dedupe set for notifications); 6 tests.
+    Feeds T-056 (store) and T-057/T-058 (almanac UI).
+
+**Logic-first coverage:** 9 test suites / 52 tests green across `lib/`. This is the testable
+core the Supabase-backed store, Edge Functions, and RN screens will wrap once accounts land.
 
 ## Cross-cutting acceptance rules (apply to every UI/content task)
 These are global invariants from the design docs; a task that violates one is not `DONE`:
