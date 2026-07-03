@@ -193,9 +193,10 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ## F2.1 — Prototype Content (hand-curated Kronoberg set)
 
 ### S2.1.1 — Kronoberg species dataset
-- **T-019 · Curate ~50 Kronoberg species** — *Claude · M · deps: — · [TSD §8](TSD.md)*
-  - ~50 real species across birds/insects/plants/mammals plausibly present in Kronoberg.
-  - Each tagged with category and a hardcoded per-month active/inactive flag.
+- **T-019 · Curate ~50 Kronoberg species** — *Claude · M · `DONE` · deps: — · [TSD §8](TSD.md)*
+  - ✅ 55 real species (`lib/species/kronoberg.ts`) across birds/mammals/insects/plants/fish,
+    each with category, rarity, and per-month active window; typed schema in
+    `lib/species/types.ts`; 7 data-integrity tests in `kronoberg.test.ts`.
 - **T-020 · Write card content for each species** — *Claude · L · deps: T-019 · [GDD §3,§5,§6](GDD.md), [USER-FLOWS §4](USER-FLOWS.md)*
   - Per species: fact, trivia ("when & how to see it"), a **give** action, a **protect** action.
   - Give/protect follow the light rules: universally safe, "follow local law" line, no risky
