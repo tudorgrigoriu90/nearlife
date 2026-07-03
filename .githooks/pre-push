@@ -1,0 +1,25 @@
+#!/bin/sh
+# Quality gate — runs before every push (way of working: local green is the gate).
+# Do NOT bypass with --no-verify. If this is red, the push must not happen.
+set -e
+
+echo "pre-push: running quality gate..."
+
+if [ -f package.json ]; then
+  # The app is scaffolded — run the full verify pipeline (lint + typecheck + test).
+  # `verify` is defined in package.json (wired in T-011/T-013). If it's missing,
+  # npm exits non-zero and the push is correctly blocked.
+  npm run verify
+else
+  echo "pre-push: no package.json yet — code checks activate after T-010 (app scaffold)."
+fi
+
+# Python pipeline checks activate once pipeline/ has a test runner (E3).
+if [ -f pipeline/pyproject.toml ] || [ -f pipeline/requirements.txt ]; then
+  if [ -f pipeline/Makefile ]; then
+    echo "pre-push: running pipeline checks..."
+    make -C pipeline verify
+  fi
+fi
+
+echo "pre-push: quality gate passed."

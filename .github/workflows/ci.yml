@@ -1,0 +1,42 @@
+name: CI
+
+# Backstop quality gate. The authoritative gate is the local pre-push hook
+# (see .githooks/pre-push and CLAUDE.md). This runs after the push reaches the
+# server and after PRs, so anything that slips past the local hook is caught here.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    name: Verify (lint + typecheck + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Run quality gate
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+            npm run verify
+          else
+            echo "No package.json yet — code checks activate after T-010 (app scaffold)."
+          fi
+
+      - name: Set up Python
+        if: hashFiles('pipeline/requirements.txt', 'pipeline/pyproject.toml') != ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run pipeline checks
+        if: hashFiles('pipeline/Makefile') != ''
+        run: make -C pipeline verify

@@ -130,13 +130,30 @@ The go/no-go items from the licensing and privacy docs. **These gate Phase 2, no
     `pipeline/` (Python), `supabase/` (migrations). Documented in a short `CONTRIBUTING`/README note.
 
 ### S1.2.2 — Continuous integration & builds
-- **T-013 · CI: lint + typecheck + test on every PR** — *Claude · S · deps: T-011 · [TSD §1](TSD.md)*
-  - GitHub Actions workflow runs lint, typecheck, and unit tests on PR; red blocks merge.
+- **T-013 · CI: lint + typecheck + test (`verify` script)** — *Claude · S · deps: T-011 · [TSD §1](TSD.md)*
+  - Define an npm `verify` script (`lint && typecheck && test`) that both the pre-push hook
+    (T-109) and CI (`.github/workflows/ci.yml`) invoke; once defined, the gate has teeth.
 - **T-014 · EAS build profiles (dev / preview / prod)** — *Claude · M · deps: T-006, T-010*
   - `eas.json` with three profiles; a `preview` build installs on a real device.
 - **T-015 · Python pipeline CI skeleton (scheduled)** — *Claude · S · deps: T-012 · [TSD §6](TSD.md)*
   - GitHub Actions workflow with Python env, dependency install, and a placeholder scheduled
     job (cron) that runs green. Real jobs land in E3.
+
+### S1.2.3 — Quality gate & repo governance
+The enforced quality gate. **Direct-push-to-main is kept**, with a local pre-push hook as the
+authoritative gate and CI on `main` as the backstop (per [CLAUDE.md](../CLAUDE.md); decision:
+local hook over PR-merge gate).
+
+- **T-109 · Pre-push quality gate + CI backstop** — *Claude · S · `DONE` · deps: T-012 · [CLAUDE.md](../CLAUDE.md)*
+  - Version-controlled git hook at `.githooks/pre-push` runs the quality gate before every
+    push; `scripts/setup-hooks.sh` sets `core.hooksPath` (also auto-run via npm `prepare` once
+    the app exists). ✅ done.
+  - `.github/workflows/ci.yml` runs the same verify pipeline on push to `main` and on PRs as a
+    backstop. ✅ done.
+  - Both currently no-op the code checks (no `package.json` yet) and **gain teeth automatically**
+    when T-011 defines the `verify` npm script (`lint && typecheck && test`). Wiring `verify`
+    is part of T-011/T-013.
+  - Never bypass the hook with `--no-verify`.
 
 ## F1.3 — Supabase Backbone
 

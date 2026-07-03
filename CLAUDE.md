@@ -31,8 +31,18 @@ instruction wins for that task only — the defaults below resume afterward.
 - Security- and correctness-critical rules get explicit tests: free-catch enforcement is
   server-side (T-075), catch-spot safety exclusions (T-049), NC-license filtering (T-042),
   honest-copy rule (T-066).
-- The full test suite + typecheck + lint must be green before every push. CI enforces this;
-  don't push red.
+- The full test suite + typecheck + lint must be green before every push.
+
+## Quality gate (enforced)
+- **Authoritative gate: the pre-push hook** at `.githooks/pre-push` runs the verify pipeline
+  (`npm run verify` = lint + typecheck + test) before every push and blocks red pushes.
+- **Never bypass it** — no `git push --no-verify`. If the gate is red, fix the code, not the gate.
+- **After cloning, run `sh scripts/setup-hooks.sh`** once to activate hooks (`core.hooksPath`).
+  Once the app is scaffolded this also runs via the npm `prepare` script.
+- **CI backstop:** `.github/workflows/ci.yml` runs the same verify pipeline on push to `main`
+  and on PRs — catches anything that slips past the local hook.
+- The gate no-ops code checks until `package.json` + the `verify` script exist (T-011/T-013);
+  it gains teeth automatically then. Governance task: **T-109**.
 
 ## Git workflow
 - **Push directly to `main`.** No feature branches, no PRs for this repo (solo + Claude).
