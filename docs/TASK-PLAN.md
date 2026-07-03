@@ -626,7 +626,13 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     `progressSummary` (3-tier counts), `spottedIds` (dedupe set for notifications); 6 tests.
     Feeds T-056 (store) and T-057/T-058 (almanac UI).
 
-**Logic-first coverage:** 9 test suites / 52 tests green across `lib/`. This is the testable
+- **T-116 · Collection store seam (interface + in-memory impl)** — *Claude · S · `DONE` · deps: T-115 · [TSD §3](TSD.md), [USER-FLOWS §4–6](USER-FLOWS.md)*
+  - ✅ `lib/collectionStore.ts`: async `CollectionStore` interface + `InMemoryCollectionStore`;
+    catch/help implicitly spot; spotted time never overwritten; returns copies; 7 tests.
+    Lets the prototype (T-027) run before Supabase; the Supabase store (T-056) implements the
+    same interface as a drop-in swap.
+
+**Logic-first coverage:** 10 test suites / 59 tests green across `lib/`. This is the testable
 core the Supabase-backed store, Edge Functions, and RN screens will wrap once accounts land.
 
 ## Cross-cutting acceptance rules (apply to every UI/content task)
