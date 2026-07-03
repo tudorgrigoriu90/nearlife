@@ -617,6 +617,10 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
   - ✅ `lib/freeCatch.ts`: `canCatch`/`remainingFreeCatches`/`registerCatch` — 3 free catches
     per season, reset on season rollover, unlimited for Full Game, throws past the limit
     (server guard); 6 tests. The logic the Edge Function in T-075 evaluates (never client-trusted).
+- **T-114 · Catch-minigame timing/scoring** — *Claude · S · `DONE` · deps: — · [GDD §4](GDD.md)*
+  - ✅ `lib/minigame/timing.ts`: `evaluateTiming` grades a tap (perfect/good/miss) against the
+    perfect moment with tunable windows, early/late symmetric; 5 tests. Render-free core of the
+    bird timing minigame (T-033 prototype, T-069 framework).
 
 ## Cross-cutting acceptance rules (apply to every UI/content task)
 These are global invariants from the design docs; a task that violates one is not `DONE`:
