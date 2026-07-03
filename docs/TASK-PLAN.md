@@ -606,6 +606,9 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
 - **T-110 · Season & active-window helpers** — *Claude · S · `DONE` · deps: T-019 · [GDD §6](GDD.md), [TSD §4](TSD.md)*
   - ✅ `lib/season.ts`: `monthOf`, `seasonOf`, `seasonKeyOf` (winter spans the year boundary),
     `isActiveInMonth`, `activeSpecies`; 7 tests. Feeds T-111, T-112, T-113.
+- **T-111 · "Active this week" selection logic** — *Claude · S · `DONE` · deps: T-110 · [USER-FLOWS §3](USER-FLOWS.md), [TSD §4b](TSD.md)*
+  - ✅ `lib/thisWeek.ts`: active species ordered new-to-user first, then rarer-before-common,
+    stable tie-break; NEW flag per entry; 5 tests. Consumed by T-028/T-078 UI.
 
 ## Cross-cutting acceptance rules (apply to every UI/content task)
 These are global invariants from the design docs; a task that violates one is not `DONE`:
