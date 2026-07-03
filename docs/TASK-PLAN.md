@@ -613,6 +613,10 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
   - ✅ `lib/notification.ts`: season-gate → dedupe → `rarity_flavor` weighting → weighted
     sample with an injected RNG; `candidateSpecies`, `weightFor`, `pickWeighted`,
     `selectNotificationSpecies`; 9 tests. Core of T-030 (prototype) and T-062 (production).
+- **T-113 · Free-catch season accounting** — *Claude · S · `DONE` · deps: T-110 · [ECONOMY](ECONOMY.md), [TSD §5b](TSD.md)*
+  - ✅ `lib/freeCatch.ts`: `canCatch`/`remainingFreeCatches`/`registerCatch` — 3 free catches
+    per season, reset on season rollover, unlimited for Full Game, throws past the limit
+    (server guard); 6 tests. The logic the Edge Function in T-075 evaluates (never client-trusted).
 
 ## Cross-cutting acceptance rules (apply to every UI/content task)
 These are global invariants from the design docs; a task that violates one is not `DONE`:
