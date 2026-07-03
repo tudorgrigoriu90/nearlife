@@ -655,9 +655,10 @@ EU languages** without a rewrite. Retrofitting i18n later is expensive, so the r
 locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md).
 
 ## F13.1 — i18n runtime & UI strings
-- **T-120 · i18n runtime + typed catalog (en, sv)** — *Claude · S · deps: T-010 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
-  - Lightweight typed `t()` with per-locale catalogs; missing keys are a compile error; English
-    fallback chain. en + sv catalogs. Unit-tested.
+- **T-120 · i18n runtime + typed catalog (en, sv)** — *Claude · S · `DONE` · deps: T-010 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - ✅ `lib/i18n/index.ts`: typed `t()`/`createTranslator` with `{name}` interpolation; keys
+    derive from the English catalog (missing key → compile error); en → English → key fallback;
+    24-locale `Locale` type, `ALPHA_LOCALES`, en + sv catalogs; 7 tests.
 - **T-121 · Localize app UI strings** — *Claude · S · deps: T-120 · [USER-FLOWS](USER-FLOWS.md)*
   - Route all user-facing UI strings (onboarding, almanac, card, store, settings, This Week)
     through `t()`; no hardcoded copy in components.
