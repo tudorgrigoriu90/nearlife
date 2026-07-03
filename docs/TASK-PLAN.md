@@ -677,9 +677,11 @@ locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INT
   - Translate fact/when-how/give/protect into Swedish for all 54 species; register `SV_CONTENT`
     in `CONTENT_BY_LOCALE`. Claude first pass → **native review before shipping** (give/protect
     are law-sensitive). Same rule for every subsequent EU language.
-- **T-124 · EU locale coverage matrix + status tracking** — *Claude · S · deps: T-122 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
-  - Encode the 24 EU locales and a `missing/machine/reviewed` status per (species, locale, field)
-    so a market only goes live when its content is `reviewed`.
+- **T-124 · EU locale coverage matrix + status tracking** — *Claude · S · `DONE` · deps: T-122 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - ✅ `lib/i18n/coverage.ts`: `LOCALE_STATUS` (missing/machine/reviewed) for all 24 locales;
+    `isLiveForUsers`/`liveLocales` (reviewed-only gate), `translationProgress`; 5 tests. en
+    reviewed; sv in progress (not live until T-127 + native review). Per-species/field
+    granularity can extend this when content translation lands.
 - **T-125 · Per-locale review gating + translation ops** — *Director + Claude · M · deps: T-124 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
   - Translation workflow (MT seed → **native review**, never raw MT for give/protect); a locale
     ships for a country only when reviewed. Per-market rollout order. **Director-gated.**
