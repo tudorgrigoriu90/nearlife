@@ -18,6 +18,7 @@
 | **IAP** | **RevenueCat** | $0 under $2.5k/mo | Abstracts App Store + Play billing (Family entitlements arrive in v2) |
 | **Analytics** | **PostHog** free tier | $0 | Measures day-7 retention (the core validation metric) |
 | **Auth** | **Supabase Auth** | $0 | Email/social; extends to the household model in v2 |
+| **i18n** | **`expo-localization`** (device locale) + lightweight typed catalog | $0 | Localizes UI + species content across the 24 EU languages; typed keys so missing strings are compile errors. See [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) |
 
 ### Honest cost floor
 Everything above is $0 at MVP scale. **Only unavoidable costs:** Apple Developer ~$99/yr,
@@ -58,10 +59,19 @@ scheduled notification job. This keeps runtime cost and complexity minimal.
 Core tables (key columns; not exhaustive):
 
 **Reference / content**
-- `species` — `id`, `scientific_name`, `common_name`, `category` (bird/insect/plant/mammal…),
-  `rarity_base`, `iucn_status`, media refs.
-- `species_content` — `species_id`, `tier` (1–5), `fact`, `trivia`, `when_how_to_see`,
-  `give_action`, `protect_action`, `iucn_threat`. (Tier 1 + all give/protect = always free.)
+- `species` — `id`, `scientific_name` (**language-independent stable key**), `category`
+  (bird/insect/plant/mammal…), `rarity_base`, `iucn_status`. (Common name is localized — see
+  `species_name`.)
+- `species_name` — `species_id`, `locale`, `common_name`. Localized common name per language
+  (a swift is *tornseglare* in `sv`). See [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md).
+- `species_content` — `species_id`, **`locale`**, `tier` (1–5), `fact`, `trivia`,
+  `when_how_to_see`, `give_action`, `protect_action`, `iucn_threat`, `review_status`
+  (`missing`/`machine`/`reviewed`). (Tier 1 + all give/protect = always free. Content is keyed
+  by locale; English is the base with fallback; a locale ships for a market only when
+  `review_status = reviewed`.)
+- `species_media` — `species_id`, `url`, `license`, `author`, `source_url`, `is_primary`.
+  Species photos (language-independent; Wikimedia Commons CC0/CC-BY/CC-BY-SA — see
+  [DATA-SOURCING-LICENSING.md](DATA-SOURCING-LICENSING.md)). Stored in Supabase Storage.
 - `habitat_types` — `id`, `name`, `osm_tag_rules` (what OSM tags map to this habitat).
 - `species_habitat` — `species_id`, `habitat_type_id` (which habitats a species is catchable in).
 - `species_season` — `species_id`, `region_id`, `month`, `presence_prob`, `is_active_window`.

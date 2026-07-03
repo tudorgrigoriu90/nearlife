@@ -295,10 +295,11 @@ see [ECONOMY.md](ECONOMY.md); the store gains cards then.)*
 │   Quiet hours: 22:00–07:00  │
 │   (toggle) "Good time now"  │  opt-in prime-time nudges
 │ Location: While in use ▾    │
+│ Language: Svenska ▾         │  device locale by default; override here (i18n)
 │ Privacy                     │
 │   [ Export my data ]        │  GDPR — first-class
 │   [ Delete account & data ] │
-│ Attribution / About         │  GBIF · © OpenStreetMap
+│ Attribution / About         │  GBIF · © OpenStreetMap · photo credits
 └────────────────────────────┘
 ```
 **Data export + account deletion are build-time features** (GDPR), reachable anytime.
@@ -316,3 +317,7 @@ No ads section — there are no ads.
   the only conversion surface is the free-catch counter and the Store itself.
 - **Consent & deletion first-class** — reachable from Settings at all times.
 - **Safety** — catch spots on public/accessible land only, hazards excluded.
+- **Localized** — all copy runs through i18n (device locale, overridable); species names and
+  content are per-locale with English fallback ([INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)).
+- **Every species card has a photo** — the hero image, from license-clear sources with
+  attribution ([DATA-SOURCING-LICENSING.md](DATA-SOURCING-LICENSING.md)).

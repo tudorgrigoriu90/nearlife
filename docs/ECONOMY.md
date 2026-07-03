@@ -107,6 +107,12 @@ cleaner funnel with zero tonal cost.
   defaults to universally safe actions, and always highlights "follow local law" (rules in
   [GDD.md](GDD.md) §5) — so opening a region is a light editorial pass, not a heavy
   vetting project.
+- **EU expansion adds a language cost.** Beyond Sweden, opening a country also means localizing
+  species content into its language with **native review** (correctness- and law-sensitive give/
+  protect advice cannot be raw machine-translated) — see [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md).
+  Photos and the data pipeline are language-independent, so the incremental cost per country is
+  *translation + native review + local-law check* — still modeled as growth spend, justified by
+  the new home market it opens.
 - **How to choose the next region:** new home-market users (people who can set it as
   hometown and convert to Full Game) first; traveler pack demand second. Packs are real
   revenue, but each opened region's bigger prize is its home market.

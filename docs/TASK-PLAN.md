@@ -72,6 +72,8 @@ T-shirt sizing (solo cadence, not team story points): **XS** <½ day · **S** ~1
 | **E10** | Privacy, Compliance & Account | P2 | Claude + Director |
 | **E11** | Launch, Analytics & Ops | P2 | Director + Claude |
 | **E12** | Post-Validation Expansion (v2) | P3 | Claude + Director |
+| **E13** | Internationalization & Localization | P1→P2 | Claude (Director: translation review) |
+| **E14** | Species Photos & Media | P1→P2 | Claude + Director |
 
 ---
 ---
@@ -202,8 +204,9 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     shared `FOLLOW_LOCAL_LAW` line. `content.test.ts` (6 tests) enforces full coverage, the
     honesty rule (no "right now" claims), and the invasive-risk rule (no "plant/release a
     specific species" in give actions). Prototype content — Director review before public use.
-- **T-021 · Source & attribute placeholder imagery** — *Claude · S · deps: T-019*
-  - Each species has a hero image from a license-clear source; attribution recorded.
+- **T-021 · Prototype imagery** — *Claude · S · deps: T-019 · (absorbed into E14)*
+  - Superseded by **E14**: the prototype uses the media schema (T-118) with a category-emoji
+    fallback; real license-clear photos + attribution come from T-119. See E14.
 
 ## F2.2 — Prototype App Shell
 
@@ -643,6 +646,57 @@ core the Supabase-backed store, Edge Functions, and RN screens will wrap once ac
     run (Director / next session) to confirm layout and rendering. Collection wiring, tap-to-
     collect, navigation, and states remain for T-025/T-027/T-028.
 
+---
+---
+
+# E13 — Internationalization & Localization
+**Phase:** P1→P2 · **Goal:** ship alpha in **Swedish + English** and be architected for all **24
+EU languages** without a rewrite. Retrofitting i18n later is expensive, so the runtime and the
+locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md).
+
+## F13.1 — i18n runtime & UI strings
+- **T-120 · i18n runtime + typed catalog (en, sv)** — *Claude · S · deps: T-010 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - Lightweight typed `t()` with per-locale catalogs; missing keys are a compile error; English
+    fallback chain. en + sv catalogs. Unit-tested.
+- **T-121 · Localize app UI strings** — *Claude · S · deps: T-120 · [USER-FLOWS](USER-FLOWS.md)*
+  - Route all user-facing UI strings (onboarding, almanac, card, store, settings, This Week)
+    through `t()`; no hardcoded copy in components.
+- **T-123 · Locale detection & selection** — *Claude · S · deps: T-120 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - `expo-localization` device locale → nearest supported locale; Settings override; persists.
+
+## F13.2 — Localized species content
+- **T-122 · Locale-aware species content + Swedish** — *Claude · L · deps: T-020, T-120 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md), [TSD §3](TSD.md)*
+  - Restructure content to be keyed by `(species_id, locale)` with English base + fallback;
+    localized common names; add **Swedish** for all species (alpha). `review_status` per entry.
+- **T-124 · EU locale coverage matrix + status tracking** — *Claude · S · deps: T-122 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - Encode the 24 EU locales and a `missing/machine/reviewed` status per (species, locale, field)
+    so a market only goes live when its content is `reviewed`.
+- **T-125 · Per-locale review gating + translation ops** — *Director + Claude · M · deps: T-124 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - Translation workflow (MT seed → **native review**, never raw MT for give/protect); a locale
+    ships for a country only when reviewed. Per-market rollout order. **Director-gated.**
+
+---
+---
+
+# E14 — Species Photos & Media
+**Phase:** P1→P2 · **Goal:** every species card has a real hero photo, license-clear with
+attribution. Photos are language-independent (one set serves all locales). Licensing:
+[DATA-SOURCING-LICENSING.md](DATA-SOURCING-LICENSING.md) §5.
+
+- **T-118 · Media schema + attribution model** — *Claude · S · deps: T-019 · [TSD §3](TSD.md), [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
+  - `SpeciesMedia` type (`url`, `license`, `author`, `sourceUrl`, `isPrimary`) + attribution
+    formatting; prototype falls back to the category emoji until photos are sourced. Unit-tested.
+- **T-119 · Source Wikimedia Commons photos (Kronoberg set)** — *Claude + Director · L · deps: T-118 · [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
+  - One CC0/CC-BY/CC-BY-SA photo per species, unmodified, with author + license + source URL
+    recorded; exclude NC/ND. Director spot-checks licensing. (Needs web sourcing + Supabase
+    Storage upload; the prototype can bundle a subset.)
+- **T-126 · Species card + almanac render photos** — *Claude · M · deps: T-118, T-119, T-059 · [USER-FLOWS §3,§4](USER-FLOWS.md)*
+  - Card hero image and almanac thumbnails use `species_media` with a graceful placeholder;
+    per-photo attribution shown on the card / About.
+
+> **T-021 (prototype imagery)** is superseded/absorbed by E14: the prototype uses the media
+> schema (T-118) with emoji fallback, and real photos come from T-119.
+
 ## Cross-cutting acceptance rules (apply to every UI/content task)
 These are global invariants from the design docs; a task that violates one is not `DONE`:
 
@@ -657,6 +711,10 @@ These are global invariants from the design docs; a task that violates one is no
    ([TSD §5](TSD.md)).
 6. **Consent & deletion first-class** — reachable from Settings at all times
    ([PRIVACY](PRIVACY-COMPLIANCE.md)).
+7. **No hardcoded user-facing copy** — all strings go through i18n; species names/content are
+   per-locale with English fallback ([INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)).
+8. **Photos are license-clear + attributed** — CC0/CC-BY/CC-BY-SA, unmodified, credited
+   ([DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)).
 
 ## Open review items folded in as tasks
 From the entrepreneur review, tracked so they aren't lost: written go/kill criteria (**T-036**),
