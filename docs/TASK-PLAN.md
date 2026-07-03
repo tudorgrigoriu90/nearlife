@@ -635,8 +635,16 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     Lets the prototype (T-027) run before Supabase; the Supabase store (T-056) implements the
     same interface as a drop-in swap.
 
-**Logic-first coverage:** 10 test suites / 59 tests green across `lib/`. This is the testable
+- **T-128 · Collective-impact aggregation** — *Claude · S · `DONE` · deps: T-115 · [GDD §7](GDD.md), [TSD §3](TSD.md)*
+  - ✅ `lib/impact.ts`: `impactSummary` → helped-species / total-pledges / give / protect from
+    collection records (works for a user or a community union); 3 tests. Core of the impact
+    counters (T-081).
+
+**Logic-first coverage:** ~17 test suites / ~98 tests green across `lib/`. This is the testable
 core the Supabase-backed store, Edge Functions, and RN screens will wrap once accounts land.
+Covered: seasons, This Week, notification weighting, free-catch, minigame timing, collection
+model + store, i18n runtime + locale resolution + coverage matrix, Swedish content, media
+schema, collective impact.
 
 - **T-117 · First rendered screen: This Week (prototype shell)** — *Claude · S · `DONE`* (partial toward T-028) *· deps: T-111, T-020 · [USER-FLOWS §3](USER-FLOWS.md)*
   - ✅ `components/ThisWeekScreen.tsx` wired into `App.tsx`: renders the real Kronoberg seed
