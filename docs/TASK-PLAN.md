@@ -663,8 +663,10 @@ locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INT
   - ✅ `ThisWeekScreen` chrome runs through `createTranslator(locale)` — no hardcoded copy;
     accepts a `locale` prop (device detection in T-123). Species names/content localize in T-122.
     Remaining screens localize as they are built.
-- **T-123 · Locale detection & selection** — *Claude · S · deps: T-120 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
-  - `expo-localization` device locale → nearest supported locale; Settings override; persists.
+- **T-123 · Locale detection & selection** — *Claude · S · `DONE` (detection; Settings override pending Settings screen) · deps: T-120 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - ✅ `lib/i18n/resolveLocale.ts` (pure, 4 tests) maps a BCP-47 tag → supported Locale with
+    English fallback; `lib/i18n/deviceLocale.ts` reads `expo-localization`; `App.tsx` uses it.
+    User override persists once the Settings screen exists (T-009 flow / USER-FLOWS §9).
 
 ## F13.2 — Localized species content
 - **T-122 · Locale-aware content architecture + Swedish names** — *Claude · M · `DONE` · deps: T-020, T-120 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md), [TSD §3](TSD.md)*
