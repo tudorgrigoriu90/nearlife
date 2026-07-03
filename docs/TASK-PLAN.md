@@ -635,6 +635,14 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
 **Logic-first coverage:** 10 test suites / 59 tests green across `lib/`. This is the testable
 core the Supabase-backed store, Edge Functions, and RN screens will wrap once accounts land.
 
+- **T-117 · First rendered screen: This Week (prototype shell)** — *Claude · S · `DONE`* (partial toward T-028) *· deps: T-111, T-020 · [USER-FLOWS §3](USER-FLOWS.md)*
+  - ✅ `components/ThisWeekScreen.tsx` wired into `App.tsx`: renders the real Kronoberg seed
+    data via the tested `thisWeek` logic (empty collection → all NEW), with honest "active this
+    season" footnote. Typecheck + lint green.
+  - ⚠️ **Not visually verified** — no simulator in this environment. Needs a `npm start` device
+    run (Director / next session) to confirm layout and rendering. Collection wiring, tap-to-
+    collect, navigation, and states remain for T-025/T-027/T-028.
+
 ## Cross-cutting acceptance rules (apply to every UI/content task)
 These are global invariants from the design docs; a task that violates one is not `DONE`:
 
