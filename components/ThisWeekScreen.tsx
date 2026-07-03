@@ -1,13 +1,14 @@
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { createTranslator, type Locale } from '../lib/i18n';
 import { monthOf } from '../lib/season';
 import { thisWeek, type ThisWeekEntry } from '../lib/thisWeek';
 import { KRONOBERG_CONTENT } from '../lib/species/content';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import type { SpeciesCategory } from '../lib/species/types';
 
-// First rendered prototype screen (T-117): the "Active this week" pull surface (USER-FLOWS §3)
-// driven by the real Kronoberg seed data and the tested `thisWeek` selection logic. Collection
-// is empty for now (everything shows as NEW) until the store is wired into the UI.
+// "Active this week" pull surface (USER-FLOWS §3), driven by real Kronoberg seed data and the
+// tested `thisWeek` logic (T-111). All chrome strings run through i18n (T-121); species names
+// and content localize in T-122. Collection is empty for now → everything shows NEW.
 // NOTE: not yet visually verified on a device — logic is unit-tested; layout needs a run.
 
 const CATEGORY_EMOJI: Record<SpeciesCategory, string> = {
@@ -19,7 +20,7 @@ const CATEGORY_EMOJI: Record<SpeciesCategory, string> = {
   fungus: '🍄',
 };
 
-function Row({ entry }: { entry: ThisWeekEntry }) {
+function Row({ entry, newLabel }: { entry: ThisWeekEntry; newLabel: string }) {
   const { species, isNew } = entry;
   const content = KRONOBERG_CONTENT[species.id];
   return (
@@ -28,7 +29,7 @@ function Row({ entry }: { entry: ThisWeekEntry }) {
       <View style={styles.rowText}>
         <View style={styles.rowHeader}>
           <Text style={styles.name}>{species.commonName}</Text>
-          {isNew ? <Text style={styles.newBadge}>NEW</Text> : null}
+          {isNew ? <Text style={styles.newBadge}>{newLabel}</Text> : null}
         </View>
         <Text style={styles.detail}>{content?.whenAndHow ?? species.scientificName}</Text>
       </View>
@@ -36,24 +37,25 @@ function Row({ entry }: { entry: ThisWeekEntry }) {
   );
 }
 
-export default function ThisWeekScreen() {
+export default function ThisWeekScreen({ locale = 'en' }: { locale?: Locale }) {
+  const tr = createTranslator(locale);
   const month = monthOf(new Date());
   const entries = thisWeek(KRONOBERG_SPECIES, month, new Set());
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>This week 🌿</Text>
+      <Text style={styles.title}>{tr('thisWeek.title')} 🌿</Text>
       <Text style={styles.subtitle}>
-        Kronoberg · {entries.length} species active in your area this season
+        {tr('thisWeek.subtitle', { region: tr('region.kronoberg'), count: entries.length })}
       </Text>
       <FlatList
         data={entries}
         keyExtractor={(e) => e.species.id}
-        renderItem={({ item }) => <Row entry={item} />}
+        renderItem={({ item }) => <Row entry={item} newLabel={tr('thisWeek.new')} />}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.detail}>A quiet week — winter is resting season here.</Text>}
+        ListEmptyComponent={<Text style={styles.detail}>{tr('thisWeek.empty')}</Text>}
       />
-      <Text style={styles.footnote}>Active this season, never “here right now”.</Text>
+      <Text style={styles.footnote}>{tr('thisWeek.honesty')}</Text>
     </View>
   );
 }

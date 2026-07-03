@@ -659,9 +659,10 @@ locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INT
   - ✅ `lib/i18n/index.ts`: typed `t()`/`createTranslator` with `{name}` interpolation; keys
     derive from the English catalog (missing key → compile error); en → English → key fallback;
     24-locale `Locale` type, `ALPHA_LOCALES`, en + sv catalogs; 7 tests.
-- **T-121 · Localize app UI strings** — *Claude · S · deps: T-120 · [USER-FLOWS](USER-FLOWS.md)*
-  - Route all user-facing UI strings (onboarding, almanac, card, store, settings, This Week)
-    through `t()`; no hardcoded copy in components.
+- **T-121 · Localize app UI strings** — *Claude · S · `DONE` (This Week; more screens as built) · deps: T-120 · [USER-FLOWS](USER-FLOWS.md)*
+  - ✅ `ThisWeekScreen` chrome runs through `createTranslator(locale)` — no hardcoded copy;
+    accepts a `locale` prop (device detection in T-123). Species names/content localize in T-122.
+    Remaining screens localize as they are built.
 - **T-123 · Locale detection & selection** — *Claude · S · deps: T-120 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
   - `expo-localization` device locale → nearest supported locale; Settings override; persists.
 
