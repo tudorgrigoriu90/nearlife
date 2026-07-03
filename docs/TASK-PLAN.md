@@ -134,9 +134,10 @@ The go/no-go items from the licensing and privacy docs. **These gate Phase 2, no
   - ✅ ESLint (flat, `eslint-config-expo` + `eslint-config-prettier`), Prettier, and
     `tsc --noEmit` (strict) all green; `lint`/`typecheck` scripts in `package.json`.
 
-- **T-012 · Establish repo structure** — *Claude · XS · deps: T-010*
-  - Clear top-level layout: `app/` (screens), `components/`, `lib/` (client, data access),
-    `pipeline/` (Python), `supabase/` (migrations). Documented in a short `CONTRIBUTING`/README note.
+- **T-012 · Establish repo structure** — *Claude · XS · `DONE` · deps: T-010*
+  - ✅ Layout established with purpose stubs: `app/`, `components/`, `lib/`, `supabase/`
+    (`pipeline/` created in T-015). Documented in `CONTRIBUTING.md` (setup, commands, structure,
+    workflow).
 
 ### S1.2.2 — Continuous integration & builds
 - **T-013 · CI: lint + typecheck + test (`verify` script)** — *Claude · S · `DONE` · deps: T-011 · [TSD §1](TSD.md)*
