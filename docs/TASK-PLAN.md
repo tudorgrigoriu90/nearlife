@@ -94,9 +94,12 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
   - App Store Connect access confirmed; team ID recorded in a private secrets note.
 - **T-002 · Register Google Play Developer account** — *Director · XS · deps: — · [TSD §1](TSD.md)*
   - Play Console account active ($25 one-time paid); identity verification complete.
-- **T-003 · Create Supabase project (EU region)** — *Director + Claude · XS · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
-  - Project created in an **EU region** (data residency); Director owns billing.
-  - Project URL + anon/service keys handed to Claude via secrets note (never committed).
+- **T-003 · Create Supabase project (EU region)** — *Director + Claude · XS · `DONE` · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+  - ✅ Project `subjdoiicfmiimtvlzsg` created (EU region); publishable key wired via `.env.local`
+    (git-ignored); connectivity verified (publishable key authenticates for data queries).
+  - ⚠️ **Action for Director:** the `sb_secret_...` key was exposed in chat — **rotate it** in
+    the dashboard. Not needed by the app (publishable key only); server jobs get a fresh secret
+    via a CI secret later.
 - **T-004 · Create RevenueCat account & link store keys** — *Director · S · deps: T-001, T-002 · [ECONOMY](ECONOMY.md), [TSD §1](TSD.md)*
   - RevenueCat project created; App Store + Play billing keys linked.
   - Verified free tier covers projected volume (<$2.5k/mo).
@@ -172,7 +175,17 @@ local hook over PR-merge gate).
 
 ## F1.3 — Supabase Backbone
 
+### S1.3.0 — Client wiring
+- **T-129 · Supabase client + config** — *Claude · S · `DONE` · deps: T-003 · [TSD §1,§3](TSD.md)*
+  - ✅ `lib/supabaseConfig.ts` reads `EXPO_PUBLIC_SUPABASE_URL`/`_PUBLISHABLE_KEY` (throws if
+    missing; 3 tests); `lib/supabase.ts` lazily creates the client (publishable key only, RLS-
+    governed). `@supabase/supabase-js` + `react-native-url-polyfill` installed.
+
 ### S1.3.1 — Migrations & extensions
+> **Next step (needs Director):** to push schema migrations (T-016) I need either a **Supabase
+> access token** (dashboard → Account → Access Tokens) stored as a CI/secret so the CLI can
+> link + push, or you run the generated SQL yourself. The DB password from project creation is
+> also needed for `supabase link`.
 - **T-016 · Supabase CLI + migrations workflow** — *Claude · S · deps: T-003 · [TSD §3](TSD.md)*
   - `supabase` CLI linked to the project; a no-op migration applies cleanly locally and remote.
   - Migration convention documented (timestamped, reversible where practical).
