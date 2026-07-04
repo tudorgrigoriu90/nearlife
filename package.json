@@ -34,5 +34,8 @@
     "verify": "npm run lint && npm run typecheck && npm run test",
     "prepare": "git config core.hooksPath .githooks"
   },
-  "private": true
+  "private": true,
+  "engines": {
+    "node": ">=20.19.4"
+  }
 }
