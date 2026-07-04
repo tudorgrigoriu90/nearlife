@@ -105,8 +105,9 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
   - Verified free tier covers projected volume (<$2.5k/mo).
 - **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - EU-hosted instance; IP anonymization enabled; project API key issued.
-- **T-006 · Create Expo/EAS account** — *Director · XS · deps: — · [TSD §1](TSD.md)*
-  - EAS account active; owner set; access shared for cloud builds (no Mac required).
+- **T-006 · Create Expo/EAS account** — *Director · XS · `DONE` · deps: — · [TSD §1](TSD.md)*
+  - ✅ EAS project created (`27adb571-a470-4052-bb0f-c2a35fbedb39`); wired into `app.json`
+    (`extra.eas.projectId`). Run `eas init --id …` (or it's already set) after `eas login`.
 
 ### S1.1.2 — Data licensing & legal confirmations
 The go/no-go items from the licensing and privacy docs. **These gate Phase 2, not Phase 1**
@@ -148,8 +149,12 @@ The go/no-go items from the licensing and privacy docs. **These gate Phase 2, no
 - **T-013 · CI: lint + typecheck + test (`verify` script)** — *Claude · S · `DONE` · deps: T-011 · [TSD §1](TSD.md)*
   - ✅ `verify` = `lint && typecheck && test` defined; Jest via `jest-expo` + `babel-preset-expo`
     with a passing smoke test. Both the pre-push hook (T-109) and CI now have teeth.
-- **T-014 · EAS build profiles (dev / preview / prod)** — *Claude · M · deps: T-006, T-010*
-  - `eas.json` with three profiles; a `preview` build installs on a real device.
+- **T-014 · EAS build profiles (dev / preview / prod)** — *Claude · M · `DONE` (profiles; first build pending) · deps: T-006, T-010*
+  - ✅ `eas.json` with `development` (dev client), `preview` (internal distributable), and
+    `production` (auto-increment, store-ready) profiles + `submit.production`.
+  - ⚠️ First build not run yet. To *see* the app now, no build is needed: `npx expo start` →
+    open in **Expo Go**. Standalone install → `eas build --profile preview`. **`production` is
+    only for store submission** (needs Apple/Google accounts T-001/T-002 + signing).
 - **T-015 · Python pipeline CI skeleton (scheduled)** — *Claude · S · `DONE` · deps: T-012 · [TSD §6](TSD.md)*
   - ✅ `pipeline/` skeleton (`run.py` + `tests/` + `requirements.txt`);
     `.github/workflows/pipeline.yml` runs it on a monthly cron + manual dispatch; `ci.yml`
