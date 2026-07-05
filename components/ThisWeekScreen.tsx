@@ -4,21 +4,12 @@ import { monthOf } from '../lib/season';
 import { thisWeek, type ThisWeekEntry } from '../lib/thisWeek';
 import { commonNameFor, contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
-import type { SpeciesCategory } from '../lib/species/types';
+import { CATEGORY_EMOJI } from './speciesVisual';
 
 // "Active this week" pull surface (USER-FLOWS §3), driven by real Kronoberg seed data and the
 // tested `thisWeek` logic (T-111). All chrome strings run through i18n (T-121); species names
 // and content localize in T-122. Collection is empty for now → everything shows NEW.
 // NOTE: not yet visually verified on a device — logic is unit-tested; layout needs a run.
-
-const CATEGORY_EMOJI: Record<SpeciesCategory, string> = {
-  bird: '🐦',
-  mammal: '🦔',
-  insect: '🦋',
-  plant: '🌼',
-  fish: '🐟',
-  fungus: '🍄',
-};
 
 function Row({
   entry,

@@ -28,6 +28,37 @@ export const en = {
   'thisWeek.new': 'NEW',
   'thisWeek.empty': 'A quiet week — winter is resting season here.',
   'thisWeek.honesty': 'Active this season, never “here right now”.',
+
+  // Almanac (T-025)
+  'almanac.title': 'Almanac',
+  'almanac.empty': 'Your almanac is waiting — spot your first species.',
+  'almanac.loading': 'Loading your almanac…',
+  'almanac.filter.all': 'All',
+  'almanac.progress': '{discovered} of {total} spotted',
+
+  // Category labels (Almanac filter chips)
+  'category.bird': 'Birds',
+  'category.mammal': 'Mammals',
+  'category.insect': 'Insects',
+  'category.plant': 'Plants',
+  'category.fish': 'Fish',
+  'category.fungus': 'Fungi',
+
+  // Three tiers
+  'tier.spotted': 'Spotted',
+  'tier.caught': 'Caught',
+  'tier.helped': 'Helped',
+
+  // Species card (T-026)
+  'card.give': 'Give',
+  'card.protect': 'Protect',
+  'card.findNearby': 'Find it nearby',
+  'card.depth': 'Depth',
+  'card.locked': 'Play to unlock',
+  'card.notSpotted': 'Not spotted yet',
+  'card.back': 'Back',
+  'card.followLaw':
+    'Always follow local rules — access rights, protected species, and feeding differ by place.',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -43,6 +74,37 @@ const sv: Catalog = {
   'thisWeek.new': 'NY',
   'thisWeek.empty': 'En lugn vecka – vintern är vilosäsong här.',
   'thisWeek.honesty': 'Aktiv den här säsongen, aldrig ”här just nu”.',
+
+  // Almanac (T-025)
+  'almanac.title': 'Almanacka',
+  'almanac.empty': 'Din almanacka väntar – hitta din första art.',
+  'almanac.loading': 'Laddar din almanacka…',
+  'almanac.filter.all': 'Alla',
+  'almanac.progress': '{discovered} av {total} sedda',
+
+  // Category labels (Almanac filter chips)
+  'category.bird': 'Fåglar',
+  'category.mammal': 'Däggdjur',
+  'category.insect': 'Insekter',
+  'category.plant': 'Växter',
+  'category.fish': 'Fiskar',
+  'category.fungus': 'Svampar',
+
+  // Three tiers
+  'tier.spotted': 'Sedd',
+  'tier.caught': 'Fångad',
+  'tier.helped': 'Hjälpt',
+
+  // Species card (T-026)
+  'card.give': 'Ge',
+  'card.protect': 'Skydda',
+  'card.findNearby': 'Hitta den i närheten',
+  'card.depth': 'Fördjupning',
+  'card.locked': 'Spela för att låsa upp',
+  'card.notSpotted': 'Inte sedd ännu',
+  'card.back': 'Tillbaka',
+  'card.followLaw':
+    'Följ alltid lokala regler – allemansrätten, fridlysta arter och matning skiljer sig åt beroende på plats.',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

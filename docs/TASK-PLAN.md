@@ -240,12 +240,20 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     is felt in the first minute.
 
 ### S2.2.2 — Almanac & Species Card
-- **T-025 · Almanac grid with tier overlays** — *Claude · M · deps: T-020 · [USER-FLOWS §2](USER-FLOWS.md)*
-  - Grid of species with ●/◐/◑ tier overlays; greyed = not-yet-Spotted; category filter chips.
-  - Empty state ("your almanac is waiting"); loading skeleton.
-- **T-026 · Species card** — *Claude · M · deps: T-020 · [USER-FLOWS §4](USER-FLOWS.md)*
-  - Card shows fact, when/how trivia, give + protect (both free), depth-tier placeholder row,
-    "find it nearby" entry. Not-yet-Spotted state shows silhouette.
+- **T-025 · Almanac grid with tier overlays** — *Claude · M · `DONE` · deps: T-020 · [USER-FLOWS §2](USER-FLOWS.md)*
+  - ✅ `lib/almanac.ts` (pure, 7 tests): `almanacEntries` (species + ●/◐/◑ tier overlay + category
+    filter), `categoryCounts`, `discoveredCount`. `components/AlmanacScreen.tsx`: 3-column grid,
+    category filter chips (i18n `category.*`), greyed silhouette for not-yet-Spotted, progress
+    header, empty state ("your almanac is waiting") and loading skeleton. Shared category-emoji
+    helper `components/speciesVisual.ts` (ThisWeekScreen refactored onto it).
+  - ⚠️ **Not visually verified** — no simulator here; logic is unit-tested, layout needs a device run.
+- **T-026 · Species card** — *Claude · M · `DONE` · deps: T-020 · [USER-FLOWS §4](USER-FLOWS.md)*
+  - ✅ `components/SpeciesCard.tsx`: fact, when/how, give + protect (both always free, with the
+    standing follow-local-law line), depth-tier placeholder row (5 levels; Tier-1 unlocked, 2–5
+    climb-by-play per T-053/T-060), "find it nearby" entry. Not-yet-Spotted state shows a
+    silhouette while mission content stays free (invariant #2). All chrome via i18n; content via
+    `contentFor`. Wired into `App.tsx` (minimal tab shell: This Week ↔ Almanac → card).
+  - ⚠️ **Not visually verified** — logic/content are tested; on-device layout needs a run.
 - **T-027 · Collection state persistence** — *Claude · S · deps: T-018, T-026*
   - Spotting a species persists to Supabase against the user; survives app restart and reinstall
     (tied to account).
@@ -658,11 +666,11 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     collection records (works for a user or a community union); 3 tests. Core of the impact
     counters (T-081).
 
-**Logic-first coverage:** ~17 test suites / ~98 tests green across `lib/`. This is the testable
+**Logic-first coverage:** ~18 test suites / ~108 tests green across `lib/`. This is the testable
 core the Supabase-backed store, Edge Functions, and RN screens will wrap once accounts land.
-Covered: seasons, This Week, notification weighting, free-catch, minigame timing, collection
-model + store, i18n runtime + locale resolution + coverage matrix, Swedish content, media
-schema, collective impact.
+Covered: seasons, This Week, almanac grid, notification weighting, free-catch, minigame timing,
+collection model + store, i18n runtime + locale resolution + coverage matrix, Swedish content,
+media schema, collective impact.
 
 - **T-117 · First rendered screen: This Week (prototype shell)** — *Claude · S · `DONE`* (partial toward T-028) *· deps: T-111, T-020 · [USER-FLOWS §3](USER-FLOWS.md)*
   - ✅ `components/ThisWeekScreen.tsx` wired into `App.tsx`: renders the real Kronoberg seed
