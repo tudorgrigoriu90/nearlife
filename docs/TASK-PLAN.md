@@ -714,6 +714,14 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     collection records (works for a user or a community union); 3 tests. Core of the impact
     counters (T-081).
 
+- **T-131 · Notification cadence & quiet-hours logic** — *Claude · S · `DONE` · deps: T-110 · [TSD §4](TSD.md)*
+  - ✅ `lib/cadence.ts` (8 tests): `canSendNow` gates a send by quiet hours → daily cap →
+    frequency cap (priority order, exact boundaries), and `isQuietHour` handles a window that
+    wraps past midnight. Clock/timezone-free (caller passes `nowMs` + local hour); all levers are
+    config (`CadenceConfig`, T-065). This is the "may we send now?" half of the engine that the
+    scheduled Edge Function evaluates — the prototype cadence (T-032) and production engine (T-063)
+    wrap it unchanged, alongside the tested candidate selection (T-112).
+
 **Logic-first coverage:** ~18 test suites / ~108 tests green across `lib/`. This is the testable
 core the Supabase-backed store, Edge Functions, and RN screens will wrap once accounts land.
 Covered: seasons, This Week, almanac grid, notification weighting, free-catch, minigame timing,
