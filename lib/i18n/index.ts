@@ -95,6 +95,18 @@ export const en = {
   'minigame.fail': 'It got away',
   'minigame.continue': 'Continue',
   'minigame.cancel': 'Not now',
+
+  // Catch flow + free-catch counter (T-034)
+  'catch.remaining': '{count} free catches left this season',
+  'catch.caught': 'You caught {name}!',
+  'catch.continue': 'Keep exploring',
+  'paywall.title': 'Out of free catches',
+  'paywall.body': 'You’ve used your 3 free catches this season. The Full Game unlocks unlimited catching.',
+  'paywall.freeMission': '✓ The mission is always free',
+  'paywall.noAds': '✓ No ads. Ever.',
+  'paywall.cta': 'Get the Full Game',
+  'paywall.later': 'Maybe later',
+  'paywall.soon': 'Purchases arrive with the Full Game (coming soon).',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -177,6 +189,18 @@ const sv: Catalog = {
   'minigame.fail': 'Den kom undan',
   'minigame.continue': 'Fortsätt',
   'minigame.cancel': 'Inte nu',
+
+  // Catch flow + free-catch counter (T-034)
+  'catch.remaining': '{count} gratis fångster kvar denna säsong',
+  'catch.caught': 'Du fångade {name}!',
+  'catch.continue': 'Fortsätt utforska',
+  'paywall.title': 'Slut på gratis fångster',
+  'paywall.body': 'Du har använt dina 3 gratis fångster denna säsong. Fullversionen låser upp obegränsat fångande.',
+  'paywall.freeMission': '✓ Uppdraget är alltid gratis',
+  'paywall.noAds': '✓ Inga annonser. Någonsin.',
+  'paywall.cta': 'Skaffa fullversionen',
+  'paywall.later': 'Kanske senare',
+  'paywall.soon': 'Köp kommer med fullversionen (snart).',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

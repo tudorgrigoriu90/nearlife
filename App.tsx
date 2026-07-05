@@ -6,12 +6,27 @@ import OnboardingFlow from './components/OnboardingFlow';
 import SpeciesCard from './components/SpeciesCard';
 import ThisWeekScreen from './components/ThisWeekScreen';
 import TimingRingMinigame from './components/minigame/TimingRingMinigame';
+import ProtectTip from './components/catch/ProtectTip';
+import FreeCatchSheet from './components/catch/FreeCatchSheet';
 import { useCollection } from './components/useCollection';
 import { spottedIds, tierStateFor } from './lib/collection';
+import {
+  canCatch,
+  registerCatch,
+  remainingFreeCatches,
+  type FreeCatchState,
+} from './lib/freeCatch';
+import { seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator } from './lib/i18n';
 import { KRONOBERG_SPECIES } from './lib/species/kronoberg';
 import type { Species } from './lib/species/types';
+
+const INITIAL_FREE_CATCH: FreeCatchState = {
+  fullGame: false,
+  freeCatchesUsed: 0,
+  freeCatchSeason: null,
+};
 
 // Prototype app shell (E2). Onboarding (T-022+) runs first; once complete, a minimal tab
 // switcher between the "This week" pull surface (T-117) and the Almanac grid (T-025); tapping a
@@ -31,6 +46,19 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('thisWeek');
   const [selected, setSelected] = useState<Species | null>(null);
   const [catching, setCatching] = useState<Species | null>(null);
+  const [caughtTip, setCaughtTip] = useState<Species | null>(null);
+  const [paywall, setPaywall] = useState(false);
+  const [freeCatch, setFreeCatch] = useState<FreeCatchState>(INITIAL_FREE_CATCH);
+
+  const seasonKey = seasonKeyOf(new Date());
+  const remaining = remainingFreeCatches(freeCatch, seasonKey);
+
+  // Catch entry (T-034): a free user gets 3 catches/season; the 4th attempt shows the gentle
+  // sheet instead of the minigame. The counter increments only on a successful catch.
+  const attemptCatch = (species: Species) => {
+    if (canCatch(freeCatch, seasonKey)) setCatching(species);
+    else setPaywall(true);
+  };
 
   if (!onboarded) {
     return (
@@ -45,17 +73,31 @@ export default function App() {
     );
   }
 
+  if (caughtTip) {
+    // Catch-success delight moment: contextual protect tip, kept clean — no upsell (invariant #4).
+    return (
+      <>
+        <ProtectTip species={caughtTip} locale={locale} onDone={() => setCaughtTip(null)} />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (catching) {
+    const target = catching;
     return (
       <>
         <TimingRingMinigame
           locale={locale}
           onCancel={() => setCatching(null)}
           onComplete={({ success }) => {
-            // Prototype: success writes Caught (prime-bonus computation is T-074). The free-catch
-            // gate, protect tip and paywall wrap this in T-034.
-            if (success) collection.markCaught(catching.id, false);
             setCatching(null);
+            if (success) {
+              // Counter increments on success only; the attempt was already gated by canCatch.
+              setFreeCatch((prev) => registerCatch(prev, seasonKey));
+              collection.markCaught(target.id, false); // prime-bonus computation is T-074
+              setCaughtTip(target);
+            }
           }}
         />
         <StatusBar style="auto" />
@@ -65,16 +107,18 @@ export default function App() {
 
   if (selected) {
     return (
-      <>
+      <View style={styles.root}>
         <SpeciesCard
           species={selected}
           locale={locale}
           tier={tierStateFor(collection.records, selected.id)}
           onBack={() => setSelected(null)}
-          onFindNearby={(species) => setCatching(species)}
+          onFindNearby={attemptCatch}
+          nearbyNote={freeCatch.fullGame ? undefined : tr('catch.remaining', { count: remaining })}
         />
+        {paywall ? <FreeCatchSheet locale={locale} onClose={() => setPaywall(false)} /> : null}
         <StatusBar style="auto" />
-      </>
+      </View>
     );
   }
 

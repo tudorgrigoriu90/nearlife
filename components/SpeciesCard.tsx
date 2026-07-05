@@ -20,12 +20,15 @@ export default function SpeciesCard({
   locale = 'en',
   tier = EMPTY_TIER_STATE,
   onFindNearby,
+  nearbyNote,
   onBack,
 }: {
   species: Species;
   locale?: Locale;
   tier?: TierState;
   onFindNearby?: (species: Species) => void;
+  /** Small caption under the find-nearby CTA — e.g. the free-catch counter (T-034). */
+  nearbyNote?: string;
   onBack?: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -80,9 +83,12 @@ export default function SpeciesCard({
       </ScrollView>
 
       {onFindNearby ? (
-        <Pressable onPress={() => onFindNearby(species)} accessibilityRole="button" style={styles.cta}>
-          <Text style={styles.ctaText}>{tr('card.findNearby')} →</Text>
-        </Pressable>
+        <View style={styles.ctaWrap}>
+          <Pressable onPress={() => onFindNearby(species)} accessibilityRole="button" style={styles.cta}>
+            <Text style={styles.ctaText}>{tr('card.findNearby')} →</Text>
+          </Pressable>
+          {nearbyNote ? <Text style={styles.nearbyNote}>{nearbyNote}</Text> : null}
+        </View>
       ) : null}
     </View>
   );
@@ -136,6 +142,8 @@ const styles = StyleSheet.create({
   depthNum: { fontSize: 15, fontWeight: '700', color: '#9fb0a0' },
   depthNumUnlocked: { color: '#fff' },
   depthHint: { marginTop: 8, fontSize: 12, color: '#7a8a7c', fontStyle: 'italic' },
-  cta: { margin: 20, paddingVertical: 16, borderRadius: 14, backgroundColor: '#3a7d44', alignItems: 'center' },
+  ctaWrap: { margin: 20 },
+  cta: { paddingVertical: 16, borderRadius: 14, backgroundColor: '#3a7d44', alignItems: 'center' },
   ctaText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  nearbyNote: { marginTop: 8, fontSize: 12, color: '#7a8a7c', textAlign: 'center' },
 });

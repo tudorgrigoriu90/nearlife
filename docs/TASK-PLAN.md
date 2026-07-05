@@ -321,10 +321,16 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     got-away feedback. Launched from the card's "find it nearby"; success writes Caught (prototype,
     no GPS gating). Free-catch gate + protect tip + paywall wrap it in T-034.
   - ⚠️ Animation/layout not device-verified; the scoring is unit-tested.
-- **T-034 · Fake catch flow + 3-free-catch counter** — *Claude · M · deps: T-033 · [ECONOMY](ECONOMY.md), [USER-FLOWS §6](USER-FLOWS.md)*
-  - No real GPS gating (prototype). Success marks Caught, shows a contextual protect tip.
-  - Free-catch counter decrements; 4th attempt shows the gentle "unlimited with Full Game" sheet
-    (no real purchase in prototype). Lets us test the whole three-tier feel, not just Spotted.
+- **T-034 · Fake catch flow + 3-free-catch counter** — *Claude · M · `DONE` · deps: T-033 · [ECONOMY](ECONOMY.md), [USER-FLOWS §6](USER-FLOWS.md)*
+  - ✅ No GPS gating (prototype): the card's "find it nearby" launches the timing minigame; on
+    success the species is marked Caught and a **contextual protect tip** (`components/catch/ProtectTip.tsx`)
+    fires — kept clean, **no upsell** on the delight moment (invariant #4).
+  - ✅ Free-catch counter via the tested `freeCatch` logic (T-113): 3/season, increments on
+    success, shown on the card ("N free catches left this season"). The **4th attempt** opens the
+    gentle `FreeCatchSheet` — no purchase (RevenueCat is E9), no dark patterns, with "mission
+    always free" / "no ads" reassurance. Full three-tier feel (Spotted → Caught → protect)
+    now playable. **S2.4.1 complete.**
+  - ⚠️ On-device layout/flow not visually verified; the counter logic + grading are unit-tested.
 
 ## F2.5 — Validation Instrumentation & Test
 
