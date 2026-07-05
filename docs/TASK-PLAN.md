@@ -198,25 +198,31 @@ local hook over PR-merge gate).
     governed). `@supabase/supabase-js` + `react-native-url-polyfill` installed.
 
 ### S1.3.1 — Migrations & extensions
-> **BLOCKER (environment):** Claude's build sandbox **cannot reach `*.supabase.co`** — the network
-> policy denies outbound (proxy 403 on CONNECT, verified 2026-07-05). So migrations can't be
-> applied or verified from a Claude session **regardless of credentials** (the `sb_publishable_…`
-> / `sb_secret_…` API keys don't run DDL anyway). Two unblock paths: (a) **Director applies** the
-> authored SQL — `supabase db push` with an access token (`sbp_…`) + DB password, or paste into
-> the dashboard SQL editor; or (b) **recreate the environment** with an egress policy allowing
-> `*.supabase.co` + `api.supabase.com`, then Claude does it end-to-end.
-- **T-016 · Supabase CLI + migrations workflow** — *Claude · S · `BLOCKED` (SQL authored; apply is Director-side, see blocker) · deps: T-003 · [TSD §3](TSD.md)*
-  - Migration convention established: timestamped files in `supabase/migrations/`, idempotent,
-    RLS-on. Two migrations authored (`…000001` profiles+collection, `…000002` extensions).
-    `supabase/README.md` documents the apply + verify steps. **Applying/verifying needs Director**
-    (network blocker above).
-- **T-017 · Enable PostGIS + pg_cron extensions** — *Claude · XS · `BLOCKED` (migration authored; apply is Director-side) · deps: T-016 · [TSD §1](TSD.md)*
-  - ✅ `supabase/migrations/20260704000002_extensions.sql` enables `postgis` + `pg_cron`
-    (idempotent) with a verification query. Not yet applied (network blocker).
-- **T-018 · Base auth configuration** — *Claude · S · `BLOCKED` (dashboard config, Director) · deps: T-003 · [TSD §1](TSD.md)*
-  - Email + at least one social provider enabled; anonymous read of public content allowed;
-    a signed-in test user can be created. **Supabase Auth is dashboard configuration** — Director
-    action; Claude can't reach the project to set or verify it.
+> **Unblocked (2026-07-05):** the **Supabase connector (MCP)** is now attached, so Claude reaches
+> the live project `subjdoiicfmiimtvlzsg` server-side (bypassing the build sandbox's `*.supabase.co`
+> network block). Migrations are applied and verified via the connector (`apply_migration`,
+> `list_tables`, `execute_sql`), not the local CLI.
+- **T-016 · Supabase CLI + migrations workflow** — *Claude · S · `DONE` (via connector) · deps: T-003 · [TSD §3](TSD.md)*
+  - ✅ Migration convention: timestamped files in `supabase/migrations/`, idempotent, RLS-on.
+    Both migrations (`…000001` profiles+collection, `…000002` extensions) are **applied to the
+    live DB** and present in Supabase's migration history. `supabase/README.md` documents apply +
+    verify. (Applied through the MCP connector rather than a locally-linked CLI — the sandbox
+    still can't reach `*.supabase.co` directly, but the connector runs server-side.)
+- **T-017 · Enable PostGIS + pg_cron extensions** — *Claude · XS · `DONE` · deps: T-016 · [TSD §1](TSD.md)*
+  - ✅ `postgis` 3.3 (GEOS/PROJ) and `pg_cron` 1.6.4 installed and **verified live**
+    (`select postgis_version()` returns; `pg_cron` present). Migration `…000002_extensions.sql`.
+- **T-018 · Base auth configuration** — *Claude · S · `IN-PROGRESS` (needs dashboard provider toggle) · deps: T-003 · [TSD §1](TSD.md)*
+  - Auth provider enablement (email / anonymous sign-ins) is GoTrue **dashboard configuration**,
+    not exposed to the connector's SQL/Management tools — Director toggles it (Authentication →
+    Providers). Prototype recommendation: enable **Anonymous sign-ins** (frictionless session so
+    collection can persist per user) + **Email**. Claude wires the client-side auth once enabled.
+
+> **⚠️ Security finding (pre-existing, not from our migrations):** the live DB has an event-trigger
+> function `public.rls_auto_enable()` (auto-enables RLS on new public tables — protective) that is
+> `SECURITY DEFINER` with `EXECUTE` granted to `anon`/`authenticated`; the security advisor flags
+> it. Practical risk is low (it errors outside an event-trigger context) but the fix is to
+> `revoke execute on function public.rls_auto_enable() from anon, authenticated, public;`. Not
+> applied — Claude did not create this object, so it's raised for Director sign-off first.
 
 ---
 ---
