@@ -524,8 +524,11 @@ enforcement ([GDD §4](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)).
 - **T-067 · MapLibre catch-spot map** — *Claude · M · deps: T-048 · [TSD §1,§5](TSD.md), [USER-FLOWS §6](USER-FLOWS.md)*
   - MapLibre map with free tiles shows the user and nearby (public-land) habitat spots for the
     target species; OSM attribution visible.
-- **T-068 · Proximity gating & states** — *Claude · M · deps: T-067 · [USER-FLOWS §6](USER-FLOWS.md)*
-  - Catch enabled only within range; states for no-spots-nearby, too-far (`[Get closer]`), GPS-off.
+- **T-068 · Proximity gating & states** — *Claude · M · `IN-PROGRESS` (geo core done; map UI pending) · deps: T-067 · [USER-FLOWS §6](USER-FLOWS.md)*
+  - ✅ `lib/proximity.ts` (9 tests): `haversineMeters`, `nearestSpot`, and `proximityState` →
+    `in-range` / `too-far` / `no-spots` / `gps-off` against a configurable catch radius
+    (`DEFAULT_CATCH_RANGE_M = 100`). Remaining: the MapLibre map + wiring the state to the catch
+    CTA — depends on real catch spots (T-048, E3) and the map screen (T-067).
 
 ## F6.2 — Per-Category Minigames
 Each category gets a distinct one-thumb, 10–20s minigame; species within a category reskin the
