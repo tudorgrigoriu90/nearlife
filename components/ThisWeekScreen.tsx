@@ -8,8 +8,9 @@ import { CATEGORY_EMOJI } from './speciesVisual';
 
 // "Active this week" pull surface (USER-FLOWS §3), driven by real Kronoberg seed data and the
 // tested `thisWeek` logic (T-111). All chrome strings run through i18n (T-121); species names
-// and content localize in T-122. Collection is empty for now → everything shows NEW.
-// NOTE: not yet visually verified on a device — logic is unit-tested; layout needs a run.
+// and content localize in T-122. NEW markers reflect the user's collection via `spottedIds`
+// (T-028). This surface is fully self-contained — it never depends on notifications, proving the
+// app isn't notification-driven. NOTE: not yet visually verified on a device.
 
 function Row({
   entry,
@@ -37,10 +38,16 @@ function Row({
   );
 }
 
-export default function ThisWeekScreen({ locale = 'en' }: { locale?: Locale }) {
+export default function ThisWeekScreen({
+  locale = 'en',
+  spottedIds,
+}: {
+  locale?: Locale;
+  spottedIds?: ReadonlySet<string>;
+}) {
   const tr = createTranslator(locale);
   const month = monthOf(new Date());
-  const entries = thisWeek(KRONOBERG_SPECIES, month, new Set());
+  const entries = thisWeek(KRONOBERG_SPECIES, month, spottedIds ?? new Set());
 
   return (
     <View style={styles.container}>

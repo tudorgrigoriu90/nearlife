@@ -6,7 +6,7 @@ import OnboardingFlow from './components/OnboardingFlow';
 import SpeciesCard from './components/SpeciesCard';
 import ThisWeekScreen from './components/ThisWeekScreen';
 import { useCollection } from './components/useCollection';
-import { tierStateFor } from './lib/collection';
+import { spottedIds, tierStateFor } from './lib/collection';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator } from './lib/i18n';
 import { KRONOBERG_SPECIES } from './lib/species/kronoberg';
@@ -66,7 +66,7 @@ export default function App() {
       ) : null}
       <View style={styles.screen}>
         {tab === 'thisWeek' ? (
-          <ThisWeekScreen locale={locale} />
+          <ThisWeekScreen locale={locale} spottedIds={spottedIds(collection.records)} />
         ) : (
           <AlmanacScreen
             species={KRONOBERG_SPECIES}

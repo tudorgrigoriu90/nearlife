@@ -287,9 +287,12 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     (tied to account).
 
 ### S2.2.3 — This Week screen
-- **T-028 · "Active this week" list** — *Claude · S · deps: T-025 · [USER-FLOWS §3](USER-FLOWS.md), [GDD §7](GDD.md)*
-  - Lists species whose hardcoded seasonality is active for the current week; `{NEW}` markers.
-  - Works with notifications disabled — proves the app isn't notification-dependent.
+- **T-028 · "Active this week" list** — *Claude · S · `DONE` · deps: T-025 · [USER-FLOWS §3](USER-FLOWS.md), [GDD §7](GDD.md)*
+  - ✅ `ThisWeekScreen` (from T-117) lists active-this-week species via the tested `thisWeek`
+    logic (T-111) with `{NEW}` markers now driven by the real collection (`spottedIds` prop) —
+    spotting a species drops its NEW badge. Empty (quiet-week) state included.
+  - ✅ Fully self-contained: no notification dependency, proving the app isn't notification-driven.
+    Tap-to-collect is T-029. ⚠️ On-device layout not visually verified.
 - **T-029 · Tap-to-collect from This Week** — *Claude · XS · deps: T-028*
   - Tapping a `{NEW}` species opens its card and marks it Spotted, same as a notification tap.
 
