@@ -622,11 +622,15 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
 manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch.**
 
 ## F10.1 — Consent & Age-Gate
-- **T-088 · Granular consent (no pre-ticked boxes)** — *Claude · M · deps: T-018 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
-  - Separate opt-ins for location, notifications, analytics; consent state is first-class user
-    data; features gate on it. (No ad consent — no ads.)
-- **T-089 · Age-gate (GDPR-K, Sweden 13)** — *Claude · S · deps: T-088 · [PRIVACY §3](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
-  - Birth-year gate; under-threshold routes to a restricted, minimal-data path.
+- **T-088 · Granular consent (no pre-ticked boxes)** — *Claude · M · `IN-PROGRESS` (state model done; UI + persistence pending) · deps: T-018 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
+  - ✅ `lib/consent.ts` (5 tests): `ConsentState` for location/notifications/analytics, all
+    defaulting **off** (no pre-ticked boxes); `grant`/`revoke`/`setConsent`/`hasConsent`, immutable.
+    **No `ads` consent kind** (no ads — invariant #3), asserted by test. Serializable → first-class
+    user data. Remaining: consent screen(s), persistence to the profile, and wiring feature gates.
+- **T-089 · Age-gate (GDPR-K, Sweden 13)** — *Claude · S · `IN-PROGRESS` (gate logic done; onboarding screen pending) · deps: T-088 · [PRIVACY §3](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
+  - ✅ `lib/ageGate.ts` (4 tests): birth-**year**-only gate (data minimization), `DIGITAL_CONSENT_AGE_SE = 13`,
+    `agePath()` → `full` | `restricted` for the minimal-data path. Remaining: the onboarding
+    birth-year step + routing the restricted path.
 
 ## F10.2 — Location Minimization & Hometown
 - **T-090 · Hometown GPS-derive-once + discard coordinates** — *Claude · M · deps: T-088 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [ECONOMY](ECONOMY.md), [USER-FLOWS §1](USER-FLOWS.md)*
