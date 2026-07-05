@@ -1,12 +1,15 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CollectionRecord } from '../lib/collection';
-import { InMemoryCollectionStore } from '../lib/collectionStore';
+import { InMemoryCollectionStore, type CollectionStore } from '../lib/collectionStore';
+import { ensureAnonymousSession, getSupabase } from '../lib/supabase';
+import { hasSupabaseConfig } from '../lib/supabaseConfig';
+import { SupabaseCollectionGateway, SupabaseCollectionStore } from '../lib/supabaseCollectionStore';
 
-// React glue over the tested in-memory collection store (T-116). The prototype keeps collection
-// in memory for a single session; the Supabase-backed store (T-056) implements the same
-// interface, so this hook swaps to it without screen changes (T-027). Store domain rules
-// (catch/help imply spotted, spotted-time never overwritten) live in the store and are tested
-// there — this hook only mirrors the store's records into React state.
+// React glue over the collection store (T-027). When Supabase config is present the hook persists
+// to the live DB via SupabaseCollectionStore (signing in anonymously on first use, session cached
+// in AsyncStorage so it survives restarts); otherwise it falls back to the in-memory store so the
+// app still runs without a backend (tests, or a device with no .env.local). The store is built
+// lazily off-render to avoid side effects during render; domain rules live in the store.
 
 export interface Collection {
   records: CollectionRecord[];
@@ -14,24 +17,53 @@ export interface Collection {
   markCaught: (speciesId: string, primeBonus: boolean) => void;
 }
 
+function createStore(): CollectionStore {
+  if (hasSupabaseConfig()) {
+    return new SupabaseCollectionStore(
+      new SupabaseCollectionGateway(getSupabase()),
+      ensureAnonymousSession,
+    );
+  }
+  return new InMemoryCollectionStore();
+}
+
 export function useCollection(): Collection {
-  const store = useMemo(() => new InMemoryCollectionStore(), []);
+  const storeRef = useRef<CollectionStore | null>(null);
+  const getStore = useCallback((): CollectionStore => {
+    storeRef.current ??= createStore();
+    return storeRef.current;
+  }, []);
+
   const [records, setRecords] = useState<CollectionRecord[]>([]);
 
-  const sync = useCallback(async (op: Promise<unknown>) => {
-    await op;
-    setRecords(await store.list());
-  }, [store]);
+  const refresh = useCallback(async () => {
+    setRecords(await getStore().list());
+  }, [getStore]);
+
+  // Load any persisted collection on mount (also triggers the anonymous sign-in when backed by
+  // Supabase). Failures are swallowed to a console warning so the app still renders offline.
+  useEffect(() => {
+    refresh().catch((e: unknown) => console.warn('collection load failed', e));
+  }, [refresh]);
 
   const spot = useCallback(
-    (speciesId: string) => void sync(store.markSpotted(speciesId, new Date().toISOString())),
-    [store, sync],
+    (speciesId: string) => {
+      void getStore()
+        .markSpotted(speciesId, new Date().toISOString())
+        .then(refresh)
+        .catch((e: unknown) => console.warn('spot failed', e));
+    },
+    [getStore, refresh],
   );
 
   const markCaught = useCallback(
-    (speciesId: string, primeBonus: boolean) =>
-      void sync(store.markCaught(speciesId, new Date().toISOString(), primeBonus)),
-    [store, sync],
+    (speciesId: string, primeBonus: boolean) => {
+      void getStore()
+        .markCaught(speciesId, new Date().toISOString(), primeBonus)
+        .then(refresh)
+        .catch((e: unknown) => console.warn('markCaught failed', e));
+    },
+    [getStore, refresh],
   );
 
   return { records, spot, markCaught };

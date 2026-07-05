@@ -296,9 +296,24 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     silhouette while mission content stays free (invariant #2). All chrome via i18n; content via
     `contentFor`. Wired into `App.tsx` (minimal tab shell: This Week ↔ Almanac → card).
   - ⚠️ **Not visually verified** — logic/content are tested; on-device layout needs a run.
-- **T-027 · Collection state persistence** — *Claude · S · deps: T-018, T-026*
-  - Spotting a species persists to Supabase against the user; survives app restart and reinstall
-    (tied to account).
+- **T-027 · Collection state persistence** — *Claude · S · `IN-PROGRESS` (built + RLS-verified; on-device run + reinstall pending) · deps: T-018, T-026*
+  - ✅ `lib/supabaseCollectionStore.ts`: `SupabaseCollectionStore` implements the `CollectionStore`
+    seam (drop-in for the in-memory store), reusing the pure `apply*` transitions (extracted to
+    `collectionStore.ts`, shared + tested once) and a thin `CollectionGateway` (supabase-js
+    adapter). Row mapping + store logic unit-tested against a fake gateway (6 tests). `useCollection`
+    persists to Supabase when configured, else falls back to in-memory (graceful offline / tests).
+  - ✅ Auth: `ensureAnonymousSession()` (silent `signInAnonymously()`, session persisted in
+    AsyncStorage → **survives app restart**); client configured for RN (T-018 anonymous provider on).
+  - ✅ **RLS verified live** via the connector: `collection`/`profiles` policies are exactly
+    `auth.uid() = user_id` for select/insert/update/delete — a user reads/writes only their own rows.
+  - ⚠️ **On-device run pending** (sandbox can't reach `*.supabase.co` and has no simulator) — needs
+    `.env.local` (URL + publishable key) on the device. **Reinstall-survival is NOT met by anonymous
+    auth** (anonymous users don't survive reinstall/other devices); tracked as **T-133**.
+- **T-133 · Link email to an anonymous user (reinstall / cross-device survival)** — *Claude · S · `TODO` · deps: T-027 · [PRIVACY §1](PRIVACY-COMPLIANCE.md)*
+  - Anonymous sessions survive restarts but not reinstall. Add optional email-linking
+    (`updateUser({ email })` / identity linking) so a user can make their collection durable across
+    reinstall and devices — the "survives reinstall (tied to account)" half of T-027. Kept optional
+    so onboarding stays frictionless (Settings entry point once that screen exists).
 
 ### S2.2.3 — This Week screen
 - **T-028 · "Active this week" list** — *Claude · S · `DONE` · deps: T-025 · [USER-FLOWS §3](USER-FLOWS.md), [GDD §7](GDD.md)*
