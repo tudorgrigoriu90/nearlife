@@ -198,18 +198,25 @@ local hook over PR-merge gate).
     governed). `@supabase/supabase-js` + `react-native-url-polyfill` installed.
 
 ### S1.3.1 — Migrations & extensions
-> **Next step (needs Director):** to push schema migrations (T-016) I need either a **Supabase
-> access token** (dashboard → Account → Access Tokens) stored as a CI/secret so the CLI can
-> link + push, or you run the generated SQL yourself. The DB password from project creation is
-> also needed for `supabase link`.
-- **T-016 · Supabase CLI + migrations workflow** — *Claude · S · deps: T-003 · [TSD §3](TSD.md)*
-  - `supabase` CLI linked to the project; a no-op migration applies cleanly locally and remote.
-  - Migration convention documented (timestamped, reversible where practical).
-- **T-017 · Enable PostGIS + pg_cron extensions** — *Claude · XS · deps: T-016 · [TSD §1](TSD.md)*
-  - `postgis` and `pg_cron` enabled via migration; verified with a trivial spatial query.
-- **T-018 · Base auth configuration** — *Claude · S · deps: T-003 · [TSD §1](TSD.md)*
+> **BLOCKER (environment):** Claude's build sandbox **cannot reach `*.supabase.co`** — the network
+> policy denies outbound (proxy 403 on CONNECT, verified 2026-07-05). So migrations can't be
+> applied or verified from a Claude session **regardless of credentials** (the `sb_publishable_…`
+> / `sb_secret_…` API keys don't run DDL anyway). Two unblock paths: (a) **Director applies** the
+> authored SQL — `supabase db push` with an access token (`sbp_…`) + DB password, or paste into
+> the dashboard SQL editor; or (b) **recreate the environment** with an egress policy allowing
+> `*.supabase.co` + `api.supabase.com`, then Claude does it end-to-end.
+- **T-016 · Supabase CLI + migrations workflow** — *Claude · S · `BLOCKED` (SQL authored; apply is Director-side, see blocker) · deps: T-003 · [TSD §3](TSD.md)*
+  - Migration convention established: timestamped files in `supabase/migrations/`, idempotent,
+    RLS-on. Two migrations authored (`…000001` profiles+collection, `…000002` extensions).
+    `supabase/README.md` documents the apply + verify steps. **Applying/verifying needs Director**
+    (network blocker above).
+- **T-017 · Enable PostGIS + pg_cron extensions** — *Claude · XS · `BLOCKED` (migration authored; apply is Director-side) · deps: T-016 · [TSD §1](TSD.md)*
+  - ✅ `supabase/migrations/20260704000002_extensions.sql` enables `postgis` + `pg_cron`
+    (idempotent) with a verification query. Not yet applied (network blocker).
+- **T-018 · Base auth configuration** — *Claude · S · `BLOCKED` (dashboard config, Director) · deps: T-003 · [TSD §1](TSD.md)*
   - Email + at least one social provider enabled; anonymous read of public content allowed;
-    a signed-in test user can be created.
+    a signed-in test user can be created. **Supabase Auth is dashboard configuration** — Director
+    action; Claude can't reach the project to set or verify it.
 
 ---
 ---
