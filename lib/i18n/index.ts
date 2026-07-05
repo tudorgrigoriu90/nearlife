@@ -84,6 +84,17 @@ export const en = {
   'onboarding.notif.cta': 'Turn on nudges',
   'onboarding.firstSpotted.badge': 'Your first sighting!',
   'onboarding.firstSpotted.cta': 'Start exploring',
+
+  // Catch minigame — bird timing (T-033)
+  'minigame.instruction': 'Tap when the shrinking ring lines up with the target — that’s the dive.',
+  'minigame.tapHint': 'Tap anywhere',
+  'minigame.grade.perfect': 'Perfect!',
+  'minigame.grade.good': 'Nice timing!',
+  'minigame.grade.miss': 'Just missed',
+  'minigame.success': 'Caught!',
+  'minigame.fail': 'It got away',
+  'minigame.continue': 'Continue',
+  'minigame.cancel': 'Not now',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -155,6 +166,17 @@ const sv: Catalog = {
   'onboarding.notif.cta': 'Slå på påminnelser',
   'onboarding.firstSpotted.badge': 'Din första observation!',
   'onboarding.firstSpotted.cta': 'Börja utforska',
+
+  // Catch minigame — bird timing (T-033)
+  'minigame.instruction': 'Tryck när den krympande ringen möter målet – det är dyket.',
+  'minigame.tapHint': 'Tryck var som helst',
+  'minigame.grade.perfect': 'Perfekt!',
+  'minigame.grade.good': 'Bra tajming!',
+  'minigame.grade.miss': 'Nästan',
+  'minigame.success': 'Fångad!',
+  'minigame.fail': 'Den kom undan',
+  'minigame.continue': 'Fortsätt',
+  'minigame.cancel': 'Inte nu',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

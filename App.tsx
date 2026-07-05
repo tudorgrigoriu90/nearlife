@@ -5,6 +5,7 @@ import AlmanacScreen from './components/AlmanacScreen';
 import OnboardingFlow from './components/OnboardingFlow';
 import SpeciesCard from './components/SpeciesCard';
 import ThisWeekScreen from './components/ThisWeekScreen';
+import TimingRingMinigame from './components/minigame/TimingRingMinigame';
 import { useCollection } from './components/useCollection';
 import { spottedIds, tierStateFor } from './lib/collection';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
@@ -29,6 +30,7 @@ export default function App() {
   const [previewMode, setPreviewMode] = useState(false);
   const [tab, setTab] = useState<Tab>('thisWeek');
   const [selected, setSelected] = useState<Species | null>(null);
+  const [catching, setCatching] = useState<Species | null>(null);
 
   if (!onboarded) {
     return (
@@ -43,6 +45,24 @@ export default function App() {
     );
   }
 
+  if (catching) {
+    return (
+      <>
+        <TimingRingMinigame
+          locale={locale}
+          onCancel={() => setCatching(null)}
+          onComplete={({ success }) => {
+            // Prototype: success writes Caught (prime-bonus computation is T-074). The free-catch
+            // gate, protect tip and paywall wrap this in T-034.
+            if (success) collection.markCaught(catching.id, false);
+            setCatching(null);
+          }}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (selected) {
     return (
       <>
@@ -51,6 +71,7 @@ export default function App() {
           locale={locale}
           tier={tierStateFor(collection.records, selected.id)}
           onBack={() => setSelected(null)}
+          onFindNearby={(species) => setCatching(species)}
         />
         <StatusBar style="auto" />
       </>

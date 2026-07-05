@@ -313,8 +313,14 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ## F2.4 — Prototype Catch Taste
 
 ### S2.4.1 — One fake bird-timing minigame
-- **T-033 · Timing-ring minigame (bird)** — *Claude · M · deps: T-010 · [GDD §4](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
-  - A 10–20s one-thumb timing minigame ("tap when it dives"); clear success/fail feedback.
+- **T-033 · Timing-ring minigame (bird)** — *Claude · M · `DONE` · deps: T-010 · [GDD §4](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
+  - ✅ `components/minigame/TimingRingMinigame.tsx`: a one-thumb "tap when it dives" game — a ring
+    shrinks and loops; the player taps once to line it up with the target ring, within a 12s
+    budget. Grading is the tested render-free core (`evaluateTiming`, T-114); the component only
+    drives the visual and reports `{ success, result }` with clear perfect/good/miss + caught /
+    got-away feedback. Launched from the card's "find it nearby"; success writes Caught (prototype,
+    no GPS gating). Free-catch gate + protect tip + paywall wrap it in T-034.
+  - ⚠️ Animation/layout not device-verified; the scoring is unit-tested.
 - **T-034 · Fake catch flow + 3-free-catch counter** — *Claude · M · deps: T-033 · [ECONOMY](ECONOMY.md), [USER-FLOWS §6](USER-FLOWS.md)*
   - No real GPS gating (prototype). Success marks Caught, shows a contextual protect tip.
   - Free-catch counter decrements; 4th attempt shows the gentle "unlimited with Full Game" sheet
