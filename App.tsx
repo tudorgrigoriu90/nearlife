@@ -114,6 +114,7 @@ export default function App() {
           species={selected}
           locale={locale}
           tier={tierStateFor(collection.records, selected.id)}
+          fullGame={freeCatch.fullGame}
           onBack={() => setSelected(null)}
           onFindNearby={attemptCatch}
           nearbyNote={freeCatch.fullGame ? undefined : tr('catch.remaining', { count: remaining })}

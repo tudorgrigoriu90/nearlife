@@ -762,6 +762,13 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     catch flow in `App.tsx` (replaced the hardcoded `false`); the production catch resolution
     (T-074) consumes the same helper.
 
+- **T-135 · Depth-tier climb-by-play logic** — *Claude · S · `DONE` · deps: T-115 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
+  - ✅ `lib/depthTier.ts` (7 tests): `unlockedDepth(tier, fullGame)` / `isDepthUnlocked` — Tier 1
+    free, then climb by spotting → catching → helping (all three = mastery, level 5); Full Game
+    opens all 5 immediately. Tests assert **both** states reach the same depth (progression, not
+    paywall). Wired into `SpeciesCard`'s depth row (was a static placeholder). The production task
+    **T-060** is this logic + the real Full Game entitlement (T-083, RevenueCat).
+
 - **T-132 · Analytics event catalog + tracker seam** — *Claude · S · `DONE` · deps: — · [TSD §8](TSD.md), [VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md)*
   - ✅ `lib/analytics.ts` (5 tests): a typed `AnalyticsEventProps` catalog (session start, This
     Week opened, notification delivered/opened, species spotted w/ source, catch attempted/
