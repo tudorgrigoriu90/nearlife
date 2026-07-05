@@ -211,18 +211,19 @@ local hook over PR-merge gate).
 - **T-017 · Enable PostGIS + pg_cron extensions** — *Claude · XS · `DONE` · deps: T-016 · [TSD §1](TSD.md)*
   - ✅ `postgis` 3.3 (GEOS/PROJ) and `pg_cron` 1.6.4 installed and **verified live**
     (`select postgis_version()` returns; `pg_cron` present). Migration `…000002_extensions.sql`.
-- **T-018 · Base auth configuration** — *Claude · S · `IN-PROGRESS` (needs dashboard provider toggle) · deps: T-003 · [TSD §1](TSD.md)*
-  - Auth provider enablement (email / anonymous sign-ins) is GoTrue **dashboard configuration**,
-    not exposed to the connector's SQL/Management tools — Director toggles it (Authentication →
-    Providers). Prototype recommendation: enable **Anonymous sign-ins** (frictionless session so
-    collection can persist per user) + **Email**. Claude wires the client-side auth once enabled.
+- **T-018 · Base auth configuration** — *Claude · S · `IN-PROGRESS` · deps: T-003 · [TSD §1](TSD.md)*
+  - ✅ **Email** provider enabled (Director). ⏳ **Anonymous sign-ins** pending — it's a GoTrue
+    setting (not a provider card and not exposed to the connector's tools), toggled at
+    **Authentication → Sign In / Providers** (`/dashboard/project/subjdoiicfmiimtvlzsg/auth/providers`)
+    via the **"Allow anonymous sign-ins"** switch at the top of the page. Recommended for the
+    frictionless prototype session (`supabase.auth.signInAnonymously()`); email magic-link is the
+    fallback. Client-side auth bootstrap is wired next with T-027.
 
-> **⚠️ Security finding (pre-existing, not from our migrations):** the live DB has an event-trigger
-> function `public.rls_auto_enable()` (auto-enables RLS on new public tables — protective) that is
-> `SECURITY DEFINER` with `EXECUTE` granted to `anon`/`authenticated`; the security advisor flags
-> it. Practical risk is low (it errors outside an event-trigger context) but the fix is to
-> `revoke execute on function public.rls_auto_enable() from anon, authenticated, public;`. Not
-> applied — Claude did not create this object, so it's raised for Director sign-off first.
+> **✅ Security finding resolved (2026-07-05):** the pre-existing `SECURITY DEFINER` event-trigger
+> function `public.rls_auto_enable()` had `EXECUTE` granted to `anon`/`authenticated` (advisor
+> flag). With Director approval, migration `…000001_harden_rls_auto_enable_grants.sql` revoked it
+> — now executable only by `postgres`/`service_role`; the auto-RLS behaviour is unaffected (event
+> triggers run as owner). Claude flagged rather than silently changed it (didn't create it).
 
 ---
 ---

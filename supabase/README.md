@@ -12,9 +12,11 @@ applied via the Supabase CLI (see task T-016).
 > is supplied. This is a Director-side step, unless the environment is recreated with an egress
 > policy that allows `*.supabase.co` + `api.supabase.com`.
 
-Migrations in `migrations/`, applied **in order**:
+Migrations in `migrations/`, applied **in order** (all live on the project as of 2026-07-05):
 1. `20260704000001_profiles_and_collection.sql` — profiles + collection tables, RLS to owner (T-056).
 2. `20260704000002_extensions.sql` — PostGIS + pg_cron (T-017).
+3. `20260705000001_harden_rls_auto_enable_grants.sql` — revoke anon/authenticated EXECUTE on the
+   pre-existing `rls_auto_enable()` event-trigger function (security advisor, T-018).
 
 To apply, either:
 
