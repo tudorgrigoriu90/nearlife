@@ -762,6 +762,12 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     catch flow in `App.tsx` (replaced the hardcoded `false`); the production catch resolution
     (T-074) consumes the same helper.
 
+- **T-136 · Badge earn logic** — *Claude · S · `DONE` · deps: T-115 · [GDD §8](GDD.md)*
+  - ✅ `lib/badges.ts` (4 tests): `earnedBadges(records, species)` → category-completion badges
+    (all species in a category spotted), spotted-count milestones (10/25/50), helped-count
+    milestones (1/5/10), stable order. Habitat/season badges arrive with the real data layer (E3).
+    Core of the badges UI + almanac completion (T-082); labels are i18n at the UI layer.
+
 - **T-135 · Depth-tier climb-by-play logic** — *Claude · S · `DONE` · deps: T-115 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
   - ✅ `lib/depthTier.ts` (7 tests): `unlockedDepth(tier, fullGame)` / `isDepthUnlocked` — Tier 1
     free, then climb by spotting → catching → helping (all three = mastery, level 5); Full Game
