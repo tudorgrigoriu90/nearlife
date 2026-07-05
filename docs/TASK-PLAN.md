@@ -177,6 +177,17 @@ local hook over PR-merge gate).
     when T-011 defines the `verify` npm script (`lint && typecheck && test`). Wiring `verify`
     is part of T-011/T-013.
   - Never bypass the hook with `--no-verify`.
+  - ⚠️ **Fixed in T-130:** the hook shipped non-executable (`100644`), so Git *silently ignored
+    it* after a plain `npm install` (the npm `prepare` script only sets `core.hooksPath`; it
+    never chmods). The gate only worked if you happened to run `scripts/setup-hooks.sh` by hand.
+
+- **T-130 · Fix: store pre-push hook executable so the gate isn't silently skipped** — *Claude · XS · `DONE` · deps: T-109 · [CLAUDE.md](../CLAUDE.md)*
+  - Committed `.githooks/pre-push` with mode `100755` (`git update-index --chmod=+x`). Git
+    refuses to run non-executable hooks, so as shipped the "authoritative gate" no-opped on any
+    machine where only `npm install` (npm `prepare`) had run — the exact "hook was ignored
+    because it's not set as executable" warning. The mode bit is the portable fix: it survives
+    checkout on Linux/macOS, and Windows Git runs hooks regardless of the bit. `prepare` is left
+    cross-platform (plain `git config`) so `npm install` doesn't require `sh` on Windows.
 
 ## F1.3 — Supabase Backbone
 
