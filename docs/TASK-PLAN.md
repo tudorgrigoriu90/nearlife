@@ -756,6 +756,12 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     scheduled Edge Function evaluates — the prototype cadence (T-032) and production engine (T-063)
     wrap it unchanged, alongside the tested candidate selection (T-112).
 
+- **T-134 · Prime-bonus computation** — *Claude · XS · `DONE` · deps: T-110 · [GDD §6](GDD.md)*
+  - ✅ `lib/primeBonus.ts` (3 tests): `isPrimeCatch(species, date)` — a catch earns the prime bonus
+    only inside the species' active window (reuses `isActiveInMonth`). Wired into the prototype
+    catch flow in `App.tsx` (replaced the hardcoded `false`); the production catch resolution
+    (T-074) consumes the same helper.
+
 - **T-132 · Analytics event catalog + tracker seam** — *Claude · S · `DONE` · deps: — · [TSD §8](TSD.md), [VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md)*
   - ✅ `lib/analytics.ts` (5 tests): a typed `AnalyticsEventProps` catalog (session start, This
     Week opened, notification delivered/opened, species spotted w/ source, catch attempted/
