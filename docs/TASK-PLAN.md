@@ -722,11 +722,20 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     scheduled Edge Function evaluates — the prototype cadence (T-032) and production engine (T-063)
     wrap it unchanged, alongside the tested candidate selection (T-112).
 
-**Logic-first coverage:** ~18 test suites / ~108 tests green across `lib/`. This is the testable
+- **T-132 · Analytics event catalog + tracker seam** — *Claude · S · `DONE` · deps: — · [TSD §8](TSD.md), [VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md)*
+  - ✅ `lib/analytics.ts` (5 tests): a typed `AnalyticsEventProps` catalog (session start, This
+    Week opened, notification delivered/opened, species spotted w/ source, catch attempted/
+    succeeded, free-catches exhausted, paywall shown) + a `Tracker` interface with `NoopTracker`
+    (safe default) and `InMemoryTracker` (tests/local funnel). `retentionDayIndex` derives the
+    D1/D3/D7 buckets the criteria need. Storage-free, no PII (ids/enums only). The PostHog-backed
+    tracker (T-035, blocked on the PostHog account) implements `Tracker` as a drop-in.
+
+**Logic-first coverage:** ~22 test suites / ~127 tests green across `lib/`. This is the testable
 core the Supabase-backed store, Edge Functions, and RN screens will wrap once accounts land.
-Covered: seasons, This Week, almanac grid, notification weighting, free-catch, minigame timing,
-collection model + store, i18n runtime + locale resolution + coverage matrix, Swedish content,
-media schema, collective impact.
+Covered: seasons, This Week, almanac grid, notification weighting, notification cadence &
+quiet-hours, free-catch, minigame timing, collection model + store, onboarding flow, hometown
+resolution, analytics event seam, i18n runtime + locale resolution + coverage matrix, Swedish
+content, media schema, collective impact.
 
 - **T-117 · First rendered screen: This Week (prototype shell)** — *Claude · S · `DONE`* (partial toward T-028) *· deps: T-111, T-020 · [USER-FLOWS §3](USER-FLOWS.md)*
   - ✅ `components/ThisWeekScreen.tsx` wired into `App.tsx`: renders the real Kronoberg seed
