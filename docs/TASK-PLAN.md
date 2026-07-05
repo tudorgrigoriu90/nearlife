@@ -504,8 +504,13 @@ per-month probabilities, honest and fully tunable ([TSD §4](TSD.md)).
 ## F5.2 — Honesty & Tuning
 - **T-065 · Config-driven tuning levers** — *Claude · S · deps: T-062 · [TSD §4](TSD.md)*
   - Cadence, cell resolution, rarity curve, active-window strictness all config, not hardcoded.
-- **T-066 · Copy-rule enforcement** — *Claude · XS · deps: T-059, T-063 · [GDD §3](GDD.md), [USER-FLOWS](USER-FLOWS.md)*
-  - Automated check/lint or content review ensuring no string overclaims real-time presence.
+- **T-066 · Copy-rule enforcement** — *Claude · XS · `DONE` · deps: — · [GDD §3](GDD.md), [USER-FLOWS](USER-FLOWS.md)*
+  - ✅ `lib/contentHonesty.ts` is the single source of truth for banned real-time-presence phrases
+    (en + sv); `findRealtimeClaims`/`isHonest`. `contentHonesty.test.ts` enforces it across **every**
+    species content field (en + sv) **and** every UI catalog string in both locales — 436 checks,
+    so no copy can overclaim presence without failing the build (invariant #1). The honesty
+    disclaimer (`thisWeek.honesty`), which quotes the phrase to disclaim it, is the one documented
+    exemption. Deps relaxed: the check runs on existing content now (didn't need T-059/T-063).
 
 ---
 ---
