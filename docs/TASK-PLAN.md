@@ -641,12 +641,19 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - Runtime location kept at H3-cell resolution; no precise lat/long trail retained.
 
 ## F10.3 — GDPR Rights
-- **T-092 · Data export endpoint** — *Claude · M · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
-  - User can export their data from Settings; reachable anytime.
+- **T-092 · Data export endpoint** — *Claude · M · `IN-PROGRESS` (bundle builder done; Settings entry + DB read pending) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
+  - ✅ `lib/dataExport.ts` (3 tests): `buildDataExport` assembles a versioned, deterministic
+    (species-sorted, copy-safe) bundle of the user's own data (profile + consent + collection);
+    `exportToJson`. Remaining: the Settings action that reads from Supabase and hands the user the file.
 - **T-093 · Account + data deletion** — *Claude · M · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
   - "Delete account & data" fully erases user data (and cascades); build-time feature, not ops.
-- **T-094 · Retention policy & auto-expiry** — *Claude · S · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
-  - Defined retention windows for collection/location/analytics; anything not needed auto-expires.
+    *(Schema groundwork in place: `collection`/`profiles` FK to `auth.users` with `on delete
+    cascade`, so deleting the auth user erases their rows — the delete flow is an Edge Function
+    calling the auth admin API. No pure core to extract; done with the Settings + server work.)*
+- **T-094 · Retention policy & auto-expiry** — *Claude · S · `IN-PROGRESS` (policy + expiry logic done; scheduled job pending) · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+  - ✅ `lib/retention.ts` (3 tests): `DEFAULT_RETENTION` windows (runtime location 30d < inactive
+    anonymous 90d < analytics 365d) + `isExpired`/`expiryMs`. Remaining: the pg_cron job that
+    applies expiry (deletes stale rows / anonymous users).
 
 ## F10.4 — Legal Artifacts
 - **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*
