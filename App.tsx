@@ -24,11 +24,20 @@ export default function App() {
   const locale = detectDeviceLocale();
   const tr = createTranslator(locale);
   const [onboarded, setOnboarded] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
   const [tab, setTab] = useState<Tab>('thisWeek');
   const [selected, setSelected] = useState<Species | null>(null);
 
   if (!onboarded) {
-    return <OnboardingFlow locale={locale} onComplete={() => setOnboarded(true)} />;
+    return (
+      <OnboardingFlow
+        locale={locale}
+        onComplete={({ locationOutcome }) => {
+          setPreviewMode(locationOutcome === 'denied');
+          setOnboarded(true);
+        }}
+      />
+    );
   }
 
   if (selected) {
@@ -47,6 +56,11 @@ export default function App() {
 
   return (
     <View style={styles.root}>
+      {previewMode ? (
+        <View style={styles.previewBanner}>
+          <Text style={styles.previewText}>{tr('preview.banner')}</Text>
+        </View>
+      ) : null}
       <View style={styles.screen}>
         {tab === 'thisWeek' ? (
           <ThisWeekScreen locale={locale} />
@@ -79,6 +93,8 @@ function TabButton({ label, active, onPress }: { label: string; active: boolean;
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#f4f8f2' },
   screen: { flex: 1 },
+  previewBanner: { backgroundColor: '#fbe9c6', paddingTop: 44, paddingBottom: 8, paddingHorizontal: 16 },
+  previewText: { fontSize: 12, color: '#7a5a1f', textAlign: 'center' },
   tabBar: {
     flexDirection: 'row',
     borderTopWidth: StyleSheet.hairlineWidth,

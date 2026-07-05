@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createTranslator, type Locale } from '../lib/i18n';
+import { resolveHometown } from '../lib/hometown';
 import { FIRST_STEP, isComplete, stepAfter, type OnboardingStep } from '../lib/onboarding';
 import { requestLocationPermission, type PermissionOutcome } from '../lib/permissions';
 import OnboardingScaffold from './onboarding/OnboardingScaffold';
@@ -62,8 +63,23 @@ export default function OnboardingFlow({
           onNext={askLocation}
         />
       );
+    case 'hometownConfirm': {
+      // Location denied → no region to confirm; skip to preview mode (non-blocking, T-023).
+      if (locationOutcome === 'denied') return <StepAdvancer onMount={advance} />;
+      // Prototype resolves any location to Kronoberg; coordinates are already discarded.
+      const region = resolveHometown();
+      return (
+        <OnboardingScaffold
+          emoji="🏡"
+          title={tr('onboarding.hometown.title')}
+          body={`${region.name}\n\n${tr('onboarding.hometown.body')}`}
+          ctaLabel={tr('onboarding.hometown.cta', { region: region.name })}
+          onNext={advance}
+        />
+      );
+    }
     default:
-      // Steps implemented by later tasks (T-023/T-024) auto-advance until the flow completes.
+      // Steps implemented by later tasks (T-024) auto-advance until the flow completes.
       return <StepAdvancer onMount={advance} />;
   }
 }

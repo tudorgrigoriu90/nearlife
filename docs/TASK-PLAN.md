@@ -248,10 +248,14 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     Shared `components/onboarding/OnboardingScaffold.tsx` layout; all copy via i18n. Onboarding
     gates the app shell in `App.tsx`. Later steps auto-advance until implemented (T-023/T-024).
   - ⚠️ **OS permission flow not device-verified** — no simulator here; the flow machine is unit-tested.
-- **T-023 · GPS-derived hometown confirm (hardcoded resolve → Kronoberg)** — *Claude · S · deps: T-022 · [USER-FLOWS §1](USER-FLOWS.md), [ECONOMY](ECONOMY.md)*
-  - Device location resolved once; prototype hardcodes the resolve to Kronoberg and shows a
-    confirmation ("can't be changed later"). Coords discarded; only region stored.
-  - Location-denied → non-blocking preview mode.
+- **T-023 · GPS-derived hometown confirm (hardcoded resolve → Kronoberg)** — *Claude · S · `DONE` · deps: T-022 · [USER-FLOWS §1](USER-FLOWS.md), [ECONOMY](ECONOMY.md)*
+  - ✅ `lib/hometown.ts` (3 tests): `resolveHometown(coords)` returns **only a `Region`** — coords
+    are consumed and never returned/stored (PRIVACY §1); prototype hardcodes Kronoberg. A test
+    asserts the result has no `latitude`/`longitude`. `OnboardingFlow` adds a hometown-confirm
+    step ("can't be changed later", CTA "Confirm Kronoberg").
+  - ✅ Location-denied → the confirm step is skipped and `App.tsx` enters **non-blocking preview
+    mode** with a banner; the app stays fully usable.
+  - ⚠️ On-device permission/preview behaviour not visually verified.
 - **T-024 · Notification pre-prompt + first Spotted demo** — *Claude · S · deps: T-023 · [USER-FLOWS §1,§4](USER-FLOWS.md)*
   - Notification pre-prompt; onboarding ends with an immediate first Spotted card so the payoff
     is felt in the first minute.

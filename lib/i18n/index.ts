@@ -70,6 +70,12 @@ export const en = {
     'Nearby checks your location once to set your home region, then asks the OS for permission.',
   'onboarding.location.privacy': 'Used once, then discarded — only your region is kept, never coordinates.',
   'onboarding.location.cta': 'Continue',
+
+  // Onboarding — hometown confirm (T-023)
+  'onboarding.hometown.title': 'Your home region',
+  'onboarding.hometown.body': 'This is set once from your location and can’t be changed later.',
+  'onboarding.hometown.cta': 'Confirm {region}',
+  'preview.banner': 'Preview mode — allow location to set your home region.',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -127,6 +133,12 @@ const sv: Catalog = {
     'Nearby kollar din plats en gång för att ställa in din hemregion och frågar sedan operativsystemet om tillåtelse.',
   'onboarding.location.privacy': 'Används en gång och kastas sedan – bara din region sparas, aldrig koordinater.',
   'onboarding.location.cta': 'Fortsätt',
+
+  // Onboarding — hometown confirm (T-023)
+  'onboarding.hometown.title': 'Din hemregion',
+  'onboarding.hometown.body': 'Den ställs in en gång från din plats och kan inte ändras senare.',
+  'onboarding.hometown.cta': 'Bekräfta {region}',
+  'preview.banner': 'Förhandsläge – tillåt plats för att ställa in din hemregion.',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };
