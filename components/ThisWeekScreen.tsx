@@ -1,9 +1,10 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { monthOf } from '../lib/season';
 import { thisWeek, type ThisWeekEntry } from '../lib/thisWeek';
 import { commonNameFor, contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
+import type { Species } from '../lib/species/types';
 import { CATEGORY_EMOJI } from './speciesVisual';
 
 // "Active this week" pull surface (USER-FLOWS §3), driven by real Kronoberg seed data and the
@@ -16,16 +17,23 @@ function Row({
   entry,
   locale,
   newLabel,
+  onSelect,
 }: {
   entry: ThisWeekEntry;
   locale: Locale;
   newLabel: string;
+  onSelect?: (species: Species) => void;
 }) {
   const { species, isNew } = entry;
   const name = commonNameFor(species, locale);
   const content = contentFor(species.id, locale);
   return (
-    <View style={styles.row}>
+    <Pressable
+      style={styles.row}
+      onPress={() => onSelect?.(species)}
+      accessibilityRole="button"
+      accessibilityLabel={name}
+    >
       <Text style={styles.emoji}>{CATEGORY_EMOJI[species.category]}</Text>
       <View style={styles.rowText}>
         <View style={styles.rowHeader}>
@@ -34,16 +42,18 @@ function Row({
         </View>
         <Text style={styles.detail}>{content?.whenAndHow ?? species.scientificName}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 export default function ThisWeekScreen({
   locale = 'en',
   spottedIds,
+  onSelectSpecies,
 }: {
   locale?: Locale;
   spottedIds?: ReadonlySet<string>;
+  onSelectSpecies?: (species: Species) => void;
 }) {
   const tr = createTranslator(locale);
   const month = monthOf(new Date());
@@ -59,7 +69,7 @@ export default function ThisWeekScreen({
         data={entries}
         keyExtractor={(e) => e.species.id}
         renderItem={({ item }) => (
-          <Row entry={item} locale={locale} newLabel={tr('thisWeek.new')} />
+          <Row entry={item} locale={locale} newLabel={tr('thisWeek.new')} onSelect={onSelectSpecies} />
         )}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.detail}>{tr('thisWeek.empty')}</Text>}

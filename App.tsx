@@ -66,7 +66,16 @@ export default function App() {
       ) : null}
       <View style={styles.screen}>
         {tab === 'thisWeek' ? (
-          <ThisWeekScreen locale={locale} spottedIds={spottedIds(collection.records)} />
+          <ThisWeekScreen
+            locale={locale}
+            spottedIds={spottedIds(collection.records)}
+            onSelectSpecies={(species) => {
+              // Tapping a This Week entry marks it Spotted and opens its card (same as a
+              // notification tap, USER-FLOWS §4).
+              collection.spot(species.id);
+              setSelected(species);
+            }}
+          />
         ) : (
           <AlmanacScreen
             species={KRONOBERG_SPECIES}

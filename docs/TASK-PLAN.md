@@ -293,8 +293,10 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     spotting a species drops its NEW badge. Empty (quiet-week) state included.
   - ✅ Fully self-contained: no notification dependency, proving the app isn't notification-driven.
     Tap-to-collect is T-029. ⚠️ On-device layout not visually verified.
-- **T-029 · Tap-to-collect from This Week** — *Claude · XS · deps: T-028*
-  - Tapping a `{NEW}` species opens its card and marks it Spotted, same as a notification tap.
+- **T-029 · Tap-to-collect from This Week** — *Claude · XS · `DONE` · deps: T-028*
+  - ✅ This Week rows are now `Pressable`; tapping one marks the species Spotted in the shared
+    collection and opens its `SpeciesCard` (same effect as a notification tap, USER-FLOWS §4).
+    The NEW badge clears on return since the collection updated. **S2.2.2 + S2.2.3 complete.**
 
 ## F2.3 — Prototype Notifications
 
