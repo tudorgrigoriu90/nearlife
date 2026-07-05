@@ -240,8 +240,14 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ## F2.2 — Prototype App Shell
 
 ### S2.2.1 — Onboarding (lite, compliance-shaped)
-- **T-022 · Welcome + location pre-prompt** — *Claude · S · deps: T-010 · [USER-FLOWS §1](USER-FLOWS.md)*
-  - Welcome step; pre-prompt explainer *before* the OS location dialog; while-in-use request.
+- **T-022 · Welcome + location pre-prompt** — *Claude · S · `DONE` · deps: T-010 · [USER-FLOWS §1](USER-FLOWS.md)*
+  - ✅ `lib/onboarding.ts` (tested step machine, 3 tests) drives the flow; `components/OnboardingFlow.tsx`
+    renders the Welcome step and a location **pre-prompt explainer that shows before the OS
+    dialog** (USER-FLOWS §1), then fires a **while-in-use** request via `lib/permissions.ts`
+    (`requestForegroundPermissionsAsync`; background location never requested — PRIVACY §1).
+    Shared `components/onboarding/OnboardingScaffold.tsx` layout; all copy via i18n. Onboarding
+    gates the app shell in `App.tsx`. Later steps auto-advance until implemented (T-023/T-024).
+  - ⚠️ **OS permission flow not device-verified** — no simulator here; the flow machine is unit-tested.
 - **T-023 · GPS-derived hometown confirm (hardcoded resolve → Kronoberg)** — *Claude · S · deps: T-022 · [USER-FLOWS §1](USER-FLOWS.md), [ECONOMY](ECONOMY.md)*
   - Device location resolved once; prototype hardcodes the resolve to Kronoberg and shows a
     confirmation ("can't be changed later"). Coords discarded; only region stored.

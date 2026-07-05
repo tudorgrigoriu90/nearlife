@@ -59,6 +59,17 @@ export const en = {
   'card.back': 'Back',
   'card.followLaw':
     'Always follow local rules — access rights, protected species, and feeding differ by place.',
+
+  // Onboarding — welcome + location pre-prompt (T-022)
+  'onboarding.welcome.title': 'Welcome to Nearby',
+  'onboarding.welcome.body':
+    'Discover the wild lives sharing your corner of the world — season by season.',
+  'onboarding.welcome.cta': 'Get started',
+  'onboarding.location.title': 'Find species near you',
+  'onboarding.location.body':
+    'Nearby checks your location once to set your home region, then asks the OS for permission.',
+  'onboarding.location.privacy': 'Used once, then discarded — only your region is kept, never coordinates.',
+  'onboarding.location.cta': 'Continue',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -105,6 +116,17 @@ const sv: Catalog = {
   'card.back': 'Tillbaka',
   'card.followLaw':
     'Följ alltid lokala regler – allemansrätten, fridlysta arter och matning skiljer sig åt beroende på plats.',
+
+  // Onboarding — welcome + location pre-prompt (T-022)
+  'onboarding.welcome.title': 'Välkommen till Nearby',
+  'onboarding.welcome.body':
+    'Upptäck de vilda liven som delar ditt hörn av världen – säsong för säsong.',
+  'onboarding.welcome.cta': 'Kom igång',
+  'onboarding.location.title': 'Hitta arter nära dig',
+  'onboarding.location.body':
+    'Nearby kollar din plats en gång för att ställa in din hemregion och frågar sedan operativsystemet om tillåtelse.',
+  'onboarding.location.privacy': 'Används en gång och kastas sedan – bara din region sparas, aldrig koordinater.',
+  'onboarding.location.cta': 'Fortsätt',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

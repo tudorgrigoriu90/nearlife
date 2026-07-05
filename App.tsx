@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AlmanacScreen from './components/AlmanacScreen';
+import OnboardingFlow from './components/OnboardingFlow';
 import SpeciesCard from './components/SpeciesCard';
 import ThisWeekScreen from './components/ThisWeekScreen';
 import { tierStateFor } from './lib/collection';
@@ -10,10 +11,11 @@ import { createTranslator } from './lib/i18n';
 import { KRONOBERG_SPECIES } from './lib/species/kronoberg';
 import type { Species } from './lib/species/types';
 
-// Prototype app shell (E2). A minimal tab switcher between the "This week" pull surface (T-117)
-// and the Almanac grid (T-025); tapping a species opens its card (T-026). No navigation library
-// yet — local state is enough for the throwaway prototype. Collection is empty until persistence
-// lands (T-027, Supabase-gated); tap-to-collect is T-029.
+// Prototype app shell (E2). Onboarding (T-022+) runs first; once complete, a minimal tab
+// switcher between the "This week" pull surface (T-117) and the Almanac grid (T-025); tapping a
+// species opens its card (T-026). No navigation library yet — local state is enough for the
+// throwaway prototype. Collection is empty until persistence lands (T-027, Supabase-gated);
+// tap-to-collect is T-029.
 
 type Tab = 'thisWeek' | 'almanac';
 
@@ -21,8 +23,13 @@ export default function App() {
   // Device locale for now; a user override from Settings will take precedence (T-123).
   const locale = detectDeviceLocale();
   const tr = createTranslator(locale);
+  const [onboarded, setOnboarded] = useState(false);
   const [tab, setTab] = useState<Tab>('thisWeek');
   const [selected, setSelected] = useState<Species | null>(null);
+
+  if (!onboarded) {
+    return <OnboardingFlow locale={locale} onComplete={() => setOnboarded(true)} />;
+  }
 
   if (selected) {
     return (
