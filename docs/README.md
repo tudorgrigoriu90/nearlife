@@ -14,6 +14,7 @@ avoid duplication.
 | [USER-FLOWS.md](USER-FLOWS.md) | Screen inventory + key user journeys | Outline |
 | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) | i18n/l10n — languages, phasing (sv+en → 24 EU), what gets localized, translation ops | Draft |
 | [TASK-PLAN.md](TASK-PLAN.md) | Delivery backlog — epics/features/stories/tasks, phased, with acceptance criteria | Draft |
+| [VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md) | **Go/kill:** pre-registered numeric + qualitative thresholds for the Kronoberg validation test (GDD §9) | Draft — pending Director approval (T-036) |
 | [DATA-SOURCING-LICENSING.md](DATA-SOURCING-LICENSING.md) | **Go/no-go:** API licensing for commercial use | Draft — needs legal verification |
 | [PRIVACY-COMPLIANCE.md](PRIVACY-COMPLIANCE.md) | **Go/no-go:** GDPR, location, kids (no ads ship — resolved) | Draft — needs legal verification |
 

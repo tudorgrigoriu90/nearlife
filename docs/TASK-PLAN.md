@@ -338,10 +338,13 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 - **T-035 · PostHog event instrumentation** — *Claude · S · deps: T-005, T-031 · [TSD §8](TSD.md)*
   - Events: notification delivered/opened, species spotted, catch attempted/succeeded, session
     start, This Week opened. Day-1/3/7 retention derivable.
-- **T-036 · Write go/kill criteria (before testing)** — *Claude + Director · S · deps: — · [GDD §9](GDD.md)*
-  - A short criteria doc committed **before** recruiting users: explicit numeric + qualitative
-    thresholds for go vs. kill (e.g. sustained notification-open rate floor, "would you be
-    disappointed if this went away?" signal). Director approves.
+- **T-036 · Write go/kill criteria (before testing)** — *Claude + Director · S · `DONE` (draft; Director approval pending) · deps: — · [GDD §9](GDD.md)*
+  - ✅ [docs/VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md): pre-registered GO/ITERATE/KILL bands
+    with **two primary metrics** (Sean-Ellis "very disappointed" ≥40%, day-7 return ≥35%) plus
+    secondary diagnostics (notification open rate, passive-collect depth, non-notification pull,
+    catch taste) and a weighted qualitative rubric (rewarding vs. hollow). n≈25 read as
+    directional; each metric maps to a T-035 event. Indexed in docs/README.
+  - ⚠️ **Director-gated:** must be reviewed/approved and frozen **before** recruiting testers (T-038).
 - **T-037 · Validation funnel dashboard** — *Claude · S · deps: T-035*
   - PostHog dashboard showing the onboarding→spot→return funnel and day-7 open rate.
 
