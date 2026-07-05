@@ -177,6 +177,17 @@ local hook over PR-merge gate).
     when T-011 defines the `verify` npm script (`lint && typecheck && test`). Wiring `verify`
     is part of T-011/T-013.
   - Never bypass the hook with `--no-verify`.
+  - ⚠️ **Fixed in T-130:** the hook shipped non-executable (`100644`), so Git *silently ignored
+    it* after a plain `npm install` (the npm `prepare` script only sets `core.hooksPath`; it
+    never chmods). The gate only worked if you happened to run `scripts/setup-hooks.sh` by hand.
+
+- **T-130 · Fix: store pre-push hook executable so the gate isn't silently skipped** — *Claude · XS · `DONE` · deps: T-109 · [CLAUDE.md](../CLAUDE.md)*
+  - Committed `.githooks/pre-push` with mode `100755` (`git update-index --chmod=+x`). Git
+    refuses to run non-executable hooks, so as shipped the "authoritative gate" no-opped on any
+    machine where only `npm install` (npm `prepare`) had run — the exact "hook was ignored
+    because it's not set as executable" warning. The mode bit is the portable fix: it survives
+    checkout on Linux/macOS, and Windows Git runs hooks regardless of the bit. `prepare` is left
+    cross-platform (plain `git config`) so `npm install` doesn't require `sh` on Windows.
 
 ## F1.3 — Supabase Backbone
 
@@ -187,18 +198,32 @@ local hook over PR-merge gate).
     governed). `@supabase/supabase-js` + `react-native-url-polyfill` installed.
 
 ### S1.3.1 — Migrations & extensions
-> **Next step (needs Director):** to push schema migrations (T-016) I need either a **Supabase
-> access token** (dashboard → Account → Access Tokens) stored as a CI/secret so the CLI can
-> link + push, or you run the generated SQL yourself. The DB password from project creation is
-> also needed for `supabase link`.
-- **T-016 · Supabase CLI + migrations workflow** — *Claude · S · deps: T-003 · [TSD §3](TSD.md)*
-  - `supabase` CLI linked to the project; a no-op migration applies cleanly locally and remote.
-  - Migration convention documented (timestamped, reversible where practical).
-- **T-017 · Enable PostGIS + pg_cron extensions** — *Claude · XS · deps: T-016 · [TSD §1](TSD.md)*
-  - `postgis` and `pg_cron` enabled via migration; verified with a trivial spatial query.
-- **T-018 · Base auth configuration** — *Claude · S · deps: T-003 · [TSD §1](TSD.md)*
-  - Email + at least one social provider enabled; anonymous read of public content allowed;
-    a signed-in test user can be created.
+> **Unblocked (2026-07-05):** the **Supabase connector (MCP)** is now attached, so Claude reaches
+> the live project `subjdoiicfmiimtvlzsg` server-side (bypassing the build sandbox's `*.supabase.co`
+> network block). Migrations are applied and verified via the connector (`apply_migration`,
+> `list_tables`, `execute_sql`), not the local CLI.
+- **T-016 · Supabase CLI + migrations workflow** — *Claude · S · `DONE` (via connector) · deps: T-003 · [TSD §3](TSD.md)*
+  - ✅ Migration convention: timestamped files in `supabase/migrations/`, idempotent, RLS-on.
+    Both migrations (`…000001` profiles+collection, `…000002` extensions) are **applied to the
+    live DB** and present in Supabase's migration history. `supabase/README.md` documents apply +
+    verify. (Applied through the MCP connector rather than a locally-linked CLI — the sandbox
+    still can't reach `*.supabase.co` directly, but the connector runs server-side.)
+- **T-017 · Enable PostGIS + pg_cron extensions** — *Claude · XS · `DONE` · deps: T-016 · [TSD §1](TSD.md)*
+  - ✅ `postgis` 3.3 (GEOS/PROJ) and `pg_cron` 1.6.4 installed and **verified live**
+    (`select postgis_version()` returns; `pg_cron` present). Migration `…000002_extensions.sql`.
+- **T-018 · Base auth configuration** — *Claude · S · `IN-PROGRESS` · deps: T-003 · [TSD §1](TSD.md)*
+  - ✅ **Email** provider enabled (Director). ⏳ **Anonymous sign-ins** pending — it's a GoTrue
+    setting (not a provider card and not exposed to the connector's tools), toggled at
+    **Authentication → Sign In / Providers** (`/dashboard/project/subjdoiicfmiimtvlzsg/auth/providers`)
+    via the **"Allow anonymous sign-ins"** switch at the top of the page. Recommended for the
+    frictionless prototype session (`supabase.auth.signInAnonymously()`); email magic-link is the
+    fallback. Client-side auth bootstrap is wired next with T-027.
+
+> **✅ Security finding resolved (2026-07-05):** the pre-existing `SECURITY DEFINER` event-trigger
+> function `public.rls_auto_enable()` had `EXECUTE` granted to `anon`/`authenticated` (advisor
+> flag). With Director approval, migration `…000001_harden_rls_auto_enable_grants.sql` revoked it
+> — now executable only by `postgres`/`service_role`; the auto-RLS behaviour is unaffected (event
+> triggers run as owner). Claude flagged rather than silently changed it (didn't create it).
 
 ---
 ---
@@ -229,33 +254,78 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ## F2.2 — Prototype App Shell
 
 ### S2.2.1 — Onboarding (lite, compliance-shaped)
-- **T-022 · Welcome + location pre-prompt** — *Claude · S · deps: T-010 · [USER-FLOWS §1](USER-FLOWS.md)*
-  - Welcome step; pre-prompt explainer *before* the OS location dialog; while-in-use request.
-- **T-023 · GPS-derived hometown confirm (hardcoded resolve → Kronoberg)** — *Claude · S · deps: T-022 · [USER-FLOWS §1](USER-FLOWS.md), [ECONOMY](ECONOMY.md)*
-  - Device location resolved once; prototype hardcodes the resolve to Kronoberg and shows a
-    confirmation ("can't be changed later"). Coords discarded; only region stored.
-  - Location-denied → non-blocking preview mode.
-- **T-024 · Notification pre-prompt + first Spotted demo** — *Claude · S · deps: T-023 · [USER-FLOWS §1,§4](USER-FLOWS.md)*
-  - Notification pre-prompt; onboarding ends with an immediate first Spotted card so the payoff
-    is felt in the first minute.
+- **T-022 · Welcome + location pre-prompt** — *Claude · S · `DONE` · deps: T-010 · [USER-FLOWS §1](USER-FLOWS.md)*
+  - ✅ `lib/onboarding.ts` (tested step machine, 3 tests) drives the flow; `components/OnboardingFlow.tsx`
+    renders the Welcome step and a location **pre-prompt explainer that shows before the OS
+    dialog** (USER-FLOWS §1), then fires a **while-in-use** request via `lib/permissions.ts`
+    (`requestForegroundPermissionsAsync`; background location never requested — PRIVACY §1).
+    Shared `components/onboarding/OnboardingScaffold.tsx` layout; all copy via i18n. Onboarding
+    gates the app shell in `App.tsx`. Later steps auto-advance until implemented (T-023/T-024).
+  - ⚠️ **OS permission flow not device-verified** — no simulator here; the flow machine is unit-tested.
+- **T-023 · GPS-derived hometown confirm (hardcoded resolve → Kronoberg)** — *Claude · S · `DONE` · deps: T-022 · [USER-FLOWS §1](USER-FLOWS.md), [ECONOMY](ECONOMY.md)*
+  - ✅ `lib/hometown.ts` (3 tests): `resolveHometown(coords)` returns **only a `Region`** — coords
+    are consumed and never returned/stored (PRIVACY §1); prototype hardcodes Kronoberg. A test
+    asserts the result has no `latitude`/`longitude`. `OnboardingFlow` adds a hometown-confirm
+    step ("can't be changed later", CTA "Confirm Kronoberg").
+  - ✅ Location-denied → the confirm step is skipped and `App.tsx` enters **non-blocking preview
+    mode** with a banner; the app stays fully usable.
+  - ⚠️ On-device permission/preview behaviour not visually verified.
+- **T-024 · Notification pre-prompt + first Spotted demo** — *Claude · S · `DONE` · deps: T-023 · [USER-FLOWS §1,§4](USER-FLOWS.md)*
+  - ✅ Notification pre-prompt explainer before the OS dialog (`requestNotificationPermission`,
+    expo-notifications); outcome does **not** gate onboarding (the pull surface works without it).
+    Onboarding ends on a **first Spotted card**: the most interesting active-this-week species
+    (tested `thisWeek` selection, quiet-week fallback) is marked Spotted on entry and shown in a
+    full `SpeciesCard` with a "first sighting" badge → "Start exploring".
+  - ✅ Shared session collection wired via `components/useCollection.ts` (React glue over the
+    tested `InMemoryCollectionStore`, T-116): the first sighting persists into the Almanac and
+    card tier. Swaps to the Supabase store (T-056) without screen changes. **S2.2.1 complete.**
+  - ⚠️ OS permission flow not device-verified.
 
 ### S2.2.2 — Almanac & Species Card
-- **T-025 · Almanac grid with tier overlays** — *Claude · M · deps: T-020 · [USER-FLOWS §2](USER-FLOWS.md)*
-  - Grid of species with ●/◐/◑ tier overlays; greyed = not-yet-Spotted; category filter chips.
-  - Empty state ("your almanac is waiting"); loading skeleton.
-- **T-026 · Species card** — *Claude · M · deps: T-020 · [USER-FLOWS §4](USER-FLOWS.md)*
-  - Card shows fact, when/how trivia, give + protect (both free), depth-tier placeholder row,
-    "find it nearby" entry. Not-yet-Spotted state shows silhouette.
-- **T-027 · Collection state persistence** — *Claude · S · deps: T-018, T-026*
-  - Spotting a species persists to Supabase against the user; survives app restart and reinstall
-    (tied to account).
+- **T-025 · Almanac grid with tier overlays** — *Claude · M · `DONE` · deps: T-020 · [USER-FLOWS §2](USER-FLOWS.md)*
+  - ✅ `lib/almanac.ts` (pure, 7 tests): `almanacEntries` (species + ●/◐/◑ tier overlay + category
+    filter), `categoryCounts`, `discoveredCount`. `components/AlmanacScreen.tsx`: 3-column grid,
+    category filter chips (i18n `category.*`), greyed silhouette for not-yet-Spotted, progress
+    header, empty state ("your almanac is waiting") and loading skeleton. Shared category-emoji
+    helper `components/speciesVisual.ts` (ThisWeekScreen refactored onto it).
+  - ⚠️ **Not visually verified** — no simulator here; logic is unit-tested, layout needs a device run.
+- **T-026 · Species card** — *Claude · M · `DONE` · deps: T-020 · [USER-FLOWS §4](USER-FLOWS.md)*
+  - ✅ `components/SpeciesCard.tsx`: fact, when/how, give + protect (both always free, with the
+    standing follow-local-law line), depth-tier placeholder row (5 levels; Tier-1 unlocked, 2–5
+    climb-by-play per T-053/T-060), "find it nearby" entry. Not-yet-Spotted state shows a
+    silhouette while mission content stays free (invariant #2). All chrome via i18n; content via
+    `contentFor`. Wired into `App.tsx` (minimal tab shell: This Week ↔ Almanac → card).
+  - ⚠️ **Not visually verified** — logic/content are tested; on-device layout needs a run.
+- **T-027 · Collection state persistence** — *Claude · S · `IN-PROGRESS` (built + RLS-verified; on-device run + reinstall pending) · deps: T-018, T-026*
+  - ✅ `lib/supabaseCollectionStore.ts`: `SupabaseCollectionStore` implements the `CollectionStore`
+    seam (drop-in for the in-memory store), reusing the pure `apply*` transitions (extracted to
+    `collectionStore.ts`, shared + tested once) and a thin `CollectionGateway` (supabase-js
+    adapter). Row mapping + store logic unit-tested against a fake gateway (6 tests). `useCollection`
+    persists to Supabase when configured, else falls back to in-memory (graceful offline / tests).
+  - ✅ Auth: `ensureAnonymousSession()` (silent `signInAnonymously()`, session persisted in
+    AsyncStorage → **survives app restart**); client configured for RN (T-018 anonymous provider on).
+  - ✅ **RLS verified live** via the connector: `collection`/`profiles` policies are exactly
+    `auth.uid() = user_id` for select/insert/update/delete — a user reads/writes only their own rows.
+  - ⚠️ **On-device run pending** (sandbox can't reach `*.supabase.co` and has no simulator) — needs
+    `.env.local` (URL + publishable key) on the device. **Reinstall-survival is NOT met by anonymous
+    auth** (anonymous users don't survive reinstall/other devices); tracked as **T-133**.
+- **T-133 · Link email to an anonymous user (reinstall / cross-device survival)** — *Claude · S · `TODO` · deps: T-027 · [PRIVACY §1](PRIVACY-COMPLIANCE.md)*
+  - Anonymous sessions survive restarts but not reinstall. Add optional email-linking
+    (`updateUser({ email })` / identity linking) so a user can make their collection durable across
+    reinstall and devices — the "survives reinstall (tied to account)" half of T-027. Kept optional
+    so onboarding stays frictionless (Settings entry point once that screen exists).
 
 ### S2.2.3 — This Week screen
-- **T-028 · "Active this week" list** — *Claude · S · deps: T-025 · [USER-FLOWS §3](USER-FLOWS.md), [GDD §7](GDD.md)*
-  - Lists species whose hardcoded seasonality is active for the current week; `{NEW}` markers.
-  - Works with notifications disabled — proves the app isn't notification-dependent.
-- **T-029 · Tap-to-collect from This Week** — *Claude · XS · deps: T-028*
-  - Tapping a `{NEW}` species opens its card and marks it Spotted, same as a notification tap.
+- **T-028 · "Active this week" list** — *Claude · S · `DONE` · deps: T-025 · [USER-FLOWS §3](USER-FLOWS.md), [GDD §7](GDD.md)*
+  - ✅ `ThisWeekScreen` (from T-117) lists active-this-week species via the tested `thisWeek`
+    logic (T-111) with `{NEW}` markers now driven by the real collection (`spottedIds` prop) —
+    spotting a species drops its NEW badge. Empty (quiet-week) state included.
+  - ✅ Fully self-contained: no notification dependency, proving the app isn't notification-driven.
+    Tap-to-collect is T-029. ⚠️ On-device layout not visually verified.
+- **T-029 · Tap-to-collect from This Week** — *Claude · XS · `DONE` · deps: T-028*
+  - ✅ This Week rows are now `Pressable`; tapping one marks the species Spotted in the shared
+    collection and opens its `SpeciesCard` (same effect as a notification tap, USER-FLOWS §4).
+    The NEW badge clears on return since the collection updated. **S2.2.2 + S2.2.3 complete.**
 
 ## F2.3 — Prototype Notifications
 
@@ -272,12 +342,24 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ## F2.4 — Prototype Catch Taste
 
 ### S2.4.1 — One fake bird-timing minigame
-- **T-033 · Timing-ring minigame (bird)** — *Claude · M · deps: T-010 · [GDD §4](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
-  - A 10–20s one-thumb timing minigame ("tap when it dives"); clear success/fail feedback.
-- **T-034 · Fake catch flow + 3-free-catch counter** — *Claude · M · deps: T-033 · [ECONOMY](ECONOMY.md), [USER-FLOWS §6](USER-FLOWS.md)*
-  - No real GPS gating (prototype). Success marks Caught, shows a contextual protect tip.
-  - Free-catch counter decrements; 4th attempt shows the gentle "unlimited with Full Game" sheet
-    (no real purchase in prototype). Lets us test the whole three-tier feel, not just Spotted.
+- **T-033 · Timing-ring minigame (bird)** — *Claude · M · `DONE` · deps: T-010 · [GDD §4](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
+  - ✅ `components/minigame/TimingRingMinigame.tsx`: a one-thumb "tap when it dives" game — a ring
+    shrinks and loops; the player taps once to line it up with the target ring, within a 12s
+    budget. Grading is the tested render-free core (`evaluateTiming`, T-114); the component only
+    drives the visual and reports `{ success, result }` with clear perfect/good/miss + caught /
+    got-away feedback. Launched from the card's "find it nearby"; success writes Caught (prototype,
+    no GPS gating). Free-catch gate + protect tip + paywall wrap it in T-034.
+  - ⚠️ Animation/layout not device-verified; the scoring is unit-tested.
+- **T-034 · Fake catch flow + 3-free-catch counter** — *Claude · M · `DONE` · deps: T-033 · [ECONOMY](ECONOMY.md), [USER-FLOWS §6](USER-FLOWS.md)*
+  - ✅ No GPS gating (prototype): the card's "find it nearby" launches the timing minigame; on
+    success the species is marked Caught and a **contextual protect tip** (`components/catch/ProtectTip.tsx`)
+    fires — kept clean, **no upsell** on the delight moment (invariant #4).
+  - ✅ Free-catch counter via the tested `freeCatch` logic (T-113): 3/season, increments on
+    success, shown on the card ("N free catches left this season"). The **4th attempt** opens the
+    gentle `FreeCatchSheet` — no purchase (RevenueCat is E9), no dark patterns, with "mission
+    always free" / "no ads" reassurance. Full three-tier feel (Spotted → Caught → protect)
+    now playable. **S2.4.1 complete.**
+  - ⚠️ On-device layout/flow not visually verified; the counter logic + grading are unit-tested.
 
 ## F2.5 — Validation Instrumentation & Test
 
@@ -285,10 +367,13 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 - **T-035 · PostHog event instrumentation** — *Claude · S · deps: T-005, T-031 · [TSD §8](TSD.md)*
   - Events: notification delivered/opened, species spotted, catch attempted/succeeded, session
     start, This Week opened. Day-1/3/7 retention derivable.
-- **T-036 · Write go/kill criteria (before testing)** — *Claude + Director · S · deps: — · [GDD §9](GDD.md)*
-  - A short criteria doc committed **before** recruiting users: explicit numeric + qualitative
-    thresholds for go vs. kill (e.g. sustained notification-open rate floor, "would you be
-    disappointed if this went away?" signal). Director approves.
+- **T-036 · Write go/kill criteria (before testing)** — *Claude + Director · S · `DONE` (draft; Director approval pending) · deps: — · [GDD §9](GDD.md)*
+  - ✅ [docs/VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md): pre-registered GO/ITERATE/KILL bands
+    with **two primary metrics** (Sean-Ellis "very disappointed" ≥40%, day-7 return ≥35%) plus
+    secondary diagnostics (notification open rate, passive-collect depth, non-notification pull,
+    catch taste) and a weighted qualitative rubric (rewarding vs. hollow). n≈25 read as
+    directional; each metric maps to a T-035 event. Indexed in docs/README.
+  - ⚠️ **Director-gated:** must be reviewed/approved and frozen **before** recruiting testers (T-038).
 - **T-037 · Validation funnel dashboard** — *Claude · S · deps: T-035*
   - PostHog dashboard showing the onboarding→spot→return funnel and day-7 open rate.
 
@@ -658,11 +743,28 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     collection records (works for a user or a community union); 3 tests. Core of the impact
     counters (T-081).
 
-**Logic-first coverage:** ~17 test suites / ~98 tests green across `lib/`. This is the testable
+- **T-131 · Notification cadence & quiet-hours logic** — *Claude · S · `DONE` · deps: T-110 · [TSD §4](TSD.md)*
+  - ✅ `lib/cadence.ts` (8 tests): `canSendNow` gates a send by quiet hours → daily cap →
+    frequency cap (priority order, exact boundaries), and `isQuietHour` handles a window that
+    wraps past midnight. Clock/timezone-free (caller passes `nowMs` + local hour); all levers are
+    config (`CadenceConfig`, T-065). This is the "may we send now?" half of the engine that the
+    scheduled Edge Function evaluates — the prototype cadence (T-032) and production engine (T-063)
+    wrap it unchanged, alongside the tested candidate selection (T-112).
+
+- **T-132 · Analytics event catalog + tracker seam** — *Claude · S · `DONE` · deps: — · [TSD §8](TSD.md), [VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md)*
+  - ✅ `lib/analytics.ts` (5 tests): a typed `AnalyticsEventProps` catalog (session start, This
+    Week opened, notification delivered/opened, species spotted w/ source, catch attempted/
+    succeeded, free-catches exhausted, paywall shown) + a `Tracker` interface with `NoopTracker`
+    (safe default) and `InMemoryTracker` (tests/local funnel). `retentionDayIndex` derives the
+    D1/D3/D7 buckets the criteria need. Storage-free, no PII (ids/enums only). The PostHog-backed
+    tracker (T-035, blocked on the PostHog account) implements `Tracker` as a drop-in.
+
+**Logic-first coverage:** ~22 test suites / ~127 tests green across `lib/`. This is the testable
 core the Supabase-backed store, Edge Functions, and RN screens will wrap once accounts land.
-Covered: seasons, This Week, notification weighting, free-catch, minigame timing, collection
-model + store, i18n runtime + locale resolution + coverage matrix, Swedish content, media
-schema, collective impact.
+Covered: seasons, This Week, almanac grid, notification weighting, notification cadence &
+quiet-hours, free-catch, minigame timing, collection model + store, onboarding flow, hometown
+resolution, analytics event seam, i18n runtime + locale resolution + coverage matrix, Swedish
+content, media schema, collective impact.
 
 - **T-117 · First rendered screen: This Week (prototype shell)** — *Claude · S · `DONE`* (partial toward T-028) *· deps: T-111, T-020 · [USER-FLOWS §3](USER-FLOWS.md)*
   - ✅ `components/ThisWeekScreen.tsx` wired into `App.tsx`: renders the real Kronoberg seed

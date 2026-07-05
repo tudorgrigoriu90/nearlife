@@ -28,6 +28,85 @@ export const en = {
   'thisWeek.new': 'NEW',
   'thisWeek.empty': 'A quiet week — winter is resting season here.',
   'thisWeek.honesty': 'Active this season, never “here right now”.',
+
+  // Almanac (T-025)
+  'almanac.title': 'Almanac',
+  'almanac.empty': 'Your almanac is waiting — spot your first species.',
+  'almanac.loading': 'Loading your almanac…',
+  'almanac.filter.all': 'All',
+  'almanac.progress': '{discovered} of {total} spotted',
+
+  // Category labels (Almanac filter chips)
+  'category.bird': 'Birds',
+  'category.mammal': 'Mammals',
+  'category.insect': 'Insects',
+  'category.plant': 'Plants',
+  'category.fish': 'Fish',
+  'category.fungus': 'Fungi',
+
+  // Three tiers
+  'tier.spotted': 'Spotted',
+  'tier.caught': 'Caught',
+  'tier.helped': 'Helped',
+
+  // Species card (T-026)
+  'card.give': 'Give',
+  'card.protect': 'Protect',
+  'card.findNearby': 'Find it nearby',
+  'card.depth': 'Depth',
+  'card.locked': 'Play to unlock',
+  'card.notSpotted': 'Not spotted yet',
+  'card.back': 'Back',
+  'card.followLaw':
+    'Always follow local rules — access rights, protected species, and feeding differ by place.',
+
+  // Onboarding — welcome + location pre-prompt (T-022)
+  'onboarding.welcome.title': 'Welcome to Nearby',
+  'onboarding.welcome.body':
+    'Discover the wild lives sharing your corner of the world — season by season.',
+  'onboarding.welcome.cta': 'Get started',
+  'onboarding.location.title': 'Find species near you',
+  'onboarding.location.body':
+    'Nearby checks your location once to set your home region, then asks the OS for permission.',
+  'onboarding.location.privacy': 'Used once, then discarded — only your region is kept, never coordinates.',
+  'onboarding.location.cta': 'Continue',
+
+  // Onboarding — hometown confirm (T-023)
+  'onboarding.hometown.title': 'Your home region',
+  'onboarding.hometown.body': 'This is set once from your location and can’t be changed later.',
+  'onboarding.hometown.cta': 'Confirm {region}',
+  'preview.banner': 'Preview mode — allow location to set your home region.',
+
+  // Onboarding — notification pre-prompt + first Spotted (T-024)
+  'onboarding.notif.title': 'Never miss a season',
+  'onboarding.notif.body':
+    'A gentle nudge when a species is active in your region — a few a week, never spam.',
+  'onboarding.notif.cta': 'Turn on nudges',
+  'onboarding.firstSpotted.badge': 'Your first sighting!',
+  'onboarding.firstSpotted.cta': 'Start exploring',
+
+  // Catch minigame — bird timing (T-033)
+  'minigame.instruction': 'Tap when the shrinking ring lines up with the target — that’s the dive.',
+  'minigame.tapHint': 'Tap anywhere',
+  'minigame.grade.perfect': 'Perfect!',
+  'minigame.grade.good': 'Nice timing!',
+  'minigame.grade.miss': 'Just missed',
+  'minigame.success': 'Caught!',
+  'minigame.fail': 'It got away',
+  'minigame.continue': 'Continue',
+  'minigame.cancel': 'Not now',
+
+  // Catch flow + free-catch counter (T-034)
+  'catch.remaining': '{count} free catches left this season',
+  'catch.caught': 'You caught {name}!',
+  'catch.continue': 'Keep exploring',
+  'paywall.title': 'Out of free catches',
+  'paywall.body': 'You’ve used your 3 free catches this season. The Full Game unlocks unlimited catching.',
+  'paywall.freeMission': '✓ The mission is always free',
+  'paywall.noAds': '✓ No ads. Ever.',
+  'paywall.cta': 'Get the Full Game',
+  'paywall.later': 'Maybe later',
+  'paywall.soon': 'Purchases arrive with the Full Game (coming soon).',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -43,6 +122,85 @@ const sv: Catalog = {
   'thisWeek.new': 'NY',
   'thisWeek.empty': 'En lugn vecka – vintern är vilosäsong här.',
   'thisWeek.honesty': 'Aktiv den här säsongen, aldrig ”här just nu”.',
+
+  // Almanac (T-025)
+  'almanac.title': 'Almanacka',
+  'almanac.empty': 'Din almanacka väntar – hitta din första art.',
+  'almanac.loading': 'Laddar din almanacka…',
+  'almanac.filter.all': 'Alla',
+  'almanac.progress': '{discovered} av {total} sedda',
+
+  // Category labels (Almanac filter chips)
+  'category.bird': 'Fåglar',
+  'category.mammal': 'Däggdjur',
+  'category.insect': 'Insekter',
+  'category.plant': 'Växter',
+  'category.fish': 'Fiskar',
+  'category.fungus': 'Svampar',
+
+  // Three tiers
+  'tier.spotted': 'Sedd',
+  'tier.caught': 'Fångad',
+  'tier.helped': 'Hjälpt',
+
+  // Species card (T-026)
+  'card.give': 'Ge',
+  'card.protect': 'Skydda',
+  'card.findNearby': 'Hitta den i närheten',
+  'card.depth': 'Fördjupning',
+  'card.locked': 'Spela för att låsa upp',
+  'card.notSpotted': 'Inte sedd ännu',
+  'card.back': 'Tillbaka',
+  'card.followLaw':
+    'Följ alltid lokala regler – allemansrätten, fridlysta arter och matning skiljer sig åt beroende på plats.',
+
+  // Onboarding — welcome + location pre-prompt (T-022)
+  'onboarding.welcome.title': 'Välkommen till Nearby',
+  'onboarding.welcome.body':
+    'Upptäck de vilda liven som delar ditt hörn av världen – säsong för säsong.',
+  'onboarding.welcome.cta': 'Kom igång',
+  'onboarding.location.title': 'Hitta arter nära dig',
+  'onboarding.location.body':
+    'Nearby kollar din plats en gång för att ställa in din hemregion och frågar sedan operativsystemet om tillåtelse.',
+  'onboarding.location.privacy': 'Används en gång och kastas sedan – bara din region sparas, aldrig koordinater.',
+  'onboarding.location.cta': 'Fortsätt',
+
+  // Onboarding — hometown confirm (T-023)
+  'onboarding.hometown.title': 'Din hemregion',
+  'onboarding.hometown.body': 'Den ställs in en gång från din plats och kan inte ändras senare.',
+  'onboarding.hometown.cta': 'Bekräfta {region}',
+  'preview.banner': 'Förhandsläge – tillåt plats för att ställa in din hemregion.',
+
+  // Onboarding — notification pre-prompt + first Spotted (T-024)
+  'onboarding.notif.title': 'Missa aldrig en säsong',
+  'onboarding.notif.body':
+    'En vänlig påminnelse när en art är aktiv i din region – några i veckan, aldrig spam.',
+  'onboarding.notif.cta': 'Slå på påminnelser',
+  'onboarding.firstSpotted.badge': 'Din första observation!',
+  'onboarding.firstSpotted.cta': 'Börja utforska',
+
+  // Catch minigame — bird timing (T-033)
+  'minigame.instruction': 'Tryck när den krympande ringen möter målet – det är dyket.',
+  'minigame.tapHint': 'Tryck var som helst',
+  'minigame.grade.perfect': 'Perfekt!',
+  'minigame.grade.good': 'Bra tajming!',
+  'minigame.grade.miss': 'Nästan',
+  'minigame.success': 'Fångad!',
+  'minigame.fail': 'Den kom undan',
+  'minigame.continue': 'Fortsätt',
+  'minigame.cancel': 'Inte nu',
+
+  // Catch flow + free-catch counter (T-034)
+  'catch.remaining': '{count} gratis fångster kvar denna säsong',
+  'catch.caught': 'Du fångade {name}!',
+  'catch.continue': 'Fortsätt utforska',
+  'paywall.title': 'Slut på gratis fångster',
+  'paywall.body': 'Du har använt dina 3 gratis fångster denna säsong. Fullversionen låser upp obegränsat fångande.',
+  'paywall.freeMission': '✓ Uppdraget är alltid gratis',
+  'paywall.noAds': '✓ Inga annonser. Någonsin.',
+  'paywall.cta': 'Skaffa fullversionen',
+  'paywall.later': 'Kanske senare',
+  'paywall.soon': 'Köp kommer med fullversionen (snart).',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

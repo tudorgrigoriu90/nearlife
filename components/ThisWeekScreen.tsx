@@ -1,39 +1,39 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { monthOf } from '../lib/season';
 import { thisWeek, type ThisWeekEntry } from '../lib/thisWeek';
 import { commonNameFor, contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
-import type { SpeciesCategory } from '../lib/species/types';
+import type { Species } from '../lib/species/types';
+import { CATEGORY_EMOJI } from './speciesVisual';
 
 // "Active this week" pull surface (USER-FLOWS §3), driven by real Kronoberg seed data and the
 // tested `thisWeek` logic (T-111). All chrome strings run through i18n (T-121); species names
-// and content localize in T-122. Collection is empty for now → everything shows NEW.
-// NOTE: not yet visually verified on a device — logic is unit-tested; layout needs a run.
-
-const CATEGORY_EMOJI: Record<SpeciesCategory, string> = {
-  bird: '🐦',
-  mammal: '🦔',
-  insect: '🦋',
-  plant: '🌼',
-  fish: '🐟',
-  fungus: '🍄',
-};
+// and content localize in T-122. NEW markers reflect the user's collection via `spottedIds`
+// (T-028). This surface is fully self-contained — it never depends on notifications, proving the
+// app isn't notification-driven. NOTE: not yet visually verified on a device.
 
 function Row({
   entry,
   locale,
   newLabel,
+  onSelect,
 }: {
   entry: ThisWeekEntry;
   locale: Locale;
   newLabel: string;
+  onSelect?: (species: Species) => void;
 }) {
   const { species, isNew } = entry;
   const name = commonNameFor(species, locale);
   const content = contentFor(species.id, locale);
   return (
-    <View style={styles.row}>
+    <Pressable
+      style={styles.row}
+      onPress={() => onSelect?.(species)}
+      accessibilityRole="button"
+      accessibilityLabel={name}
+    >
       <Text style={styles.emoji}>{CATEGORY_EMOJI[species.category]}</Text>
       <View style={styles.rowText}>
         <View style={styles.rowHeader}>
@@ -42,14 +42,22 @@ function Row({
         </View>
         <Text style={styles.detail}>{content?.whenAndHow ?? species.scientificName}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
-export default function ThisWeekScreen({ locale = 'en' }: { locale?: Locale }) {
+export default function ThisWeekScreen({
+  locale = 'en',
+  spottedIds,
+  onSelectSpecies,
+}: {
+  locale?: Locale;
+  spottedIds?: ReadonlySet<string>;
+  onSelectSpecies?: (species: Species) => void;
+}) {
   const tr = createTranslator(locale);
   const month = monthOf(new Date());
-  const entries = thisWeek(KRONOBERG_SPECIES, month, new Set());
+  const entries = thisWeek(KRONOBERG_SPECIES, month, spottedIds ?? new Set());
 
   return (
     <View style={styles.container}>
@@ -61,7 +69,7 @@ export default function ThisWeekScreen({ locale = 'en' }: { locale?: Locale }) {
         data={entries}
         keyExtractor={(e) => e.species.id}
         renderItem={({ item }) => (
-          <Row entry={item} locale={locale} newLabel={tr('thisWeek.new')} />
+          <Row entry={item} locale={locale} newLabel={tr('thisWeek.new')} onSelect={onSelectSpecies} />
         )}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.detail}>{tr('thisWeek.empty')}</Text>}

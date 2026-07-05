@@ -20,3 +20,10 @@ export function getSupabaseConfig(): SupabaseConfig {
   }
   return { url, publishableKey };
 }
+
+/** True when the client Supabase config is present — lets callers fall back gracefully. */
+export function hasSupabaseConfig(): boolean {
+  return Boolean(
+    process.env.EXPO_PUBLIC_SUPABASE_URL && process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  );
+}

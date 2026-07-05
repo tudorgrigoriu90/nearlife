@@ -1,10 +1,11 @@
 import type { CollectionRecord, HelpKind } from './collection';
 
-// Collection persistence seam (T-116). An async interface so the Supabase-backed store (T-056)
-// is a drop-in replacement, plus an in-memory implementation the Kronoberg prototype (T-027)
-// can run on before any backend exists. Timestamps are passed in by the caller (clock-free →
-// unit-testable). Domain rule: catching or helping a species also marks it spotted — you
-// cannot reach a higher tier without knowing it lives around you (USER-FLOWS §4–6).
+// Collection persistence seam (T-116). An async interface so the Supabase-backed store (T-027 /
+// T-056) is a drop-in replacement, plus an in-memory implementation the Kronoberg prototype can
+// run on offline. Timestamps are passed in by the caller (clock-free → unit-testable). Domain
+// rule: catching or helping a species also marks it spotted — you cannot reach a higher tier
+// without knowing it lives around you (USER-FLOWS §4–6). Those rules live in the pure `apply*`
+// helpers below so both stores share one tested implementation.
 
 export interface CollectionStore {
   list(): Promise<CollectionRecord[]>;
@@ -14,7 +15,7 @@ export interface CollectionStore {
   markHelped(speciesId: string, kind: HelpKind, at: string): Promise<CollectionRecord>;
 }
 
-function blankRecord(speciesId: string): CollectionRecord {
+export function blankRecord(speciesId: string): CollectionRecord {
   return {
     speciesId,
     spottedAt: null,
@@ -23,6 +24,39 @@ function blankRecord(speciesId: string): CollectionRecord {
     helpedKind: null,
     primeBonus: false,
   };
+}
+
+// ── Pure state transitions (shared by every store) ───────────────────────────
+// `current` is the existing record or null. Spotted time is never overwritten; catching and
+// helping imply spotted. Returning a fresh object keeps callers copy-safe.
+
+export function applySpotted(
+  current: CollectionRecord | null,
+  speciesId: string,
+  at: string,
+): CollectionRecord {
+  const base = current ?? blankRecord(speciesId);
+  return { ...base, spottedAt: base.spottedAt ?? at };
+}
+
+export function applyCaught(
+  current: CollectionRecord | null,
+  speciesId: string,
+  at: string,
+  primeBonus: boolean,
+): CollectionRecord {
+  const base = current ?? blankRecord(speciesId);
+  return { ...base, spottedAt: base.spottedAt ?? at, caughtAt: at, primeBonus };
+}
+
+export function applyHelped(
+  current: CollectionRecord | null,
+  speciesId: string,
+  kind: HelpKind,
+  at: string,
+): CollectionRecord {
+  const base = current ?? blankRecord(speciesId);
+  return { ...base, spottedAt: base.spottedAt ?? at, helpedAt: at, helpedKind: kind };
 }
 
 export class InMemoryCollectionStore implements CollectionStore {
@@ -41,34 +75,20 @@ export class InMemoryCollectionStore implements CollectionStore {
     return r ? { ...r } : null;
   }
 
-  private upsert(speciesId: string, patch: Partial<CollectionRecord>): CollectionRecord {
-    const current = this.records.get(speciesId) ?? blankRecord(speciesId);
-    const next = { ...current, ...patch };
-    this.records.set(speciesId, next);
-    return { ...next };
+  private put(record: CollectionRecord): CollectionRecord {
+    this.records.set(record.speciesId, record);
+    return { ...record };
   }
 
   async markSpotted(speciesId: string, at: string): Promise<CollectionRecord> {
-    const current = this.records.get(speciesId);
-    // Do not overwrite an earlier spotted time.
-    return this.upsert(speciesId, { spottedAt: current?.spottedAt ?? at });
+    return this.put(applySpotted(this.records.get(speciesId) ?? null, speciesId, at));
   }
 
   async markCaught(speciesId: string, at: string, primeBonus: boolean): Promise<CollectionRecord> {
-    const current = this.records.get(speciesId);
-    return this.upsert(speciesId, {
-      spottedAt: current?.spottedAt ?? at, // catching implies spotted
-      caughtAt: at,
-      primeBonus,
-    });
+    return this.put(applyCaught(this.records.get(speciesId) ?? null, speciesId, at, primeBonus));
   }
 
   async markHelped(speciesId: string, kind: HelpKind, at: string): Promise<CollectionRecord> {
-    const current = this.records.get(speciesId);
-    return this.upsert(speciesId, {
-      spottedAt: current?.spottedAt ?? at, // helping implies spotted
-      helpedAt: at,
-      helpedKind: kind,
-    });
+    return this.put(applyHelped(this.records.get(speciesId) ?? null, speciesId, kind, at));
   }
 }
