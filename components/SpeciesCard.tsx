@@ -79,13 +79,11 @@ export default function SpeciesCard({
         </View>
       </ScrollView>
 
-      <Pressable
-        onPress={() => onFindNearby?.(species)}
-        accessibilityRole="button"
-        style={styles.cta}
-      >
-        <Text style={styles.ctaText}>{tr('card.findNearby')} →</Text>
-      </Pressable>
+      {onFindNearby ? (
+        <Pressable onPress={() => onFindNearby(species)} accessibilityRole="button" style={styles.cta}>
+          <Text style={styles.ctaText}>{tr('card.findNearby')} →</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }

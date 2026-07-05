@@ -5,6 +5,7 @@ import AlmanacScreen from './components/AlmanacScreen';
 import OnboardingFlow from './components/OnboardingFlow';
 import SpeciesCard from './components/SpeciesCard';
 import ThisWeekScreen from './components/ThisWeekScreen';
+import { useCollection } from './components/useCollection';
 import { tierStateFor } from './lib/collection';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator } from './lib/i18n';
@@ -23,6 +24,7 @@ export default function App() {
   // Device locale for now; a user override from Settings will take precedence (T-123).
   const locale = detectDeviceLocale();
   const tr = createTranslator(locale);
+  const collection = useCollection();
   const [onboarded, setOnboarded] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [tab, setTab] = useState<Tab>('thisWeek');
@@ -32,6 +34,7 @@ export default function App() {
     return (
       <OnboardingFlow
         locale={locale}
+        onFirstSpotted={collection.spot}
         onComplete={({ locationOutcome }) => {
           setPreviewMode(locationOutcome === 'denied');
           setOnboarded(true);
@@ -46,7 +49,7 @@ export default function App() {
         <SpeciesCard
           species={selected}
           locale={locale}
-          tier={tierStateFor([], selected.id)}
+          tier={tierStateFor(collection.records, selected.id)}
           onBack={() => setSelected(null)}
         />
         <StatusBar style="auto" />
@@ -67,7 +70,7 @@ export default function App() {
         ) : (
           <AlmanacScreen
             species={KRONOBERG_SPECIES}
-            records={[]}
+            records={collection.records}
             locale={locale}
             onSelectSpecies={setSelected}
           />

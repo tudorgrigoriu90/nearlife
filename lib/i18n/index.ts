@@ -76,6 +76,14 @@ export const en = {
   'onboarding.hometown.body': 'This is set once from your location and can’t be changed later.',
   'onboarding.hometown.cta': 'Confirm {region}',
   'preview.banner': 'Preview mode — allow location to set your home region.',
+
+  // Onboarding — notification pre-prompt + first Spotted (T-024)
+  'onboarding.notif.title': 'Never miss a season',
+  'onboarding.notif.body':
+    'A gentle nudge when a species is active in your region — a few a week, never spam.',
+  'onboarding.notif.cta': 'Turn on nudges',
+  'onboarding.firstSpotted.badge': 'Your first sighting!',
+  'onboarding.firstSpotted.cta': 'Start exploring',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -139,6 +147,14 @@ const sv: Catalog = {
   'onboarding.hometown.body': 'Den ställs in en gång från din plats och kan inte ändras senare.',
   'onboarding.hometown.cta': 'Bekräfta {region}',
   'preview.banner': 'Förhandsläge – tillåt plats för att ställa in din hemregion.',
+
+  // Onboarding — notification pre-prompt + first Spotted (T-024)
+  'onboarding.notif.title': 'Missa aldrig en säsong',
+  'onboarding.notif.body':
+    'En vänlig påminnelse när en art är aktiv i din region – några i veckan, aldrig spam.',
+  'onboarding.notif.cta': 'Slå på påminnelser',
+  'onboarding.firstSpotted.badge': 'Din första observation!',
+  'onboarding.firstSpotted.cta': 'Börja utforska',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

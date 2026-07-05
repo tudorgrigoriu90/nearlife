@@ -256,9 +256,16 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
   - ✅ Location-denied → the confirm step is skipped and `App.tsx` enters **non-blocking preview
     mode** with a banner; the app stays fully usable.
   - ⚠️ On-device permission/preview behaviour not visually verified.
-- **T-024 · Notification pre-prompt + first Spotted demo** — *Claude · S · deps: T-023 · [USER-FLOWS §1,§4](USER-FLOWS.md)*
-  - Notification pre-prompt; onboarding ends with an immediate first Spotted card so the payoff
-    is felt in the first minute.
+- **T-024 · Notification pre-prompt + first Spotted demo** — *Claude · S · `DONE` · deps: T-023 · [USER-FLOWS §1,§4](USER-FLOWS.md)*
+  - ✅ Notification pre-prompt explainer before the OS dialog (`requestNotificationPermission`,
+    expo-notifications); outcome does **not** gate onboarding (the pull surface works without it).
+    Onboarding ends on a **first Spotted card**: the most interesting active-this-week species
+    (tested `thisWeek` selection, quiet-week fallback) is marked Spotted on entry and shown in a
+    full `SpeciesCard` with a "first sighting" badge → "Start exploring".
+  - ✅ Shared session collection wired via `components/useCollection.ts` (React glue over the
+    tested `InMemoryCollectionStore`, T-116): the first sighting persists into the Almanac and
+    card tier. Swaps to the Supabase store (T-056) without screen changes. **S2.2.1 complete.**
+  - ⚠️ OS permission flow not device-verified.
 
 ### S2.2.2 — Almanac & Species Card
 - **T-025 · Almanac grid with tier overlays** — *Claude · M · `DONE` · deps: T-020 · [USER-FLOWS §2](USER-FLOWS.md)*
