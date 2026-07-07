@@ -574,11 +574,18 @@ same mechanic ([GDD §4](GDD.md)).
 useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
 
 ## F7.1 — Pledge Flow
-- **T-076 · Give/Protect pledge screen** — *Claude · M · deps: T-052, T-059 · [USER-FLOWS §7](USER-FLOWS.md)*
-  - Choose give or protect; "why it matters" (knowledge-first, never scolding); standing
-    "⚖ follow local rules" line; one-tap "I'll do this" → Helped.
-- **T-077 · pledges table + impact feed** — *Claude · S · deps: T-076, T-056 · [TSD §3](TSD.md), [GDD §7](GDD.md)*
-  - Pledges recorded; feed `impact_counters`. No proof required; no ad or upsell on this moment.
+- **T-076 · Give/Protect pledge screen** — *Claude · M · `DONE` · deps: T-052, T-059 · [USER-FLOWS §7](USER-FLOWS.md)*
+  - ✅ First Phase-2 feature after the gate: the **Helped tier** is now wired into the app,
+    completing the three-tier loop (Spotted → Caught → Helped). The species card shows give +
+    protect ("why it matters", knowledge-first) each with a one-tap **"✓ I'll do this"** pledge
+    (`onPledge`) → `collection.help(kind)` marks Helped and shows `PledgeConfirm` — a clean
+    honor-system confirmation with the standing follow-local-law line and **no upsell/ads**
+    (invariant #4). `useCollection` gained `help()`. ⚠️ On-device layout not visually verified.
+- **T-077 · pledges table + impact feed** — *Claude · S · `IN-PROGRESS` (pledges recorded via collection; dedicated table/feed pending) · deps: T-076, T-056 · [TSD §3](TSD.md), [GDD §7](GDD.md)*
+  - ✅ Pledges are recorded as Helped collection records (`helped_at` / `helped_kind`), persisted
+    via the Supabase store (T-027) with owner RLS; the impact aggregation (`lib/impact.ts`, T-128)
+    already derives give/protect/helped counts from them — no proof required, no upsell on the
+    moment. Remaining: a dedicated `pledges`/`impact_counters` surface + community feed (T-081).
 
 ---
 ---

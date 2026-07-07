@@ -8,6 +8,7 @@ import ThisWeekScreen from './components/ThisWeekScreen';
 import TimingRingMinigame from './components/minigame/TimingRingMinigame';
 import ProtectTip from './components/catch/ProtectTip';
 import FreeCatchSheet from './components/catch/FreeCatchSheet';
+import PledgeConfirm from './components/helped/PledgeConfirm';
 import { useCollection } from './components/useCollection';
 import { spottedIds, tierStateFor } from './lib/collection';
 import {
@@ -21,6 +22,7 @@ import { seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator } from './lib/i18n';
 import { KRONOBERG_SPECIES } from './lib/species/kronoberg';
+import type { HelpKind } from './lib/collection';
 import type { Species } from './lib/species/types';
 
 const INITIAL_FREE_CATCH: FreeCatchState = {
@@ -48,6 +50,7 @@ export default function App() {
   const [selected, setSelected] = useState<Species | null>(null);
   const [catching, setCatching] = useState<Species | null>(null);
   const [caughtTip, setCaughtTip] = useState<Species | null>(null);
+  const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
   const [paywall, setPaywall] = useState(false);
   const [freeCatch, setFreeCatch] = useState<FreeCatchState>(INITIAL_FREE_CATCH);
 
@@ -79,6 +82,21 @@ export default function App() {
     return (
       <>
         <ProtectTip species={caughtTip} locale={locale} onDone={() => setCaughtTip(null)} />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
+  if (pledge) {
+    // Helped-tier confirmation — clean, no upsell (invariant #4).
+    return (
+      <>
+        <PledgeConfirm
+          species={pledge.species}
+          kind={pledge.kind}
+          locale={locale}
+          onDone={() => setPledge(null)}
+        />
         <StatusBar style="auto" />
       </>
     );
@@ -117,6 +135,11 @@ export default function App() {
           fullGame={freeCatch.fullGame}
           onBack={() => setSelected(null)}
           onFindNearby={attemptCatch}
+          onPledge={(species, kind) => {
+            // Helped tier: one-tap honor-system pledge (GDD §5) → mark Helped + confirm.
+            collection.help(species.id, kind);
+            setPledge({ species, kind });
+          }}
           nearbyNote={freeCatch.fullGame ? undefined : tr('catch.remaining', { count: remaining })}
         />
         {paywall ? <FreeCatchSheet locale={locale} onClose={() => setPaywall(false)} /> : null}

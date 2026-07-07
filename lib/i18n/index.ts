@@ -107,6 +107,12 @@ export const en = {
   'paywall.cta': 'Get the Full Game',
   'paywall.later': 'Maybe later',
   'paywall.soon': 'Purchases arrive with the Full Game (coming soon).',
+
+  // Helped tier — give/protect pledge (T-076)
+  'card.pledge': 'I’ll do this',
+  'pledge.title': 'You’re helping {name}',
+  'pledge.thanks': 'Thank you — small actions add up across the region.',
+  'pledge.done': 'Done',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -201,6 +207,12 @@ const sv: Catalog = {
   'paywall.cta': 'Skaffa fullversionen',
   'paywall.later': 'Kanske senare',
   'paywall.soon': 'Köp kommer med fullversionen (snart).',
+
+  // Helped tier — give/protect pledge (T-076)
+  'card.pledge': 'Jag gör detta',
+  'pledge.title': 'Du hjälper {name}',
+  'pledge.thanks': 'Tack – små handlingar gör skillnad i hela regionen.',
+  'pledge.done': 'Klar',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

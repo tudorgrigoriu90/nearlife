@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import type { TierState } from '../lib/collection';
+import type { HelpKind, TierState } from '../lib/collection';
 import { EMPTY_TIER_STATE } from '../lib/collection';
 import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
 import { createTranslator, type Locale } from '../lib/i18n';
@@ -22,6 +22,7 @@ export default function SpeciesCard({
   tier = EMPTY_TIER_STATE,
   fullGame = false,
   onFindNearby,
+  onPledge,
   nearbyNote,
   onBack,
 }: {
@@ -31,6 +32,8 @@ export default function SpeciesCard({
   /** Full Game entitlement unlocks all depth tiers immediately (T-060). */
   fullGame?: boolean;
   onFindNearby?: (species: Species) => void;
+  /** Pledge a give/protect action → Helped tier (T-076). */
+  onPledge?: (species: Species, kind: HelpKind) => void;
   /** Small caption under the find-nearby CTA — e.g. the free-catch counter (T-034). */
   nearbyNote?: string;
   onBack?: () => void;
@@ -62,7 +65,13 @@ export default function SpeciesCard({
 
             <Section title={tr('thisWeek.title')} body={content.whenAndHow} />
             <Section title={tr('card.give')} body={content.give} accent="give" />
+            {onPledge && !tier.helped ? (
+              <PledgeButton label={tr('card.pledge')} onPress={() => onPledge(species, 'give')} />
+            ) : null}
             <Section title={tr('card.protect')} body={content.protect} accent="protect" />
+            {onPledge && !tier.helped ? (
+              <PledgeButton label={tr('card.pledge')} onPress={() => onPledge(species, 'protect')} />
+            ) : null}
             <Text style={styles.law}>⚖ {tr('card.followLaw')}</Text>
           </>
         ) : null}
@@ -96,6 +105,14 @@ export default function SpeciesCard({
         </View>
       ) : null}
     </View>
+  );
+}
+
+function PledgeButton({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" style={styles.pledgeBtn}>
+      <Text style={styles.pledgeBtnText}>✓ {label}</Text>
+    </Pressable>
   );
 }
 
@@ -137,6 +154,8 @@ const styles = StyleSheet.create({
   giveTitle: { color: '#2f7d4f' },
   protectTitle: { color: '#2f5d8a' },
   sectionBody: { marginTop: 4, fontSize: 15, lineHeight: 21, color: '#2f3d2c' },
+  pledgeBtn: { marginTop: 8, alignSelf: 'flex-start', paddingVertical: 8, paddingHorizontal: 14, borderRadius: 10, backgroundColor: '#e7f2e7', borderWidth: 1, borderColor: '#bcd9bd' },
+  pledgeBtnText: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
   law: { marginTop: 16, fontSize: 12, color: '#7a8a7c', fontStyle: 'italic' },
   depthBlock: { marginTop: 24, paddingTop: 16, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#d4e0d2' },
   depthLabel: { fontSize: 12, fontWeight: '700', letterSpacing: 1, color: '#4a5c4d', textTransform: 'uppercase' },

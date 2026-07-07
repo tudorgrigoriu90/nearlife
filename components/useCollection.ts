@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CollectionRecord } from '../lib/collection';
+import type { CollectionRecord, HelpKind } from '../lib/collection';
 import { InMemoryCollectionStore, type CollectionStore } from '../lib/collectionStore';
 import { ensureAnonymousSession, getSupabase } from '../lib/supabase';
 import { hasSupabaseConfig } from '../lib/supabaseConfig';
@@ -15,6 +15,7 @@ export interface Collection {
   records: CollectionRecord[];
   spot: (speciesId: string) => void;
   markCaught: (speciesId: string, primeBonus: boolean) => void;
+  help: (speciesId: string, kind: HelpKind) => void;
 }
 
 function createStore(): CollectionStore {
@@ -66,5 +67,15 @@ export function useCollection(): Collection {
     [getStore, refresh],
   );
 
-  return { records, spot, markCaught };
+  const help = useCallback(
+    (speciesId: string, kind: HelpKind) => {
+      void getStore()
+        .markHelped(speciesId, kind, new Date().toISOString())
+        .then(refresh)
+        .catch((e: unknown) => console.warn('help failed', e));
+    },
+    [getStore, refresh],
+  );
+
+  return { records, spot, markCaught, help };
 }
