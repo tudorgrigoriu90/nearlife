@@ -537,14 +537,19 @@ same mechanic ([GDD §4](GDD.md)).
 - **T-069 · Minigame framework + bird (timing)** — *Claude · L · deps: T-033 · [GDD §4](GDD.md)*
   - Shared minigame component contract keyed by `species.category`; bird timing implemented
     (reanimated + gesture-handler, no engine). Graduates the prototype's toy to production.
-- **T-070 · Fish minigame (rhythm & tension)** — *Claude · M · deps: T-069 · [GDD §4](GDD.md)*
-  - Reel-style; keep the line in the sweet zone. Fair success curve.
-- **T-071 · Insect minigame (trace)** — *Claude · M · deps: T-069 · [GDD §4](GDD.md)*
-  - Follow the flight path without breaking the line.
-- **T-072 · Mammal minigame (stealth)** — *Claude · M · deps: T-069 · [GDD §4](GDD.md)*
-  - Advance slowly; freeze when it looks up.
-- **T-073 · Plant/fungus minigame (spot & frame)** — *Claude · M · deps: T-069 · [GDD §4](GDD.md)*
-  - Find it in the scene and frame it well. No photo required.
+- **T-070 · Fish minigame (rhythm & tension)** — *Claude · M · `IN-PROGRESS` (scoring core done; component pending) · deps: T-069 · [GDD §4](GDD.md)*
+  - ✅ `lib/minigame/rhythm.ts` (5 tests): `evaluateRhythm(inZoneTicks, totalTicks)` — land the
+    catch by holding the line in the sweet zone for ~60% of the fight. Component (reel bar) + T-069
+    framework remain.
+- **T-071 · Insect minigame (trace)** — *Claude · M · `IN-PROGRESS` (scoring core done; component pending) · deps: T-069 · [GDD §4](GDD.md)*
+  - ✅ `lib/minigame/trace.ts` (5 tests): `evaluateTrace(distances)` — follow the flight path;
+    a break is a sample past tolerance, forgiven up to an allowance. Component remains.
+- **T-072 · Mammal minigame (stealth)** — *Claude · M · `IN-PROGRESS` (scoring core done; component pending) · deps: T-069 · [GDD §4](GDD.md)*
+  - ✅ `lib/minigame/stealth.ts` (4 tests): `evaluateStealth(ticks)` — advance on safe ticks,
+    spotted if moving while alert, land by reaching the required progress. Component remains.
+- **T-073 · Plant/fungus minigame (spot & frame)** — *Claude · M · `IN-PROGRESS` (scoring core done; component pending) · deps: T-069 · [GDD §4](GDD.md)*
+  - ✅ `lib/minigame/frame.ts` (4 tests): `evaluateFrame(distanceFromCenter, targetRadius)` —
+    accuracy falls off linearly from the subject centre; land it above the threshold. Component remains.
 
 ## F6.3 — Catch Resolution & Entitlement
 - **T-074 · Caught resolution + prime bonus + contextual protect tip** — *Claude · M · deps: T-069, T-052 · [GDD §4,§5](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
