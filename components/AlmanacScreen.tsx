@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { almanacEntries, categoryCounts, discoveredCount, type AlmanacEntry } from '../lib/almanac';
-import type { CollectionRecord } from '../lib/collection';
+import { progressSummary, type CollectionRecord } from '../lib/collection';
 import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
 import { commonNameFor } from '../lib/species/localized';
 import type { Species, SpeciesCategory } from '../lib/species/types';
@@ -85,6 +85,7 @@ export default function AlmanacScreen({
   const entries = almanacEntries(species, records, category ?? undefined);
   const counts = categoryCounts(species, records);
   const discovered = discoveredCount(species, records);
+  const summary = progressSummary(records);
 
   if (loading) {
     return (
@@ -101,6 +102,12 @@ export default function AlmanacScreen({
       <Text style={styles.subtitle}>
         {tr('almanac.progress', { discovered, total: species.length })}
       </Text>
+
+      <View style={styles.summaryRow}>
+        <TierStat glyph="●" label={tr('tier.spotted')} count={summary.spotted} />
+        <TierStat glyph="◐" label={tr('tier.caught')} count={summary.caught} />
+        <TierStat glyph="◑" label={tr('tier.helped')} count={summary.helped} />
+      </View>
 
       <ScrollView
         horizontal
@@ -132,6 +139,17 @@ export default function AlmanacScreen({
   );
 }
 
+function TierStat({ glyph, label, count }: { glyph: string; label: string; count: number }) {
+  return (
+    <View style={styles.tierStat}>
+      <Text style={styles.tierStatCount}>
+        {glyph} {count}
+      </Text>
+      <Text style={styles.tierStatLabel}>{label}</Text>
+    </View>
+  );
+}
+
 function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return (
     <Pressable
@@ -149,7 +167,11 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingTop: 64, paddingHorizontal: 16 },
   centered: { alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34', paddingHorizontal: 4 },
-  subtitle: { marginTop: 4, marginBottom: 12, fontSize: 14, color: '#4a5c4d', paddingHorizontal: 4 },
+  subtitle: { marginTop: 4, marginBottom: 8, fontSize: 14, color: '#4a5c4d', paddingHorizontal: 4 },
+  summaryRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 4, marginBottom: 10 },
+  tierStat: { flex: 1, backgroundColor: '#fff', borderRadius: 10, paddingVertical: 8, alignItems: 'center' },
+  tierStatCount: { fontSize: 16, fontWeight: '700', color: '#3a7d44' },
+  tierStatLabel: { marginTop: 2, fontSize: 11, color: '#4a5c4d' },
   chips: { paddingVertical: 4, paddingHorizontal: 4, gap: 8 },
   chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: '#e2ebe0', marginRight: 8 },
   chipActive: { backgroundColor: '#3a7d44' },

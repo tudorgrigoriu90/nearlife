@@ -475,9 +475,11 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
 ## F4.2 — Almanac
 - **T-057 · Almanac grid (production)** — *Claude · M · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
   - Real data grid with ●/◐/◑ overlays, category chips, season/habitat secondary filters.
-- **T-058 · Almanac states & progress summary** — *Claude · S · deps: T-057 · [USER-FLOWS §2](USER-FLOWS.md)*
-  - 3-tier progress summary (Spotted/Caught/Helped counts); empty + loading states; entry points
-    to Badges, Impact, This Week.
+- **T-058 · Almanac states & progress summary** — *Claude · S · `IN-PROGRESS` (summary + states done; entry points pending) · deps: T-057 · [USER-FLOWS §2](USER-FLOWS.md)*
+  - ✅ 3-tier progress summary row (● Spotted / ◐ Caught / ◑ Helped counts via the tested
+    `progressSummary`, T-115) added to the Almanac header; empty + loading states already present
+    (T-025). Remaining: entry points to Badges (T-082) / Impact (T-081) / This Week once those
+    surfaces exist. ⚠️ On-device layout not visually verified.
 
 ## F4.3 — Species Card
 - **T-059 · Species card (production)** — *Claude · M · deps: T-055 · [USER-FLOWS §4](USER-FLOWS.md)*
