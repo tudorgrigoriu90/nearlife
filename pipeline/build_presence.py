@@ -34,22 +34,34 @@ DATA_DIR = Path(__file__).resolve().parent / "data"
 
 
 def build_for_taxon(client: GbifClient, taxon: dict) -> dict:
-    key, scientific_name, rank = taxon["key"], taxon["scientificName"], taxon["rank"]
+    key = taxon["key"]
+    names = taxon["names"]
     facet_limit = taxon.get("facetLimit", 300)
     min_occ = taxon.get("minOccurrences", 0)
-    taxon_key = client.resolve_taxon_key(scientific_name, rank)
-    print(f"[{key}] {scientific_name} -> taxonKey {taxon_key} (facetLimit={facet_limit}, "
-          f"minOccurrences={min_occ})", flush=True)
+
+    # Resolve each source name to a taxonKey; skip (with a log) any GBIF can't match exactly.
+    taxon_keys = []
+    for name in names:
+        try:
+            tk = client.resolve_taxon_key(name)
+            taxon_keys.append(tk)
+            print(f"[{key}] {name} -> taxonKey {tk}", flush=True)
+        except ValueError as exc:
+            print(f"[{key}] SKIP {name}: {exc}", flush=True)
+    if not taxon_keys:
+        raise ValueError(f"no resolvable GBIF taxa for {key} ({names})")
+    print(f"[{key}] facetLimit={facet_limit} minOccurrences={min_occ} keys={taxon_keys}", flush=True)
 
     rows = []
     truncations = 0
     for county in SWEDISH_COUNTIES:
         for month in range(1, 13):
-            pairs, truncated = client.species_facet(county["gid"], taxon_key, month, facet_limit)
-            if truncated:
-                truncations += 1
-            for species_key, count in pairs:
-                rows.append((county["gid"], month, species_key, count))
+            for taxon_key in taxon_keys:
+                pairs, truncated = client.species_facet(county["gid"], taxon_key, month, facet_limit)
+                if truncated:
+                    truncations += 1
+                for species_key, count in pairs:
+                    rows.append((county["gid"], month, species_key, count))
         print(f"  {county['name']:16s} cumulative rows: {len(rows)}", flush=True)
 
     presence = build_presence(rows)
@@ -58,8 +70,8 @@ def build_for_taxon(client: GbifClient, taxon: dict) -> dict:
         presence = {k: v for k, v in presence.items() if v["occurrences"] >= min_occ}
     species_keys = {sk for (_gid, sk) in presence.keys()}
     print(f"  resolving {len(species_keys)} species names…", flush=True)
-    names = {k: client.scientific_name(k) for k in species_keys}
-    records = list(presence_records(presence, COUNTY_NAME_BY_GID, names))
+    species_names = {k: client.scientific_name(k) for k in species_keys}
+    records = list(presence_records(presence, COUNTY_NAME_BY_GID, species_names))
 
     if truncations:
         print(
@@ -69,8 +81,9 @@ def build_for_taxon(client: GbifClient, taxon: dict) -> dict:
         )
     return {
         "meta": {
-            "taxon": scientific_name,
-            "taxonKey": taxon_key,
+            "taxon": key,
+            "taxa": names,
+            "taxonKeys": taxon_keys,
             "source": "GBIF.org occurrence API",
             "licenses": ALLOWED_LICENSES,
             "counties": len(SWEDISH_COUNTIES),
@@ -118,13 +131,12 @@ def main(argv: list[str]) -> int:
     if not argv:
         print(__doc__)
         return 2
-    # Single taxon: match a configured key, else treat argv as a scientific name (+ optional rank).
+    # Single taxon: a configured key (e.g. "reptiles"), else treat argv as GBIF scientific names.
     selected = next((t for t in TARGET_TAXA if t["key"] == argv[0]), None)
     if selected is None:
         selected = {
             "key": argv[0].lower(),
-            "scientificName": argv[0],
-            "rank": argv[1] if len(argv) > 1 else None,
+            "names": argv,  # one or more GBIF backbone names to union
             "facetLimit": 300,
             "minOccurrences": 0,
         }

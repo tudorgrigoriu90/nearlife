@@ -11,8 +11,8 @@ from gbif.taxa import TARGET_TAXA  # noqa: E402
 def test_every_taxon_has_required_fields():
     for t in TARGET_TAXA:
         assert t["key"] and isinstance(t["key"], str)
-        assert t["scientificName"] and isinstance(t["scientificName"], str)
-        assert t["rank"] in {"CLASS", "ORDER", "SUPERFAMILY", "GENUS", "PHYLUM", "FAMILY"}
+        assert isinstance(t["names"], list) and t["names"]
+        assert all(isinstance(n, str) and n for n in t["names"])
         assert isinstance(t["facetLimit"], int) and t["facetLimit"] > 0
         assert isinstance(t["minOccurrences"], int) and t["minOccurrences"] >= 0
 
@@ -23,8 +23,9 @@ def test_keys_are_unique():
 
 
 def test_covers_fauna_and_flora():
-    names = {t["scientificName"] for t in TARGET_TAXA}
-    # Vertebrates, invertebrates, and flora are all represented.
-    assert {"Aves", "Mammalia", "Amphibia", "Reptilia", "Actinopterygii"} <= names  # vertebrates
+    names = {n for t in TARGET_TAXA for n in t["names"]}
+    assert {"Aves", "Mammalia", "Amphibia"} <= names  # vertebrates
+    assert {"Squamata", "Testudines"} <= names  # reptiles (GBIF backbone grouping)
+    assert "Esociformes" in names  # fish by order (no fish class in GBIF backbone)
     assert {"Insecta", "Arachnida", "Mollusca"} <= names  # invertebrates
     assert "Tracheophyta" in names  # flora
