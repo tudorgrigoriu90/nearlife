@@ -1,4 +1,4 @@
-import { InMemoryTracker, NoopTracker, retentionDayIndex } from './analytics';
+import { ConsentGatedTracker, InMemoryTracker, NoopTracker, retentionDayIndex } from './analytics';
 
 describe('InMemoryTracker', () => {
   it('records events with their typed props in order', () => {
@@ -31,6 +31,26 @@ describe('NoopTracker', () => {
   it('accepts events without throwing (safe default before PostHog)', () => {
     const tracker = new NoopTracker();
     expect(() => tracker.track('this_week_opened', {})).not.toThrow();
+  });
+});
+
+describe('ConsentGatedTracker', () => {
+  it('forwards events only while analytics consent is granted', () => {
+    const inner = new InMemoryTracker();
+    let consented = false;
+    const tracker = new ConsentGatedTracker(inner, () => consented);
+
+    tracker.track('session_start', {});
+    expect(inner.events).toHaveLength(0); // no consent → dropped
+
+    consented = true;
+    tracker.track('session_start', {});
+    tracker.track('this_week_opened', {});
+    expect(inner.events).toHaveLength(2);
+
+    consented = false; // revoking takes effect immediately
+    tracker.track('paywall_shown', {});
+    expect(inner.events).toHaveLength(2);
   });
 });
 

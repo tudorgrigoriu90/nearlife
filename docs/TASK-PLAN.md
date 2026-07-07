@@ -364,9 +364,13 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ## F2.5 — Validation Instrumentation & Test
 
 ### S2.5.1 — Analytics & criteria
-- **T-035 · PostHog event instrumentation** — *Claude · S · deps: T-005, T-031 · [TSD §8](TSD.md)*
+- **T-035 · PostHog event instrumentation** — *Claude · S · `BLOCKED` (needs PostHog account T-005; seam + consent gate ready) · deps: T-005, T-031 · [TSD §8](TSD.md)*
   - Events: notification delivered/opened, species spotted, catch attempted/succeeded, session
     start, This Week opened. Day-1/3/7 retention derivable.
+  - ✅ Ready ahead of the account: the typed event catalog + `Tracker` seam (T-132), the D1/3/7
+    `retentionDayIndex`, and now `ConsentGatedTracker` (forwards events only while `analytics`
+    consent is granted, T-088 gating — 1 test). The PostHog delegate + emitting from the call
+    sites is the remaining wiring once the EU-hosted account (T-005) exists.
 - **T-036 · Write go/kill criteria (before testing)** — *Claude + Director · S · `DONE` (draft; Director approval pending) · deps: — · [GDD §9](GDD.md)*
   - ✅ [docs/VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md): pre-registered GO/ITERATE/KILL bands
     with **two primary metrics** (Sean-Ellis "very disappointed" ≥40%, day-7 return ≥35%) plus

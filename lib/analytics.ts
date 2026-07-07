@@ -50,6 +50,22 @@ export class InMemoryTracker implements Tracker {
   }
 }
 
+/**
+ * Wraps a tracker so events are only forwarded when the user has consented to analytics
+ * (T-088 gating). `hasConsent` is read at each `track` call, so revoking consent takes effect
+ * immediately. This is how the PostHog-backed tracker (T-035) honours the analytics opt-in.
+ */
+export class ConsentGatedTracker implements Tracker {
+  constructor(
+    private readonly delegate: Tracker,
+    private readonly hasConsent: () => boolean,
+  ) {}
+
+  track<E extends AnalyticsEvent>(event: E, props: AnalyticsEventProps[E]): void {
+    if (this.hasConsent()) this.delegate.track(event, props);
+  }
+}
+
 const DAY_MS = 86_400_000;
 
 /**
