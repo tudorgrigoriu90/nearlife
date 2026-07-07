@@ -418,20 +418,24 @@ key before loading into Supabase.**
 ## F3.1 — GBIF Occurrence Ingestion
 
 ### S3.1.1 — Occurrence → presence pipeline
-- **T-042 · GBIF nationwide presence pipeline (CC0/CC-BY filter)** — *Claude · L · `IN-PROGRESS` · deps: T-015 (T-007 for shipping) · [DATA-SOURCING §1](DATA-SOURCING-LICENSING.md), [TSD §6](TSD.md)*
-  - ✅ `pipeline/gbif/`: all **21 counties** (GADM GIDs), taxon resolution via species/match,
-    license-filtered (`CC0_1_0`/`CC_BY_4_0` only — NC/ND excluded) per-county × per-month
-    species facets, backoff on 429/5xx, pure aggregation → per-(county, species) active months.
-    Tests: aggregation, counties, taxa config.
-  - ✅ **Mammals generated nationwide**: 157 species, 1,390 county records
-    (`pipeline/data/presence_mammalia.json`); per-month presence captures real phenology
-    (e.g. hedgehog absent Dec–Jan = hibernation).
-  - ✅ **Invertebrates + flora configured**: Insecta, Arachnida, Mollusca, Tracheophyta added,
-    scoped to the encounterable core (top-N by records + `minOccurrences` floor; truncation logged).
-  - ⏳ Running `--all` for the full set (birds, amphibians, reptiles, fish, insects, arachnids,
-    molluscs, flora). Big taxa's rare long tail needs the bulk Occurrence Download API later.
-  - **Honest note:** occurrence ≠ true presence (observation bias) and CC0/CC-BY is a subset —
-    recorded in output metadata; copy stays honest.
+- **T-042 · GBIF nationwide presence pipeline (CC0/CC-BY filter)** — *Claude · L · `DONE` (data generated; DB load = T-134) · deps: T-015 (T-007 for shipping) · [DATA-SOURCING §1](DATA-SOURCING-LICENSING.md), [TSD §6](TSD.md)*
+  - ✅ `pipeline/gbif/`: all **21 counties** (GADM GIDs), EXACT-only taxon resolution,
+    license-filtered (`CC0_1_0`/`CC_BY_4_0`; NC/ND excluded) per-county × per-month species
+    facets, 429/5xx backoff, pure aggregation. Tests: aggregation, counties, taxa.
+  - ✅ **Full nationwide dataset** (`pipeline/data/presence_*.json`): ~11,900 species entries /
+    78,530 county records — insects 6,544, flora 3,082, arachnids 844, birds 708, molluscs 400,
+    fish 169, mammals 157, amphibians 17, reptiles 15. Per-month presence captures real phenology.
+  - ✅ **Correctness fix (scrutiny):** the strict resolver caught "Reptilia" silently resolving
+    to Chordata (all vertebrates → garbage 357-"reptile" set); GBIF backbone has no fish class
+    and no Reptilia, so reptiles = Squamata+Testudines and fish = the fish orders (multi-name union).
+  - **Honest notes:** (1) occurrence ≠ true presence + CC0/CC-BY subset — in metadata, copy stays
+    honest. (2) Raw GBIF includes zoo/vagrant/domestic **noise** (leopards, dolphins in "Swedish
+    mammals") — a curation pass vs. an authoritative Swedish checklist (Artdatabanken/Dyntaxa) is
+    a follow-up before user-facing use (**new T-136**). (3) 22 MB of JSON committed as the interim
+    home; canonical home is Supabase (T-134).
+- **T-136 · Curate GBIF lists against an authoritative Swedish checklist** — *Claude + Director · M · `TODO` · deps: T-042*
+  - Filter out zoo/escapee/vagrant/domestic and misID noise (e.g. via Dyntaxa/Artdatabanken or
+    an established/native flag) so the app shows species users can genuinely encounter.
 - **T-134 · Load presence dataset into Supabase (reference schema + writer)** — *Claude + Director · M · `TODO` · deps: T-042, T-003 · [TSD §3](TSD.md)*
   - New migration for `species` / `species_name` / `region_species_month` (public-read RLS);
     a loader that upserts the pipeline JSON. **Needs the service key** (RLS blocks anon writes;

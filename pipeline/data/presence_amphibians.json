@@ -1,0 +1,2619 @@
+{
+  "meta": {
+    "taxon": "Amphibia",
+    "taxonKey": 131,
+    "source": "GBIF.org occurrence API",
+    "licenses": [
+      "CC0_1_0",
+      "CC_BY_4_0"
+    ],
+    "counties": 21,
+    "facetLimit": 100,
+    "minOccurrences": 0,
+    "distinctSpecies": 17,
+    "records": 158,
+    "facetTruncations": 0,
+    "note": "Observation-based presence proxy (occurrence != true presence; TSD §7). CC0/CC-BY records only; encounterable core (top-N by records, minOccurrences floor). Re-run to refresh."
+  },
+  "records": [
+    {
+      "county": "SWE.10_1",
+      "countyName": "Norrbotten",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 1387
+    },
+    {
+      "county": "SWE.10_1",
+      "countyName": "Norrbotten",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 583
+    },
+    {
+      "county": "SWE.10_1",
+      "countyName": "Norrbotten",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "occurrences": 259
+    },
+    {
+      "county": "SWE.10_1",
+      "countyName": "Norrbotten",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        5,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 7
+    },
+    {
+      "county": "SWE.11_1",
+      "countyName": "Örebro",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 743
+    },
+    {
+      "county": "SWE.11_1",
+      "countyName": "Örebro",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 710
+    },
+    {
+      "county": "SWE.11_1",
+      "countyName": "Örebro",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 557
+    },
+    {
+      "county": "SWE.11_1",
+      "countyName": "Örebro",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 544
+    },
+    {
+      "county": "SWE.11_1",
+      "countyName": "Örebro",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 408
+    },
+    {
+      "county": "SWE.12_1",
+      "countyName": "Östergötland",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 738
+    },
+    {
+      "county": "SWE.12_1",
+      "countyName": "Östergötland",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 542
+    },
+    {
+      "county": "SWE.12_1",
+      "countyName": "Östergötland",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 485
+    },
+    {
+      "county": "SWE.12_1",
+      "countyName": "Östergötland",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 338
+    },
+    {
+      "county": "SWE.12_1",
+      "countyName": "Östergötland",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 287
+    },
+    {
+      "county": "SWE.12_1",
+      "countyName": "Östergötland",
+      "speciesKey": 2426654,
+      "scientificName": "Pelophylax lessonae",
+      "activeMonths": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "occurrences": 96
+    },
+    {
+      "county": "SWE.12_1",
+      "countyName": "Östergötland",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 3
+    },
+    {
+      "county": "SWE.12_1",
+      "countyName": "Östergötland",
+      "speciesKey": 9529916,
+      "scientificName": "Bufotes viridis",
+      "activeMonths": [
+        8
+      ],
+      "occurrences": 2
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 5553
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 2427573,
+      "scientificName": "Hyla arborea",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 5409
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 5262
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 4524
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 2423443,
+      "scientificName": "Bombina bombina",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 4223
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 2426654,
+      "scientificName": "Pelophylax lessonae",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 3561
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 3165
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 2422507,
+      "scientificName": "Epidalea calamita",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 1431
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 1387
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 2430567,
+      "scientificName": "Pelobates fuscus",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 1330
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 9529916,
+      "scientificName": "Bufotes viridis",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 1284
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 1234
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 2426661,
+      "scientificName": "Pelophylax ridibundus",
+      "activeMonths": [
+        4
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.14_1",
+      "countyName": "Södermanland",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 636
+    },
+    {
+      "county": "SWE.14_1",
+      "countyName": "Södermanland",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 312
+    },
+    {
+      "county": "SWE.14_1",
+      "countyName": "Södermanland",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 282
+    },
+    {
+      "county": "SWE.14_1",
+      "countyName": "Södermanland",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 232
+    },
+    {
+      "county": "SWE.14_1",
+      "countyName": "Södermanland",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 230
+    },
+    {
+      "county": "SWE.14_1",
+      "countyName": "Södermanland",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        8
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 5060
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 3120
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 2239
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 1878
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 858
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 2426661,
+      "scientificName": "Pelophylax ridibundus",
+      "activeMonths": [
+        5,
+        6
+      ],
+      "occurrences": 14
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 2426654,
+      "scientificName": "Pelophylax lessonae",
+      "activeMonths": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 6
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        6,
+        8
+      ],
+      "occurrences": 2
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 2427573,
+      "scientificName": "Hyla arborea",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 2
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 2423443,
+      "scientificName": "Bombina bombina",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 9529916,
+      "scientificName": "Bufotes viridis",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 2427091,
+      "scientificName": "Lithobates catesbeianus",
+      "activeMonths": [
+        8
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.16_1",
+      "countyName": "Uppsala",
+      "speciesKey": 2426654,
+      "scientificName": "Pelophylax lessonae",
+      "activeMonths": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 4973
+    },
+    {
+      "county": "SWE.16_1",
+      "countyName": "Uppsala",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 2355
+    },
+    {
+      "county": "SWE.16_1",
+      "countyName": "Uppsala",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 2343
+    },
+    {
+      "county": "SWE.16_1",
+      "countyName": "Uppsala",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 2101
+    },
+    {
+      "county": "SWE.16_1",
+      "countyName": "Uppsala",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 943
+    },
+    {
+      "county": "SWE.16_1",
+      "countyName": "Uppsala",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 708
+    },
+    {
+      "county": "SWE.17_1",
+      "countyName": "Värmland",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 720
+    },
+    {
+      "county": "SWE.17_1",
+      "countyName": "Värmland",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 615
+    },
+    {
+      "county": "SWE.17_1",
+      "countyName": "Värmland",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 528
+    },
+    {
+      "county": "SWE.17_1",
+      "countyName": "Värmland",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 503
+    },
+    {
+      "county": "SWE.17_1",
+      "countyName": "Värmland",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 267
+    },
+    {
+      "county": "SWE.17_1",
+      "countyName": "Värmland",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.18_1",
+      "countyName": "Västerbotten",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 1251
+    },
+    {
+      "county": "SWE.18_1",
+      "countyName": "Västerbotten",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 771
+    },
+    {
+      "county": "SWE.18_1",
+      "countyName": "Västerbotten",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 339
+    },
+    {
+      "county": "SWE.18_1",
+      "countyName": "Västerbotten",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 258
+    },
+    {
+      "county": "SWE.18_1",
+      "countyName": "Västerbotten",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        6
+      ],
+      "occurrences": 20
+    },
+    {
+      "county": "SWE.18_1",
+      "countyName": "Västerbotten",
+      "speciesKey": 2427573,
+      "scientificName": "Hyla arborea",
+      "activeMonths": [
+        8
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.19_1",
+      "countyName": "Västernorrland",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 349
+    },
+    {
+      "county": "SWE.19_1",
+      "countyName": "Västernorrland",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12
+      ],
+      "occurrences": 304
+    },
+    {
+      "county": "SWE.19_1",
+      "countyName": "Västernorrland",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 109
+    },
+    {
+      "county": "SWE.19_1",
+      "countyName": "Västernorrland",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        12
+      ],
+      "occurrences": 81
+    },
+    {
+      "county": "SWE.19_1",
+      "countyName": "Västernorrland",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "occurrences": 51
+    },
+    {
+      "county": "SWE.19_1",
+      "countyName": "Västernorrland",
+      "speciesKey": 5216933,
+      "scientificName": "Rhinella marina",
+      "activeMonths": [
+        6
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12
+      ],
+      "occurrences": 993
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12
+      ],
+      "occurrences": 624
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 2422507,
+      "scientificName": "Epidalea calamita",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 318
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 282
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 277
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 229
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 215
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 2426654,
+      "scientificName": "Pelophylax lessonae",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 146
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 9529916,
+      "scientificName": "Bufotes viridis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 119
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 2427573,
+      "scientificName": "Hyla arborea",
+      "activeMonths": [
+        4,
+        5,
+        6
+      ],
+      "occurrences": 17
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 2426760,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        8
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 455
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 383
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 331
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 291
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 275
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 3
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 3252
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 2637
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 1910
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 2422507,
+      "scientificName": "Epidalea calamita",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 1771
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 1620
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 1345
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 2426654,
+      "scientificName": "Pelophylax lessonae",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 218
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 2423443,
+      "scientificName": "Bombina bombina",
+      "activeMonths": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 33
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "occurrences": 13
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 9529916,
+      "scientificName": "Bufotes viridis",
+      "activeMonths": [
+        5,
+        10
+      ],
+      "occurrences": 2
+    },
+    {
+      "county": "SWE.2_1",
+      "countyName": "Dalarna",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 779
+    },
+    {
+      "county": "SWE.2_1",
+      "countyName": "Dalarna",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        12
+      ],
+      "occurrences": 644
+    },
+    {
+      "county": "SWE.2_1",
+      "countyName": "Dalarna",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12
+      ],
+      "occurrences": 500
+    },
+    {
+      "county": "SWE.2_1",
+      "countyName": "Dalarna",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 425
+    },
+    {
+      "county": "SWE.2_1",
+      "countyName": "Dalarna",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 276
+    },
+    {
+      "county": "SWE.2_1",
+      "countyName": "Dalarna",
+      "speciesKey": 2426654,
+      "scientificName": "Pelophylax lessonae",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.2_1",
+      "countyName": "Dalarna",
+      "speciesKey": 5218409,
+      "scientificName": "Lissotriton montandoni",
+      "activeMonths": [
+        9
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.3_1",
+      "countyName": "Gävleborg",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 598
+    },
+    {
+      "county": "SWE.3_1",
+      "countyName": "Gävleborg",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 493
+    },
+    {
+      "county": "SWE.3_1",
+      "countyName": "Gävleborg",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 177
+    },
+    {
+      "county": "SWE.3_1",
+      "countyName": "Gävleborg",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 175
+    },
+    {
+      "county": "SWE.3_1",
+      "countyName": "Gävleborg",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 160
+    },
+    {
+      "county": "SWE.3_1",
+      "countyName": "Gävleborg",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 2
+    },
+    {
+      "county": "SWE.3_1",
+      "countyName": "Gävleborg",
+      "speciesKey": 9529916,
+      "scientificName": "Bufotes viridis",
+      "activeMonths": [
+        6
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.4_1",
+      "countyName": "Gotland",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 421
+    },
+    {
+      "county": "SWE.4_1",
+      "countyName": "Gotland",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 398
+    },
+    {
+      "county": "SWE.4_1",
+      "countyName": "Gotland",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 154
+    },
+    {
+      "county": "SWE.4_1",
+      "countyName": "Gotland",
+      "speciesKey": 9529916,
+      "scientificName": "Bufotes viridis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "occurrences": 8
+    },
+    {
+      "county": "SWE.4_1",
+      "countyName": "Gotland",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        4
+      ],
+      "occurrences": 2
+    },
+    {
+      "county": "SWE.4_1",
+      "countyName": "Gotland",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        4,
+        5
+      ],
+      "occurrences": 2
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 747
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 707
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 599
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 474
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 229
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 2427573,
+      "scientificName": "Hyla arborea",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 128
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 2422507,
+      "scientificName": "Epidalea calamita",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "occurrences": 89
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        6
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 2426654,
+      "scientificName": "Pelophylax lessonae",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.6_1",
+      "countyName": "Jämtland",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 710
+    },
+    {
+      "county": "SWE.6_1",
+      "countyName": "Jämtland",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 284
+    },
+    {
+      "county": "SWE.6_1",
+      "countyName": "Jämtland",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 281
+    },
+    {
+      "county": "SWE.6_1",
+      "countyName": "Jämtland",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 141
+    },
+    {
+      "county": "SWE.6_1",
+      "countyName": "Jämtland",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 55
+    },
+    {
+      "county": "SWE.7_1",
+      "countyName": "Jönköping",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 367
+    },
+    {
+      "county": "SWE.7_1",
+      "countyName": "Jönköping",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12
+      ],
+      "occurrences": 345
+    },
+    {
+      "county": "SWE.7_1",
+      "countyName": "Jönköping",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 279
+    },
+    {
+      "county": "SWE.7_1",
+      "countyName": "Jönköping",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 217
+    },
+    {
+      "county": "SWE.7_1",
+      "countyName": "Jönköping",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 177
+    },
+    {
+      "county": "SWE.7_1",
+      "countyName": "Jönköping",
+      "speciesKey": 2426654,
+      "scientificName": "Pelophylax lessonae",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 93
+    },
+    {
+      "county": "SWE.7_1",
+      "countyName": "Jönköping",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12
+      ],
+      "occurrences": 2667
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 1656
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 864
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 667
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 585
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 9529916,
+      "scientificName": "Bufotes viridis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 438
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 207
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 2426654,
+      "scientificName": "Pelophylax lessonae",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 115
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 2426760,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "occurrences": 8
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 2422507,
+      "scientificName": "Epidalea calamita",
+      "activeMonths": [
+        5,
+        6
+      ],
+      "occurrences": 4
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 2426661,
+      "scientificName": "Pelophylax ridibundus",
+      "activeMonths": [
+        6
+      ],
+      "occurrences": 1
+    },
+    {
+      "county": "SWE.9_1",
+      "countyName": "Kronoberg",
+      "speciesKey": 5217160,
+      "scientificName": "Bufo bufo",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 364
+    },
+    {
+      "county": "SWE.9_1",
+      "countyName": "Kronoberg",
+      "speciesKey": 2426805,
+      "scientificName": "Rana temporaria",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 295
+    },
+    {
+      "county": "SWE.9_1",
+      "countyName": "Kronoberg",
+      "speciesKey": 2426789,
+      "scientificName": "Rana arvalis",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 209
+    },
+    {
+      "county": "SWE.9_1",
+      "countyName": "Kronoberg",
+      "speciesKey": 2431885,
+      "scientificName": "Triturus cristatus",
+      "activeMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 153
+    },
+    {
+      "county": "SWE.9_1",
+      "countyName": "Kronoberg",
+      "speciesKey": 5218405,
+      "scientificName": "Lissotriton vulgaris",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 144
+    },
+    {
+      "county": "SWE.9_1",
+      "countyName": "Kronoberg",
+      "speciesKey": 8252035,
+      "scientificName": "Rana dalmatina",
+      "activeMonths": [
+        4,
+        6
+      ],
+      "occurrences": 2
+    },
+    {
+      "county": "SWE.9_1",
+      "countyName": "Kronoberg",
+      "speciesKey": 9529916,
+      "scientificName": "Bufotes viridis",
+      "activeMonths": [
+        7
+      ],
+      "occurrences": 1
+    }
+  ]
+}
