@@ -589,8 +589,10 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
 ## F8.2 — Seasonal & Events
 - **T-079 · Seasonal window handling** — *Claude · M · deps: T-044 · [GDD §7](GDD.md)*
   - Migrants only catchable when genuinely passing through; season is a hard constraint.
-- **T-080 · Live events** — *Claude · M · deps: T-079 · [GDD §7](GDD.md)*
-  - "First swift of spring," salmon run, mushroom bloom — real-calendar events surfaced.
+- **T-080 · Live events** — *Claude · M · `IN-PROGRESS` (calendar core done; surfacing UI pending) · deps: T-079 · [GDD §7](GDD.md)*
+  - ✅ `lib/liveEvents.ts` (3 tests): `KRONOBERG_EVENTS` (first-swift-of-spring, salmon run,
+    mushroom bloom, first frost) with honest month windows; `activeEvents(date)`/`isEventActive`.
+    Labels are i18n; surfacing on Home/This Week + the real data layer's windows (E3) remain.
 
 ## F8.3 — Impact & Badges
 - **T-081 · Collective impact counters** — *Claude · M · deps: T-077 · [GDD §7](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
@@ -606,8 +608,11 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
 subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nudge.
 
 ## F9.1 — RevenueCat & Store
-- **T-083 · RevenueCat SDK + entitlement sync** — *Claude · M · deps: T-004, T-056 · [ECONOMY](ECONOMY.md), [TSD §1,§3](TSD.md)*
-  - SDK integrated; `entitlements.full_game` mirrored to Supabase; entitlement drives unlocks.
+- **T-083 · RevenueCat SDK + entitlement sync** — *Claude · M · `IN-PROGRESS` (resolution core done; SDK + sync pending, needs T-004) · deps: T-004, T-056 · [ECONOMY](ECONOMY.md), [TSD §1,§3](TSD.md)*
+  - ✅ `lib/entitlement.ts` (3 tests): `FULL_GAME_ENTITLEMENT` + `resolveEntitlements(activeIds)`
+    → `{ fullGame }`, the single source of truth the app already consumes (depth tiers T-135,
+    free-catch T-113). Remaining (needs the RevenueCat account, T-004): the SDK integration that
+    produces the active-entitlement ids and mirrors `full_game` to Supabase.
 - **T-084 · Full Game product + purchase flow** — *Claude · M · deps: T-083 · [ECONOMY](ECONOMY.md)*
   - $9.99 one-time product purchasable on both stores (sandbox verified); unlocks unlimited
     catching + all depth tiers + full home region.
