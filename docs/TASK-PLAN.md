@@ -484,8 +484,13 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     T-102 (households) lands; the current `user_id` shape covers v1.
 
 ## F4.2 — Almanac
-- **T-057 · Almanac grid (production)** — *Claude · M · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
-  - Real data grid with ●/◐/◑ overlays, category chips, season/habitat secondary filters.
+- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (data seam done; async wiring pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
+  - ✅ Data-access seam `lib/speciesRepository.ts` (7 tests): `SpeciesRepository` (`listSpecies` +
+    `getContent`) with a `HardcodedSpeciesRepository` (the bundled set the app runs on today) and a
+    `SupabaseSpeciesRepository` (reads the seeded `species`/`species_content` tables via a fakeable
+    gateway, English content fallback). Grid already renders ●/◐/◑ overlays + category chips (T-025).
+  - Remaining: point the screens at the repository (async load), apply the content seed, and add
+    season/habitat secondary filters (habitat needs E3).
 - **T-058 · Almanac states & progress summary** — *Claude · S · `IN-PROGRESS` (summary + states done; entry points pending) · deps: T-057 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ 3-tier progress summary row (● Spotted / ◐ Caught / ◑ Helped counts via the tested
     `progressSummary`, T-115) added to the Almanac header; empty + loading states already present
@@ -493,9 +498,11 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     surfaces exist. ⚠️ On-device layout not visually verified.
 
 ## F4.3 — Species Card
-- **T-059 · Species card (production)** — *Claude · M · deps: T-055 · [USER-FLOWS §4](USER-FLOWS.md)*
-  - Full card: fact, when/how, give/protect (always free), depth row, "find it nearby" entry,
-    share. Honest copy enforced.
+- **T-059 · Species card (production)** — *Claude · M · `IN-PROGRESS` (card + data seam done; async content read pending) · deps: T-055 · [USER-FLOWS §4](USER-FLOWS.md)*
+  - ✅ The card renders fact, when/how, give/protect (always free, honest-copy enforced by T-066),
+    the real depth row (T-135) and find-it-nearby + pledge entries. Content now resolvable via
+    `SpeciesRepository.getContent` (locale + English fallback). Remaining: read content through the
+    repository (async) instead of the bundled module, and share.
 - **T-060 · Depth-tier climb-by-play logic** — *Claude · M · deps: T-059, T-053 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
   - Free users unlock depth tiers by playing (spot/catch/help); Full Game unlocks all immediately.
     Progression, not paywall — verified for both states.
