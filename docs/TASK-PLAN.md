@@ -389,10 +389,16 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ---
 
 # 🚦 Validation Decision Gate
-**Phase:** GATE · Not an epic — a hard stop. **No Phase 2 epic may start until this passes.**
+**Phase:** GATE · Not an epic — a hard stop. ✅ **PASSED (GO) — 2026-07-07.** Phase 2 epics are
+now unblocked; each Phase-2 task still respects its own `deps:` (several remain blocked on
+Director accounts — GBIF T-007, RevenueCat T-004, PostHog T-005, legal T-009).
 
-- **T-041 · Go/kill decision on the passive-collecting thesis** — *Director · XS · deps: T-040 · [GDD §9](GDD.md)*
-  - Director records the decision (GO / ITERATE / KILL) with reasoning against T-036 criteria.
+- **T-041 · Go/kill decision on the passive-collecting thesis** — *Director · XS · `DONE` (GO) · deps: T-040 · [GDD §9](GDD.md)*
+  - ✅ **Decision: GO (2026-07-07).** Director (Tudor) records: the passive-collecting loop feels
+    **rewarding and educating** — the thesis holds. Phase 2 (real data layer + production app)
+    begins. *(Recorded as a Director judgement call ahead of the full spring-window field test —
+    T-038/T-039/T-040; the pre-registered criteria in [VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md)
+    remain the yardstick if a formal re-check is run.)*
   - **GO** → Phase 2 begins. **ITERATE** → loop selected E2 tasks and re-test. **KILL** → stop;
     the thesis failed and no engineering saves it (per [GDD §9](GDD.md)).
 
