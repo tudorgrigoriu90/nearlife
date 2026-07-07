@@ -465,13 +465,15 @@ spatially-indexed data layer for Kronoberg. **Gated by T-007 (GBIF confirmation)
 species card backed by the real data model. Supersedes the E2 prototype screens.
 
 ## F4.1 — Production Data Model
-- **T-055 · species & species_content tables + RLS** — *Claude · M · `DONE` (schema live; seed pending) · deps: T-016 · [TSD §3](TSD.md)*
+- **T-055 · species & species_content tables + RLS** — *Claude · M · `DONE` · deps: T-016 · [TSD §3](TSD.md)*
   - ✅ `supabase/migrations/…000001_production_species_tables.sql`, **applied + verified on the live
     DB** (via connector, 2026-07-07): `species` (catalogue) + `species_content` (locale-keyed
     fact/when-how/give/protect, `always_free` default true — invariant #2). RLS: public **read**
-    for `anon`+`authenticated` (`using(true)`); writes are service-role only. Security advisor clean
-    for these tables. **Seeding** (curated set now / GBIF later) + switching the app to read from
-    them (T-057/T-059) are the next steps.
+    for `anon`+`authenticated` (`using(true)`); writes are service-role only. Security advisor clean.
+  - ✅ **Seed:** `scripts/gen-species-seed.ts` generates idempotent upserts from the curated set →
+    `…000002_seed_species.sql`. The **54-species catalogue is seeded + verified live** (`count = 54`);
+    the full content seed (en+sv) is in the migration file, applied when the app reads from the DB
+    (T-057/T-059) or replaced by the GBIF pipeline (E3). Switching the app to DB-reads is next.
   - ℹ️ Advisor note: `collection`/`profiles` show "anonymous access" warnings — **expected by
     design** (anonymous users are our users; policies are owner-scoped `auth.uid() = user_id`).
 - **T-056 · collection table + RLS** — *Claude · S · `DONE` · deps: T-055, T-018 · [TSD §3](TSD.md)*
