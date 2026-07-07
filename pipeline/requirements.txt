@@ -1,3 +1,3 @@
-# Data pipeline dependencies. Real ingestion libs (pandas, h3, requests, pygbif, etc.)
-# are added in E3 as the GBIF/OSM jobs land. For now: just the test runner.
+# Data pipeline dependencies.
 pytest==8.3.4
+requests==2.32.3  # GBIF occurrence API client (T-042)

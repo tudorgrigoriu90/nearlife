@@ -410,15 +410,36 @@ Director accounts — GBIF T-007, RevenueCat T-004, PostHog T-005, legal T-009).
 ---
 
 # E3 — Species Data & Content Pipeline
-**Phase:** P2 · **Goal:** replace the hardcoded prototype data with a real, licensed,
-spatially-indexed data layer for Kronoberg. **Gated by T-007 (GBIF confirmation).**
+**Phase:** P2 · **Goal:** a real, licensed, occurrence-based fauna+flora dataset for **all of
+Sweden (21 län)** — nationwide alpha, not just Kronoberg. **Still gated by T-007 (GBIF written
+commercial confirmation) before shipping a paid app; and by the reference-data schema + service
+key before loading into Supabase.**
 
 ## F3.1 — GBIF Occurrence Ingestion
 
-### S3.1.1 — Occurrence → probability pipeline
-- **T-042 · GBIF ingest with CC0/CC-BY filter** — *Claude · L · deps: T-007, T-015 · [DATA-SOURCING §1](DATA-SOURCING-LICENSING.md), [TSD §6](TSD.md)*
-  - Python job pulls Kronoberg occurrences; **excludes CC-BY-NC**; captures dataset DOIs.
-  - A test asserts no NC-licensed records survive the filter.
+### S3.1.1 — Occurrence → presence pipeline
+- **T-042 · GBIF nationwide presence pipeline (CC0/CC-BY filter)** — *Claude · L · `IN-PROGRESS` · deps: T-015 (T-007 for shipping) · [DATA-SOURCING §1](DATA-SOURCING-LICENSING.md), [TSD §6](TSD.md)*
+  - ✅ `pipeline/gbif/`: all **21 counties** (GADM GIDs), taxon resolution via species/match,
+    license-filtered (`CC0_1_0`/`CC_BY_4_0` only — NC/ND excluded) per-county × per-month
+    species facets, backoff on 429/5xx, pure aggregation → per-(county, species) active months.
+    Tests: aggregation, counties, taxa config.
+  - ✅ **Mammals generated nationwide**: 157 species, 1,390 county records
+    (`pipeline/data/presence_mammalia.json`); per-month presence captures real phenology
+    (e.g. hedgehog absent Dec–Jan = hibernation).
+  - ✅ **Invertebrates + flora configured**: Insecta, Arachnida, Mollusca, Tracheophyta added,
+    scoped to the encounterable core (top-N by records + `minOccurrences` floor; truncation logged).
+  - ⏳ Running `--all` for the full set (birds, amphibians, reptiles, fish, insects, arachnids,
+    molluscs, flora). Big taxa's rare long tail needs the bulk Occurrence Download API later.
+  - **Honest note:** occurrence ≠ true presence (observation bias) and CC0/CC-BY is a subset —
+    recorded in output metadata; copy stays honest.
+- **T-134 · Load presence dataset into Supabase (reference schema + writer)** — *Claude + Director · M · `TODO` · deps: T-042, T-003 · [TSD §3](TSD.md)*
+  - New migration for `species` / `species_name` / `region_species_month` (public-read RLS);
+    a loader that upserts the pipeline JSON. **Needs the service key** (RLS blocks anon writes;
+    rotate the exposed secret first). Then the app reads live data instead of hardcoded TS.
+- **T-135 · Curate + author content at national scale** — *Claude + Director · XL · `TODO` · deps: T-042 · [GDD §5](GDD.md), [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - The real bottleneck: fact + give + protect per species, **region-appropriate, law-checked,
+    translated with native review**. Recommend staging by taxon (vertebrates first) and reusing
+    species-level advice across counties. Not auto-generatable for give/protect.
 - **T-043 · H3 cell aggregation (res 7–8)** — *Claude · M · deps: T-042 · [TSD §3](TSD.md)*
   - Occurrences aggregated into H3 cells at chosen resolution; cell geometry stored.
 - **T-044 · Per-cell per-month presence probability** — *Claude · L · deps: T-043 · [TSD §4](TSD.md)*
