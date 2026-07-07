@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { TierState } from '../lib/collection';
 import { EMPTY_TIER_STATE } from '../lib/collection';
+import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { commonNameFor, contentFor } from '../lib/species/localized';
 import type { Species } from '../lib/species/types';
@@ -13,12 +14,13 @@ import { speciesGlyph } from './speciesVisual';
 // still free and visible. All chrome runs through i18n; content localizes via contentFor.
 // NOTE: on-device layout not yet visually verified — no simulator in this environment.
 
-const DEPTH_TIERS = [1, 2, 3, 4, 5] as const;
+const DEPTH_TIERS = Array.from({ length: MAX_DEPTH }, (_, i) => i + 1);
 
 export default function SpeciesCard({
   species,
   locale = 'en',
   tier = EMPTY_TIER_STATE,
+  fullGame = false,
   onFindNearby,
   nearbyNote,
   onBack,
@@ -26,6 +28,8 @@ export default function SpeciesCard({
   species: Species;
   locale?: Locale;
   tier?: TierState;
+  /** Full Game entitlement unlocks all depth tiers immediately (T-060). */
+  fullGame?: boolean;
   onFindNearby?: (species: Species) => void;
   /** Small caption under the find-nearby CTA — e.g. the free-catch counter (T-034). */
   nearbyNote?: string;
@@ -67,7 +71,8 @@ export default function SpeciesCard({
           <Text style={styles.depthLabel}>{tr('card.depth')}</Text>
           <View style={styles.depthRow}>
             {DEPTH_TIERS.map((level) => {
-              const unlocked = level === 1; // Tier-1 always free; 2–5 climb-by-play (T-053/T-060).
+              // Tier-1 always free; 2–5 climb-by-play or Full Game (T-060).
+              const unlocked = isDepthUnlocked(level, tier, fullGame);
               return (
                 <View
                   key={level}

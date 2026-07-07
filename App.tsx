@@ -16,6 +16,7 @@ import {
   remainingFreeCatches,
   type FreeCatchState,
 } from './lib/freeCatch';
+import { isPrimeCatch } from './lib/primeBonus';
 import { seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator } from './lib/i18n';
@@ -95,7 +96,8 @@ export default function App() {
             if (success) {
               // Counter increments on success only; the attempt was already gated by canCatch.
               setFreeCatch((prev) => registerCatch(prev, seasonKey));
-              collection.markCaught(target.id, false); // prime-bonus computation is T-074
+              // Prime bonus when caught within the species' active window (GDD §6, T-074).
+              collection.markCaught(target.id, isPrimeCatch(target, new Date()));
               setCaughtTip(target);
             }
           }}
@@ -112,6 +114,7 @@ export default function App() {
           species={selected}
           locale={locale}
           tier={tierStateFor(collection.records, selected.id)}
+          fullGame={freeCatch.fullGame}
           onBack={() => setSelected(null)}
           onFindNearby={attemptCatch}
           nearbyNote={freeCatch.fullGame ? undefined : tr('catch.remaining', { count: remaining })}

@@ -504,8 +504,13 @@ per-month probabilities, honest and fully tunable ([TSD §4](TSD.md)).
 ## F5.2 — Honesty & Tuning
 - **T-065 · Config-driven tuning levers** — *Claude · S · deps: T-062 · [TSD §4](TSD.md)*
   - Cadence, cell resolution, rarity curve, active-window strictness all config, not hardcoded.
-- **T-066 · Copy-rule enforcement** — *Claude · XS · deps: T-059, T-063 · [GDD §3](GDD.md), [USER-FLOWS](USER-FLOWS.md)*
-  - Automated check/lint or content review ensuring no string overclaims real-time presence.
+- **T-066 · Copy-rule enforcement** — *Claude · XS · `DONE` · deps: — · [GDD §3](GDD.md), [USER-FLOWS](USER-FLOWS.md)*
+  - ✅ `lib/contentHonesty.ts` is the single source of truth for banned real-time-presence phrases
+    (en + sv); `findRealtimeClaims`/`isHonest`. `contentHonesty.test.ts` enforces it across **every**
+    species content field (en + sv) **and** every UI catalog string in both locales — 436 checks,
+    so no copy can overclaim presence without failing the build (invariant #1). The honesty
+    disclaimer (`thisWeek.honesty`), which quotes the phrase to disclaim it, is the one documented
+    exemption. Deps relaxed: the check runs on existing content now (didn't need T-059/T-063).
 
 ---
 ---
@@ -519,8 +524,11 @@ enforcement ([GDD §4](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)).
 - **T-067 · MapLibre catch-spot map** — *Claude · M · deps: T-048 · [TSD §1,§5](TSD.md), [USER-FLOWS §6](USER-FLOWS.md)*
   - MapLibre map with free tiles shows the user and nearby (public-land) habitat spots for the
     target species; OSM attribution visible.
-- **T-068 · Proximity gating & states** — *Claude · M · deps: T-067 · [USER-FLOWS §6](USER-FLOWS.md)*
-  - Catch enabled only within range; states for no-spots-nearby, too-far (`[Get closer]`), GPS-off.
+- **T-068 · Proximity gating & states** — *Claude · M · `IN-PROGRESS` (geo core done; map UI pending) · deps: T-067 · [USER-FLOWS §6](USER-FLOWS.md)*
+  - ✅ `lib/proximity.ts` (9 tests): `haversineMeters`, `nearestSpot`, and `proximityState` →
+    `in-range` / `too-far` / `no-spots` / `gps-off` against a configurable catch radius
+    (`DEFAULT_CATCH_RANGE_M = 100`). Remaining: the MapLibre map + wiring the state to the catch
+    CTA — depends on real catch spots (T-048, E3) and the map screen (T-067).
 
 ## F6.2 — Per-Category Minigames
 Each category gets a distinct one-thumb, 10–20s minigame; species within a category reskin the
@@ -617,11 +625,15 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
 manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch.**
 
 ## F10.1 — Consent & Age-Gate
-- **T-088 · Granular consent (no pre-ticked boxes)** — *Claude · M · deps: T-018 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
-  - Separate opt-ins for location, notifications, analytics; consent state is first-class user
-    data; features gate on it. (No ad consent — no ads.)
-- **T-089 · Age-gate (GDPR-K, Sweden 13)** — *Claude · S · deps: T-088 · [PRIVACY §3](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
-  - Birth-year gate; under-threshold routes to a restricted, minimal-data path.
+- **T-088 · Granular consent (no pre-ticked boxes)** — *Claude · M · `IN-PROGRESS` (state model done; UI + persistence pending) · deps: T-018 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
+  - ✅ `lib/consent.ts` (5 tests): `ConsentState` for location/notifications/analytics, all
+    defaulting **off** (no pre-ticked boxes); `grant`/`revoke`/`setConsent`/`hasConsent`, immutable.
+    **No `ads` consent kind** (no ads — invariant #3), asserted by test. Serializable → first-class
+    user data. Remaining: consent screen(s), persistence to the profile, and wiring feature gates.
+- **T-089 · Age-gate (GDPR-K, Sweden 13)** — *Claude · S · `IN-PROGRESS` (gate logic done; onboarding screen pending) · deps: T-088 · [PRIVACY §3](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
+  - ✅ `lib/ageGate.ts` (4 tests): birth-**year**-only gate (data minimization), `DIGITAL_CONSENT_AGE_SE = 13`,
+    `agePath()` → `full` | `restricted` for the minimal-data path. Remaining: the onboarding
+    birth-year step + routing the restricted path.
 
 ## F10.2 — Location Minimization & Hometown
 - **T-090 · Hometown GPS-derive-once + discard coordinates** — *Claude · M · deps: T-088 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [ECONOMY](ECONOMY.md), [USER-FLOWS §1](USER-FLOWS.md)*
@@ -632,12 +644,19 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - Runtime location kept at H3-cell resolution; no precise lat/long trail retained.
 
 ## F10.3 — GDPR Rights
-- **T-092 · Data export endpoint** — *Claude · M · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
-  - User can export their data from Settings; reachable anytime.
+- **T-092 · Data export endpoint** — *Claude · M · `IN-PROGRESS` (bundle builder done; Settings entry + DB read pending) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
+  - ✅ `lib/dataExport.ts` (3 tests): `buildDataExport` assembles a versioned, deterministic
+    (species-sorted, copy-safe) bundle of the user's own data (profile + consent + collection);
+    `exportToJson`. Remaining: the Settings action that reads from Supabase and hands the user the file.
 - **T-093 · Account + data deletion** — *Claude · M · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
   - "Delete account & data" fully erases user data (and cascades); build-time feature, not ops.
-- **T-094 · Retention policy & auto-expiry** — *Claude · S · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
-  - Defined retention windows for collection/location/analytics; anything not needed auto-expires.
+    *(Schema groundwork in place: `collection`/`profiles` FK to `auth.users` with `on delete
+    cascade`, so deleting the auth user erases their rows — the delete flow is an Edge Function
+    calling the auth admin API. No pure core to extract; done with the Settings + server work.)*
+- **T-094 · Retention policy & auto-expiry** — *Claude · S · `IN-PROGRESS` (policy + expiry logic done; scheduled job pending) · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+  - ✅ `lib/retention.ts` (3 tests): `DEFAULT_RETENTION` windows (runtime location 30d < inactive
+    anonymous 90d < analytics 365d) + `isExpired`/`expiryMs`. Remaining: the pg_cron job that
+    applies expiry (deletes stale rows / anonymous users).
 
 ## F10.4 — Legal Artifacts
 - **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*
@@ -750,6 +769,25 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     config (`CadenceConfig`, T-065). This is the "may we send now?" half of the engine that the
     scheduled Edge Function evaluates — the prototype cadence (T-032) and production engine (T-063)
     wrap it unchanged, alongside the tested candidate selection (T-112).
+
+- **T-134 · Prime-bonus computation** — *Claude · XS · `DONE` · deps: T-110 · [GDD §6](GDD.md)*
+  - ✅ `lib/primeBonus.ts` (3 tests): `isPrimeCatch(species, date)` — a catch earns the prime bonus
+    only inside the species' active window (reuses `isActiveInMonth`). Wired into the prototype
+    catch flow in `App.tsx` (replaced the hardcoded `false`); the production catch resolution
+    (T-074) consumes the same helper.
+
+- **T-136 · Badge earn logic** — *Claude · S · `DONE` · deps: T-115 · [GDD §8](GDD.md)*
+  - ✅ `lib/badges.ts` (4 tests): `earnedBadges(records, species)` → category-completion badges
+    (all species in a category spotted), spotted-count milestones (10/25/50), helped-count
+    milestones (1/5/10), stable order. Habitat/season badges arrive with the real data layer (E3).
+    Core of the badges UI + almanac completion (T-082); labels are i18n at the UI layer.
+
+- **T-135 · Depth-tier climb-by-play logic** — *Claude · S · `DONE` · deps: T-115 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
+  - ✅ `lib/depthTier.ts` (7 tests): `unlockedDepth(tier, fullGame)` / `isDepthUnlocked` — Tier 1
+    free, then climb by spotting → catching → helping (all three = mastery, level 5); Full Game
+    opens all 5 immediately. Tests assert **both** states reach the same depth (progression, not
+    paywall). Wired into `SpeciesCard`'s depth row (was a static placeholder). The production task
+    **T-060** is this logic + the real Full Game entitlement (T-083, RevenueCat).
 
 - **T-132 · Analytics event catalog + tracker seam** — *Claude · S · `DONE` · deps: — · [TSD §8](TSD.md), [VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md)*
   - ✅ `lib/analytics.ts` (5 tests): a typed `AnalyticsEventProps` catalog (session start, This
