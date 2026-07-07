@@ -21,12 +21,14 @@ export default function SettingsScreen({
   consent,
   onToggleConsent,
   onSelectLocale,
+  onExportData,
   onDone,
 }: {
   locale?: Locale;
   consent: ConsentState;
   onToggleConsent: (kind: ConsentKind, value: boolean) => void;
   onSelectLocale: (locale: Locale) => void;
+  onExportData: () => void;
   onDone: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -71,6 +73,14 @@ export default function SettingsScreen({
           ))}
         </View>
 
+        <Text style={styles.sectionLabel}>{tr('settings.yourData')}</Text>
+        <View style={styles.card}>
+          <Pressable onPress={onExportData} accessibilityRole="button" style={styles.row}>
+            <Text style={styles.rowLabel}>{tr('settings.exportData')}</Text>
+            <Text style={styles.chevron}>›</Text>
+          </Pressable>
+        </View>
+
         <Text style={styles.sectionLabel}>{tr('settings.dataAttribution')}</Text>
         <View style={styles.card}>
           <Text style={styles.attribution}>{tr('attribution.gbif')}</Text>
@@ -95,6 +105,7 @@ const styles = StyleSheet.create({
   rowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#e2ebe0' },
   rowLabel: { fontSize: 16, color: '#22331f' },
   check: { fontSize: 16, fontWeight: '700', color: '#3a7d44' },
+  chevron: { fontSize: 20, color: '#9fb0a0' },
   hint: { marginTop: 8, fontSize: 12, color: '#7a8a7c', fontStyle: 'italic' },
   attribution: { paddingVertical: 14, fontSize: 13, color: '#4a5c4d', lineHeight: 19 },
   about: { marginTop: 28, fontSize: 12, color: '#9fb0a0', textAlign: 'center' },

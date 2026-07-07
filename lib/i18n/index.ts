@@ -130,6 +130,12 @@ export const en = {
   'settings.done': 'Done',
   'lang.en': 'English',
   'lang.sv': 'Svenska',
+
+  // Your data — export (T-092)
+  'settings.yourData': 'Your data',
+  'settings.exportData': 'Export my data',
+  'export.title': 'Your data',
+  'export.hint': 'Everything Nearby holds about you. Select the text to copy it.',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -247,6 +253,12 @@ const sv: Catalog = {
   'settings.done': 'Klar',
   'lang.en': 'English',
   'lang.sv': 'Svenska',
+
+  // Your data — export (T-092)
+  'settings.yourData': 'Dina uppgifter',
+  'settings.exportData': 'Exportera mina uppgifter',
+  'export.title': 'Dina uppgifter',
+  'export.hint': 'Allt Nearby har om dig. Markera texten för att kopiera den.',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

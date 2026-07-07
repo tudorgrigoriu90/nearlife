@@ -688,10 +688,12 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - Runtime location kept at H3-cell resolution; no precise lat/long trail retained.
 
 ## F10.3 — GDPR Rights
-- **T-092 · Data export endpoint** — *Claude · M · `IN-PROGRESS` (bundle builder done; Settings entry + DB read pending) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
-  - ✅ `lib/dataExport.ts` (3 tests): `buildDataExport` assembles a versioned, deterministic
-    (species-sorted, copy-safe) bundle of the user's own data (profile + consent + collection);
-    `exportToJson`. Remaining: the Settings action that reads from Supabase and hands the user the file.
+- **T-092 · Data export endpoint** — *Claude · M · `DONE` (reachable + produces the bundle; file-share later) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
+  - ✅ `lib/dataExport.ts` (3 tests): `buildDataExport` → versioned, deterministic bundle
+    (profile + consent + collection); `exportToJson`. ✅ **Settings → "Export my data"** opens
+    `DataExportView` showing the full bundle as selectable JSON the user can copy — reachable
+    anytime (invariant #6). Later: a file/share download and reading server-authoritative profile/
+    consent once those persist.
 - **T-093 · Account + data deletion** — *Claude · M · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
   - "Delete account & data" fully erases user data (and cascades); build-time feature, not ops.
     *(Schema groundwork in place: `collection`/`profiles` FK to `auth.users` with `on delete

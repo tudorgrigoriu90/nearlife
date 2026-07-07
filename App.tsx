@@ -10,8 +10,11 @@ import ProtectTip from './components/catch/ProtectTip';
 import FreeCatchSheet from './components/catch/FreeCatchSheet';
 import PledgeConfirm from './components/helped/PledgeConfirm';
 import SettingsScreen from './components/SettingsScreen';
+import DataExportView from './components/DataExportView';
 import { useCollection } from './components/useCollection';
 import { DEFAULT_CONSENT, setConsent, type ConsentKind, type ConsentState } from './lib/consent';
+import { buildDataExport, exportToJson } from './lib/dataExport';
+import { KRONOBERG_REGION } from './lib/hometown';
 import { spottedIds, tierStateFor } from './lib/collection';
 import {
   canCatch,
@@ -51,6 +54,7 @@ export default function App() {
   const [previewMode, setPreviewMode] = useState(false);
   const [tab, setTab] = useState<Tab>('thisWeek');
   const [showSettings, setShowSettings] = useState(false);
+  const [exportJson, setExportJson] = useState<string | null>(null);
   const [consent, setConsentState] = useState<ConsentState>(DEFAULT_CONSENT);
   const [selected, setSelected] = useState<Species | null>(null);
   const [catching, setCatching] = useState<Species | null>(null);
@@ -61,6 +65,16 @@ export default function App() {
 
   const toggleConsent = (kind: ConsentKind, value: boolean) =>
     setConsentState((c) => setConsent(c, kind, value));
+
+  const exportMyData = () => {
+    const bundle = buildDataExport({
+      exportedAt: new Date().toISOString(),
+      profile: { homeRegion: previewMode ? null : KRONOBERG_REGION.id },
+      consent,
+      collection: collection.records,
+    });
+    setExportJson(exportToJson(bundle));
+  };
 
   const seasonKey = seasonKeyOf(new Date());
   const remaining = remainingFreeCatches(freeCatch, seasonKey);
@@ -85,6 +99,15 @@ export default function App() {
     );
   }
 
+  if (exportJson !== null) {
+    return (
+      <>
+        <DataExportView json={exportJson} locale={locale} onDone={() => setExportJson(null)} />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (showSettings) {
     return (
       <>
@@ -93,6 +116,7 @@ export default function App() {
           consent={consent}
           onToggleConsent={toggleConsent}
           onSelectLocale={(loc) => setLocaleOverride(loc)}
+          onExportData={exportMyData}
           onDone={() => setShowSettings(false)}
         />
         <StatusBar style="auto" />
