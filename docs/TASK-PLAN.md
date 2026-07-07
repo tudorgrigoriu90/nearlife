@@ -465,12 +465,21 @@ spatially-indexed data layer for Kronoberg. **Gated by T-007 (GBIF confirmation)
 species card backed by the real data model. Supersedes the E2 prototype screens.
 
 ## F4.1 — Production Data Model
-- **T-055 · species & species_content tables + RLS** — *Claude · M · deps: T-016 · [TSD §3](TSD.md)*
-  - Tables per [TSD §3](TSD.md); Tier-1 + all give/protect flagged always-free; row-level
-    security so users read public content and write only their own state.
-- **T-056 · collection table + RLS** — *Claude · S · deps: T-055, T-018 · [TSD §3](TSD.md)*
-  - `collection` with spotted/caught/helped timestamps, `prime_bonus`, `tier_reached`; RLS to owner.
-  - `owner_id` shaped to accept user-or-household later (v2) without migration pain.
+- **T-055 · species & species_content tables + RLS** — *Claude · M · `DONE` (schema live; seed pending) · deps: T-016 · [TSD §3](TSD.md)*
+  - ✅ `supabase/migrations/…000001_production_species_tables.sql`, **applied + verified on the live
+    DB** (via connector, 2026-07-07): `species` (catalogue) + `species_content` (locale-keyed
+    fact/when-how/give/protect, `always_free` default true — invariant #2). RLS: public **read**
+    for `anon`+`authenticated` (`using(true)`); writes are service-role only. Security advisor clean
+    for these tables. **Seeding** (curated set now / GBIF later) + switching the app to read from
+    them (T-057/T-059) are the next steps.
+  - ℹ️ Advisor note: `collection`/`profiles` show "anonymous access" warnings — **expected by
+    design** (anonymous users are our users; policies are owner-scoped `auth.uid() = user_id`).
+- **T-056 · collection table + RLS** — *Claude · S · `DONE` · deps: T-055, T-018 · [TSD §3](TSD.md)*
+  - ✅ `collection` (spotted/caught/helped timestamps, `helped_kind`, `prime_bonus`) + `profiles`
+    live with owner-scoped RLS (migration …000001). Verified end-to-end: the app persists via the
+    Supabase store (T-027) — the live table now holds real rows from device runs.
+  - ⚠️ `tier_reached` and household-shaped `owner_id` (v2) not yet added — a later migration when
+    T-102 (households) lands; the current `user_id` shape covers v1.
 
 ## F4.2 — Almanac
 - **T-057 · Almanac grid (production)** — *Claude · M · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
