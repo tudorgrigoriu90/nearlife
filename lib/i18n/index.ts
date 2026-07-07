@@ -113,6 +113,23 @@ export const en = {
   'pledge.title': 'You’re helping {name}',
   'pledge.thanks': 'Thank you — small actions add up across the region.',
   'pledge.done': 'Done',
+
+  // Settings (T-088 consent UI · T-101 attribution · T-123 locale override)
+  'nav.settings': 'Settings',
+  'settings.title': 'Settings',
+  'settings.privacy': 'Privacy & consent',
+  'consent.location': 'Location',
+  'consent.notifications': 'Notifications',
+  'consent.analytics': 'Analytics',
+  'consent.hint': 'You choose what to share. Nothing is on by default, and there are no ads.',
+  'settings.language': 'Language',
+  'settings.dataAttribution': 'Data & attribution',
+  'attribution.gbif': 'Species data: GBIF.org and its contributing datasets.',
+  'attribution.osm': 'Habitat & maps: © OpenStreetMap contributors.',
+  'settings.about': 'Nearby — Kronoberg alpha',
+  'settings.done': 'Done',
+  'lang.en': 'English',
+  'lang.sv': 'Svenska',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -213,6 +230,23 @@ const sv: Catalog = {
   'pledge.title': 'Du hjälper {name}',
   'pledge.thanks': 'Tack – små handlingar gör skillnad i hela regionen.',
   'pledge.done': 'Klar',
+
+  // Settings (T-088 consent UI · T-101 attribution · T-123 locale override)
+  'nav.settings': 'Inställningar',
+  'settings.title': 'Inställningar',
+  'settings.privacy': 'Integritet & samtycke',
+  'consent.location': 'Plats',
+  'consent.notifications': 'Aviseringar',
+  'consent.analytics': 'Analys',
+  'consent.hint': 'Du väljer vad du delar. Inget är på från början, och det finns inga annonser.',
+  'settings.language': 'Språk',
+  'settings.dataAttribution': 'Data & källor',
+  'attribution.gbif': 'Artdata: GBIF.org och dess bidragande dataset.',
+  'attribution.osm': 'Habitat & kartor: © OpenStreetMap contributors.',
+  'settings.about': 'Nearby — Kronoberg alfa',
+  'settings.done': 'Klar',
+  'lang.en': 'English',
+  'lang.sv': 'Svenska',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

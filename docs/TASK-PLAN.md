@@ -668,11 +668,12 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
 manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch.**
 
 ## F10.1 — Consent & Age-Gate
-- **T-088 · Granular consent (no pre-ticked boxes)** — *Claude · M · `IN-PROGRESS` (state model done; UI + persistence pending) · deps: T-018 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
+- **T-088 · Granular consent (no pre-ticked boxes)** — *Claude · M · `IN-PROGRESS` (model + UI done; persistence + feature-gating pending) · deps: T-018 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
   - ✅ `lib/consent.ts` (5 tests): `ConsentState` for location/notifications/analytics, all
     defaulting **off** (no pre-ticked boxes); `grant`/`revoke`/`setConsent`/`hasConsent`, immutable.
-    **No `ads` consent kind** (no ads — invariant #3), asserted by test. Serializable → first-class
-    user data. Remaining: consent screen(s), persistence to the profile, and wiring feature gates.
+    **No `ads` consent kind** (no ads — invariant #3). ✅ **UI:** the Settings screen has the three
+    granular toggles (defaulting off) with the "you choose / no ads" hint. Remaining: persist to the
+    profile and wire feature gates (e.g. analytics tracker T-035 respects `analytics`).
 - **T-089 · Age-gate (GDPR-K, Sweden 13)** — *Claude · S · `IN-PROGRESS` (gate logic done; onboarding screen pending) · deps: T-088 · [PRIVACY §3](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
   - ✅ `lib/ageGate.ts` (4 tests): birth-**year**-only gate (data minimization), `DIGITAL_CONSENT_AGE_SE = 13`,
     `agePath()` → `full` | `restricted` for the minimal-data path. Remaining: the onboarding
@@ -727,9 +728,10 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - Crash/error reporting on the app; alerting if the data pipeline or notification cron fails.
 
 ## F11.3 — Attribution
-- **T-101 · Attribution surfaces** — *Claude · XS · deps: T-045, T-046 · [DATA-SOURCING](DATA-SOURCING-LICENSING.md), [USER-FLOWS §9](USER-FLOWS.md)*
-  - In-app "GBIF.org + datasets (DOIs)" and "© OpenStreetMap contributors" attribution in
-    Settings/About.
+- **T-101 · Attribution surfaces** — *Claude · XS · `DONE` (copy live; DOIs when the pipeline lands) · deps: T-045, T-046 · [DATA-SOURCING](DATA-SOURCING-LICENSING.md), [USER-FLOWS §9](USER-FLOWS.md)*
+  - ✅ The Settings screen's "Data & attribution" section shows GBIF ("GBIF.org and its
+    contributing datasets") and "© OpenStreetMap contributors" (i18n `attribution.*`). Per-dataset
+    DOIs get appended once the GBIF pipeline captures them (T-045).
 
 ---
 ---
@@ -872,7 +874,10 @@ locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INT
   - ✅ `ThisWeekScreen` chrome runs through `createTranslator(locale)` — no hardcoded copy;
     accepts a `locale` prop (device detection in T-123). Species names/content localize in T-122.
     Remaining screens localize as they are built.
-- **T-123 · Locale detection & selection** — *Claude · S · `DONE` (detection; Settings override pending Settings screen) · deps: T-120 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+- **T-123 · Locale detection & selection** — *Claude · S · `DONE` · deps: T-120 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - ✅ Settings now has a **language override** (English / Svenska, the live locales) that takes
+    precedence over device detection — the "user override" the T-120/T-123 runtime anticipated.
+    (Persisting the choice across launches lands with profile persistence.)
   - ✅ `lib/i18n/resolveLocale.ts` (pure, 4 tests) maps a BCP-47 tag → supported Locale with
     English fallback; `lib/i18n/deviceLocale.ts` reads `expo-localization`; `App.tsx` uses it.
     User override persists once the Settings screen exists (T-009 flow / USER-FLOWS §9).

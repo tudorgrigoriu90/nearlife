@@ -9,7 +9,9 @@ import TimingRingMinigame from './components/minigame/TimingRingMinigame';
 import ProtectTip from './components/catch/ProtectTip';
 import FreeCatchSheet from './components/catch/FreeCatchSheet';
 import PledgeConfirm from './components/helped/PledgeConfirm';
+import SettingsScreen from './components/SettingsScreen';
 import { useCollection } from './components/useCollection';
+import { DEFAULT_CONSENT, setConsent, type ConsentKind, type ConsentState } from './lib/consent';
 import { spottedIds, tierStateFor } from './lib/collection';
 import {
   canCatch,
@@ -20,7 +22,7 @@ import {
 import { isPrimeCatch } from './lib/primeBonus';
 import { seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
-import { createTranslator } from './lib/i18n';
+import { createTranslator, type Locale } from './lib/i18n';
 import { KRONOBERG_SPECIES } from './lib/species/kronoberg';
 import type { HelpKind } from './lib/collection';
 import type { Species } from './lib/species/types';
@@ -40,19 +42,25 @@ const INITIAL_FREE_CATCH: FreeCatchState = {
 type Tab = 'thisWeek' | 'almanac';
 
 export default function App() {
-  // Device locale for now; a user override from Settings will take precedence (T-123).
-  const locale = detectDeviceLocale();
+  // Device locale by default; a user override from Settings takes precedence (T-123).
+  const [localeOverride, setLocaleOverride] = useState<Locale | null>(null);
+  const locale = localeOverride ?? detectDeviceLocale();
   const tr = createTranslator(locale);
   const collection = useCollection();
   const [onboarded, setOnboarded] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [tab, setTab] = useState<Tab>('thisWeek');
+  const [showSettings, setShowSettings] = useState(false);
+  const [consent, setConsentState] = useState<ConsentState>(DEFAULT_CONSENT);
   const [selected, setSelected] = useState<Species | null>(null);
   const [catching, setCatching] = useState<Species | null>(null);
   const [caughtTip, setCaughtTip] = useState<Species | null>(null);
   const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
   const [paywall, setPaywall] = useState(false);
   const [freeCatch, setFreeCatch] = useState<FreeCatchState>(INITIAL_FREE_CATCH);
+
+  const toggleConsent = (kind: ConsentKind, value: boolean) =>
+    setConsentState((c) => setConsent(c, kind, value));
 
   const seasonKey = seasonKeyOf(new Date());
   const remaining = remainingFreeCatches(freeCatch, seasonKey);
@@ -74,6 +82,21 @@ export default function App() {
           setOnboarded(true);
         }}
       />
+    );
+  }
+
+  if (showSettings) {
+    return (
+      <>
+        <SettingsScreen
+          locale={locale}
+          consent={consent}
+          onToggleConsent={toggleConsent}
+          onSelectLocale={(loc) => setLocaleOverride(loc)}
+          onDone={() => setShowSettings(false)}
+        />
+        <StatusBar style="auto" />
+      </>
     );
   }
 
@@ -179,6 +202,7 @@ export default function App() {
       <View style={styles.tabBar}>
         <TabButton label={tr('thisWeek.title')} active={tab === 'thisWeek'} onPress={() => setTab('thisWeek')} />
         <TabButton label={tr('almanac.title')} active={tab === 'almanac'} onPress={() => setTab('almanac')} />
+        <TabButton label={`⚙ ${tr('nav.settings')}`} active={false} onPress={() => setShowSettings(true)} />
       </View>
       <StatusBar style="auto" />
     </View>
