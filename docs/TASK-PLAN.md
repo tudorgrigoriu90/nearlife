@@ -436,10 +436,21 @@ key before loading into Supabase.**
 - **T-136 · Curate GBIF lists against an authoritative Swedish checklist** — *Claude + Director · M · `TODO` · deps: T-042*
   - Filter out zoo/escapee/vagrant/domestic and misID noise (e.g. via Dyntaxa/Artdatabanken or
     an established/native flag) so the app shows species users can genuinely encounter.
-- **T-134 · Load presence dataset into Supabase (reference schema + writer)** — *Claude + Director · M · `TODO` · deps: T-042, T-003 · [TSD §3](TSD.md)*
-  - New migration for `species` / `species_name` / `region_species_month` (public-read RLS);
-    a loader that upserts the pipeline JSON. **Needs the service key** (RLS blocks anon writes;
-    rotate the exposed secret first). Then the app reads live data instead of hardcoded TS.
+- **T-134 · Load presence dataset into Supabase (reference schema + writer)** — *Claude + Director · M · `IN-PROGRESS` (schema + loader + bounded seed done; full bulk load needs the service key) · deps: T-042, T-003 · [TSD §3](TSD.md)*
+  - ✅ **Schema** `…000003_regions_and_presence.sql`: `regions` (21 counties), `species` taxonomy
+    columns (`gbif_key`, `taxon_group`, `vertebrate`; `category` now nullable for amphibians/
+    reptiles/arachnids/molluscs), and `species_presence(region_id, species_id, active_months,
+    occurrences)` — all public-read RLS. (Region-level presence is the interim for per-cell
+    `cell_species_month`, T-044.)
+  - ✅ **Bulk loader** `pipeline/gbif/supabase_load.py` + pure `gbif/db_rows.py` (`build_rows`,
+    species deduped with unioned windows + summed occurrences; 3 pytest). Idempotent upsert of
+    regions → species → presence via `$SUPABASE_DB_URL` (service role). This is the home for the
+    ~12k species / 78.5k presence rows — the pipeline's job, not ad-hoc SQL.
+  - ✅ **Bounded alpha seed** `…000004_seed_kronoberg_presence.sql` (from `scripts/gen-kronoberg-presence.ts`):
+    links **53/54** curated species to their real Kronoberg (SWE.9_1) GBIF presence
+    (`gbif_key`/`taxon_group`/`vertebrate` + `species_presence` rows) — applyable via the connector now.
+  - ⏳ **Remaining:** apply the migrations + run the bulk loader with the service key (CI job); then
+    switch the app to read presence from the DB (T-057/T-059).
 - **T-135 · Curate + author content at national scale** — *Claude + Director · XL · `TODO` · deps: T-042 · [GDD §5](GDD.md), [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
   - The real bottleneck: fact + give + protect per species, **region-appropriate, law-checked,
     translated with native review**. Recommend staging by taxon (vertebrates first) and reusing
@@ -529,7 +540,7 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
 ## F4.3 — Species Card
 - **T-059 · Species card (production)** — *Claude · M · `IN-PROGRESS` (card + data seam done; async content read pending) · deps: T-055 · [USER-FLOWS §4](USER-FLOWS.md)*
   - ✅ The card renders fact, when/how, give/protect (always free, honest-copy enforced by T-066),
-    the real depth row (T-135) and find-it-nearby + pledge entries. Content now resolvable via
+    the real depth row (T-138) and find-it-nearby + pledge entries. Content now resolvable via
     `SpeciesRepository.getContent` (locale + English fallback). Remaining: read content through the
     repository (async) instead of the bundled module, and share.
 - **T-060 · Depth-tier climb-by-play logic** — *Claude · M · deps: T-059, T-053 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
@@ -672,7 +683,7 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
 ## F9.1 — RevenueCat & Store
 - **T-083 · RevenueCat SDK + entitlement sync** — *Claude · M · `IN-PROGRESS` (resolution core done; SDK + sync pending, needs T-004) · deps: T-004, T-056 · [ECONOMY](ECONOMY.md), [TSD §1,§3](TSD.md)*
   - ✅ `lib/entitlement.ts` (3 tests): `FULL_GAME_ENTITLEMENT` + `resolveEntitlements(activeIds)`
-    → `{ fullGame }`, the single source of truth the app already consumes (depth tiers T-135,
+    → `{ fullGame }`, the single source of truth the app already consumes (depth tiers T-138,
     free-catch T-113). Remaining (needs the RevenueCat account, T-004): the SDK integration that
     produces the active-entitlement ids and mirrors `full_game` to Supabase.
 - **T-084 · Full Game product + purchase flow** — *Claude · M · deps: T-083 · [ECONOMY](ECONOMY.md)*
@@ -849,19 +860,19 @@ Each feeds a later integration task (UI wiring / Edge Function) that consumes it
     scheduled Edge Function evaluates — the prototype cadence (T-032) and production engine (T-063)
     wrap it unchanged, alongside the tested candidate selection (T-112).
 
-- **T-134 · Prime-bonus computation** — *Claude · XS · `DONE` · deps: T-110 · [GDD §6](GDD.md)*
+- **T-137 · Prime-bonus computation** *(renumbered from T-134 to resolve a merge collision with the pipeline's T-134)* — *Claude · XS · `DONE` · deps: T-110 · [GDD §6](GDD.md)*
   - ✅ `lib/primeBonus.ts` (3 tests): `isPrimeCatch(species, date)` — a catch earns the prime bonus
     only inside the species' active window (reuses `isActiveInMonth`). Wired into the prototype
     catch flow in `App.tsx` (replaced the hardcoded `false`); the production catch resolution
     (T-074) consumes the same helper.
 
-- **T-136 · Badge earn logic** — *Claude · S · `DONE` · deps: T-115 · [GDD §8](GDD.md)*
+- **T-139 · Badge earn logic** *(renumbered from T-136 to resolve a merge collision with the pipeline's T-136)* — *Claude · S · `DONE` · deps: T-115 · [GDD §8](GDD.md)*
   - ✅ `lib/badges.ts` (4 tests): `earnedBadges(records, species)` → category-completion badges
     (all species in a category spotted), spotted-count milestones (10/25/50), helped-count
     milestones (1/5/10), stable order. Habitat/season badges arrive with the real data layer (E3).
     Core of the badges UI + almanac completion (T-082); labels are i18n at the UI layer.
 
-- **T-135 · Depth-tier climb-by-play logic** — *Claude · S · `DONE` · deps: T-115 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
+- **T-138 · Depth-tier climb-by-play logic** *(renumbered from T-135 to resolve a merge collision with the pipeline's T-135)* — *Claude · S · `DONE` · deps: T-115 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
   - ✅ `lib/depthTier.ts` (7 tests): `unlockedDepth(tier, fullGame)` / `isDepthUnlocked` — Tier 1
     free, then climb by spotting → catching → helping (all three = mastery, level 5); Full Game
     opens all 5 immediately. Tests assert **both** states reach the same depth (progression, not
