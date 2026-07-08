@@ -600,22 +600,36 @@ enforcement ([GDD §4](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)).
 Each category gets a distinct one-thumb, 10–20s minigame; species within a category reskin the
 same mechanic ([GDD §4](GDD.md)).
 
-- **T-069 · Minigame framework + bird (timing)** — *Claude · L · deps: T-033 · [GDD §4](GDD.md)*
-  - Shared minigame component contract keyed by `species.category`; bird timing implemented
-    (reanimated + gesture-handler, no engine). Graduates the prototype's toy to production.
-- **T-070 · Fish minigame (rhythm & tension)** — *Claude · M · `IN-PROGRESS` (scoring core done; component pending) · deps: T-069 · [GDD §4](GDD.md)*
+- **T-069 · Minigame framework + bird (timing)** — *Claude · L · `DONE` · deps: T-033 · [GDD §4](GDD.md)*
+  - ✅ Shared component contract (`components/minigame/types.ts`: `MinigameProps`/`MinigameOutcome`)
+    + `MinigameShell` (dark stage, instruction/hint, cancel, win-lose result screen) + a
+    `CatchMinigame` dispatcher keyed by `species.category` (fungus reskins plant). The catch flow
+    (App.tsx) passes `category` and one identical callback set; it never learns the mechanic table.
+  - ✅ Bird timing graduated onto the shell/contract; grade copy comes from a new tested core
+    (`lib/minigame/grade.ts`, `gradeFromScore` — 4 tests). Built on plain RN primitives
+    (setInterval + Pressable/PanResponder), **no new deps** (consistent with the shipped bird
+    game and the "no new dependencies" rule; reanimated deferred, not required for feel yet).
+  - ⚠️ Animation/layout not device-verified; scoring + grade mapping are unit-tested.
+- **T-070 · Fish minigame (rhythm & tension)** — *Claude · M · `DONE` · deps: T-069 · [GDD §4](GDD.md)*
   - ✅ `lib/minigame/rhythm.ts` (5 tests): `evaluateRhythm(inZoneTicks, totalTicks)` — land the
-    catch by holding the line in the sweet zone for ~60% of the fight. Component (reel bar) + T-069
-    framework remain.
-- **T-071 · Insect minigame (trace)** — *Claude · M · `IN-PROGRESS` (scoring core done; component pending) · deps: T-069 · [GDD §4](GDD.md)*
+    catch by holding the line in the sweet zone for ~60% of the fight.
+  - ✅ `components/minigame/FishReelMinigame.tsx`: press-and-hold reels a sweet-zone band up, gravity
+    sinks it; a fish drifts on a deterministic sine; each tick samples in-zone → `evaluateRhythm`. ⚠️ not device-verified.
+- **T-071 · Insect minigame (trace)** — *Claude · M · `DONE` · deps: T-069 · [GDD §4](GDD.md)*
   - ✅ `lib/minigame/trace.ts` (5 tests): `evaluateTrace(distances)` — follow the flight path;
-    a break is a sample past tolerance, forgiven up to an allowance. Component remains.
-- **T-072 · Mammal minigame (stealth)** — *Claude · M · `IN-PROGRESS` (scoring core done; component pending) · deps: T-069 · [GDD §4](GDD.md)*
+    a break is a sample past tolerance, forgiven up to an allowance.
+  - ✅ `components/minigame/TraceMinigame.tsx`: PanResponder tracks the finger; a butterfly flies a
+    deterministic figure-eight; per-tick finger↔target distance → `evaluateTrace`. ⚠️ not device-verified.
+- **T-072 · Mammal minigame (stealth)** — *Claude · M · `DONE` · deps: T-069 · [GDD §4](GDD.md)*
   - ✅ `lib/minigame/stealth.ts` (4 tests): `evaluateStealth(ticks)` — advance on safe ticks,
-    spotted if moving while alert, land by reaching the required progress. Component remains.
-- **T-073 · Plant/fungus minigame (spot & frame)** — *Claude · M · `IN-PROGRESS` (scoring core done; component pending) · deps: T-069 · [GDD §4](GDD.md)*
+    spotted if moving while alert, land by reaching the required progress.
+  - ✅ `components/minigame/StealthMinigame.tsx`: hold to creep, release to freeze; a telegraphed
+    calm→warn→alert cycle; per-tick {moving, alert} → `evaluateStealth`. ⚠️ not device-verified.
+- **T-073 · Plant/fungus minigame (spot & frame)** — *Claude · M · `DONE` · deps: T-069 · [GDD §4](GDD.md)*
   - ✅ `lib/minigame/frame.ts` (4 tests): `evaluateFrame(distanceFromCenter, targetRadius)` —
-    accuracy falls off linearly from the subject centre; land it above the threshold. Component remains.
+    accuracy falls off linearly from the subject centre; land it above the threshold.
+  - ✅ `components/minigame/FrameMinigame.tsx`: drag a reticle onto the subject among decoy
+    plants, then capture; reticle↔subject distance → `evaluateFrame`. ⚠️ not device-verified.
 
 ## F6.3 — Catch Resolution & Entitlement
 - **T-074 · Caught resolution + prime bonus + contextual protect tip** — *Claude · M · deps: T-069, T-052 · [GDD §4,§5](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*

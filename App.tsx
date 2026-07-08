@@ -5,7 +5,7 @@ import AlmanacScreen from './components/AlmanacScreen';
 import OnboardingFlow from './components/OnboardingFlow';
 import SpeciesCard from './components/SpeciesCard';
 import ThisWeekScreen from './components/ThisWeekScreen';
-import TimingRingMinigame from './components/minigame/TimingRingMinigame';
+import CatchMinigame from './components/minigame/CatchMinigame';
 import ProtectTip from './components/catch/ProtectTip';
 import FreeCatchSheet from './components/catch/FreeCatchSheet';
 import PledgeConfirm from './components/helped/PledgeConfirm';
@@ -153,7 +153,8 @@ export default function App() {
     const target = catching;
     return (
       <>
-        <TimingRingMinigame
+        <CatchMinigame
+          category={target.category}
           locale={locale}
           onCancel={() => setCatching(null)}
           onComplete={({ success }) => {
