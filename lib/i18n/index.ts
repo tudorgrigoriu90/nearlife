@@ -85,16 +85,35 @@ export const en = {
   'onboarding.firstSpotted.badge': 'Your first sighting!',
   'onboarding.firstSpotted.cta': 'Start exploring',
 
-  // Catch minigame — bird timing (T-033)
-  'minigame.instruction': 'Tap when the shrinking ring lines up with the target — that’s the dive.',
-  'minigame.tapHint': 'Tap anywhere',
+  // Catch minigames — shared result copy (T-069)
   'minigame.grade.perfect': 'Perfect!',
-  'minigame.grade.good': 'Nice timing!',
+  'minigame.grade.good': 'Nice one!',
   'minigame.grade.miss': 'Just missed',
   'minigame.success': 'Caught!',
   'minigame.fail': 'It got away',
   'minigame.continue': 'Continue',
   'minigame.cancel': 'Not now',
+  // Bird — timing (T-033/T-069)
+  'minigame.bird.instruction': 'Tap when the shrinking ring lines up with the target — that’s the dive.',
+  'minigame.bird.hint': 'Tap anywhere',
+  // Fish — rhythm & tension (T-070)
+  'minigame.fish.instruction': 'Hold to reel the line up; keep the fish inside the band.',
+  'minigame.fish.hint': 'Press and hold to reel',
+  // Insect — trace (T-071)
+  'minigame.insect.instruction': 'Keep your finger on it as it flies — don’t break the line.',
+  'minigame.insect.hint': 'Follow the flight path',
+  // Mammal — stealth (T-072)
+  'minigame.mammal.instruction': 'Creep closer while it grazes. Freeze the moment it looks up.',
+  'minigame.mammal.hint.moving': 'Release the moment it turns',
+  'minigame.mammal.hint.frozen': 'Hold to creep while it grazes',
+  'minigame.mammal.grazing': 'Grazing',
+  'minigame.mammal.turning': 'About to look up…',
+  'minigame.mammal.watching': 'Watching!',
+  'minigame.mammal.creeping': 'Creeping…',
+  'minigame.mammal.holdToCreep': 'Hold to creep',
+  // Plant / fungus — spot & frame (T-073)
+  'minigame.plant.instruction': 'Find it among the leaves and drag the frame onto it.',
+  'minigame.plant.capture': 'Frame it',
 
   // Catch flow + free-catch counter (T-034)
   'catch.remaining': '{count} free catches left this season',
@@ -208,16 +227,35 @@ const sv: Catalog = {
   'onboarding.firstSpotted.badge': 'Din första observation!',
   'onboarding.firstSpotted.cta': 'Börja utforska',
 
-  // Catch minigame — bird timing (T-033)
-  'minigame.instruction': 'Tryck när den krympande ringen möter målet – det är dyket.',
-  'minigame.tapHint': 'Tryck var som helst',
+  // Catch minigames — shared result copy (T-069)
   'minigame.grade.perfect': 'Perfekt!',
-  'minigame.grade.good': 'Bra tajming!',
+  'minigame.grade.good': 'Snyggt!',
   'minigame.grade.miss': 'Nästan',
   'minigame.success': 'Fångad!',
   'minigame.fail': 'Den kom undan',
   'minigame.continue': 'Fortsätt',
   'minigame.cancel': 'Inte nu',
+  // Bird — timing (T-033/T-069)
+  'minigame.bird.instruction': 'Tryck när den krympande ringen möter målet – det är dyket.',
+  'minigame.bird.hint': 'Tryck var som helst',
+  // Fish — rhythm & tension (T-070)
+  'minigame.fish.instruction': 'Håll för att veva upp linan; håll fisken inom bandet.',
+  'minigame.fish.hint': 'Tryck och håll för att veva',
+  // Insect — trace (T-071)
+  'minigame.insect.instruction': 'Håll fingret på den när den flyger – bryt inte linjen.',
+  'minigame.insect.hint': 'Följ flygbanan',
+  // Mammal — stealth (T-072)
+  'minigame.mammal.instruction': 'Smyg närmare medan den betar. Frys när den tittar upp.',
+  'minigame.mammal.hint.moving': 'Släpp så fort den vänder sig',
+  'minigame.mammal.hint.frozen': 'Håll för att smyga medan den betar',
+  'minigame.mammal.grazing': 'Betar',
+  'minigame.mammal.turning': 'Tittar snart upp…',
+  'minigame.mammal.watching': 'Vaksam!',
+  'minigame.mammal.creeping': 'Smyger…',
+  'minigame.mammal.holdToCreep': 'Håll för att smyga',
+  // Plant / fungus — spot & frame (T-073)
+  'minigame.plant.instruction': 'Hitta den bland löven och dra ramen över den.',
+  'minigame.plant.capture': 'Rama in',
 
   // Catch flow + free-catch counter (T-034)
   'catch.remaining': '{count} gratis fångster kvar denna säsong',
