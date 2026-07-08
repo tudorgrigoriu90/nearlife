@@ -688,8 +688,11 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - Device location resolved once to a region; **coordinates discarded**, only `home_region_id`
     stored; hometown locked (support-only change). No manual picker.
   - Location-denied → preview mode; hometown set on first grant.
-- **T-091 · Cell-level location storage only** — *Claude · S · deps: T-090 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [TSD §3](TSD.md)*
-  - Runtime location kept at H3-cell resolution; no precise lat/long trail retained.
+- **T-091 · Cell-level location storage only** — *Claude · S · `IN-PROGRESS` (cell core done; H3 + wiring pending) · deps: T-090 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [TSD §3](TSD.md)*
+  - ✅ `lib/cell.ts` (4 tests): `cellKey(coords, resolutionDeg)` snaps a location to a coarse grid
+    cell so no precise lat/long is retained (PRIVACY §1); tests assert nearby points share a cell
+    and the precise coordinates aren't exposed. Production swaps to H3 res 7–8 (T-043); wiring the
+    runtime catch-location through this remains.
 
 ## F10.3 — GDPR Rights
 - **T-092 · Data export endpoint** — *Claude · M · `DONE` (reachable + produces the bundle; file-share later) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
