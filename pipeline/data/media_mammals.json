@@ -1,0 +1,1586 @@
+{
+  "meta": {
+    "source": "Wikipedia + Wikimedia Commons",
+    "taxonFrom": "presence_mammalia.json",
+    "totalSpecies": 157,
+    "withImage": 155,
+    "withoutImage": 2,
+    "coveragePct": 98.7,
+    "byLicense": {
+      "CC BY-SA 3.0": 44,
+      "CC BY 2.0": 10,
+      "CC BY-SA 2.0 de": 2,
+      "CC BY 4.0": 4,
+      "CC BY-SA 4.0": 54,
+      "Public domain": 17,
+      "CC BY-SA 2.0": 10,
+      "CC BY 3.0": 5,
+      "CC0": 6,
+      "CC BY-SA 3.0 at": 1,
+      "CC BY-SA 2.5": 2
+    },
+    "note": "Commercial-safe licenses only (CC0/PD/CC BY/CC BY-SA); attribution recorded. Null imageUrl → app uses the category-emoji fallback. Binaries hosted on Supabase Storage at load time."
+  },
+  "media": [
+    {
+      "speciesKey": 2433753,
+      "scientificName": "Lutra lutra",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d3/Fischotter%2C_Lutra_Lutra.JPG",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Bernard Landgraf",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fischotter,_Lutra_Lutra.JPG",
+      "wikiTitle": "Eurasian otter"
+    },
+    {
+      "speciesKey": 8211070,
+      "scientificName": "Sciurus vulgaris",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Squirrel_posing.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Peter Trimming",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Squirrel_posing.jpg",
+      "wikiTitle": "Red squirrel"
+    },
+    {
+      "speciesKey": 5219616,
+      "scientificName": "Erinaceus europaeus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Erinaceus_europaeus_LC0119.jpg",
+      "license": "CC BY-SA 2.0 de",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/de/deed.en",
+      "author": "Jörg Hempel",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Erinaceus_europaeus_LC0119.jpg",
+      "wikiTitle": "European hedgehog"
+    },
+    {
+      "speciesKey": 2436756,
+      "scientificName": "Lepus timidus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Lepus_timidus_-_%D0%95%D0%B2%D0%B3%D0%B5%D0%BD%D0%B8%D0%B9_%D0%95%D0%B3%D0%BE%D1%80%D0%B5%D0%B9%D1%87%D0%B5%D0%BD%D0%BA%D0%BE%D0%B2_-_96446302.jpeg",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "author": "Евгений Егорейченков",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lepus_timidus_-_%D0%95%D0%B2%D0%B3%D0%B5%D0%BD%D0%B8%D0%B9_%D0%95%D0%B3%D0%BE%D1%80%D0%B5%D0%B9%D1%87%D0%B5%D0%BD%D0%BA%D0%BE%D0%B2_-_96446302.jpeg",
+      "wikiTitle": "Mountain hare"
+    },
+    {
+      "speciesKey": 5218823,
+      "scientificName": "Mustela vison",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/04/MinkforWiki.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Needsmoreritalin",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:MinkforWiki.jpg",
+      "wikiTitle": "American mink"
+    },
+    {
+      "speciesKey": 5220126,
+      "scientificName": "Capreolus capreolus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Roe_deer_%28Capreolus_capreolus%29_young_male_Cumnor.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Roe_deer_(Capreolus_capreolus)_young_male_Cumnor.jpg",
+      "wikiTitle": "Roe deer"
+    },
+    {
+      "speciesKey": 2440940,
+      "scientificName": "Alces alces",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Alaska_moose.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Paxson Woelber",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alaska_moose.jpg",
+      "wikiTitle": "Moose"
+    },
+    {
+      "speciesKey": 5219243,
+      "scientificName": "Vulpes vulpes",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d2/Portrait_of_a_red_fox_in_Rautas_fj%C3%A4llurskog_%28cropped%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "ClaudiaTen",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Portrait_of_a_red_fox_in_Rautas_fj%C3%A4llurskog_(cropped).jpg",
+      "wikiTitle": "Red fox"
+    },
+    {
+      "speciesKey": 2433433,
+      "scientificName": "Ursus arctos",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/71/2010-kodiak-bear-1.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Yathin S Krishnappa",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:2010-kodiak-bear-1.jpg",
+      "wikiTitle": "Brown bear"
+    },
+    {
+      "speciesKey": 5220114,
+      "scientificName": "Rangifer tarandus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Reinbukken_p%C3%A5_frisk_gr%C3%B8nt_beite._-_panoramio.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Are G Nilsen",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Reinbukken_p%C3%A5_frisk_gr%C3%B8nt_beite._-_panoramio.jpg",
+      "wikiTitle": "Reindeer"
+    },
+    {
+      "speciesKey": 5219073,
+      "scientificName": "Gulo gulo",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/86/J%C3%A4rv1.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Esquilo",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:J%C3%A4rv1.jpg",
+      "wikiTitle": "Wolverine"
+    },
+    {
+      "speciesKey": 4409131,
+      "scientificName": "Castor fiber",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cc/Beaver_pho34.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Per Harald Olsen",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beaver_pho34.jpg",
+      "wikiTitle": "Eurasian beaver"
+    },
+    {
+      "speciesKey": 2435240,
+      "scientificName": "Lynx lynx",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/49/Lynx_Nationalpark_Bayerischer_Wald_01.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Aconcagua (talk)",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lynx_Nationalpark_Bayerischer_Wald_01.jpg",
+      "wikiTitle": "Eurasian lynx"
+    },
+    {
+      "speciesKey": 5219019,
+      "scientificName": "Mustela erminea",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cf/R%C3%B8yskatt_%28Mustela_erminea_erminea%29%2C_Lista%2C_Norway.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Marton Berntsen, crop by User:MPF",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:R%C3%B8yskatt_(Mustela_erminea_erminea),_Lista,_Norway.jpg",
+      "wikiTitle": "Stoat"
+    },
+    {
+      "speciesKey": 2434552,
+      "scientificName": "Nyctereutes procyonoides",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/7f/%D0%84%D0%BD%D0%BE%D1%82%D0%BE%D0%B2%D0%B8%D0%B4%D0%BD%D0%B8%D0%B9_%D1%81%D0%BE%D0%B1%D0%B0%D0%BA%D0%B0_%28Nyctereutes_procyonoides%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Ryzhkov Sergey",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%84%D0%BD%D0%BE%D1%82%D0%BE%D0%B2%D0%B8%D0%B4%D0%BD%D0%B8%D0%B9_%D1%81%D0%BE%D0%B1%D0%B0%D0%BA%D0%B0_(Nyctereutes_procyonoides).jpg",
+      "wikiTitle": "Common raccoon dog"
+    },
+    {
+      "speciesKey": 5706764,
+      "scientificName": "Myodes glareolus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Bank_vole_%28Clethrionomys_glareolus%29_Drenthe.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bank_vole_(Clethrionomys_glareolus)_Drenthe.jpg",
+      "wikiTitle": "Bank vole"
+    },
+    {
+      "speciesKey": 5219840,
+      "scientificName": "Lemmus lemmus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Tunturisopuli_Lemmus_Lemmus.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "Argus fin",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tunturisopuli_Lemmus_Lemmus.jpg",
+      "wikiTitle": "Norway lemming"
+    },
+    {
+      "speciesKey": 8316400,
+      "scientificName": "Sorex araneus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Sorex-araneus.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Soricida",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sorex-araneus.jpg",
+      "wikiTitle": "Common shrew"
+    },
+    {
+      "speciesKey": 2433875,
+      "scientificName": "Meles meles",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1a/European_badger_%28Meles_meles_taxus%29_Drenthe.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:European_badger_(Meles_meles_taxus)_Drenthe.jpg",
+      "wikiTitle": "European badger"
+    },
+    {
+      "speciesKey": 5218987,
+      "scientificName": "Mustela nivalis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Mustela_nivalis_-British_Wildlife_Centre-4.jpg",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Keven Law",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mustela_nivalis_-British_Wildlife_Centre-4.jpg",
+      "wikiTitle": "Least weasel"
+    },
+    {
+      "speciesKey": 5218878,
+      "scientificName": "Martes martes",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Pine_Marten_%2848173751702%29.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "caroline legg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pine_Marten_(48173751702).jpg",
+      "wikiTitle": "European pine marten"
+    },
+    {
+      "speciesKey": 5219858,
+      "scientificName": "Ondatra zibethicus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/00/Muskrat_swimming_Ottawa.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "D. Gordon E. Robertson",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muskrat_swimming_Ottawa.jpg",
+      "wikiTitle": "Muskrat"
+    },
+    {
+      "speciesKey": 5706769,
+      "scientificName": "Myodes rufocanus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Myodes_rufocanus.jpeg",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "author": "Zbyszek Boratynski",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Myodes_rufocanus.jpeg",
+      "wikiTitle": "Grey red-backed vole"
+    },
+    {
+      "speciesKey": 5219173,
+      "scientificName": "Canis lupus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/68/Eurasian_wolf_2.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "User:Mas3cf",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eurasian_wolf_2.jpg",
+      "wikiTitle": "Wolf"
+    },
+    {
+      "speciesKey": 2438616,
+      "scientificName": "Microtus agrestis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Field_Vole_by_Bruce_McAdam.jpg",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Bruce McAdam",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Field_Vole_by_Bruce_McAdam.jpg",
+      "wikiTitle": "Short-tailed field vole"
+    },
+    {
+      "speciesKey": 4265185,
+      "scientificName": "Arvicola amphibius",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Water_Vole_on_Boot_Hill_%285592665124%29.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Peter Trimming from Croydon, England",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Water_Vole_on_Boot_Hill_(5592665124).jpg",
+      "wikiTitle": "European water vole"
+    },
+    {
+      "speciesKey": 2439261,
+      "scientificName": "Rattus norvegicus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Brown_rat_%28Rattus_norvegicus%29_Drenthe_2.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Brown_rat_(Rattus_norvegicus)_Drenthe_2.jpg",
+      "wikiTitle": "Brown rat"
+    },
+    {
+      "speciesKey": 2438635,
+      "scientificName": "Microtus oeconomus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/76/VOLE%2C_TUNDRA_%28microtus_oeconomus%29_%289-4-08%29_gambell%2C_ak_-2_%282834490753%29.jpg",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "ALAN SCHMIERER",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:VOLE,_TUNDRA_(microtus_oeconomus)_(9-4-08)_gambell,_ak_-2_(2834490753).jpg",
+      "wikiTitle": "Tundra vole"
+    },
+    {
+      "speciesKey": 2435767,
+      "scientificName": "Neomys fodiens",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/ea/Neomys_fodiens_%28Varsinais-Suomi%2C_Finland%29_1_%28cropped%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Håkan Söderholm",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Neomys_fodiens_(Varsinais-Suomi,_Finland)_1_(cropped).jpg",
+      "wikiTitle": "Eurasian water shrew"
+    },
+    {
+      "speciesKey": 7571319,
+      "scientificName": "Sorex minutus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Sorex_minutus.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Importé sur Commons par Salix. Sur Flikr par Polandeze",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sorex_minutus.jpg",
+      "wikiTitle": "Eurasian pygmy shrew"
+    },
+    {
+      "speciesKey": 5219369,
+      "scientificName": "Pusa hispida",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/33/Pusa_hispida_hispida_NOAA_1.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "NOAA Seal Survey",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pusa_hispida_hispida_NOAA_1.jpg",
+      "wikiTitle": "Ringed seal"
+    },
+    {
+      "speciesKey": 2434806,
+      "scientificName": "Halichoerus grypus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Focas_grises_%28Halichoerus_grypus%29%2C_playa_de_Horsey%2C_Norfolk%2C_Inglaterra%2C_2022-11-20%2C_DD_11.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Diego Delso",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Focas_grises_(Halichoerus_grypus),_playa_de_Horsey,_Norfolk,_Inglaterra,_2022-11-20,_DD_11.jpg",
+      "wikiTitle": "Grey seal"
+    },
+    {
+      "speciesKey": 5706762,
+      "scientificName": "Myodes rutilus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Red_backed_vole.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "Colin Canterbury/USFWS",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Red_backed_vole.jpg",
+      "wikiTitle": "Northern red-backed vole"
+    },
+    {
+      "speciesKey": 2435994,
+      "scientificName": "Sorex caecutiens",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Lappn%C3%A4bbmus_140621.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Deryni",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lappn%C3%A4bbmus_140621.jpg",
+      "wikiTitle": "Laxmann's shrew"
+    },
+    {
+      "speciesKey": 2439358,
+      "scientificName": "Myopus schisticolor",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Mets%C3%A4sopuli.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "Risto S. Pynnönen, user Pyntsi on fi.wikipedia",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mets%C3%A4sopuli.jpg",
+      "wikiTitle": "Wood lemming"
+    },
+    {
+      "speciesKey": 2432439,
+      "scientificName": "Myotis daubentonii",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/de/Myotis_daubentoni01.jpg",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Gilles San Martin from Namur, Belgium",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Myotis_daubentoni01.jpg",
+      "wikiTitle": "Daubenton's bat"
+    },
+    {
+      "speciesKey": 7429082,
+      "scientificName": "Mus musculus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Mouse_white_background.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "Unknown authorUnknown author (original) / Ilmari Karonen (editing)",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mouse_white_background.jpg",
+      "wikiTitle": "House mouse"
+    },
+    {
+      "speciesKey": 4262283,
+      "scientificName": "Alces americanus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Alaska_moose.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Paxson Woelber",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alaska_moose.jpg",
+      "wikiTitle": "Moose"
+    },
+    {
+      "speciesKey": 7705930,
+      "scientificName": "Sus scrofa",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d2/Wildschwein%2C_N%C3%A4he_Pulverstampftor_%28cropped%29.jpg",
+      "license": "CC BY-SA 3.0 at",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/at/deed.en",
+      "author": "Valentin Panzirsch",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wildschwein,_N%C3%A4he_Pulverstampftor_(cropped).jpg",
+      "wikiTitle": "Wild boar"
+    },
+    {
+      "speciesKey": 2440958,
+      "scientificName": "Cervus elaphus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Cervus_elaphus_Luc_Viatour_6.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Lviatour",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cervus_elaphus_Luc_Viatour_6.jpg",
+      "wikiTitle": "Red deer"
+    },
+    {
+      "speciesKey": 2441022,
+      "scientificName": "Bos taurus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Kim Hansen",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cow_(Fleckvieh_breed)_Oeschinensee_Slaunger_2009-07-07.jpg",
+      "wikiTitle": "Cattle"
+    },
+    {
+      "speciesKey": 7952072,
+      "scientificName": "Lepus europaeus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4e/European_hare_%28Lepus_europaeus%29_Marken_2.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:European_hare_(Lepus_europaeus)_Marken_2.jpg",
+      "wikiTitle": "European hare"
+    },
+    {
+      "speciesKey": 2440669,
+      "scientificName": "Phocoena phocoena",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Ecomare_-_bruinvis_Michael_in_2015_%28bruinvis-michael2015-9313-sw%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Ecomare/Salko de Wolf",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ecomare_-_bruinvis_Michael_in_2015_(bruinvis-michael2015-9313-sw).jpg",
+      "wikiTitle": "Harbour porpoise"
+    },
+    {
+      "speciesKey": 2435035,
+      "scientificName": "Felis catus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/15/Cat_August_2010-4.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Alvesgaspar",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cat_August_2010-4.jpg",
+      "wikiTitle": "Cat"
+    },
+    {
+      "speciesKey": 2437760,
+      "scientificName": "Apodemus sylvaticus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/11/ApodemusSylvaticus.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Christian Fischer",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:ApodemusSylvaticus.jpg",
+      "wikiTitle": "Wood mouse"
+    },
+    {
+      "speciesKey": 2437756,
+      "scientificName": "Apodemus flavicollis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/06/Apodemus.flavicollis.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "James Lindsey",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Apodemus.flavicollis.jpg",
+      "wikiTitle": "Yellow-necked mouse"
+    },
+    {
+      "speciesKey": 5219833,
+      "scientificName": "Micromys minutus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Micromysminutus1.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Hecke",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Micromysminutus1.jpg",
+      "wikiTitle": "Eurasian harvest mouse"
+    },
+    {
+      "speciesKey": 5218471,
+      "scientificName": "Pipistrellus nathusii",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/04/Pipistrellus_nathusii.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Mnolf",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_nathusii.jpg",
+      "wikiTitle": "Nathusius's pipistrelle"
+    },
+    {
+      "speciesKey": 2437394,
+      "scientificName": "Callosciurus erythraeus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/ea/Pallas%27s_squirrel_%28Callosciurus_erythraeus_thaiwanensis%29_Qianshan.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pallas%27s_squirrel_(Callosciurus_erythraeus_thaiwanensis)_Qianshan.jpg",
+      "wikiTitle": "Pallas's squirrel"
+    },
+    {
+      "speciesKey": 2435959,
+      "scientificName": "Sorex minutissimus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Sorex_minutissimus_Specimen.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Momotarou2012",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sorex_minutissimus_Specimen.jpg",
+      "wikiTitle": "Eurasian least shrew"
+    },
+    {
+      "speciesKey": 5219219,
+      "scientificName": "Canis aureus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/ee/033_Golden_jackal_in_Keoladeo_National_Park_Photo_by_Giles_Laurent.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Giles Laurent",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:033_Golden_jackal_in_Keoladeo_National_Park_Photo_by_Giles_Laurent.jpg",
+      "wikiTitle": "Golden jackal"
+    },
+    {
+      "speciesKey": 5218524,
+      "scientificName": "Nyctalus noctula",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Nyctalus_noctula.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Mnolf",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nyctalus_noctula.jpg",
+      "wikiTitle": "Common noctule"
+    },
+    {
+      "speciesKey": 2434793,
+      "scientificName": "Phoca vitulina",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/48/Common_seal_%28Phoca_vitulina%29_2.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Common_seal_(Phoca_vitulina)_2.jpg",
+      "wikiTitle": "Harbor seal"
+    },
+    {
+      "speciesKey": 5219681,
+      "scientificName": "Sciurus carolinensis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/15/EasternGraySquirrel_GAm.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "JeffreyGammon",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:EasternGraySquirrel_GAm.jpg",
+      "wikiTitle": "Eastern gray squirrel"
+    },
+    {
+      "speciesKey": 2434801,
+      "scientificName": "Pagophilus groenlandicus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/22/Harp_Seal_%28Pagophilus_groenlandicus%29%2C_Greenland_Sea_IMG_5075.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Brian Gratwicke from DC, USA",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Harp_Seal_(Pagophilus_groenlandicus),_Greenland_Sea_IMG_5075.jpg",
+      "wikiTitle": "Harp seal"
+    },
+    {
+      "speciesKey": 2436940,
+      "scientificName": "Oryctolagus cuniculus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Oryctolagus_cuniculus_-_euqirneto_-_419737670_%28cropped%29.jpeg",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "author": "euqirneto",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Oryctolagus_cuniculus_-_euqirneto_-_419737670_(cropped).jpeg",
+      "wikiTitle": "European rabbit"
+    },
+    {
+      "speciesKey": 4264680,
+      "scientificName": "Myocastor coypus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/88/Myocastor_coypus_02.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Petar Milošević",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Myocastor_coypus_02.jpg",
+      "wikiTitle": "Nutria"
+    },
+    {
+      "speciesKey": 5218887,
+      "scientificName": "Martes foina",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/46/Stone_marten_%28Martes_foina%29_Drenthe.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stone_marten_(Martes_foina)_Drenthe.jpg",
+      "wikiTitle": "Beech marten"
+    },
+    {
+      "speciesKey": 2441110,
+      "scientificName": "Ovis aries",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2c/Flock_of_sheep.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "Keith Weller",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Flock_of_sheep.jpg",
+      "wikiTitle": "Sheep"
+    },
+    {
+      "speciesKey": 5218911,
+      "scientificName": "Mustela putorius",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/17/Storm_the_polecat.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Peter Trimming",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Storm_the_polecat.jpg",
+      "wikiTitle": "European polecat"
+    },
+    {
+      "speciesKey": 2432564,
+      "scientificName": "Vespertilio murinus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Parti-coloured_bat_%28Vespertilio_murinus%29_Slovakia.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Parti-coloured_bat_(Vespertilio_murinus)_Slovakia.jpg",
+      "wikiTitle": "Parti-coloured bat"
+    },
+    {
+      "speciesKey": 7261875,
+      "scientificName": "Myotis brandtii",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Myotis_brandti.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Борисенко",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Myotis_brandti.jpg",
+      "wikiTitle": "Brandt's bat"
+    },
+    {
+      "speciesKey": 7261816,
+      "scientificName": "Eptesicus nilssonii",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Eptesicus_nilssoni.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Mnolf",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eptesicus_nilssoni.jpg",
+      "wikiTitle": "Northern bat"
+    },
+    {
+      "speciesKey": 2436016,
+      "scientificName": "Sorex isodon",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/33/Sorex_isodon.jpg",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "author": "Марат Адиев",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sorex_isodon.jpg",
+      "wikiTitle": "Taiga shrew"
+    },
+    {
+      "speciesKey": 5707150,
+      "scientificName": "Pipistrellus pygmaeus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/68/Pipistrellus_pygmaeus01.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Evgeniy Yakhontov",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_pygmaeus01.jpg",
+      "wikiTitle": "Soprano pipistrelle"
+    },
+    {
+      "speciesKey": 5220136,
+      "scientificName": "Dama dama",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f3/Fallow_deer_in_field.jpg",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Johann-Nikolaus Andreae",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fallow_deer_in_field.jpg",
+      "wikiTitle": "European fallow deer"
+    },
+    {
+      "speciesKey": 5218507,
+      "scientificName": "Plecotus auritus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Plecotus_auritus_2013-2_%28cropped%29.jpg",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Fourrure from France",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Plecotus_auritus_2013-2_(cropped).jpg",
+      "wikiTitle": "Brown long-eared bat"
+    },
+    {
+      "speciesKey": 2439658,
+      "scientificName": "Muscardinus avellanarius",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/ea/Haselmaus.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Danielle Schwarz",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Haselmaus.jpg",
+      "wikiTitle": "Hazel dormouse"
+    },
+    {
+      "speciesKey": 2439449,
+      "scientificName": "Sicista betulina",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/37/Sicista_betulina_03.JPG",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "AfroBrazilian",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sicista_betulina_03.JPG",
+      "wikiTitle": "Northern birch mouse"
+    },
+    {
+      "speciesKey": 2432389,
+      "scientificName": "Myotis nattereri",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Myotis_nattereri_%282862347369%29.jpg",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Gilles San Martin from Namur, Belgium",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Myotis_nattereri_(2862347369).jpg",
+      "wikiTitle": "Natterer's bat"
+    },
+    {
+      "speciesKey": 2432582,
+      "scientificName": "Barbastella barbastellus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Barbastella_barbastellus_01.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "C. Robiller / Naturlichter.de",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Barbastella_barbastellus_01.jpg",
+      "wikiTitle": "Western barbastelle"
+    },
+    {
+      "speciesKey": 2432452,
+      "scientificName": "Myotis dasycneme",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Myotis_dasycneme.jpg",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Gilles San Martin from Namur, Belgium",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Myotis_dasycneme.jpg",
+      "wikiTitle": "Pond bat"
+    },
+    {
+      "speciesKey": 5218465,
+      "scientificName": "Pipistrellus pipistrellus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/af/Pipistrellus_female-1.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Drahkrub",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_female-1.jpg",
+      "wikiTitle": "Common pipistrelle"
+    },
+    {
+      "speciesKey": 5218522,
+      "scientificName": "Nyctalus leisleri",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/08/Nyctalus_leisleri.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Manuel Werner, Nürtingen, AG Fledermausschutz Baden-Württemberg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nyctalus_leisleri.jpg",
+      "wikiTitle": "Lesser noctule"
+    },
+    {
+      "speciesKey": 7872906,
+      "scientificName": "Talpa europaea",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Talpa_europaea_MHNT.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Didier Descouens",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Talpa_europaea_MHNT.jpg",
+      "wikiTitle": "European mole"
+    },
+    {
+      "speciesKey": 10870120,
+      "scientificName": "Lepus europaeus x timidus",
+      "imageUrl": null
+    },
+    {
+      "speciesKey": 9754263,
+      "scientificName": "Myotis mystacinus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Whiskered_bat_%28Myotis_mystacinus%29_Rochovce.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Whiskered_bat_(Myotis_mystacinus)_Rochovce.jpg",
+      "wikiTitle": "Whiskered bat"
+    },
+    {
+      "speciesKey": 5218786,
+      "scientificName": "Procyon lotor",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Raccoon_in_Central_Park_%2835264%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Rhododendrites",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Raccoon_in_Central_Park_(35264).jpg",
+      "wikiTitle": "Raccoon"
+    },
+    {
+      "speciesKey": 5219404,
+      "scientificName": "Panthera leo",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a6/020_The_lion_king_Snyggve_in_the_Serengeti_National_Park_Photo_by_Giles_Laurent.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Giles Laurent",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:020_The_lion_king_Snyggve_in_the_Serengeti_National_Park_Photo_by_Giles_Laurent.jpg",
+      "wikiTitle": "Lion"
+    },
+    {
+      "speciesKey": 2432416,
+      "scientificName": "Myotis myotis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Myotis.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Urheber: Manuel Werner, Germany, Wikipedia-Kontakt: http://de.wikipedia.org/wiki/Benutzer:Werner,_Deutschland",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Myotis.jpg",
+      "wikiTitle": "Greater mouse-eared bat"
+    },
+    {
+      "speciesKey": 2437761,
+      "scientificName": "Apodemus agrarius",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/13/Myszarka_polna.jpg",
+      "license": "CC BY-SA 2.5",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+      "author": "Adrian Tync",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Myszarka_polna.jpg",
+      "wikiTitle": "Striped field mouse"
+    },
+    {
+      "speciesKey": 2432427,
+      "scientificName": "Myotis bechsteinii",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/10/Vespertilion_bechstein.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "Parc naturel régional des Vosges du Nord",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Vespertilion_bechstein.jpg",
+      "wikiTitle": "Bechstein's bat"
+    },
+    {
+      "speciesKey": 2440886,
+      "scientificName": "Equus caballus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/de/Nokota_Horses_cropped.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Nokota_Horses.jpg: François Marchal derivative work: Dana boomer (talk)",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nokota_Horses_cropped.jpg",
+      "wikiTitle": "Horse"
+    },
+    {
+      "speciesKey": 7964291,
+      "scientificName": "Felis silvestris",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d0/Felis_silvestris_silvestris_Luc_Viatour.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Lviatour",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Felis_silvestris_silvestris_Luc_Viatour.jpg",
+      "wikiTitle": "European wildcat"
+    },
+    {
+      "speciesKey": 2440934,
+      "scientificName": "Axis axis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/73/066_Chital_in_Ranthambore_National_Park_Photo_by_Giles_Laurent.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Giles Laurent",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:066_Chital_in_Ranthambore_National_Park_Photo_by_Giles_Laurent.jpg",
+      "wikiTitle": "Chital"
+    },
+    {
+      "speciesKey": 4827584,
+      "scientificName": "Homo neanderthalensis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3c/Neanderthal_at_AMNH.jpg",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Ryan Schwark",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Neanderthal_at_AMNH.jpg",
+      "wikiTitle": "Neanderthal"
+    },
+    {
+      "speciesKey": 4266346,
+      "scientificName": "Myotis alcathoe",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Myotis_alcathoe_-_Manuel_Ruedi_-_1_-_cropped.JPG",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Manuel Ruedi (Natural History Museum of Geneva)",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Myotis_alcathoe_-_Manuel_Ruedi_-_1_-_cropped.JPG",
+      "wikiTitle": "Alcathoe bat"
+    },
+    {
+      "speciesKey": 5218819,
+      "scientificName": "Odobenus rosmarus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/87/Walrus_in_the_Russian_Arctic_National_Park%2C_Novaya_Zemlya_2015-2.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Nixette",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Walrus_in_the_Russian_Arctic_National_Park,_Novaya_Zemlya_2015-2.jpg",
+      "wikiTitle": "Walrus"
+    },
+    {
+      "speciesKey": 2439270,
+      "scientificName": "Rattus rattus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a4/House_Rat_David_Raju.jpg",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Davidvraju",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:House_Rat_David_Raju.jpg",
+      "wikiTitle": "Black rat"
+    },
+    {
+      "speciesKey": 2440447,
+      "scientificName": "Tursiops truncatus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Tursiops_truncatus_01-cropped.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "NASA",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tursiops_truncatus_01-cropped.jpg",
+      "wikiTitle": "Common bottlenose dolphin"
+    },
+    {
+      "speciesKey": 2440412,
+      "scientificName": "Mesoplodon bidens",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/16/Mesoplodon_bidens_2.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Jörg Mazur",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mesoplodon_bidens_2.jpg",
+      "wikiTitle": "Sowerby's beaked whale"
+    },
+    {
+      "speciesKey": 5739437,
+      "scientificName": "Plecotus austriacus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/fd/Plecotus_austriacus2.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Andrei Sakhno",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Plecotus_austriacus2.jpg",
+      "wikiTitle": "Grey long-eared bat"
+    },
+    {
+      "speciesKey": 2437450,
+      "scientificName": "Tamias sibiricus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Streifenhoernchen.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "AndiW 10:51:45, 2005-09-04 (UTC)",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Streifenhoernchen.jpg",
+      "wikiTitle": "Siberian chipmunk"
+    },
+    {
+      "speciesKey": 2440483,
+      "scientificName": "Orcinus orca",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/37/Killerwhales_jumping.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "Robert Pittman",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Killerwhales_jumping.jpg",
+      "wikiTitle": "Orca"
+    },
+    {
+      "speciesKey": 8123917,
+      "scientificName": "Physeter macrocephalus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Mother_and_baby_sperm_whale.jpg",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Gabriel Barathieu",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mother_and_baby_sperm_whale.jpg",
+      "wikiTitle": "Sperm whale"
+    },
+    {
+      "speciesKey": 2440728,
+      "scientificName": "Balaenoptera acutorostrata",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a6/SBNMS_-_Minke_Whale_-_Breach_%2828670557361%29.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "National Marine Sanctuaries",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:SBNMS_-_Minke_Whale_-_Breach_(28670557361).jpg",
+      "wikiTitle": "Common minke whale"
+    },
+    {
+      "speciesKey": 8324617,
+      "scientificName": "Delphinus delphis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/74/Common_dolphin_noaa.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "NOAA NMFS",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Common_dolphin_noaa.jpg",
+      "wikiTitle": "Common dolphin"
+    },
+    {
+      "speciesKey": 2440704,
+      "scientificName": "Eschrichtius robustus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/00/Ballena_gris_adulta_con_su_ballenato.jpg",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "author": "José Eugenio Gómez Rodríguez",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ballena_gris_adulta_con_su_ballenato.jpg",
+      "wikiTitle": "Gray whale"
+    },
+    {
+      "speciesKey": 2441184,
+      "scientificName": "Bison bonasus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/59/European_bison_%28Bison_bonasus%29_male_Bia%C5%82owieza.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:European_bison_(Bison_bonasus)_male_Bia%C5%82owieza.jpg",
+      "wikiTitle": "European bison"
+    },
+    {
+      "speciesKey": 2440965,
+      "scientificName": "Odocoileus virginianus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b7/White-tailed_deer.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "USDA photo by Scott Bauer",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:White-tailed_deer.jpg",
+      "wikiTitle": "White-tailed deer"
+    },
+    {
+      "speciesKey": 5219556,
+      "scientificName": "Mandrillus sphinx",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Mandrill_Albert_September_2015_Zoo_Berlin_%282%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Katma0601",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mandrill_Albert_September_2015_Zoo_Berlin_(2).jpg",
+      "wikiTitle": "Mandrill"
+    },
+    {
+      "speciesKey": 2436566,
+      "scientificName": "Chlorocebus aethiops",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/60/Grivet_%28Chlorocebus_aethiops%29_head_2.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grivet_(Chlorocebus_aethiops)_head_2.jpg",
+      "wikiTitle": "Grivet"
+    },
+    {
+      "speciesKey": 2436603,
+      "scientificName": "Macaca fascicularis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Ubud_Monkey_Family.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Deerpeter",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ubud_Monkey_Family.jpg",
+      "wikiTitle": "Macaca fascicularis"
+    },
+    {
+      "speciesKey": 2437258,
+      "scientificName": "Pteromys volans",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/18/Pteromys_volans_292232567.jpg",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "author": "Andrew Bazdyrev",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pteromys_volans_292232567.jpg",
+      "wikiTitle": "Siberian flying squirrel"
+    },
+    {
+      "speciesKey": 5219542,
+      "scientificName": "Callithrix jacchus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/23/Wei%C3%9Fb%C3%BCschelaffe_%28Callithrix_jacchus%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Raimond Spekking",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wei%C3%9Fb%C3%BCschelaffe_(Callithrix_jacchus).jpg",
+      "wikiTitle": "Common marmoset"
+    },
+    {
+      "speciesKey": 9198359,
+      "scientificName": "Galago senegalensis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Galago_senegalensis.jpg",
+      "license": "CC BY-SA 2.5",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+      "author": "OpenCage",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Galago_senegalensis.jpg",
+      "wikiTitle": "Senegal bushbaby"
+    },
+    {
+      "speciesKey": 5219598,
+      "scientificName": "Procavia capensis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/92/Rock_hyrax_Serengeti_National_Park.jpg",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Naturedata",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rock_hyrax_Serengeti_National_Park.jpg",
+      "wikiTitle": "Rock hyrax"
+    },
+    {
+      "speciesKey": 2433395,
+      "scientificName": "Melursus ursinus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/46/Sloth_bear_stand.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "https://www.flickr.com/photos/mape_s/ mape_s",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sloth_bear_stand.jpg",
+      "wikiTitle": "Sloth bear"
+    },
+    {
+      "speciesKey": 2433536,
+      "scientificName": "Nasua nasua",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9d/Nasenbaer_Nasua_nasua_Zoo_Augsburg-04.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Rufus46",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nasenbaer_Nasua_nasua_Zoo_Augsburg-04.jpg",
+      "wikiTitle": "South American coati"
+    },
+    {
+      "speciesKey": 2436604,
+      "scientificName": "Macaca mulatta",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Rhesus_macaque_%28Macaca_mulatta_mulatta%29%2C_male%2C_Gokarna.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rhesus_macaque_(Macaca_mulatta_mulatta),_male,_Gokarna.jpg",
+      "wikiTitle": "Rhesus macaque"
+    },
+    {
+      "speciesKey": 2436637,
+      "scientificName": "Cebus capucinus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Cebus_capucinus_at_the_Bronx_Zoo_001.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Postdlf",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cebus_capucinus_at_the_Bronx_Zoo_001.jpg",
+      "wikiTitle": "Colombian white-faced capuchin"
+    },
+    {
+      "speciesKey": 2441238,
+      "scientificName": "Camelus bactrianus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Camelus_bactrianus_%2855026866188%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Christian Ursilva from Copenhagen, Denmark",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Camelus_bactrianus_(55026866188).jpg",
+      "wikiTitle": "Bactrian camel"
+    },
+    {
+      "speciesKey": 2435357,
+      "scientificName": "Dasyurus viverrinus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Eastern_quoll_%28Dasyurus_viverrinus%29_fawn_morph_Esk_Valley.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eastern_quoll_(Dasyurus_viverrinus)_fawn_morph_Esk_Valley.jpg",
+      "wikiTitle": "Eastern quoll"
+    },
+    {
+      "speciesKey": 2436626,
+      "scientificName": "Loris tardigradus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/80/Loris_tardigradus_tardigradus_001.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Dr. K.A.I. Nekaris",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Loris_tardigradus_tardigradus_001.jpg",
+      "wikiTitle": "Red slender loris"
+    },
+    {
+      "speciesKey": 2436645,
+      "scientificName": "Ateles paniscus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/88/A._paniscus_Zoo_SP.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Miguelrangeljr",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:A._paniscus_Zoo_SP.jpg",
+      "wikiTitle": "Red-faced spider monkey"
+    },
+    {
+      "speciesKey": 2440891,
+      "scientificName": "Equus asinus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Donkey_in_Clovelly%2C_North_Devon%2C_England.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "Adrian Pingstone",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Donkey_in_Clovelly,_North_Devon,_England.jpg",
+      "wikiTitle": "Donkey"
+    },
+    {
+      "speciesKey": 2433573,
+      "scientificName": "Potos flavus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/31/Potos_flavus_%288973438737%29.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Dick Culbert from Gibsons, B.C., Canada",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Potos_flavus_(8973438737).jpg",
+      "wikiTitle": "Kinkajou"
+    },
+    {
+      "speciesKey": 2436544,
+      "scientificName": "Cercocebus torquatus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/08/Rotscheitelmangabe_Cercocebus_torquatus_Tierpark_Hellabrunn-1.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Rufus46",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rotscheitelmangabe_Cercocebus_torquatus_Tierpark_Hellabrunn-1.jpg",
+      "wikiTitle": "Collared mangabey"
+    },
+    {
+      "speciesKey": 5219569,
+      "scientificName": "Cercopithecus ascanius",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/df/Red-tailed_monkey_%28Cercopithecus_ascanius%29%2C_Semliki_Wildlife_Reserve.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Red-tailed_monkey_(Cercopithecus_ascanius),_Semliki_Wildlife_Reserve.jpg",
+      "wikiTitle": "Red-tailed monkey"
+    },
+    {
+      "speciesKey": 2436616,
+      "scientificName": "Macaca nigra",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Kuifmakaak_%288721744168%29.jpg",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Tim Strater from Rotterdam, Nederland",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kuifmakaak_(8721744168).jpg",
+      "wikiTitle": "Celebes crested macaque"
+    },
+    {
+      "speciesKey": 5219628,
+      "scientificName": "Manis javanica",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/42/Pangolin_borneo.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Piekfrosch at German Wikipedia (Original text: Piekfrosch (Wikipedia-User))",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pangolin_borneo.jpg",
+      "wikiTitle": "Sunda pangolin"
+    },
+    {
+      "speciesKey": 5707341,
+      "scientificName": "Papio anubis",
+      "imageUrl": null
+    },
+    {
+      "speciesKey": 2436638,
+      "scientificName": "Cebus olivaceus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a5/C._olivaceus_Zoo_SP_2.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Miguelrangeljr",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:C._olivaceus_Zoo_SP_2.jpg",
+      "wikiTitle": "Wedge-capped capuchin"
+    },
+    {
+      "speciesKey": 7262034,
+      "scientificName": "Chlorocebus pygerythrus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Cercopiteco_verde_%28Chlorocebus_pygerythrus%29%2C_parque_nacional_del_lago_Nakuru%2C_Kenia%2C_2024-05-18%2C_DD_77.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Diego Delso",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cercopiteco_verde_(Chlorocebus_pygerythrus),_parque_nacional_del_lago_Nakuru,_Kenia,_2024-05-18,_DD_77.jpg",
+      "wikiTitle": "Vervet monkey"
+    },
+    {
+      "speciesKey": 2436648,
+      "scientificName": "Alouatta seniculus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/70/Alouatta_seniculus_Sorocaba.JPG",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Miguelrangeljr",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alouatta_seniculus_Sorocaba.JPG",
+      "wikiTitle": "Colombian red howler"
+    },
+    {
+      "speciesKey": 5220086,
+      "scientificName": "Megaptera novaeangliae",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/61/Humpback_Whale_underwater_shot.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Humpback_Whale_underwater_shot.jpg",
+      "wikiTitle": "Humpback whale"
+    },
+    {
+      "speciesKey": 2436636,
+      "scientificName": "Cebus albifrons",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Macaco_caiarara_%28Cebus_albifrons%29_com_filhote.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Nortondefeis",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Macaco_caiarara_(Cebus_albifrons)_com_filhote.jpg",
+      "wikiTitle": "Humboldt's white-fronted capuchin"
+    },
+    {
+      "speciesKey": 5219436,
+      "scientificName": "Panthera pardus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/70/African_leopard_male_%28cropped%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Sumeet Moghe",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:African_leopard_male_(cropped).jpg",
+      "wikiTitle": "Leopard"
+    },
+    {
+      "speciesKey": 2436412,
+      "scientificName": "Lemur catta",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Ring-tailed_lemur_%28Lemur_catta%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ring-tailed_lemur_(Lemur_catta).jpg",
+      "wikiTitle": "Ring-tailed lemur"
+    },
+    {
+      "speciesKey": 2436564,
+      "scientificName": "Semnopithecus entellus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/25/Northern_plains_gray_langur.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Rajeev minj",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Northern_plains_gray_langur.jpg",
+      "wikiTitle": "Northern plains gray langur"
+    },
+    {
+      "speciesKey": 2436548,
+      "scientificName": "Erythrocebus patas",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c6/Patas_Monkey.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Sanjay Acharya",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Patas_Monkey.jpg",
+      "wikiTitle": "Common patas monkey"
+    },
+    {
+      "speciesKey": 2434286,
+      "scientificName": "Herpestes edwardsi",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Herpestes_edwardsii_at_Hyderaba.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "J.M.Garg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Herpestes_edwardsii_at_Hyderaba.jpg",
+      "wikiTitle": "Indian grey mongoose"
+    },
+    {
+      "speciesKey": 2436611,
+      "scientificName": "Macaca nemestrina",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Southern_Pig-tailed_Macaque_-_Shreeram_MV.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Mvshreeram",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Southern_Pig-tailed_Macaque_-_Shreeram_MV.jpg",
+      "wikiTitle": "Southern pig-tailed macaque"
+    },
+    {
+      "speciesKey": 5219586,
+      "scientificName": "Papio hamadryas",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cb/Papio_hamadryas_pair.jpg",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "author": "Manuel González Olaechea y Franco",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Papio_hamadryas_pair.jpg",
+      "wikiTitle": "Hamadryas baboon"
+    },
+    {
+      "speciesKey": 5707338,
+      "scientificName": "Papio papio",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Male_Guinea_Baboon_in_Nuremberg_Zoo.jpg",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "Jakub Friedl from Prague, Czechia",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Male_Guinea_Baboon_in_Nuremberg_Zoo.jpg",
+      "wikiTitle": "Guinea baboon"
+    },
+    {
+      "speciesKey": 8008808,
+      "scientificName": "Carlito syrichta",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Philippine_tarsier_%28Carlito_syrichta_fraterculus%29_Bohol.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Philippine_tarsier_(Carlito_syrichta_fraterculus)_Bohol.jpg",
+      "wikiTitle": "Philippine tarsier"
+    },
+    {
+      "speciesKey": 2441056,
+      "scientificName": "Capra hircus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Hausziege_04.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Kuebi = Armin Kübelbeck",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hausziege_04.jpg",
+      "wikiTitle": "Goat"
+    },
+    {
+      "speciesKey": 5219702,
+      "scientificName": "Cavia porcellus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/30/George_the_amazing_guinea_pig.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:George_the_amazing_guinea_pig.jpg",
+      "wikiTitle": "Guinea pig"
+    },
+    {
+      "speciesKey": 2436794,
+      "scientificName": "Lepus americanus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Lepus_americanus_5459_cropped.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Lepus_americanus_5459.JPG: Walter Siegmund (talk) derivative work: Wsiegmund",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lepus_americanus_5459_cropped.jpg",
+      "wikiTitle": "Snowshoe hare"
+    },
+    {
+      "speciesKey": 5219303,
+      "scientificName": "Vulpes lagopus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Vulpes_lagopus_in_Iceland_%28cropped_3%29.jpg",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "Jonathen Pie https://unsplash.com/@r3dmax",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Vulpes_lagopus_in_Iceland_(cropped_3).jpg",
+      "wikiTitle": "Arctic fox"
+    },
+    {
+      "speciesKey": 5220003,
+      "scientificName": "Delphinapterus leucas",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Oceanogr%C3%A0fic_29102004.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Javier Yaya Tur / CIUDAD DE LAS ARTES Y LAS CIENCIAS from Valencia, España",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Oceanogr%C3%A0fic_29102004.jpg",
+      "wikiTitle": "Beluga whale"
+    },
+    {
+      "speciesKey": 2440596,
+      "scientificName": "Globicephala melas",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/85/Pilot_Whale_-_Flickr_-_gailhampshire.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "author": "gailhampshire from Cradley, Malvern, U.K",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pilot_Whale_-_Flickr_-_gailhampshire.jpg",
+      "wikiTitle": "Long-finned pilot whale"
+    },
+    {
+      "speciesKey": 5220081,
+      "scientificName": "Lagenorhynchus albirostris",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f5/White-beaked_dolphins_%28Lagenorhynchus_albirostris%29_bow-riding_Eyjafjordur.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:White-beaked_dolphins_(Lagenorhynchus_albirostris)_bow-riding_Eyjafjordur.jpg",
+      "wikiTitle": "White-beaked dolphin"
+    },
+    {
+      "speciesKey": 2440440,
+      "scientificName": "Pseudorca crassidens",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/99/Pseudoorca_Crassidens_-_False_Killer_Whale.jpg",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "author": "Stefan Thiesen Buntrabe",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pseudoorca_Crassidens_-_False_Killer_Whale.jpg",
+      "wikiTitle": "False killer whale"
+    },
+    {
+      "speciesKey": 2441122,
+      "scientificName": "Ovis ammon",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Ovis_ammon_%28cropped%29.jpg",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "author": "James Eaton",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ovis_ammon_(cropped).jpg",
+      "wikiTitle": "Argali"
+    },
+    {
+      "speciesKey": 9542814,
+      "scientificName": "Ovis gmelini",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2c/Cyprus_mouflon_%28Ovis_gmelini_ophion%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cyprus_mouflon_(Ovis_gmelini_ophion).jpg",
+      "wikiTitle": "Mouflon"
+    },
+    {
+      "speciesKey": 2441108,
+      "scientificName": "Ovibos moschatus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/ca/Muskox_%28Ovibos_moschatus%29_male_Dovrefjell_4.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Charles J. Sharp",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muskox_(Ovibos_moschatus)_male_Dovrefjell_4.jpg",
+      "wikiTitle": "Muskox"
+    },
+    {
+      "speciesKey": 5218464,
+      "scientificName": "Pipistrellus kuhlii",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Pipistrellus_kuhlii_adult.jpg",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "author": "Leonardoancillotto86",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_kuhlii_adult.jpg",
+      "wikiTitle": "Kuhl's pipistrelle"
+    },
+    {
+      "speciesKey": 5219683,
+      "scientificName": "Sciurus niger",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/41/Fox_Squirrel_%2814539535789%29.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "USFWS Mountain-Prairie",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fox_Squirrel_(14539535789).jpg",
+      "wikiTitle": "Fox squirrel"
+    },
+    {
+      "speciesKey": 2440892,
+      "scientificName": "Equus quagga",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/45/Equus_quagga_burchellii_-_Etosha%2C_2014.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Yathin S Krishnappa",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Equus_quagga_burchellii_-_Etosha,_2014.jpg",
+      "wikiTitle": "Plains zebra"
+    },
+    {
+      "speciesKey": 9055455,
+      "scientificName": "Camelus dromedarius",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Camelus_dromedarius_in_Nuweiba.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Florian Prischl",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Camelus_dromedarius_in_Nuweiba.jpg",
+      "wikiTitle": "Dromedary"
+    },
+    {
+      "speciesKey": 5220190,
+      "scientificName": "Lama glama",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Llamas%2C_Vernagt-Stausee%2C_Italy.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Andrija12345678",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Llamas,_Vernagt-Stausee,_Italy.jpg",
+      "wikiTitle": "Llama"
+    },
+    {
+      "speciesKey": 5220055,
+      "scientificName": "Stenella coeruleoalba",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Stenella_coeruleoalba_Ligurian_Sea_02_-_brighter.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Wanax01",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stenella_coeruleoalba_Ligurian_Sea_02_-_brighter.jpg",
+      "wikiTitle": "Striped dolphin"
+    },
+    {
+      "speciesKey": 2440339,
+      "scientificName": "Eubalaena glacialis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/94/GRNMS_-_Right_Whales_%2831361234602%29.jpg",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "author": "National Marine Sanctuaries",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:GRNMS_-_Right_Whales_(31361234602).jpg",
+      "wikiTitle": "North Atlantic right whale"
+    },
+    {
+      "speciesKey": 2438606,
+      "scientificName": "Microtus arvalis",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/10/Feldmaus_Microtus_arvalis.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Dieter TD, first upload in de wikipedia on 13:31, 28. Apr 2005 by Dieter TD",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Feldmaus_Microtus_arvalis.jpg",
+      "wikiTitle": "Common vole"
+    },
+    {
+      "speciesKey": 5220073,
+      "scientificName": "Lagenorhynchus acutus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Atlantic_white-sided_dolphin.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Anna",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Atlantic_white-sided_dolphin.jpg",
+      "wikiTitle": "Atlantic white-sided dolphin"
+    },
+    {
+      "speciesKey": 2436436,
+      "scientificName": "Homo sapiens",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/68/Akha_cropped_hires.JPG",
+      "license": "CC BY-SA 2.0 de",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/de/deed.en",
+      "author": "Weltenbummler84",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Akha_cropped_hires.JPG",
+      "wikiTitle": "Human"
+    }
+  ]
+}
