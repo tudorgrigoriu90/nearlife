@@ -17,9 +17,18 @@ export interface LocalizedSpecies {
   commonName: string;
 }
 
+/** A species' presence in a region: the months it's recorded there + observation count (TSD §4). */
+export interface RegionPresence {
+  speciesId: string;
+  activeMonths: number[];
+  occurrences: number;
+}
+
 export interface SpeciesRepository {
   listSpecies(locale: Locale): Promise<LocalizedSpecies[]>;
   getContent(speciesId: string, locale: Locale): Promise<SpeciesContent | null>;
+  /** Per-region presence (from `species_presence`); drives This Week + the notification engine. */
+  regionPresence(regionId: string): Promise<RegionPresence[]>;
 }
 
 /** The bundled curated data (default source until the app reads from the DB). */
@@ -32,6 +41,11 @@ export class HardcodedSpeciesRepository implements SpeciesRepository {
 
   async getContent(speciesId: string, locale: Locale): Promise<SpeciesContent | null> {
     return contentFor(speciesId, locale) ?? null;
+  }
+
+  // The bundled set is Kronoberg-only; presence is each species' curated active window.
+  async regionPresence(_regionId: string): Promise<RegionPresence[]> {
+    return this.species.map((s) => ({ speciesId: s.id, activeMonths: s.activeMonths, occurrences: 0 }));
   }
 }
 
@@ -54,6 +68,20 @@ export interface SpeciesContentRow {
   when_how: string;
   give: string;
   protect: string;
+}
+
+export interface PresenceRow {
+  species_id: string;
+  active_months: number[];
+  occurrences: number;
+}
+
+export function presenceRowToPresence(row: PresenceRow): RegionPresence {
+  return {
+    speciesId: row.species_id,
+    activeMonths: [...row.active_months].sort((a, b) => a - b),
+    occurrences: row.occurrences,
+  };
 }
 
 export function speciesRowToSpecies(row: SpeciesRow): Species {
@@ -81,6 +109,7 @@ export function contentRowToContent(row: SpeciesContentRow): SpeciesContent {
 export interface SpeciesGateway {
   fetchSpecies(): Promise<SpeciesRow[]>;
   fetchContent(speciesId: string, locale: string): Promise<SpeciesContentRow | null>;
+  fetchPresence(regionId: string): Promise<PresenceRow[]>;
 }
 
 export class SupabaseSpeciesRepository implements SpeciesRepository {
@@ -101,6 +130,10 @@ export class SupabaseSpeciesRepository implements SpeciesRepository {
       (await this.gateway.fetchContent(speciesId, locale)) ??
       (locale === 'en' ? null : await this.gateway.fetchContent(speciesId, 'en'));
     return row ? contentRowToContent(row) : null;
+  }
+
+  async regionPresence(regionId: string): Promise<RegionPresence[]> {
+    return (await this.gateway.fetchPresence(regionId)).map(presenceRowToPresence);
   }
 }
 
@@ -125,5 +158,14 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
       .maybeSingle();
     if (error) throw new Error(`species_content fetch failed: ${error.message}`);
     return (data as SpeciesContentRow | null) ?? null;
+  }
+
+  async fetchPresence(regionId: string): Promise<PresenceRow[]> {
+    const { data, error } = await this.client
+      .from('species_presence')
+      .select('species_id,active_months,occurrences')
+      .eq('region_id', regionId);
+    if (error) throw new Error(`species_presence fetch failed: ${error.message}`);
+    return (data ?? []) as PresenceRow[];
   }
 }

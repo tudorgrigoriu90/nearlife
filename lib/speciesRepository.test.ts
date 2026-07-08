@@ -59,6 +59,10 @@ describe('SupabaseSpeciesRepository', () => {
   const gateway: SpeciesGateway = {
     fetchSpecies: async () => speciesRows,
     fetchContent: async (id, locale) => contentRows[`${id}|${locale}`] ?? null,
+    fetchPresence: async (regionId) =>
+      regionId === 'SWE.9_1'
+        ? [{ species_id: 'pike', active_months: [6, 5], occurrences: 42 }]
+        : [],
   };
   const repo = new SupabaseSpeciesRepository(gateway);
 
@@ -76,5 +80,11 @@ describe('SupabaseSpeciesRepository', () => {
 
   it('returns null when neither the locale nor English has content', async () => {
     expect(await repo.getContent('ghost', 'sv')).toBeNull();
+  });
+
+  it('reads region presence and sorts the active months', async () => {
+    const presence = await repo.regionPresence('SWE.9_1');
+    expect(presence).toEqual([{ speciesId: 'pike', activeMonths: [5, 6], occurrences: 42 }]);
+    expect(await repo.regionPresence('SWE.13_1')).toEqual([]);
   });
 });
