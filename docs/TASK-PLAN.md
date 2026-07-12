@@ -664,9 +664,15 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
 ([GDD §7](GDD.md)). The pull surface is the priority lever; the rest layer on.
 
 ## F8.1 — This Week (production)
-- **T-078 · "Active this week" (production)** — *Claude · M · deps: T-044, T-057 · [USER-FLOWS §3](USER-FLOWS.md), [TSD §4b](TSD.md)*
+- **T-078 · "Active this week" (production)** — *Claude · M · `DONE` · deps: T-044, T-057 · [USER-FLOWS §3](USER-FLOWS.md), [TSD §4b](TSD.md)*
   - Real query on `cell_species_month`; ordered new-first then rarity; works without
     notifications; quiet-week and location-off states.
+  - ✅ `lib/thisWeekProduction.ts`: `thisWeekFromPresence(presence, month, collected)` reads live
+    `species_presence` (region is the interim for the per-cell query), season-gates, and orders
+    new-first then rarer-first (observation count as rarity flavour — fewer occurrences ranks
+    earlier). The two empty states are first-class result variants (`location-off` when no region
+    resolves, `quiet` when nothing is active) so the screen never infers them from an empty array.
+    Notification-independent (pure read). 6 tests.
 
 ## F8.2 — Seasonal & Events
 - **T-079 · Seasonal window handling** — *Claude · M · deps: T-044 · [GDD §7](GDD.md)*
