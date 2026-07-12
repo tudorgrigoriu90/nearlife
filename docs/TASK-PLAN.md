@@ -570,9 +570,16 @@ per-month probabilities, honest and fully tunable ([TSD §4](TSD.md)).
     more-observed species surface more, but log-compression keeps the long tail in play (not "all
     sparrows"), and the `+1` floor lets active-but-unquantified species still be picked. Flavour is
     observation-frequency (honest copy, inv. #1). Injectable `Rng` for deterministic tests.
-- **T-063 · Cadence, quiet hours, prefs + delivery logging** — *Claude · M · deps: T-062, T-032 · [TSD §4](TSD.md)*
+- **T-063 · Cadence, quiet hours, prefs + delivery logging** — *Claude · M · `IN-PROGRESS` (engine core done + tested; Edge Function wiring pending T-030/T-032 live infra) · deps: T-062, T-032 · [TSD §4](TSD.md)*
   - Frequency cap, quiet hours, notif prefs respected; every send logged
     (delivered/opened/collected) for analytics.
+  - ✅ `lib/notificationEngine.ts`: `decideNotification(user)` composes the tested parts into one
+    decision — master opt-in → cadence/quiet-hours gate (T-131) → season-gated weighted selection
+    (T-062). Cadence runs before selection so a blocked user costs no candidate work. `SkipReason`
+    surfaces exactly why a cycle sent nothing. `recordDelivery` emits `notification_delivered` for
+    the funnel (consent gating stays the tracker's concern). Pure/clock-free; deterministic `Rng`.
+  - ⏳ Remaining: run this from the scheduled Edge Function (T-064) and persist the delivery log +
+    opened/collected — blocked on the Edge Function runtime (T-030/T-032, live infra).
 - **T-064 · Schedule via pg_cron → Edge Function** — *Claude · S · deps: T-063, T-017 · [TSD §4](TSD.md)*
   - Engine runs on schedule server-side; no client dependency; observable/retryable.
 
