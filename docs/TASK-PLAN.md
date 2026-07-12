@@ -687,8 +687,14 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
     Notification-independent (pure read). 6 tests.
 
 ## F8.2 — Seasonal & Events
-- **T-079 · Seasonal window handling** — *Claude · M · deps: T-044 · [GDD §7](GDD.md)*
+- **T-079 · Seasonal window handling** — *Claude · M · `DONE` · deps: T-044 · [GDD §7](GDD.md)*
   - Migrants only catchable when genuinely passing through; season is a hard constraint.
+  - ✅ `lib/seasonalWindow.ts`: `catchableThisMonth`/`isInSeason` is the hard catch-time gate — a
+    migrant not currently in-window can't be caught even at a habitat spot. `seasonWindow` also
+    classifies migrant vs resident (window ≤ `MIGRANT_MAX_WINDOW_MONTHS`) and returns
+    `monthsUntilOpen` (year-boundary-wrapping) so copy can say "expected back around <month>"
+    honestly rather than implying presence (invariant #1). Windows come from region `activeMonths`
+    (interim for T-044's per-cell windows — a data swap, not a code change). 7 tests.
 - **T-080 · Live events** — *Claude · M · `IN-PROGRESS` (calendar core done; surfacing UI pending) · deps: T-079 · [GDD §7](GDD.md)*
   - ✅ `lib/liveEvents.ts` (3 tests): `KRONOBERG_EVENTS` (first-swift-of-spring, salmon run,
     mushroom bloom, first frost) with honest month windows; `activeEvents(date)`/`isEventActive`.
