@@ -562,9 +562,14 @@ per-month probabilities, honest and fully tunable ([TSD §4](TSD.md)).
     season gate (`activeMonths.includes(month)`) and dedupes against the collection. Consumes
     `RegionPresence` (live `species_presence`); region is the interim for the per-H3 cell, so
     swapping in `cell_species_month` later is a data change, not a code change. Pure + unit-tested.
-- **T-062 · Weighted sampling + dedupe** — *Claude · M · deps: T-061 · [TSD §4](TSD.md)*
+- **T-062 · Weighted sampling + dedupe** — *Claude · M · `DONE` · deps: T-061 · [TSD §4](TSD.md)*
   - Weight `w = presence_prob × rarity_flavor`; dedupe against collection; sample one.
   - `rarity_flavor` documented as observation-frequency, phrased honestly in copy.
+  - ✅ `lib/presenceNotification.ts`: `selectFromPresence` runs the T-061 candidate resolver then
+    weighted-samples one row. Weight `w = 1 + log10(1 + occurrences)` — a dampened presence weight:
+    more-observed species surface more, but log-compression keeps the long tail in play (not "all
+    sparrows"), and the `+1` floor lets active-but-unquantified species still be picked. Flavour is
+    observation-frequency (honest copy, inv. #1). Injectable `Rng` for deterministic tests.
 - **T-063 · Cadence, quiet hours, prefs + delivery logging** — *Claude · M · deps: T-062, T-032 · [TSD §4](TSD.md)*
   - Frequency cap, quiet hours, notif prefs respected; every send logged
     (delivered/opened/collected) for analytics.
