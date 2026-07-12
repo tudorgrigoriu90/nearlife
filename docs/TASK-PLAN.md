@@ -555,9 +555,13 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
 per-month probabilities, honest and fully tunable ([TSD §4](TSD.md)).
 
 ## F5.1 — Engine
-- **T-061 · Resolve user cell + candidate set (season-gated)** — *Claude · M · deps: T-044, T-056 · [TSD §4](TSD.md)*
+- **T-061 · Resolve user cell + candidate set (season-gated)** — *Claude · M · `DONE` · deps: T-044, T-056 · [TSD §4](TSD.md)*
   - For each due user, resolve H3 cell and build candidates from `cell_species_month` for the
     current month where `is_active_window` (hard season gate).
+  - ✅ `lib/presence.ts`: `candidatesForMonth(presence, month, collectedIds)` applies the hard
+    season gate (`activeMonths.includes(month)`) and dedupes against the collection. Consumes
+    `RegionPresence` (live `species_presence`); region is the interim for the per-H3 cell, so
+    swapping in `cell_species_month` later is a data change, not a code change. Pure + unit-tested.
 - **T-062 · Weighted sampling + dedupe** — *Claude · M · deps: T-061 · [TSD §4](TSD.md)*
   - Weight `w = presence_prob × rarity_flavor`; dedupe against collection; sample one.
   - `rarity_flavor` documented as observation-frequency, phrased honestly in copy.
