@@ -577,7 +577,12 @@ per-month probabilities, honest and fully tunable ([TSD §4](TSD.md)).
   - Engine runs on schedule server-side; no client dependency; observable/retryable.
 
 ## F5.2 — Honesty & Tuning
-- **T-065 · Config-driven tuning levers** — *Claude · S · deps: T-062 · [TSD §4](TSD.md)*
+- **T-065 · Config-driven tuning levers** — *Claude · S · `DONE` · deps: T-062 · [TSD §4](TSD.md)*
+  - ✅ `lib/tuning.ts`: `NotificationTuning` + `DEFAULT_TUNING` centralize the TSD §4 levers —
+    the rarity-band flavour curve, the presence-weight `base`/`scale`, and the cadence-per-day cap.
+    Both selection paths (`notification.ts`, `presenceNotification.ts`) thread an optional tuning
+    arg (default `DEFAULT_TUNING`), so the prototype can tune the *feel* without redeploys — a
+    config change, not a code change. Tests prove overrides re-shape both curves.
   - Cadence, cell resolution, rarity curve, active-window strictness all config, not hardcoded.
 - **T-066 · Copy-rule enforcement** — *Claude · XS · `DONE` · deps: — · [GDD §3](GDD.md), [USER-FLOWS](USER-FLOWS.md)*
   - ✅ `lib/contentHonesty.ts` is the single source of truth for banned real-time-presence phrases
