@@ -309,11 +309,17 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
   - ⚠️ **On-device run pending** (sandbox can't reach `*.supabase.co` and has no simulator) — needs
     `.env.local` (URL + publishable key) on the device. **Reinstall-survival is NOT met by anonymous
     auth** (anonymous users don't survive reinstall/other devices); tracked as **T-133**.
-- **T-133 · Link email to an anonymous user (reinstall / cross-device survival)** — *Claude · S · `TODO` · deps: T-027 · [PRIVACY §1](PRIVACY-COMPLIANCE.md)*
+- **T-133 · Link email to an anonymous user (reinstall / cross-device survival)** — *Claude · S · `IN-PROGRESS` (link core + seam + adapter done + tested; Settings entry point + on-device verify pending) · deps: T-027 · [PRIVACY §1](PRIVACY-COMPLIANCE.md)*
   - Anonymous sessions survive restarts but not reinstall. Add optional email-linking
     (`updateUser({ email })` / identity linking) so a user can make their collection durable across
     reinstall and devices — the "survives reinstall (tied to account)" half of T-027. Kept optional
     so onboarding stays frictionless (Settings entry point once that screen exists).
+  - ✅ `lib/accountLinking.ts`: `linkEmail(gateway, email)` — the tested state machine (valid email →
+    signed in → not already linked → link), returning a typed `LinkFailure` for each guard and
+    mapping gateway throws to a retryable `link-failed`. `normalizeEmail`/`isValidEmail` catch typos
+    before a round-trip. `SupabaseAuthGateway` is the thin `updateUser({ email })` adapter (identity
+    linking preserves the same `user.id`, so existing owner-scoped collection rows carry over). 7 tests.
+  - ⏳ Remaining: a Settings "Link email" entry point + on-device confirmation-flow verification.
 
 ### S2.2.3 — This Week screen
 - **T-028 · "Active this week" list** — *Claude · S · `DONE` · deps: T-025 · [USER-FLOWS §3](USER-FLOWS.md), [GDD §7](GDD.md)*
