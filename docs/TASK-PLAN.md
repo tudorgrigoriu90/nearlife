@@ -103,8 +103,12 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
 - **T-004 · Create RevenueCat account & link store keys** — *Director · S · deps: T-001, T-002 · [ECONOMY](ECONOMY.md), [TSD §1](TSD.md)*
   - RevenueCat project created; App Store + Play billing keys linked.
   - Verified free tier covers projected volume (<$2.5k/mo).
-- **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+- **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · `DONE` · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - EU-hosted instance; IP anonymization enabled; project API key issued.
+  - ✅ EU Cloud project created (Director-confirmed region); project API key (`phc_…`, a public
+    client key by design — same tier as the Supabase publishable key) issued and wired (T-035).
+    ⚠️ Director: double-check "Discard client IP data" is enabled in Project Settings → the one
+    setting I can't verify remotely.
 - **T-006 · Create Expo/EAS account** — *Director · XS · `DONE` · deps: — · [TSD §1](TSD.md)*
   - ✅ EAS project created (`27adb571-a470-4052-bb0f-c2a35fbedb39`); wired into `app.json`
     (`extra.eas.projectId`). Run `eas init --id …` (or it's already set) after `eas login`.
@@ -370,13 +374,31 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ## F2.5 — Validation Instrumentation & Test
 
 ### S2.5.1 — Analytics & criteria
-- **T-035 · PostHog event instrumentation** — *Claude · S · `BLOCKED` (needs PostHog account T-005; seam + consent gate ready) · deps: T-005, T-031 · [TSD §8](TSD.md)*
+- **T-035 · PostHog event instrumentation** — *Claude · S · `IN-PROGRESS` (wired + call sites instrumented; notification events wait on T-031, on-device verify pending) · deps: T-005, T-031 · [TSD §8](TSD.md)*
   - Events: notification delivered/opened, species spotted, catch attempted/succeeded, session
     start, This Week opened. Day-1/3/7 retention derivable.
-  - ✅ Ready ahead of the account: the typed event catalog + `Tracker` seam (T-132), the D1/3/7
-    `retentionDayIndex`, and now `ConsentGatedTracker` (forwards events only while `analytics`
-    consent is granted, T-088 gating — 1 test). The PostHog delegate + emitting from the call
-    sites is the remaining wiring once the EU-hosted account (T-005) exists.
+  - ✅ `lib/posthogConfig.ts` reads `EXPO_PUBLIC_POSTHOG_KEY`/`_HOST` (mirrors `supabaseConfig.ts`;
+    host must be the EU Cloud `https://eu.i.posthog.com` for the PRIVACY-COMPLIANCE EU-residency
+    commitment). `lib/posthog.ts` lazily builds the `posthog-react-native` client with
+    `captureAppLifecycleEvents: false` — the SDK never auto-sends anything; the *only* events it
+    ever receives are the ones this app explicitly tracks. `lib/posthogTracker.ts` (`PostHogTracker`,
+    2 tests) adapts it to the existing typed `Tracker` seam. `components/useTracker.ts` composes it
+    behind `ConsentGatedTracker` (falls back to `NoopTracker` with no config) so nothing reaches
+    PostHog before `analytics` consent is granted (invariant #6) — the gate reads consent via a ref
+    kept fresh in an effect (not during render, React Compiler-clean).
+  - ✅ **Call sites wired in `App.tsx`:** `session_start` (mount), `this_week_opened` (on that tab),
+    `species_spotted` (onboarding's first-spot + This Week tap, with `source`), `catch_attempted` /
+    `free_catches_exhausted` (`attemptCatch`), `catch_succeeded` (minigame success, grade from the
+    timing result). `notification_delivered`/`opened` and `paywall_shown` remain — they need the
+    push pipeline (T-031) and the store screen (T-085), which don't exist yet.
+  - ⏳ Remaining: set `EXPO_PUBLIC_POSTHOG_KEY`/`_HOST` in the Director's local `.env.local` + EAS
+    build secrets (not committed — same handling as the Supabase publishable key), then verify
+    events land in the PostHog dashboard from a real device/simulator run.
+  - **Test-infra fix (found while testing this):** `process.env = {...original}` (used to restore
+    env vars between tests) silently breaks later writes to `EXPO_PUBLIC_*` keys elsewhere in the
+    same test file/worker — an Expo env-polyfill quirk, reproduced in isolation. Fixed here and in
+    `supabaseConfig.test.ts` by restoring individual keys via `delete` instead of reassigning the
+    whole `process.env` object.
 - **T-036 · Write go/kill criteria (before testing)** — *Claude + Director · S · `DONE` (draft; Director approval pending) · deps: — · [GDD §9](GDD.md)*
   - ✅ [docs/VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md): pre-registered GO/ITERATE/KILL bands
     with **two primary metrics** (Sean-Ellis "very disappointed" ≥40%, day-7 return ≥35%) plus

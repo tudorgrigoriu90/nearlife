@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AlmanacScreen from './components/AlmanacScreen';
@@ -12,6 +12,7 @@ import PledgeConfirm from './components/helped/PledgeConfirm';
 import SettingsScreen from './components/SettingsScreen';
 import DataExportView from './components/DataExportView';
 import { useCollection } from './components/useCollection';
+import { useTracker } from './components/useTracker';
 import { DEFAULT_CONSENT, setConsent, type ConsentKind, type ConsentState } from './lib/consent';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import { KRONOBERG_REGION } from './lib/hometown';
@@ -56,6 +57,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [exportJson, setExportJson] = useState<string | null>(null);
   const [consent, setConsentState] = useState<ConsentState>(DEFAULT_CONSENT);
+  const track = useTracker(consent);
   const [selected, setSelected] = useState<Species | null>(null);
   const [catching, setCatching] = useState<Species | null>(null);
   const [caughtTip, setCaughtTip] = useState<Species | null>(null);
@@ -65,6 +67,19 @@ export default function App() {
 
   const toggleConsent = (kind: ConsentKind, value: boolean) =>
     setConsentState((c) => setConsent(c, kind, value));
+
+  // Validation-funnel instrumentation (T-035): session start, and This Week opened whenever the
+  // user is on that tab (covers both the initial view and switching back to it). `track` is
+  // stable across renders (useTracker), so this fires once per mount despite the dependency.
+  useEffect(() => {
+    track('session_start', {});
+  }, [track]);
+
+  useEffect(() => {
+    if (onboarded && tab === 'thisWeek' && !showSettings && exportJson === null) {
+      track('this_week_opened', {});
+    }
+  }, [onboarded, tab, showSettings, exportJson, track]);
 
   const exportMyData = () => {
     const bundle = buildDataExport({
@@ -82,15 +97,23 @@ export default function App() {
   // Catch entry (T-034): a free user gets 3 catches/season; the 4th attempt shows the gentle
   // sheet instead of the minigame. The counter increments only on a successful catch.
   const attemptCatch = (species: Species) => {
-    if (canCatch(freeCatch, seasonKey)) setCatching(species);
-    else setPaywall(true);
+    if (canCatch(freeCatch, seasonKey)) {
+      track('catch_attempted', { speciesId: species.id });
+      setCatching(species);
+    } else {
+      track('free_catches_exhausted', {});
+      setPaywall(true);
+    }
   };
 
   if (!onboarded) {
     return (
       <OnboardingFlow
         locale={locale}
-        onFirstSpotted={collection.spot}
+        onFirstSpotted={(speciesId) => {
+          collection.spot(speciesId);
+          track('species_spotted', { speciesId, source: 'onboarding' });
+        }}
         onComplete={({ locationOutcome }) => {
           setPreviewMode(locationOutcome === 'denied');
           setOnboarded(true);
@@ -156,13 +179,17 @@ export default function App() {
         <TimingRingMinigame
           locale={locale}
           onCancel={() => setCatching(null)}
-          onComplete={({ success }) => {
+          onComplete={({ success, result }) => {
             setCatching(null);
             if (success) {
               // Counter increments on success only; the attempt was already gated by canCatch.
               setFreeCatch((prev) => registerCatch(prev, seasonKey));
               // Prime bonus when caught within the species' active window (GDD §6, T-074).
               collection.markCaught(target.id, isPrimeCatch(target, new Date()));
+              track('catch_succeeded', {
+                speciesId: target.id,
+                grade: result.grade === 'perfect' ? 'perfect' : 'good',
+              });
               setCaughtTip(target);
             }
           }}
@@ -211,6 +238,7 @@ export default function App() {
               // Tapping a This Week entry marks it Spotted and opens its card (same as a
               // notification tap, USER-FLOWS §4).
               collection.spot(species.id);
+              track('species_spotted', { speciesId: species.id, source: 'this_week' });
               setSelected(species);
             }}
           />
