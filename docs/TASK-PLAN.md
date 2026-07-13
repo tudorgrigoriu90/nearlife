@@ -103,8 +103,12 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
 - **T-004 · Create RevenueCat account & link store keys** — *Director · S · deps: T-001, T-002 · [ECONOMY](ECONOMY.md), [TSD §1](TSD.md)*
   - RevenueCat project created; App Store + Play billing keys linked.
   - Verified free tier covers projected volume (<$2.5k/mo).
-- **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+- **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · `DONE` · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - EU-hosted instance; IP anonymization enabled; project API key issued.
+  - ✅ EU Cloud project created (Director-confirmed region); project API key (`phc_…`, a public
+    client key by design — same tier as the Supabase publishable key) issued and wired (T-035).
+    ⚠️ Director: double-check "Discard client IP data" is enabled in Project Settings → the one
+    setting I can't verify remotely.
 - **T-006 · Create Expo/EAS account** — *Director · XS · `DONE` · deps: — · [TSD §1](TSD.md)*
   - ✅ EAS project created (`27adb571-a470-4052-bb0f-c2a35fbedb39`); wired into `app.json`
     (`extra.eas.projectId`). Run `eas init --id …` (or it's already set) after `eas login`.
@@ -309,11 +313,17 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
   - ⚠️ **On-device run pending** (sandbox can't reach `*.supabase.co` and has no simulator) — needs
     `.env.local` (URL + publishable key) on the device. **Reinstall-survival is NOT met by anonymous
     auth** (anonymous users don't survive reinstall/other devices); tracked as **T-133**.
-- **T-133 · Link email to an anonymous user (reinstall / cross-device survival)** — *Claude · S · `TODO` · deps: T-027 · [PRIVACY §1](PRIVACY-COMPLIANCE.md)*
+- **T-133 · Link email to an anonymous user (reinstall / cross-device survival)** — *Claude · S · `IN-PROGRESS` (link core + seam + adapter done + tested; Settings entry point + on-device verify pending) · deps: T-027 · [PRIVACY §1](PRIVACY-COMPLIANCE.md)*
   - Anonymous sessions survive restarts but not reinstall. Add optional email-linking
     (`updateUser({ email })` / identity linking) so a user can make their collection durable across
     reinstall and devices — the "survives reinstall (tied to account)" half of T-027. Kept optional
     so onboarding stays frictionless (Settings entry point once that screen exists).
+  - ✅ `lib/accountLinking.ts`: `linkEmail(gateway, email)` — the tested state machine (valid email →
+    signed in → not already linked → link), returning a typed `LinkFailure` for each guard and
+    mapping gateway throws to a retryable `link-failed`. `normalizeEmail`/`isValidEmail` catch typos
+    before a round-trip. `SupabaseAuthGateway` is the thin `updateUser({ email })` adapter (identity
+    linking preserves the same `user.id`, so existing owner-scoped collection rows carry over). 7 tests.
+  - ⏳ Remaining: a Settings "Link email" entry point + on-device confirmation-flow verification.
 
 ### S2.2.3 — This Week screen
 - **T-028 · "Active this week" list** — *Claude · S · `DONE` · deps: T-025 · [USER-FLOWS §3](USER-FLOWS.md), [GDD §7](GDD.md)*
@@ -364,13 +374,31 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ## F2.5 — Validation Instrumentation & Test
 
 ### S2.5.1 — Analytics & criteria
-- **T-035 · PostHog event instrumentation** — *Claude · S · `BLOCKED` (needs PostHog account T-005; seam + consent gate ready) · deps: T-005, T-031 · [TSD §8](TSD.md)*
+- **T-035 · PostHog event instrumentation** — *Claude · S · `IN-PROGRESS` (wired + call sites instrumented; notification events wait on T-031, on-device verify pending) · deps: T-005, T-031 · [TSD §8](TSD.md)*
   - Events: notification delivered/opened, species spotted, catch attempted/succeeded, session
     start, This Week opened. Day-1/3/7 retention derivable.
-  - ✅ Ready ahead of the account: the typed event catalog + `Tracker` seam (T-132), the D1/3/7
-    `retentionDayIndex`, and now `ConsentGatedTracker` (forwards events only while `analytics`
-    consent is granted, T-088 gating — 1 test). The PostHog delegate + emitting from the call
-    sites is the remaining wiring once the EU-hosted account (T-005) exists.
+  - ✅ `lib/posthogConfig.ts` reads `EXPO_PUBLIC_POSTHOG_KEY`/`_HOST` (mirrors `supabaseConfig.ts`;
+    host must be the EU Cloud `https://eu.i.posthog.com` for the PRIVACY-COMPLIANCE EU-residency
+    commitment). `lib/posthog.ts` lazily builds the `posthog-react-native` client with
+    `captureAppLifecycleEvents: false` — the SDK never auto-sends anything; the *only* events it
+    ever receives are the ones this app explicitly tracks. `lib/posthogTracker.ts` (`PostHogTracker`,
+    2 tests) adapts it to the existing typed `Tracker` seam. `components/useTracker.ts` composes it
+    behind `ConsentGatedTracker` (falls back to `NoopTracker` with no config) so nothing reaches
+    PostHog before `analytics` consent is granted (invariant #6) — the gate reads consent via a ref
+    kept fresh in an effect (not during render, React Compiler-clean).
+  - ✅ **Call sites wired in `App.tsx`:** `session_start` (mount), `this_week_opened` (on that tab),
+    `species_spotted` (onboarding's first-spot + This Week tap, with `source`), `catch_attempted` /
+    `free_catches_exhausted` (`attemptCatch`), `catch_succeeded` (minigame success, grade from the
+    timing result). `notification_delivered`/`opened` and `paywall_shown` remain — they need the
+    push pipeline (T-031) and the store screen (T-085), which don't exist yet.
+  - ⏳ Remaining: set `EXPO_PUBLIC_POSTHOG_KEY`/`_HOST` in the Director's local `.env.local` + EAS
+    build secrets (not committed — same handling as the Supabase publishable key), then verify
+    events land in the PostHog dashboard from a real device/simulator run.
+  - **Test-infra fix (found while testing this):** `process.env = {...original}` (used to restore
+    env vars between tests) silently breaks later writes to `EXPO_PUBLIC_*` keys elsewhere in the
+    same test file/worker — an Expo env-polyfill quirk, reproduced in isolation. Fixed here and in
+    `supabaseConfig.test.ts` by restoring individual keys via `delete` instead of reassigning the
+    whole `process.env` object.
 - **T-036 · Write go/kill criteria (before testing)** — *Claude + Director · S · `DONE` (draft; Director approval pending) · deps: — · [GDD §9](GDD.md)*
   - ✅ [docs/VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md): pre-registered GO/ITERATE/KILL bands
     with **two primary metrics** (Sean-Ellis "very disappointed" ≥40%, day-7 return ≥35%) plus
@@ -555,20 +583,41 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
 per-month probabilities, honest and fully tunable ([TSD §4](TSD.md)).
 
 ## F5.1 — Engine
-- **T-061 · Resolve user cell + candidate set (season-gated)** — *Claude · M · deps: T-044, T-056 · [TSD §4](TSD.md)*
+- **T-061 · Resolve user cell + candidate set (season-gated)** — *Claude · M · `DONE` · deps: T-044, T-056 · [TSD §4](TSD.md)*
   - For each due user, resolve H3 cell and build candidates from `cell_species_month` for the
     current month where `is_active_window` (hard season gate).
-- **T-062 · Weighted sampling + dedupe** — *Claude · M · deps: T-061 · [TSD §4](TSD.md)*
+  - ✅ `lib/presence.ts`: `candidatesForMonth(presence, month, collectedIds)` applies the hard
+    season gate (`activeMonths.includes(month)`) and dedupes against the collection. Consumes
+    `RegionPresence` (live `species_presence`); region is the interim for the per-H3 cell, so
+    swapping in `cell_species_month` later is a data change, not a code change. Pure + unit-tested.
+- **T-062 · Weighted sampling + dedupe** — *Claude · M · `DONE` · deps: T-061 · [TSD §4](TSD.md)*
   - Weight `w = presence_prob × rarity_flavor`; dedupe against collection; sample one.
   - `rarity_flavor` documented as observation-frequency, phrased honestly in copy.
-- **T-063 · Cadence, quiet hours, prefs + delivery logging** — *Claude · M · deps: T-062, T-032 · [TSD §4](TSD.md)*
+  - ✅ `lib/presenceNotification.ts`: `selectFromPresence` runs the T-061 candidate resolver then
+    weighted-samples one row. Weight `w = 1 + log10(1 + occurrences)` — a dampened presence weight:
+    more-observed species surface more, but log-compression keeps the long tail in play (not "all
+    sparrows"), and the `+1` floor lets active-but-unquantified species still be picked. Flavour is
+    observation-frequency (honest copy, inv. #1). Injectable `Rng` for deterministic tests.
+- **T-063 · Cadence, quiet hours, prefs + delivery logging** — *Claude · M · `IN-PROGRESS` (engine core done + tested; Edge Function wiring pending T-030/T-032 live infra) · deps: T-062, T-032 · [TSD §4](TSD.md)*
   - Frequency cap, quiet hours, notif prefs respected; every send logged
     (delivered/opened/collected) for analytics.
+  - ✅ `lib/notificationEngine.ts`: `decideNotification(user)` composes the tested parts into one
+    decision — master opt-in → cadence/quiet-hours gate (T-131) → season-gated weighted selection
+    (T-062). Cadence runs before selection so a blocked user costs no candidate work. `SkipReason`
+    surfaces exactly why a cycle sent nothing. `recordDelivery` emits `notification_delivered` for
+    the funnel (consent gating stays the tracker's concern). Pure/clock-free; deterministic `Rng`.
+  - ⏳ Remaining: run this from the scheduled Edge Function (T-064) and persist the delivery log +
+    opened/collected — blocked on the Edge Function runtime (T-030/T-032, live infra).
 - **T-064 · Schedule via pg_cron → Edge Function** — *Claude · S · deps: T-063, T-017 · [TSD §4](TSD.md)*
   - Engine runs on schedule server-side; no client dependency; observable/retryable.
 
 ## F5.2 — Honesty & Tuning
-- **T-065 · Config-driven tuning levers** — *Claude · S · deps: T-062 · [TSD §4](TSD.md)*
+- **T-065 · Config-driven tuning levers** — *Claude · S · `DONE` · deps: T-062 · [TSD §4](TSD.md)*
+  - ✅ `lib/tuning.ts`: `NotificationTuning` + `DEFAULT_TUNING` centralize the TSD §4 levers —
+    the rarity-band flavour curve, the presence-weight `base`/`scale`, and the cadence-per-day cap.
+    Both selection paths (`notification.ts`, `presenceNotification.ts`) thread an optional tuning
+    arg (default `DEFAULT_TUNING`), so the prototype can tune the *feel* without redeploys — a
+    config change, not a code change. Tests prove overrides re-shape both curves.
   - Cadence, cell resolution, rarity curve, active-window strictness all config, not hardcoded.
 - **T-066 · Copy-rule enforcement** — *Claude · XS · `DONE` · deps: — · [GDD §3](GDD.md), [USER-FLOWS](USER-FLOWS.md)*
   - ✅ `lib/contentHonesty.ts` is the single source of truth for banned real-time-presence phrases
@@ -669,13 +718,25 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
 ([GDD §7](GDD.md)). The pull surface is the priority lever; the rest layer on.
 
 ## F8.1 — This Week (production)
-- **T-078 · "Active this week" (production)** — *Claude · M · deps: T-044, T-057 · [USER-FLOWS §3](USER-FLOWS.md), [TSD §4b](TSD.md)*
+- **T-078 · "Active this week" (production)** — *Claude · M · `DONE` · deps: T-044, T-057 · [USER-FLOWS §3](USER-FLOWS.md), [TSD §4b](TSD.md)*
   - Real query on `cell_species_month`; ordered new-first then rarity; works without
     notifications; quiet-week and location-off states.
+  - ✅ `lib/thisWeekProduction.ts`: `thisWeekFromPresence(presence, month, collected)` reads live
+    `species_presence` (region is the interim for the per-cell query), season-gates, and orders
+    new-first then rarer-first (observation count as rarity flavour — fewer occurrences ranks
+    earlier). The two empty states are first-class result variants (`location-off` when no region
+    resolves, `quiet` when nothing is active) so the screen never infers them from an empty array.
+    Notification-independent (pure read). 6 tests.
 
 ## F8.2 — Seasonal & Events
-- **T-079 · Seasonal window handling** — *Claude · M · deps: T-044 · [GDD §7](GDD.md)*
+- **T-079 · Seasonal window handling** — *Claude · M · `DONE` · deps: T-044 · [GDD §7](GDD.md)*
   - Migrants only catchable when genuinely passing through; season is a hard constraint.
+  - ✅ `lib/seasonalWindow.ts`: `catchableThisMonth`/`isInSeason` is the hard catch-time gate — a
+    migrant not currently in-window can't be caught even at a habitat spot. `seasonWindow` also
+    classifies migrant vs resident (window ≤ `MIGRANT_MAX_WINDOW_MONTHS`) and returns
+    `monthsUntilOpen` (year-boundary-wrapping) so copy can say "expected back around <month>"
+    honestly rather than implying presence (invariant #1). Windows come from region `activeMonths`
+    (interim for T-044's per-cell windows — a data swap, not a code change). 7 tests.
 - **T-080 · Live events** — *Claude · M · `IN-PROGRESS` (calendar core done; surfacing UI pending) · deps: T-079 · [GDD §7](GDD.md)*
   - ✅ `lib/liveEvents.ts` (3 tests): `KRONOBERG_EVENTS` (first-swift-of-spring, salmon run,
     mushroom bloom, first frost) with honest month windows; `activeEvents(date)`/`isEventActive`.

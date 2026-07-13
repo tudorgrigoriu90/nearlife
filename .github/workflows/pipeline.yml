@@ -27,3 +27,16 @@ jobs:
 
       - name: Run pipeline
         run: python pipeline/run.py
+
+      # Load the presence datasets into Supabase (T-045/T-134). No-op until the Director sets the
+      # SUPABASE_DB_URL repo secret to a SERVICE-ROLE pooler connection string (never the anon key).
+      - name: Load presence data into Supabase
+        working-directory: pipeline
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "SUPABASE_DB_URL not set — skipping DB load (set the repo secret to enable)."
+            exit 0
+          fi
+          python -m gbif.supabase_load

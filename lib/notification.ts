@@ -1,5 +1,6 @@
 import { activeSpecies } from './season';
-import type { Month, Rarity, Species } from './species/types';
+import { DEFAULT_TUNING, type NotificationTuning } from './tuning';
+import type { Month, Species } from './species/types';
 
 // Notification selection (T-112). Pure core of the notification engine (TSD §4), used by the
 // prototype Edge Function (T-030) and the production engine (T-062). Steps 2–5 of TSD §4:
@@ -16,8 +17,6 @@ import type { Month, Rarity, Species } from './species/types';
 /** Deterministic-testable RNG contract: returns a float in [0, 1). */
 export type Rng = () => number;
 
-const RARITY_FLAVOR: Record<Rarity, number> = { common: 1, uncommon: 2, rare: 4 };
-
 /** Active this month AND not already collected. */
 export function candidateSpecies(
   species: Species[],
@@ -28,18 +27,22 @@ export function candidateSpecies(
 }
 
 /** Selection weight for a species (presence_prob × rarity_flavor; presence is binary here). */
-export function weightFor(species: Species): number {
-  return RARITY_FLAVOR[species.rarity];
+export function weightFor(species: Species, tuning: NotificationTuning = DEFAULT_TUNING): number {
+  return tuning.rarityFlavor[species.rarity];
 }
 
 /** Sample one species from a weighted list; returns null if empty. */
-export function pickWeighted(candidates: Species[], rng: Rng): Species | null {
+export function pickWeighted(
+  candidates: Species[],
+  rng: Rng,
+  tuning: NotificationTuning = DEFAULT_TUNING,
+): Species | null {
   if (candidates.length === 0) return null;
-  const total = candidates.reduce((sum, s) => sum + weightFor(s), 0);
+  const total = candidates.reduce((sum, s) => sum + weightFor(s, tuning), 0);
   if (total <= 0) return null;
   let target = rng() * total;
   for (const s of candidates) {
-    target -= weightFor(s);
+    target -= weightFor(s, tuning);
     if (target < 0) return s;
   }
   return candidates[candidates.length - 1]; // float-rounding fallback
@@ -51,6 +54,7 @@ export function selectNotificationSpecies(
   month: Month,
   collectedIds: ReadonlySet<string>,
   rng: Rng = Math.random,
+  tuning: NotificationTuning = DEFAULT_TUNING,
 ): Species | null {
-  return pickWeighted(candidateSpecies(species, month, collectedIds), rng);
+  return pickWeighted(candidateSpecies(species, month, collectedIds), rng, tuning);
 }

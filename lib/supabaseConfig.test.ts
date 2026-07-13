@@ -1,10 +1,14 @@
 import { getSupabaseConfig } from './supabaseConfig';
 
-describe('getSupabaseConfig', () => {
-  const original = { ...process.env };
+// Restore individual keys in afterEach rather than reassigning `process.env` wholesale — a
+// whole-object reassignment (`process.env = {...original}`) trips an Expo env-polyfill quirk that
+// silently drops subsequent writes to EXPO_PUBLIC_* keys in later tests within the same file/worker
+// (see posthogConfig.test.ts). Deleting just the keys this suite touches avoids it.
 
+describe('getSupabaseConfig', () => {
   afterEach(() => {
-    process.env = { ...original };
+    delete process.env.EXPO_PUBLIC_SUPABASE_URL;
+    delete process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   });
 
   it('returns url and publishable key when both are set', () => {
