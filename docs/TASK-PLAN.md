@@ -1079,13 +1079,28 @@ attribution. Photos are language-independent (one set serves all locales). Licen
   - ✅ `lib/species/media.ts`: `SpeciesMedia` type; `isCommercialUseAllowed`/`assertAllowedLicense`
     (only CC0/CC-BY/CC-BY-SA — NC/ND rejected), `attributionFor`, `primaryPhoto`; empty
     `KRONOBERG_MEDIA` manifest (emoji fallback until T-119); 7 tests.
-- **T-119 · Source Wikimedia Commons photos (Kronoberg set)** — *Claude + Director · L · deps: T-118 · [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
-  - One CC0/CC-BY/CC-BY-SA photo per species, unmodified, with author + license + source URL
-    recorded; exclude NC/ND. Director spot-checks licensing. (Needs web sourcing + Supabase
-    Storage upload; the prototype can bundle a subset.)
-- **T-126 · Species card + almanac render photos** — *Claude · M · deps: T-118, T-119, T-059 · [USER-FLOWS §3,§4](USER-FLOWS.md)*
-  - Card hero image and almanac thumbnails use `species_media` with a graceful placeholder;
-    per-photo attribution shown on the card / About.
+- **T-119 · Source Wikimedia Commons photos (Kronoberg set)** — *Claude + Director · L · `IN-PROGRESS` (sourced + manifest at 100%; Supabase Storage upload = Director) · deps: T-118 · [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
+  - ✅ Sourcing: `pipeline/build_kronoberg_media.py` reads the curated 54 from `kronoberg.ts`, queries
+    Wikipedia + Commons (reusing the tested `media/wikimedia.py`/`licenses.py`), and writes
+    `pipeline/data/media_kronoberg.json` — **54/54 (100%) with a commercial-safe photo**
+    (40 CC-BY-SA, 9 CC-BY, 5 CC0), author + license + source page captured per photo.
+  - ✅ Manifest: `scripts/gen-kronoberg-media.ts` → `lib/species/media.kronoberg.ts` (typed
+    `KRONOBERG_MEDIA`) with the **deterministic Supabase Storage public URLs**
+    (`species-media/<id>.<ext>`). `media.test.ts` guards licenses, full attribution, species mapping,
+    and 100% coverage. **Chosen approach: re-host, not hotlink** — Wikimedia discourages app-scale
+    hotlinking; re-hosting gives reliability/perf/privacy and snapshots attribution.
+  - ⏳ **Director:** run `pipeline/media/supabase_upload.py` with `SUPABASE_URL` + the **service-role**
+    key to create the public `species-media` bucket and upload the 54 originals (unmodified;
+    resize on delivery). Until then the app shows the emoji fallback for spotted species (no breakage).
+    Spot-check licensing. National-scale sourcing (the ~12k set) reuses the same pipeline (E3, gated
+    by content T-135 + curation T-136).
+- **T-126 · Species card renders photos** — *Claude · M · `IN-PROGRESS` (card hero done; almanac thumbnails deferred) · deps: T-118, T-119, T-059 · [USER-FLOWS §3,§4](USER-FLOWS.md)*
+  - ✅ `components/SpeciesHero.tsx` renders the real photo on the species card **once spotted**
+    (keeps the pre-spot silhouette so discovery still means something), with a graceful
+    category-glyph fallback if there's no photo or the image fails to load (e.g. before the Storage
+    upload), and shows per-photo attribution (author + license) — required for CC-BY/CC-BY-SA.
+  - ⏳ Almanac grid thumbnails intentionally **kept as silhouettes/emoji** for now (the silhouette
+    reveal mechanic + not fetching 54 grid images); revisit whether spotted cells show photos.
 
 > **T-021 (prototype imagery)** is superseded/absorbed by E14: the prototype uses the media
 > schema (T-118) with emoji fallback, and real photos come from T-119.

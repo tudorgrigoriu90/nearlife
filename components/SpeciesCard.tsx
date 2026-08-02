@@ -5,7 +5,7 @@ import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { commonNameFor, contentFor } from '../lib/species/localized';
 import type { Species } from '../lib/species/types';
-import { speciesGlyph } from './speciesVisual';
+import SpeciesHero from './SpeciesHero';
 
 // Species card (T-026 · USER-FLOWS §4). The always-free Tier-1 layer: fact, when/how trivia,
 // and the give + protect mission actions (never gated — invariant #2). Below sits the depth-tier
@@ -53,7 +53,7 @@ export default function SpeciesCard({
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
-          <Text style={styles.heroEmoji}>{speciesGlyph(species.category, spotted)}</Text>
+          <SpeciesHero species={species} spotted={spotted} />
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.scientific}>{species.scientificName}</Text>
           {!spotted ? <Text style={styles.notSpotted}>{tr('card.notSpotted')}</Text> : null}
@@ -144,7 +144,6 @@ const styles = StyleSheet.create({
   backText: { fontSize: 16, color: '#3a7d44', fontWeight: '600' },
   scroll: { paddingHorizontal: 20, paddingBottom: 24 },
   hero: { alignItems: 'center', paddingVertical: 20 },
-  heroEmoji: { fontSize: 72 },
   name: { marginTop: 8, fontSize: 26, fontWeight: '700', color: '#22331f', textAlign: 'center' },
   scientific: { marginTop: 2, fontSize: 14, fontStyle: 'italic', color: '#6a7c6d' },
   notSpotted: { marginTop: 8, fontSize: 12, fontWeight: '700', color: '#7a8a7c', letterSpacing: 1 },
