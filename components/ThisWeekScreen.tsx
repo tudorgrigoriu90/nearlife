@@ -2,10 +2,12 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { monthOf } from '../lib/season';
 import { thisWeek, type ThisWeekEntry } from '../lib/thisWeek';
+import { activeEvents } from '../lib/liveEvents';
 import { commonNameFor, contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import type { Species } from '../lib/species/types';
 import { CATEGORY_EMOJI } from './speciesVisual';
+import { LIVE_EVENT_META } from './liveEventVisual';
 
 // "Active this week" pull surface (USER-FLOWS §3), driven by real Kronoberg seed data and the
 // tested `thisWeek` logic (T-111). All chrome strings run through i18n (T-121); species names
@@ -46,6 +48,31 @@ function Row({
   );
 }
 
+// Live-events strip (T-080): the real seasonal moments genuinely under way this month, rendered
+// only when there are any (nothing shows out of season). Honest by construction — the windows come
+// from the tested core (lib/liveEvents.ts). Scrolls with the list as its header.
+function EventsHeader({ locale, tr }: { locale: Locale; tr: ReturnType<typeof createTranslator> }) {
+  const events = activeEvents(new Date()).filter((e) => LIVE_EVENT_META[e.id]);
+  if (events.length === 0) return null;
+  return (
+    <View style={styles.events}>
+      <Text style={styles.eventsTitle}>{tr('events.title')}</Text>
+      {events.map((event) => {
+        const meta = LIVE_EVENT_META[event.id];
+        return (
+          <View key={event.id} style={styles.eventCard}>
+            <Text style={styles.eventEmoji}>{meta.emoji}</Text>
+            <View style={styles.rowText}>
+              <Text style={styles.eventName}>{tr(meta.nameKey)}</Text>
+              <Text style={styles.eventBlurb}>{tr(meta.blurbKey)}</Text>
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
 export default function ThisWeekScreen({
   locale = 'en',
   spottedIds,
@@ -71,6 +98,7 @@ export default function ThisWeekScreen({
         renderItem={({ item }) => (
           <Row entry={item} locale={locale} newLabel={tr('thisWeek.new')} onSelect={onSelectSpecies} />
         )}
+        ListHeaderComponent={<EventsHeader locale={locale} tr={tr} />}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.detail}>{tr('thisWeek.empty')}</Text>}
       />
@@ -84,6 +112,12 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34' },
   subtitle: { marginTop: 4, marginBottom: 16, fontSize: 14, color: '#4a5c4d' },
   list: { paddingBottom: 24 },
+  events: { marginBottom: 8 },
+  eventsTitle: { fontSize: 12, fontWeight: '700', color: '#7a8a7c', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },
+  eventCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#eaf3e6', borderRadius: 12, padding: 12, marginBottom: 8 },
+  eventEmoji: { fontSize: 26, marginRight: 12 },
+  eventName: { fontSize: 15, fontWeight: '700', color: '#2f5d34' },
+  eventBlurb: { marginTop: 2, fontSize: 13, color: '#4a5c4d' },
   row: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#d4e0d2' },
   emoji: { fontSize: 24, marginRight: 12 },
   rowText: { flex: 1 },

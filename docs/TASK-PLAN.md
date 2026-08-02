@@ -737,10 +737,16 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
     `monthsUntilOpen` (year-boundary-wrapping) so copy can say "expected back around <month>"
     honestly rather than implying presence (invariant #1). Windows come from region `activeMonths`
     (interim for T-044's per-cell windows — a data swap, not a code change). 7 tests.
-- **T-080 · Live events** — *Claude · M · `IN-PROGRESS` (calendar core done; surfacing UI pending) · deps: T-079 · [GDD §7](GDD.md)*
+- **T-080 · Live events** — *Claude · M · `DONE` (prototype windows; real-data windows with E3) · deps: T-079 · [GDD §7](GDD.md)*
   - ✅ `lib/liveEvents.ts` (3 tests): `KRONOBERG_EVENTS` (first-swift-of-spring, salmon run,
     mushroom bloom, first frost) with honest month windows; `activeEvents(date)`/`isEventActive`.
-    Labels are i18n; surfacing on Home/This Week + the real data layer's windows (E3) remain.
+  - ✅ **Surfaced on This Week**: `components/liveEventVisual.ts` maps each event id → emoji + i18n
+    name/blurb keys; `ThisWeekScreen` renders a "Happening this season" strip (as the list header)
+    showing only events genuinely under way — nothing out of season. Copy is honesty-safe (no
+    "here right now") and i18n (en+sv). `liveEventVisual.test.ts` (2 tests) asserts every event id
+    has a visual entry and points at real i18n keys.
+  - ⚠️ On-device layout not visually verified. Real-data event windows replace the hardcoded
+    Kronoberg set with E3 (T-079/T-044).
 
 ## F8.3 — Impact & Badges
 - **T-081 · Collective impact counters** — *Claude · M · deps: T-077 · [GDD §7](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*

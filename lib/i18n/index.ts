@@ -29,6 +29,17 @@ export const en = {
   'thisWeek.empty': 'A quiet week — winter is resting season here.',
   'thisWeek.honesty': 'Active this season, never “here right now”.',
 
+  // Live events (T-080) — real seasonal moments, surfaced only while genuinely under way
+  'events.title': 'Happening this season',
+  'event.first-swift-of-spring.name': 'First swifts of spring',
+  'event.first-swift-of-spring.blurb': 'The first swifts are returning to Kronoberg’s skies.',
+  'event.salmon-run.name': 'Salmon run',
+  'event.salmon-run.blurb': 'Salmon are running upstream to spawn.',
+  'event.mushroom-bloom.name': 'Mushroom season',
+  'event.mushroom-bloom.blurb': 'Fungi are fruiting across the forest floor.',
+  'event.first-frost.name': 'First frost',
+  'event.first-frost.blurb': 'The season’s first frosts are settling in.',
+
   // Almanac (T-025)
   'almanac.title': 'Almanac',
   'almanac.empty': 'Your almanac is waiting — spot your first species.',
@@ -170,6 +181,17 @@ const sv: Catalog = {
   'thisWeek.new': 'NY',
   'thisWeek.empty': 'En lugn vecka – vintern är vilosäsong här.',
   'thisWeek.honesty': 'Aktiv den här säsongen, aldrig ”här just nu”.',
+
+  // Live events (T-080)
+  'events.title': 'Den här säsongen',
+  'event.first-swift-of-spring.name': 'Vårens första tornseglare',
+  'event.first-swift-of-spring.blurb': 'Årets första tornseglare återvänder till Kronobergs himmel.',
+  'event.salmon-run.name': 'Laxvandring',
+  'event.salmon-run.blurb': 'Laxen vandrar uppströms för att leka.',
+  'event.mushroom-bloom.name': 'Svampsäsong',
+  'event.mushroom-bloom.blurb': 'Svamparna skjuter upp på skogsgolvet.',
+  'event.first-frost.name': 'Första frosten',
+  'event.first-frost.blurb': 'Säsongens första froster lägger sig.',
 
   // Almanac (T-025)
   'almanac.title': 'Almanacka',
