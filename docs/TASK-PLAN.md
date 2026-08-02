@@ -840,6 +840,27 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
 # E11 — Launch, Analytics & Ops
 **Phase:** P2 · **Goal:** ship the single-region public app and be able to see what it's doing.
 
+## F11.0 — Google Play Internal Testing (first testable build)
+The fastest path to real testers holding the app: Google Play **Internal testing** (≤100 testers,
+opt-in link) — it skips the "closed testing, 12+ testers, 14 days" rule that gates production for
+personal accounts. Ships the current prototype loop; IAP/data-layer/map are deferred.
+
+- **T-140 · Android build config for the first Play build** — *Claude · S · `DONE` (config committed; EAS env + build run are Director) · deps: T-014 · [TSD §1](TSD.md)*
+  - ✅ `app.json`: added the required **`android.package`** (`com.nearlife.nearby`) + matching iOS
+    `bundleIdentifier`; added **`expo-notifications`** and **`expo-location`** config plugins (the
+    latter with an honest, PRIVACY §1-aligned when-in-use permission string).
+  - ✅ `.env.example`: documents the four `EXPO_PUBLIC_*` build vars (Supabase URL + publishable
+    key, PostHog key + host) and how to provision them as EAS environment variables per profile.
+  - ⚠️ **Package id is permanent once uploaded to Play** — Director confirms/changes
+    `com.nearlife.nearby` before the first upload. Creating the EAS env vars and running
+    `eas build -p android --profile production` (needs `eas login`) remain Director steps.
+- **T-141 · On-device smoke test of the prototype loop** — *Claude + Director · M · `TODO` · deps: T-140 · [GDD §9](GDD.md)*
+  - Run the app on a real device (Expo Go / dev build) and walk onboarding → This Week (incl. the
+    live-events strip) → species card → catch minigame (all five categories) → Helped pledge →
+    Settings (consent, export, language). Fix layout/runtime issues so testers get a working app.
+    Confirm Supabase anonymous auth + collection persistence work on-device (closes the T-027
+    device-run gap). This pays down the "not visually verified" debt across the screens.
+
 ## F11.1 — Store Submission
 - **T-097 · Store listings + assets** — *Claude + Director · M · deps: T-084 · [review]*
   - App name (final, replacing placeholder "Nearby"), descriptions, screenshots, icon; data-safety
