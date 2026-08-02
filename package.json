@@ -38,6 +38,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "verify": "npm run lint && npm run typecheck && npm run test"
   },
   "private": true,

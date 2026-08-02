@@ -204,6 +204,19 @@ before pushing — CI runs after the push and reports (does not block) a red `ma
     it reports/notifies on a red `main` but does not block it. Authors run `npm run verify` locally
     before pushing. Hard prevention would need PRs + a required status check (out of scope for now).
 
+- **T-143 · Component/UI test setup + raise coverage to ≥90%** — *Claude · M · `TODO` · deps: T-013 · [CLAUDE.md](../CLAUDE.md)*
+  - **Honest baseline (measured):** `npm run test:coverage` = **~45% statements** over all source
+    (`lib/` ~95%+, but `components/*` and `App.tsx` at ~0% — no render tests). The pure logic-first
+    layer is thoroughly tested; the UI layer is not.
+  - **Blocker found:** React Native render testing does not work on this stack out of the box —
+    `@testing-library/react-native` + `react-test-renderer` **no-op / hang** under Expo SDK 57 +
+    **React 19.2** (React 19 deprecated `react-test-renderer`). Needs the React-19-compatible RNTL
+    render path / jest-expo setup (or an alternative renderer) before component tests can run.
+  - ✅ Groundwork: `jest.config.js` now has `collectCoverageFrom` (honest whole-repo coverage) and a
+    `test:coverage` script. No coverage threshold is enforced yet (would fail at 45%).
+  - Remaining: fix the render-test setup, write render/interaction tests across `components/*` +
+    `App.tsx` flows, then add a `coverageThreshold` (≥90%) to `jest.config.js` and enforce it in CI.
+
 ### S1.3.0 — Client wiring
 - **T-129 · Supabase client + config** — *Claude · S · `DONE` · deps: T-003 · [TSD §1,§3](TSD.md)*
   - ✅ `lib/supabaseConfig.ts` reads `EXPO_PUBLIC_SUPABASE_URL`/`_PUBLISHABLE_KEY` (throws if
