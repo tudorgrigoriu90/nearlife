@@ -80,6 +80,30 @@ class WikimediaClient:
         infos = page.get("imageinfo")
         return infos[0] if infos else None
 
+    def fetch_extract(self, scientific_name: str) -> str | None:
+        """A grounded 1–2 sentence intro from Wikipedia (CC BY-SA — attribute at the card).
+
+        Used to seed the species 'fact' at national scale (T-135). Returns None when there is no
+        article, so the caller can leave the fact blank rather than fabricate one.
+        """
+        data = self._get(
+            WIKI_API,
+            {
+                "action": "query",
+                "format": "json",
+                "prop": "extracts",
+                "exintro": 1,
+                "explaintext": 1,
+                "exsentences": 2,
+                "titles": scientific_name,
+                "redirects": 1,
+            },
+        )
+        pages = data.get("query", {}).get("pages", {})
+        page = next(iter(pages.values()), {})
+        extract = (page.get("extract") or "").strip()
+        return extract or None
+
     def fetch_image(self, scientific_name: str) -> dict | None:
         """Return {imageUrl, license, licenseUrl, author, sourceUrl, wikiTitle} or None."""
         file_name, wiki_title = self._lead_image_file(scientific_name)

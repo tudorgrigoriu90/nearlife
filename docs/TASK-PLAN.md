@@ -488,10 +488,19 @@ key before loading into Supabase.**
     (`gbif_key`/`taxon_group`/`vertebrate` + `species_presence` rows) — applyable via the connector now.
   - ⏳ **Remaining:** apply the migrations + run the bulk loader with the service key (CI job); then
     switch the app to read presence from the DB (T-057/T-059).
-- **T-135 · Curate + author content at national scale** — *Claude + Director · XL · `TODO` · deps: T-042 · [GDD §5](GDD.md), [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
-  - The real bottleneck: fact + give + protect per species, **region-appropriate, law-checked,
-    translated with native review**. Recommend staging by taxon (vertebrates first) and reusing
-    species-level advice across counties. Not auto-generatable for give/protect.
+- **T-135 · Curate + author content at national scale** — *Claude + Director · XL · `IN-PROGRESS` (pipeline built + validated on mammals; full 12k run + review pending) · deps: T-042 · [GDD §5](GDD.md), [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+  - ✅ Pipeline `pipeline/build_content.py` (+ `media/content_templates.py`, 8 pytest) generates, for
+    every species in a presence file: a **grounded fact** from Wikipedia (CC BY-SA, attributed —
+    never fabricated; `null` when there's no article), an **honest season+habitat "when & how"**
+    line templated from the real active-months, and **safe taxon-level give/protect** templates.
+    All entries are `status='machine'`, `needsReview=true`, `curationStatus='uncurated'`.
+  - ✅ **Hard safety line kept:** give/protect are category templates only — **never** auto-written
+    per-species plant/release advice (invariant #2; the per-species invasive check stays T-054).
+  - ✅ Validated on **mammals** (`data/content_mammal.json`). Full 12k run is `build_content.py --all`
+    (hours — run in CI, not interactively).
+  - ⏳ Remaining: run all taxa; **native review** (T-125) + **GBIF-noise curation** (T-136) before it
+    ships; load into `species_content` (T-134) and switch the app to DB reads (T-057/T-059) so the
+    12k actually render; sv translation via the review gate.
 - **T-043 · H3 cell aggregation (res 7–8)** — *Claude · M · deps: T-042 · [TSD §3](TSD.md)*
   - Occurrences aggregated into H3 cells at chosen resolution; cell geometry stored.
 - **T-044 · Per-cell per-month presence probability** — *Claude · L · deps: T-043 · [TSD §4](TSD.md)*
