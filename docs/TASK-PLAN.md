@@ -829,8 +829,14 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     applies expiry (deletes stale rows / anonymous users).
 
 ## F10.4 — Legal Artifacts
-- **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*
-  - Claude drafts; Director + legal approve. Linked in-app.
+- **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · `IN-PROGRESS` (policy drafted; legal review + hosting pending) · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*
+  - ✅ Draft policy `docs/legal/PRIVACY-POLICY.md` written from PRIVACY-COMPLIANCE.md: what's
+    collected + legal basis, no-ads/no-sale, location derive-once-and-discard, sub-processors
+    (Supabase/PostHog/RevenueCat/Google Play), retention windows, GDPR rights (in-app export +
+    delete), IMY complaint route, 13+ age-gate. Honest and minimization-first.
+  - ⚠️ **Director:** fill the `[bracketed]` controller identity + contact email, get legal review
+    (T-009), and **publish at a stable URL** — that URL is the required Google Play privacy-policy
+    link. In-app "Privacy policy" link (Settings) wires up once the URL exists.
 - **T-096 · Processor DPAs + EU residency verified** — *Director · M · deps: T-009 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - Signed DPAs and verified EU residency/SCCs for Supabase, RevenueCat, PostHog.
 
