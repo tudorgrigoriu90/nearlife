@@ -45,8 +45,10 @@ export function primaryPhoto(media: SpeciesMedia[], speciesId: string): SpeciesM
 }
 
 /**
- * Sourced photos for the Kronoberg set. Empty until T-119 populates it from Wikimedia Commons
- * (with real author/license/source per photo). The UI falls back to the category emoji while
- * this is empty, so an unsourced species is never broken.
+ * Sourced photos for the Kronoberg set (T-119) — generated into `media.kronoberg.ts` from Wikimedia
+ * Commons (real author/license/source per photo), re-hosted on Supabase Storage. The UI falls back
+ * to the category emoji when a species has no photo or the image fails to load, so a species is
+ * never broken (including before the Storage upload runs). Regenerate with
+ * `scripts/gen-kronoberg-media.ts` after re-sourcing.
  */
-export const KRONOBERG_MEDIA: SpeciesMedia[] = [];
+export { KRONOBERG_MEDIA } from './media.kronoberg';

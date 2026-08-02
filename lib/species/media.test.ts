@@ -6,6 +6,7 @@ import {
   primaryPhoto,
   type SpeciesMedia,
 } from './media';
+import { KRONOBERG_SPECIES } from './kronoberg';
 
 function media(overrides: Partial<SpeciesMedia> & { speciesId: string }): SpeciesMedia {
   return {
@@ -62,9 +63,35 @@ describe('primaryPhoto', () => {
 });
 
 describe('KRONOBERG_MEDIA manifest', () => {
-  it('contains only commercially-usable licenses (guard for when T-119 populates it)', () => {
+  it('contains only commercially-usable licenses (invariant #8)', () => {
     for (const m of KRONOBERG_MEDIA) {
       expect(isCommercialUseAllowed(m.license)).toBe(true);
+    }
+  });
+
+  it('carries full attribution for every photo (author + source + url)', () => {
+    for (const m of KRONOBERG_MEDIA) {
+      expect(m.author.trim().length).toBeGreaterThan(0);
+      expect(m.sourceUrl).toMatch(/^https?:\/\//);
+      expect(m.url).toContain('/storage/v1/object/public/species-media/');
+    }
+  });
+
+  it('maps every photo to a real curated species, with no duplicate primary', () => {
+    const ids = new Set(KRONOBERG_SPECIES.map((s) => s.id));
+    const primaries = new Set<string>();
+    for (const m of KRONOBERG_MEDIA) {
+      expect(ids.has(m.speciesId)).toBe(true);
+      if (m.isPrimary) {
+        expect(primaries.has(m.speciesId)).toBe(false);
+        primaries.add(m.speciesId);
+      }
+    }
+  });
+
+  it('has a primary photo for every curated species (full coverage)', () => {
+    for (const s of KRONOBERG_SPECIES) {
+      expect(primaryPhoto(KRONOBERG_MEDIA, s.id)).not.toBeNull();
     }
   });
 });
