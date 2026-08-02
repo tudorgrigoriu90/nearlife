@@ -167,9 +167,10 @@ The go/no-go items from the licensing and privacy docs. **These gate Phase 2, no
     Windows); pipeline code is gated in CI as the backstop. Real jobs land in E3.
 
 ### S1.2.3 — Quality gate & repo governance
-The enforced quality gate. **Direct-push-to-main is kept**, with a local pre-push hook as the
-authoritative gate and CI on `main` as the backstop (per [CLAUDE.md](../CLAUDE.md); decision:
-local hook over PR-merge gate).
+The enforced quality gate. **Direct-push-to-main is kept.** **GitHub Actions CI is now the
+authoritative gate** (per [CLAUDE.md](../CLAUDE.md)); the local pre-push hook was removed in
+**T-142** (slow, easy to leave unconfigured, redundant with CI). Run `npm run verify` locally
+before pushing — CI runs after the push and reports (does not block) a red `main`.
 
 - **T-109 · Pre-push quality gate + CI backstop** — *Claude · S · `DONE` · deps: T-012 · [CLAUDE.md](../CLAUDE.md)*
   - Version-controlled git hook at `.githooks/pre-push` runs the quality gate before every
@@ -193,7 +194,15 @@ local hook over PR-merge gate).
     checkout on Linux/macOS, and Windows Git runs hooks regardless of the bit. `prepare` is left
     cross-platform (plain `git config`) so `npm install` doesn't require `sh` on Windows.
 
-## F1.3 — Supabase Backbone
+- **T-142 · Migrate the pre-push quality gate to CI (remove the local hook)** — *Claude · XS · `DONE` · deps: T-109 · [CLAUDE.md](../CLAUDE.md)*
+  - Removed `.githooks/pre-push` + `scripts/setup-hooks.sh` and the npm `prepare`
+    `core.hooksPath` wiring; unset `core.hooksPath` locally. The hook ran the full `npm run verify`
+    on every push (slow) and was easy to leave unconfigured — and it was fully redundant with CI.
+  - `.github/workflows/ci.yml` is now the **authoritative** gate (was labelled "backstop"): it
+    runs `verify` (lint + typecheck + test) + the Python pipeline on every push to `main` and PR.
+  - **Trade-off (documented in CLAUDE.md):** with direct-push-to-main, CI runs *after* the push, so
+    it reports/notifies on a red `main` but does not block it. Authors run `npm run verify` locally
+    before pushing. Hard prevention would need PRs + a required status check (out of scope for now).
 
 ### S1.3.0 — Client wiring
 - **T-129 · Supabase client + config** — *Claude · S · `DONE` · deps: T-003 · [TSD §1,§3](TSD.md)*

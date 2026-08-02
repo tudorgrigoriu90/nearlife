@@ -38,8 +38,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "verify": "npm run lint && npm run typecheck && npm run test",
-    "prepare": "git config core.hooksPath .githooks"
+    "verify": "npm run lint && npm run typecheck && npm run test"
   },
   "private": true,
   "engines": {

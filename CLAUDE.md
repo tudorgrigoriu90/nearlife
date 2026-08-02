@@ -34,15 +34,17 @@ instruction wins for that task only — the defaults below resume afterward.
 - The full test suite + typecheck + lint must be green before every push.
 
 ## Quality gate (enforced)
-- **Authoritative gate: the pre-push hook** at `.githooks/pre-push` runs the verify pipeline
-  (`npm run verify` = lint + typecheck + test) before every push and blocks red pushes.
-- **Never bypass it** — no `git push --no-verify`. If the gate is red, fix the code, not the gate.
-- **After cloning, run `sh scripts/setup-hooks.sh`** once to activate hooks (`core.hooksPath`).
-  Once the app is scaffolded this also runs via the npm `prepare` script.
-- **CI backstop:** `.github/workflows/ci.yml` runs the same verify pipeline on push to `main`
-  and on PRs — catches anything that slips past the local hook.
-- The gate no-ops code checks until `package.json` + the `verify` script exist (T-011/T-013);
-  it gains teeth automatically then. Governance task: **T-109**.
+- **Authoritative gate: GitHub Actions CI** — `.github/workflows/ci.yml` runs the verify pipeline
+  (`npm run verify` = lint + typecheck + test) plus the Python pipeline checks on every push to
+  `main` and on every PR. A red run is a failed gate: fix the code, don't disable the check.
+- **The local pre-push hook was removed** (T-142) — it was slow, easy to have unconfigured, and
+  redundant with CI. There is no `core.hooksPath` / `setup-hooks.sh` step anymore.
+- **Run `npm run verify` locally before you push.** Because pushes go straight to `main` (no PRs),
+  CI runs *after* the push — it reports and notifies on a red `main` but does not block the push.
+  Keeping `main` green is on the author; the local verify run is how you stay ahead of CI.
+- If you ever want CI to *block* bad code instead of just reporting it, switch to PRs + branch
+  protection with a required `Verify` status check (a workflow change, currently out of scope).
+- Governance task: **T-109** (original hook + CI backstop), superseded for the local hook by **T-142**.
 
 ## Git workflow
 - **Push directly to `main`.** No feature branches, no PRs for this repo (solo + Claude).

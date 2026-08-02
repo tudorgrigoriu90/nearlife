@@ -1,8 +1,10 @@
 name: CI
 
-# Backstop quality gate. The authoritative gate is the local pre-push hook
-# (see .githooks/pre-push and CLAUDE.md). This runs after the push reaches the
-# server and after PRs, so anything that slips past the local hook is caught here.
+# Authoritative quality gate (see CLAUDE.md). Runs the verify pipeline (lint +
+# typecheck + test) and the Python pipeline checks on every push to main and on
+# every PR. There is no local pre-push hook anymore (removed in T-142) — run
+# `npm run verify` locally before pushing, since pushes go straight to main and
+# this reports (does not block) a red main.
 
 on:
   push:

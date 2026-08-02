@@ -18,6 +18,6 @@ python pipeline/run.py            # run the (placeholder) pipeline
 ```
 
 ## Gating
-Pipeline code is gated in **CI** (`.github/workflows/ci.yml` runs `pytest` on push/PR), not in
-the local pre-push hook — the hook stays JS/TS-only so no Python toolchain is required locally.
+Pipeline code is gated in **CI** (`.github/workflows/ci.yml` runs `pytest` on push/PR) — the
+authoritative quality gate (there is no local git hook; see [CLAUDE.md](../CLAUDE.md), T-142).
 The scheduled runner is `.github/workflows/pipeline.yml`.

@@ -6,8 +6,7 @@ one task per push, task-plan discipline). This file is the practical dev setup.
 ## First-time setup
 
 ```sh
-npm install            # installs deps; the `prepare` script wires the git hooks path
-sh scripts/setup-hooks.sh   # (optional belt-and-suspenders; also chmods the hook)
+npm install            # installs deps
 ```
 
 ## Daily commands
@@ -20,8 +19,9 @@ sh scripts/setup-hooks.sh   # (optional belt-and-suspenders; also chmods the hoo
 | `npm test` | Jest (via `jest-expo`) |
 | `npm run verify` | lint + typecheck + test — **the quality gate** |
 
-`npm run verify` is what the pre-push hook and CI run. If it's red, the push is blocked
-(don't bypass with `--no-verify`).
+`npm run verify` is what CI runs (the authoritative gate — `.github/workflows/ci.yml`). Run it
+locally before every push: pushes go straight to `main`, so CI runs *after* the push and reports
+(does not block) a red `main`. Keeping `main` green is on you.
 
 ## Repository structure
 
@@ -35,7 +35,7 @@ sh scripts/setup-hooks.sh   # (optional belt-and-suspenders; also chmods the hoo
 | `supabase/` | Database migrations, Edge Functions, seed data |
 | `assets/` | Icons, images |
 | `docs/` | Design docs + [TASK-PLAN.md](docs/TASK-PLAN.md) (the backlog) |
-| `.githooks/`, `.github/` | Quality gate: pre-push hook + CI backstop |
+| `.github/` | Quality gate: GitHub Actions CI (`workflows/ci.yml`) |
 
 ## Workflow in one line
 
