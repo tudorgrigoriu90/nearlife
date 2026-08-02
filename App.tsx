@@ -24,6 +24,7 @@ import {
   type FreeCatchState,
 } from './lib/freeCatch';
 import { isPrimeCatch } from './lib/primeBonus';
+import { gradeFromScore } from './lib/minigame/grade';
 import { seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator, type Locale } from './lib/i18n';
@@ -180,7 +181,7 @@ export default function App() {
           category={target.category}
           locale={locale}
           onCancel={() => setCatching(null)}
-          onComplete={({ success, result }) => {
+          onComplete={({ success, score }) => {
             setCatching(null);
             if (success) {
               // Counter increments on success only; the attempt was already gated by canCatch.
@@ -189,7 +190,8 @@ export default function App() {
               collection.markCaught(target.id, isPrimeCatch(target, new Date()));
               track('catch_succeeded', {
                 speciesId: target.id,
-                grade: result.grade === 'perfect' ? 'perfect' : 'good',
+                // Derive the analytics grade from the unified 0–1 score (success ⇒ perfect|good).
+                grade: gradeFromScore(true, score) === 'perfect' ? 'perfect' : 'good',
               });
               setCaughtTip(target);
             }
