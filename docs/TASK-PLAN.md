@@ -868,9 +868,13 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
     device-run gap). This pays down the "not visually verified" debt across the screens.
 
 ## F11.1 — Store Submission
-- **T-097 · Store listings + assets** — *Claude + Director · M · deps: T-084 · [review]*
-  - App name (final, replacing placeholder "Nearby"), descriptions, screenshots, icon; data-safety
-    / privacy nutrition labels filled honestly (no ads, minimal data). General-audience category.
+- **T-097 · Store listings + assets** — *Claude + Director · M · `IN-PROGRESS` (copy + form answers drafted; final name/graphics/submission pending) · deps: T-084 · [review]*
+  - ✅ `docs/launch/PLAY-STORE-LISTING.md`: short + full description (honesty-safe copy), category,
+    **Data safety** answers, **content-rating** (IARC) answers, **target audience 13+**, **Ads: No**,
+    and **App access = no login required**. All reflect the first internal-testing build (no IAP yet).
+  - ⚠️ **Director:** trademark-check the name "Nearby" (generic — may collide); supply the
+    **feature graphic (1024×500)** + screenshots (need a running build, T-141); enter the listing +
+    App-content answers in Play Console. Revisit Data safety/Ads if IAP or a social layer is added.
 - **T-098 · App Store + Play submission & review** — *Director · L · deps: T-095, T-096, T-097, all P2 build epics · [PRIVACY §3](PRIVACY-COMPLIANCE.md)*
   - Builds submitted; review passed; app live in target market.
 
