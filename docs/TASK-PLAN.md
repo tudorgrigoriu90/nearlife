@@ -204,22 +204,23 @@ before pushing — CI runs after the push and reports (does not block) a red `ma
     it reports/notifies on a red `main` but does not block it. Authors run `npm run verify` locally
     before pushing. Hard prevention would need PRs + a required status check (out of scope for now).
 
-- **T-143 · Component/UI test setup + raise coverage** — *Claude · M · `IN-PROGRESS` (setup fixed; coverage ~45% → ~75%; ≥90% pending) · deps: T-013 · [CLAUDE.md](../CLAUDE.md)*
+- **T-143 · Component/UI test setup + raise coverage to ≥90%** — *Claude · M · `DONE` · deps: T-013 · [CLAUDE.md](../CLAUDE.md)*
   - ✅ **Root cause fixed:** RN render testing works now. The blocker was RNTL v14 being **async**
     (`await render(...)`) **and** needing the new **`test-renderer`** peer (React 19's replacement
     for the deprecated `react-test-renderer`) — which wasn't installed. Both are now declared in
-    devDependencies; tests use `await render()` + the `screen` API.
-  - ✅ **Coverage 44.98% → 75.26% statements** (branches 62.5%, funcs 71.4%, lines 75.5%), **726
-    tests / 65 suites green**. Render + interaction tests added for SpeciesCard, SpeciesHero,
-    ThisWeek, Almanac, Settings, DataExport, ProtectTip, PledgeConfirm, FreeCatchSheet,
-    OnboardingFlow, the MinigameShell + CatchMinigame dispatcher (all 6 category games), and an
-    App boot test.
-  - ✅ **Ratchet:** `jest.config.js` `coverageThreshold` floors (stmts 70 / branches 58 / funcs 65 /
-    lines 70); enforced in CI via `npm run verify:ci` (local `verify` stays fast). Raise toward 90%
-    as tests grow.
-  - ⏳ To ≥90%: drive `App.tsx`'s post-onboarding flow (tabs → card → catch → settings/pledge/paywall
-    — needs permission mocks + async `waitFor`) and the minigame **interaction/scoring** branches
-    (fake-timer tick → tap → result), then raise the threshold.
+    devDependencies; tests use `await render()` + the `screen` API (interactions are async too —
+    `await fireEvent.press(...)`).
+  - ✅ **Coverage 44.98% → 90.91% statements** (lines 91.84%, functions 86.6%, branches 82.6%),
+    **737 tests / 67 suites green**. Tests cover every component + a full **App integration flow**
+    (onboarding → tabs → species card → catch success → protect tip → pledge; Settings → export →
+    Almanac), all 5 minigames' **interaction/scoring** paths (fake-timer tick → result), and the
+    Supabase species gateway (production DB reads via a fake client).
+  - ✅ **Enforced ratchet:** `jest.config.js` `coverageThreshold` = stmts 90 / lines 90 / funcs 85 /
+    branches 80, gated in CI via `npm run verify:ci` (local `verify` stays fast). A real coverage
+    regression now fails CI.
+  - Note: branches 82.6% / functions 86.6% are below 90% (thresholds set accordingly); statements
+    and lines — the headline metrics — are ≥90%. Remaining thin lib infra (supabase.ts client
+    factory, posthog.ts, permissions.ts) is side-effect glue exercised at runtime, not unit-tested.
 
 ### S1.3.0 — Client wiring
 - **T-129 · Supabase client + config** — *Claude · S · `DONE` · deps: T-003 · [TSD §1,§3](TSD.md)*

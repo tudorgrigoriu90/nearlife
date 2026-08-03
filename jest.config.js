@@ -9,10 +9,10 @@ module.exports = {
     '!**/*.test.{ts,tsx}',
     '!lib/species/media.kronoberg.ts',
   ],
-  // Ratchet: floors a few points below the current level (T-143 lifted it ~45% → ~75% once the
-  // RN render-test setup worked). Raise toward 90% as App-flow + minigame-interaction tests land.
-  // Enforced in CI via `npm run verify:ci` (local `npm run verify` stays fast, no coverage).
+  // Ratchet (T-143): the render-test setup fix + component/App-flow/minigame tests took coverage
+  // ~45% → ~91% statements / ~92% lines. Floors sit just under the achieved level so a real
+  // regression fails CI (via `npm run verify:ci`) without brittleness. Raise as coverage grows.
   coverageThreshold: {
-    global: { statements: 70, branches: 58, functions: 65, lines: 70 },
+    global: { statements: 90, branches: 80, functions: 85, lines: 90 },
   },
 };
