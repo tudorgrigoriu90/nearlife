@@ -28,7 +28,7 @@ jobs:
         run: |
           if [ -f package.json ]; then
             npm ci
-            npm run verify
+            npm run verify:ci
           else
             echo "No package.json yet — code checks activate after T-010 (app scaffold)."
           fi

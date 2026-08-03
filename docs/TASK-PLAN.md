@@ -204,18 +204,22 @@ before pushing — CI runs after the push and reports (does not block) a red `ma
     it reports/notifies on a red `main` but does not block it. Authors run `npm run verify` locally
     before pushing. Hard prevention would need PRs + a required status check (out of scope for now).
 
-- **T-143 · Component/UI test setup + raise coverage to ≥90%** — *Claude · M · `TODO` · deps: T-013 · [CLAUDE.md](../CLAUDE.md)*
-  - **Honest baseline (measured):** `npm run test:coverage` = **~45% statements** over all source
-    (`lib/` ~95%+, but `components/*` and `App.tsx` at ~0% — no render tests). The pure logic-first
-    layer is thoroughly tested; the UI layer is not.
-  - **Blocker found:** React Native render testing does not work on this stack out of the box —
-    `@testing-library/react-native` + `react-test-renderer` **no-op / hang** under Expo SDK 57 +
-    **React 19.2** (React 19 deprecated `react-test-renderer`). Needs the React-19-compatible RNTL
-    render path / jest-expo setup (or an alternative renderer) before component tests can run.
-  - ✅ Groundwork: `jest.config.js` now has `collectCoverageFrom` (honest whole-repo coverage) and a
-    `test:coverage` script. No coverage threshold is enforced yet (would fail at 45%).
-  - Remaining: fix the render-test setup, write render/interaction tests across `components/*` +
-    `App.tsx` flows, then add a `coverageThreshold` (≥90%) to `jest.config.js` and enforce it in CI.
+- **T-143 · Component/UI test setup + raise coverage** — *Claude · M · `IN-PROGRESS` (setup fixed; coverage ~45% → ~75%; ≥90% pending) · deps: T-013 · [CLAUDE.md](../CLAUDE.md)*
+  - ✅ **Root cause fixed:** RN render testing works now. The blocker was RNTL v14 being **async**
+    (`await render(...)`) **and** needing the new **`test-renderer`** peer (React 19's replacement
+    for the deprecated `react-test-renderer`) — which wasn't installed. Both are now declared in
+    devDependencies; tests use `await render()` + the `screen` API.
+  - ✅ **Coverage 44.98% → 75.26% statements** (branches 62.5%, funcs 71.4%, lines 75.5%), **726
+    tests / 65 suites green**. Render + interaction tests added for SpeciesCard, SpeciesHero,
+    ThisWeek, Almanac, Settings, DataExport, ProtectTip, PledgeConfirm, FreeCatchSheet,
+    OnboardingFlow, the MinigameShell + CatchMinigame dispatcher (all 6 category games), and an
+    App boot test.
+  - ✅ **Ratchet:** `jest.config.js` `coverageThreshold` floors (stmts 70 / branches 58 / funcs 65 /
+    lines 70); enforced in CI via `npm run verify:ci` (local `verify` stays fast). Raise toward 90%
+    as tests grow.
+  - ⏳ To ≥90%: drive `App.tsx`'s post-onboarding flow (tabs → card → catch → settings/pledge/paywall
+    — needs permission mocks + async `waitFor`) and the minigame **interaction/scoring** branches
+    (fake-timer tick → tap → result), then raise the threshold.
 
 ### S1.3.0 — Client wiring
 - **T-129 · Supabase client + config** — *Claude · S · `DONE` · deps: T-003 · [TSD §1,§3](TSD.md)*
