@@ -514,6 +514,15 @@ key before loading into Supabase.**
   - ⏳ Remaining: run all taxa; **native review** (T-125) + **GBIF-noise curation** (T-136) before it
     ships; load into `species_content` (T-134) and switch the app to DB reads (T-057/T-059) so the
     12k actually render; sv translation via the review gate.
+- **T-144 · CI workflow for the national data pipeline** — *Claude · S · `DONE` (workflow; needs Director secrets to load) · deps: T-134, T-135 · [TSD §6](TSD.md)*
+  - ✅ `.github/workflows/data-pipeline.yml` (manual `workflow_dispatch`): installs the pipeline deps,
+    generates national content (`build_content.py --all` or a chosen taxon) + the curated photo
+    manifest, and uploads the generated JSON as an artifact. The **Supabase load** (`gbif.supabase_load`,
+    T-134) and **photo upload** (`media/supabase_upload.py`, T-119) steps run only when the repo
+    secrets are set — so the whole E3 load runs from GitHub with secrets, not Python on a laptop.
+  - ⏳ **Director:** add repo secrets `SUPABASE_DB_URL` (service-role Postgres string),
+    `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, then run the workflow. A `species_content` loader
+    (content JSON → table) is the one remaining pipeline piece before the 12k render.
 - **T-043 · H3 cell aggregation (res 7–8)** — *Claude · M · deps: T-042 · [TSD §3](TSD.md)*
   - Occurrences aggregated into H3 cells at chosen resolution; cell geometry stored.
 - **T-044 · Per-cell per-month presence probability** — *Claude · L · deps: T-043 · [TSD §4](TSD.md)*

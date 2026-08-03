@@ -1,0 +1,72 @@
+name: Data pipeline
+
+# Operationalises the E3 national data load (T-042/T-134/T-135/T-119) as a manual workflow, so it
+# runs from GitHub with secrets rather than Python on someone's laptop. Content generation always
+# runs (no secrets needed); the Supabase load + photo upload run only when the corresponding repo
+# secrets are set. Manual-only (workflow_dispatch) — it makes external API calls and DB writes, so
+# it never fires automatically.
+#
+# Repo secrets (Settings → Secrets and variables → Actions), all optional:
+#   SUPABASE_DB_URL       service-role Postgres connection string → load species/presence (T-134)
+#   SUPABASE_URL          https://<ref>.supabase.co               → photo upload target (T-119)
+#   SUPABASE_SERVICE_KEY  service-role key                        → photo upload auth (T-119)
+
+on:
+  workflow_dispatch:
+    inputs:
+      content_scope:
+        description: "Content generation scope: 'all' (~12k species, ~hours) or a single presence file name (e.g. presence_mammals.json)"
+        required: false
+        default: "all"
+
+concurrency:
+  group: data-pipeline
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    name: Generate + load national data
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install pipeline deps
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Generate species content (grounded facts + safe templates, T-135)
+        run: |
+          if [ "${{ inputs.content_scope }}" = "all" ]; then
+            python pipeline/build_content.py --all
+          else
+            python pipeline/build_content.py "pipeline/data/${{ inputs.content_scope }}"
+          fi
+
+      - name: Refresh curated photo manifest (T-119)
+        run: python pipeline/build_kronoberg_media.py
+
+      - name: Upload generated data as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-data
+          path: pipeline/data/*.json
+          retention-days: 14
+
+      - name: Load species + presence into Supabase (T-134)
+        if: ${{ env.SUPABASE_DB_URL != '' }}
+        working-directory: pipeline
+        run: python -m gbif.supabase_load
+
+      - name: Upload curated photos to Supabase Storage (T-119)
+        if: ${{ env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_KEY != '' }}
+        run: python pipeline/media/supabase_upload.py
