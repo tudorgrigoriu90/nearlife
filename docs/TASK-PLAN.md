@@ -616,13 +616,17 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     T-102 (households) lands; the current `user_id` shape covers v1.
 
 ## F4.2 — Almanac
-- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (data seam done; async wiring pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
+- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (async wiring done; DB seed + secondary filters pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ Data-access seam `lib/speciesRepository.ts` (7 tests): `SpeciesRepository` (`listSpecies` +
     `getContent`) with a `HardcodedSpeciesRepository` (the bundled set the app runs on today) and a
     `SupabaseSpeciesRepository` (reads the seeded `species`/`species_content` tables via a fakeable
     gateway, English content fallback). Grid already renders ●/◐/◑ overlays + category chips (T-025).
-  - Remaining: point the screens at the repository (async load), apply the content seed, and add
-    season/habitat secondary filters (habitat needs E3).
+  - ✅ **App now loads the Almanac catalogue through the repository** (`App.tsx`, one-shot async load
+    on mount → `AlmanacScreen` gets `species` + `loading`), not the bundled module directly. Defaults
+    to `HardcodedSpeciesRepository` (no behaviour change); the source swaps to Supabase once the DB is
+    seeded. App integration test asserts the loaded total (fails if the async load regresses).
+  - Remaining: inject the Supabase-backed repo + apply the content seed (needs the seeded DB,
+    T-055/T-145 load), and add season/habitat secondary filters (habitat needs E3).
 - **T-058 · Almanac states & progress summary** — *Claude · S · `IN-PROGRESS` (summary + states done; entry points pending) · deps: T-057 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ 3-tier progress summary row (● Spotted / ◐ Caught / ◑ Helped counts via the tested
     `progressSummary`, T-115) added to the Almanac header; empty + loading states already present

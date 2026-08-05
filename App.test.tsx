@@ -96,6 +96,12 @@ describe('App', () => {
       await press(tr('settings.done')); // close settings → tabs
       await press(tr('almanac.title'));
       expect(await screen.findByText(tr('almanac.filter.all'))).toBeTruthy();
+      // Species loaded through the repository seam (T-057), not the bundled module directly: the
+      // progress total reflects the loaded catalogue (would be 0 if the async load never resolved).
+      // One species is spotted by onboarding, so discovered = 1.
+      expect(
+        screen.getByText(tr('almanac.progress', { discovered: 1, total: KRONOBERG_SPECIES.length })),
+      ).toBeTruthy();
     },
     FLOW_TIMEOUT,
   );

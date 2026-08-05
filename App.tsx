@@ -28,7 +28,7 @@ import { gradeFromScore } from './lib/minigame/grade';
 import { seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator, type Locale } from './lib/i18n';
-import { KRONOBERG_SPECIES } from './lib/species/kronoberg';
+import { HardcodedSpeciesRepository } from './lib/speciesRepository';
 import type { HelpKind } from './lib/collection';
 import type { Species } from './lib/species/types';
 
@@ -37,6 +37,12 @@ const INITIAL_FREE_CATCH: FreeCatchState = {
   freeCatchesUsed: 0,
   freeCatchSeason: null,
 };
+
+// The species catalogue is read through the repository seam (T-057), not the bundled module
+// directly, so the source can swap to the seeded Supabase tables without touching the shell. The
+// default is the bundled Kronoberg set the app runs on today; the source swaps to a Supabase-backed
+// repo once the DB is seeded (T-055 content seed). Module-level so its identity is stable.
+const SPECIES_REPO = new HardcodedSpeciesRepository();
 
 // Prototype app shell (E2). Onboarding (T-022+) runs first; once complete, a minimal tab
 // switcher between the "This week" pull surface (T-117) and the Almanac grid (T-025); tapping a
@@ -52,6 +58,10 @@ export default function App() {
   const locale = localeOverride ?? detectDeviceLocale();
   const tr = createTranslator(locale);
   const collection = useCollection();
+  // Almanac catalogue, loaded async through the repository seam (T-057). Defaults to the bundled
+  // set (no behaviour change) until a DB-backed repo is injected. Names re-localize in the grid.
+  const [almanacSpecies, setAlmanacSpecies] = useState<Species[]>([]);
+  const [speciesLoading, setSpeciesLoading] = useState(true);
   const [onboarded, setOnboarded] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [tab, setTab] = useState<Tab>('thisWeek');
@@ -81,6 +91,28 @@ export default function App() {
       track('this_week_opened', {});
     }
   }, [onboarded, tab, showSettings, exportJson, track]);
+
+  // Load the Almanac catalogue via the repository (T-057). One-shot on mount / repo change; the
+  // grid localizes names itself, so this doesn't need to re-run on a locale switch.
+  useEffect(() => {
+    let cancelled = false;
+    SPECIES_REPO.listSpecies(locale)
+      .then((list) => {
+        if (!cancelled) {
+          setAlmanacSpecies(list.map((entry) => entry.species));
+          setSpeciesLoading(false);
+        }
+      })
+      .catch(() => {
+        // A failed load clears loading rather than crashing the shell; the DB-backed repo
+        // surfaces its own errors (SupabaseSpeciesGateway throws with context).
+        if (!cancelled) setSpeciesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot load; grid re-localizes names
+  }, []);
 
   const exportMyData = () => {
     const bundle = buildDataExport({
@@ -247,7 +279,8 @@ export default function App() {
           />
         ) : (
           <AlmanacScreen
-            species={KRONOBERG_SPECIES}
+            species={almanacSpecies}
+            loading={speciesLoading}
             records={collection.records}
             locale={locale}
             onSelectSpecies={setSelected}
