@@ -221,6 +221,11 @@ before pushing — CI runs after the push and reports (does not block) a red `ma
   - Note: branches 82.6% / functions 86.6% are below 90% (thresholds set accordingly); statements
     and lines — the headline metrics — are ≥90%. Remaining thin lib infra (supabase.ts client
     factory, posthog.ts, permissions.ts) is side-effect glue exercised at runtime, not unit-tested.
+- **T-147 · De-flake the AlmanacScreen render test** — *Claude · XS · `DONE` · deps: T-143 · [CLAUDE.md](../CLAUDE.md)*
+  - ✅ `components/AlmanacScreen.test.tsx` "renders the grid…" rendered the full 54-species FlatList
+    under jest's 5000ms default: ~420ms in isolation but a false-red under CPU load (seen twice while
+    a clean install saturated the machine). Gave it an explicit 20s budget (mirrors App.test's
+    `FLOW_TIMEOUT`) — removes the flake without hiding a genuine hang. Keeps `main`/CI reliably green.
 
 ### S1.3.0 — Client wiring
 - **T-129 · Supabase client + config** — *Claude · S · `DONE` · deps: T-003 · [TSD §1,§3](TSD.md)*
