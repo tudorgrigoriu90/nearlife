@@ -517,8 +517,8 @@ key before loading into Supabase.**
   - ✅ Validated on **mammals** (`data/content_mammal.json`). Full 12k run is `build_content.py --all`
     (hours — run in CI, not interactively).
   - ⏳ Remaining: run all taxa; **native review** (T-125) + **GBIF-noise curation** (T-136) before it
-    ships; load into `species_content` (T-134) and switch the app to DB reads (T-057/T-059) so the
-    12k actually render; sv translation via the review gate.
+    ships; load into `species_content` (**T-145** loader — done) and switch the app to DB reads
+    (T-057/T-059) so the 12k actually render; sv translation via the review gate.
 - **T-144 · CI workflow for the national data pipeline** — *Claude · S · `DONE` (workflow; needs Director secrets to load) · deps: T-134, T-135 · [TSD §6](TSD.md)*
   - ✅ `.github/workflows/data-pipeline.yml` (manual `workflow_dispatch`): installs the pipeline deps,
     generates national content (`build_content.py --all` or a chosen taxon) + the curated photo
@@ -526,8 +526,22 @@ key before loading into Supabase.**
     T-134) and **photo upload** (`media/supabase_upload.py`, T-119) steps run only when the repo
     secrets are set — so the whole E3 load runs from GitHub with secrets, not Python on a laptop.
   - ⏳ **Director:** add repo secrets `SUPABASE_DB_URL` (service-role Postgres string),
-    `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, then run the workflow. A `species_content` loader
-    (content JSON → table) is the one remaining pipeline piece before the 12k render.
+    `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, then run the workflow. The `species_content` loader
+    (content JSON → table) is now built + tested (**T-145**) — running it just needs those secrets.
+- **T-145 · Load generated content into `species_content` (loader + tests)** — *Claude · S · `DONE` (code + 5 pytest; bulk run needs the service key) · deps: T-135, T-055 · [TSD §3](TSD.md)*
+  - ✅ Pure row-builder `pipeline/gbif/content_rows.py` (`build_content_rows` → species_content upsert
+    dicts with `gbif:<key>` ids matching the species loader) + thin loader
+    `pipeline/gbif/supabase_load_content.py` (idempotent upsert via service-role `$SUPABASE_DB_URL`),
+    mirroring the presence loader (T-045). 5 pytest; full pipeline suite green (31).
+  - ✅ **Honest coverage:** only species with a grounded Wikipedia fact become rows (`species_content.fact`
+    is NOT NULL and the app treats `fact` as required); fact-less species are counted + reported,
+    **never fabricated** (invariant #1). Smoke on `content_mammal.json`: 156/157 rows, 1 skipped.
+  - ⏳ Run inside the T-144 workflow **after** the species/presence load (FK order), with the service key.
+- **T-146 · Decide how fact-less species surface mission content (give/protect)** — *Claude + Director · S · `TODO` · deps: T-145 · [GDD §5](GDD.md)*
+  - Invariant #2 wants give/protect free for **every** species, but `species_content.fact` is NOT NULL,
+    so a species with no grounded fact currently gets **no** row — dropping its (safe, templated)
+    give/protect too. Decide: make `fact` nullable + render mission-only cards, or accept fact-gated
+    content. A schema + app-render + honest-copy call; Director confirms. Surfaced by T-145.
 - **T-043 · H3 cell aggregation (res 7–8)** — *Claude · M · deps: T-042 · [TSD §3](TSD.md)*
   - Occurrences aggregated into H3 cells at chosen resolution; cell geometry stored.
 - **T-044 · Per-cell per-month presence probability** — *Claude · L · deps: T-043 · [TSD §4](TSD.md)*
