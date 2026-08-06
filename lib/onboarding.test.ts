@@ -15,6 +15,7 @@ describe('onboarding flow', () => {
     }
     expect(visited).toEqual([
       'welcome',
+      'ageGate',
       'locationPrePrompt',
       'hometownConfirm',
       'notificationPrePrompt',

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
+import { agePath, type AgePath } from '../lib/ageGate';
 import { resolveHometown } from '../lib/hometown';
 import { FIRST_STEP, isComplete, stepAfter, type OnboardingStep } from '../lib/onboarding';
 import {
@@ -12,6 +13,7 @@ import { monthOf } from '../lib/season';
 import { contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import { thisWeek } from '../lib/thisWeek';
+import AgeGateStep from './onboarding/AgeGateStep';
 import OnboardingScaffold from './onboarding/OnboardingScaffold';
 import SpeciesCard from './SpeciesCard';
 
@@ -23,6 +25,8 @@ import SpeciesCard from './SpeciesCard';
 
 export interface OnboardingResult {
   locationOutcome: PermissionOutcome;
+  /** From the age-gate (T-089): `restricted` routes the minimal-data path (no analytics offered). */
+  agePath: AgePath;
 }
 
 export default function OnboardingFlow({
@@ -37,6 +41,9 @@ export default function OnboardingFlow({
   const tr = createTranslator(locale);
   const [step, setStep] = useState<OnboardingStep>(FIRST_STEP);
   const [locationOutcome, setLocationOutcome] = useState<PermissionOutcome>('denied');
+  // Defaults to the full path; the age-gate step sets it before the flow can complete (it sits
+  // before every data-collecting step, so `done` is only ever reached with a real value).
+  const [userAgePath, setUserAgePath] = useState<AgePath>('full');
 
   // The starter species: the most interesting active-this-week species (tested thisWeek logic),
   // falling back to the first seed species in a quiet week so onboarding always has a payoff.
@@ -48,7 +55,7 @@ export default function OnboardingFlow({
   const advance = () => setStep((s) => stepAfter(s));
 
   useEffect(() => {
-    if (isComplete(step)) onComplete({ locationOutcome });
+    if (isComplete(step)) onComplete({ locationOutcome, agePath: userAgePath });
     // onComplete is a stable callback from the parent; re-firing on identity change is undesired.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
@@ -76,6 +83,19 @@ export default function OnboardingFlow({
           onNext={advance}
         />
       );
+    case 'ageGate': {
+      const currentYear = new Date().getFullYear();
+      return (
+        <AgeGateStep
+          locale={locale}
+          currentYear={currentYear}
+          onSubmit={(birthYear) => {
+            setUserAgePath(agePath(birthYear, currentYear));
+            advance();
+          }}
+        />
+      );
+    }
     case 'locationPrePrompt':
       return (
         <OnboardingScaffold

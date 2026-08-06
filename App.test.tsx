@@ -46,9 +46,20 @@ async function press(name: string | RegExp, opts?: { exact?: boolean }) {
   await fireEvent.press(await screen.findByText(name, opts));
 }
 
-async function completeOnboarding() {
+// Age-gate (T-089) sits right after welcome. Compute years relative to "now" so the adult/minor
+// paths stay correct whenever the suite runs.
+const ADULT_BIRTH_YEAR = String(new Date().getFullYear() - 30);
+const MINOR_BIRTH_YEAR = String(new Date().getFullYear() - 5);
+
+async function completeOnboarding(birthYear = ADULT_BIRTH_YEAR) {
   await render(<App />);
   await press(tr('onboarding.welcome.cta'));
+  // Age-gate: enter a birth year, then continue (T-089).
+  await fireEvent.changeText(
+    await screen.findByPlaceholderText(tr('onboarding.age.placeholder')),
+    birthYear,
+  );
+  await press(tr('onboarding.age.cta'));
   await press(tr('onboarding.location.cta'));
   await press(tr('onboarding.hometown.cta', { region: 'Kronoberg' })); // location granted → confirm
   await press(tr('onboarding.notif.cta'));
@@ -105,6 +116,21 @@ describe('App', () => {
       expect(
         screen.getByText(tr('almanac.progress', { discovered: 1, total: KRONOBERG_SPECIES.length })),
       ).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'routes an under-13 user to the minimal-data path: the analytics opt-in is withheld',
+    async () => {
+      await completeOnboarding(MINOR_BIRTH_YEAR); // age ~5 → restricted (T-089)
+
+      await press(tr('nav.settings'), { exact: false });
+      // The analytics toggle is removed entirely (not merely defaulted off), with an explanatory note.
+      expect(screen.queryByText(tr('consent.analytics'))).toBeNull();
+      expect(screen.getByText(tr('consent.analyticsLocked'))).toBeTruthy();
+      // The other granular consents remain available.
+      expect(screen.getByText(tr('consent.location'))).toBeTruthy();
     },
     FLOW_TIMEOUT,
   );

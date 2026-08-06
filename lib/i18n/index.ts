@@ -96,6 +96,13 @@ export const en = {
   'onboarding.firstSpotted.badge': 'Your first sighting!',
   'onboarding.firstSpotted.cta': 'Start exploring',
 
+  // Age-gate (T-089 · GDPR-K). Birth YEAR only (data minimization) — never a full date.
+  'onboarding.age.title': 'Your year of birth',
+  'onboarding.age.body':
+    'We ask once to keep Nearby right for your age. We store only the year — never a full date.',
+  'onboarding.age.placeholder': 'Year of birth (e.g. 1990)',
+  'onboarding.age.cta': 'Continue',
+
   // Catch minigames — shared result copy (T-069)
   'minigame.grade.perfect': 'Perfect!',
   'minigame.grade.good': 'Nice one!',
@@ -153,6 +160,7 @@ export const en = {
   'consent.analytics': 'Analytics',
   'consent.hint': 'You choose what to share. Nothing is on by default, and there are no ads.',
   'settings.language': 'Language',
+  'consent.analyticsLocked': 'Analytics stays off for accounts under 13.',
   'settings.dataAttribution': 'Data & attribution',
   'attribution.gbif': 'Species data: GBIF.org and its contributing datasets.',
   'attribution.osm': 'Habitat & maps: © OpenStreetMap contributors.',
@@ -249,6 +257,13 @@ const sv: Catalog = {
   'onboarding.firstSpotted.badge': 'Din första observation!',
   'onboarding.firstSpotted.cta': 'Börja utforska',
 
+  // Age-gate (T-089 · GDPR-K). Birth YEAR only (data minimization) — never a full date.
+  'onboarding.age.title': 'Ditt födelseår',
+  'onboarding.age.body':
+    'Vi frågar en gång för att anpassa Nearby efter din ålder. Vi sparar bara året – aldrig ett fullständigt datum.',
+  'onboarding.age.placeholder': 'Födelseår (t.ex. 1990)',
+  'onboarding.age.cta': 'Fortsätt',
+
   // Catch minigames — shared result copy (T-069)
   'minigame.grade.perfect': 'Perfekt!',
   'minigame.grade.good': 'Snyggt!',
@@ -306,6 +321,7 @@ const sv: Catalog = {
   'consent.analytics': 'Analys',
   'consent.hint': 'Du väljer vad du delar. Inget är på från början, och det finns inga annonser.',
   'settings.language': 'Språk',
+  'consent.analyticsLocked': 'Analys är avstängd för konton under 13 år.',
   'settings.dataAttribution': 'Data & källor',
   'attribution.gbif': 'Artdata: GBIF.org och dess bidragande dataset.',
   'attribution.osm': 'Habitat & kartor: © OpenStreetMap contributors.',

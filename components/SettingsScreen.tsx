@@ -19,6 +19,7 @@ const LOCALE_KEY: Record<string, TranslationKey> = { en: 'lang.en', sv: 'lang.sv
 export default function SettingsScreen({
   locale = 'en',
   consent,
+  analyticsLocked = false,
   onToggleConsent,
   onSelectLocale,
   onExportData,
@@ -26,12 +27,16 @@ export default function SettingsScreen({
 }: {
   locale?: Locale;
   consent: ConsentState;
+  /** Under-13 (age-gate, T-089): the analytics opt-in is withheld — minimal-data path. */
+  analyticsLocked?: boolean;
   onToggleConsent: (kind: ConsentKind, value: boolean) => void;
   onSelectLocale: (locale: Locale) => void;
   onExportData: () => void;
   onDone: () => void;
 }) {
   const tr = createTranslator(locale);
+  // Minors are never offered analytics (T-089) — the toggle is removed, not just defaulted off.
+  const consentKinds = analyticsLocked ? CONSENT_KINDS.filter((k) => k !== 'analytics') : CONSENT_KINDS;
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -44,7 +49,7 @@ export default function SettingsScreen({
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionLabel}>{tr('settings.privacy')}</Text>
         <View style={styles.card}>
-          {CONSENT_KINDS.map((kind, i) => (
+          {consentKinds.map((kind, i) => (
             <View key={kind} style={[styles.row, i > 0 && styles.rowBorder]}>
               <Text style={styles.rowLabel}>{tr(CONSENT_KEY[kind])}</Text>
               <Switch
@@ -56,6 +61,7 @@ export default function SettingsScreen({
           ))}
         </View>
         <Text style={styles.hint}>{tr('consent.hint')}</Text>
+        {analyticsLocked ? <Text style={styles.hint}>{tr('consent.analyticsLocked')}</Text> : null}
 
         <Text style={styles.sectionLabel}>{tr('settings.language')}</Text>
         <View style={styles.card}>

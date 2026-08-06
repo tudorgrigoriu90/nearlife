@@ -79,6 +79,8 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [exportJson, setExportJson] = useState<string | null>(null);
   const [consent, setConsentState] = useState<ConsentState>(DEFAULT_CONSENT);
+  // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
+  const [analyticsLocked, setAnalyticsLocked] = useState(false);
   const track = useTracker(consent);
   const [selected, setSelected] = useState<Species | null>(null);
   const [catching, setCatching] = useState<Species | null>(null);
@@ -88,6 +90,8 @@ export default function App() {
   const [freeCatch, setFreeCatch] = useState<FreeCatchState>(INITIAL_FREE_CATCH);
 
   const toggleConsent = (kind: ConsentKind, value: boolean) => {
+    // Minors can never enable analytics (T-089 minimal-data path), even if a toggle is reached.
+    if (analyticsLocked && kind === 'analytics') return;
     // Persist every change so the choice survives a restart (GDPR consent record, T-088).
     const next = setConsent(consent, kind, value);
     setConsentState(next);
@@ -196,8 +200,9 @@ export default function App() {
           collection.spot(speciesId);
           track('species_spotted', { speciesId, source: 'onboarding' });
         }}
-        onComplete={({ locationOutcome }) => {
+        onComplete={({ locationOutcome, agePath }) => {
           setPreviewMode(locationOutcome === 'denied');
+          setAnalyticsLocked(agePath === 'restricted');
           setOnboarded(true);
         }}
       />
@@ -219,6 +224,7 @@ export default function App() {
         <SettingsScreen
           locale={locale}
           consent={consent}
+          analyticsLocked={analyticsLocked}
           onToggleConsent={toggleConsent}
           onSelectLocale={(loc) => setLocaleOverride(loc)}
           onExportData={exportMyData}

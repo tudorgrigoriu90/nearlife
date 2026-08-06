@@ -874,10 +874,18 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     no analytics event reaches PostHog before `analytics` consent is granted (invariant #6).
   - Remaining: sync consent to the Supabase **profile** (pairs with the export/delete flows,
     T-092/T-093); location/notification consent already mirror their OS-permission results.
-- **T-089 · Age-gate (GDPR-K, Sweden 13)** — *Claude · S · `IN-PROGRESS` (gate logic done; onboarding screen pending) · deps: T-088 · [PRIVACY §3](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
+- **T-089 · Age-gate (GDPR-K, Sweden 13)** — *Claude · S · `DONE` (birth-year step + restricted routing; on-device layout unverified) · deps: T-088 · [PRIVACY §3](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
   - ✅ `lib/ageGate.ts` (4 tests): birth-**year**-only gate (data minimization), `DIGITAL_CONSENT_AGE_SE = 13`,
-    `agePath()` → `full` | `restricted` for the minimal-data path. Remaining: the onboarding
-    birth-year step + routing the restricted path.
+    `agePath()` → `full` | `restricted` for the minimal-data path.
+  - ✅ **Onboarding step** `components/onboarding/AgeGateStep.tsx` (3 tests) — a birth-**year** input
+    (digits-only, 4 max, plausible-range validated; Continue inert until valid). Inserted in the step
+    machine (`lib/onboarding.ts`) right after `welcome`, **before** any permission ask or the first
+    Spotted, so age is established before data processing (GDPR-K). i18n en+sv.
+  - ✅ **Restricted routing** = the minimal-data path the doc calls for (kids-mode proper is v2,
+    PRIVACY §3): under-13 → **analytics is never offered** — the Settings toggle is removed (not just
+    defaulted off) and `toggleConsent` refuses to enable `analytics`, so no behavioural data on minors.
+    No one is blocked (general-audience positioning). App flow test drives a minor through onboarding
+    and asserts the analytics opt-in is withheld.
 
 ## F10.2 — Location Minimization & Hometown
 - **T-090 · Hometown GPS-derive-once + discard coordinates** — *Claude · M · deps: T-088 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [ECONOMY](ECONOMY.md), [USER-FLOWS §1](USER-FLOWS.md)*
