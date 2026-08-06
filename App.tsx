@@ -30,6 +30,7 @@ import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator, type Locale } from './lib/i18n';
 import { HardcodedSpeciesRepository } from './lib/speciesRepository';
 import type { HelpKind } from './lib/collection';
+import type { SpeciesContent } from './lib/species/content';
 import type { Species } from './lib/species/types';
 
 const INITIAL_FREE_CATCH: FreeCatchState = {
@@ -62,6 +63,11 @@ export default function App() {
   // set (no behaviour change) until a DB-backed repo is injected. Names re-localize in the grid.
   const [almanacSpecies, setAlmanacSpecies] = useState<Species[]>([]);
   const [speciesLoading, setSpeciesLoading] = useState(true);
+  // Selected species' card content, loaded through the repository (T-059). Keyed by species id so a
+  // stale result from a previously-open card is never shown against the newly-selected species.
+  const [cardContent, setCardContent] = useState<{ speciesId: string; content: SpeciesContent | null } | null>(
+    null,
+  );
   const [onboarded, setOnboarded] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [tab, setTab] = useState<Tab>('thisWeek');
@@ -113,6 +119,24 @@ export default function App() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot load; grid re-localizes names
   }, []);
+
+  // Load the selected species' Tier-1 content through the repository (T-059). Fires when a card
+  // opens or the locale changes; the id-keyed result guards against showing a stale species' card.
+  useEffect(() => {
+    if (!selected) return;
+    let cancelled = false;
+    const speciesId = selected.id;
+    SPECIES_REPO.getContent(speciesId, locale)
+      .then((content) => {
+        if (!cancelled) setCardContent({ speciesId, content });
+      })
+      .catch(() => {
+        if (!cancelled) setCardContent({ speciesId, content: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selected, locale]);
 
   const exportMyData = () => {
     const bundle = buildDataExport({
@@ -239,6 +263,7 @@ export default function App() {
       <View style={styles.root}>
         <SpeciesCard
           species={selected}
+          content={cardContent?.speciesId === selected.id ? cardContent.content : null}
           locale={locale}
           tier={tierStateFor(collection.records, selected.id)}
           fullGame={freeCatch.fullGame}

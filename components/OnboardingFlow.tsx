@@ -9,6 +9,7 @@ import {
   type PermissionOutcome,
 } from '../lib/permissions';
 import { monthOf } from '../lib/season';
+import { contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import { thisWeek } from '../lib/thisWeek';
 import OnboardingScaffold from './onboarding/OnboardingScaffold';
@@ -121,6 +122,7 @@ export default function OnboardingFlow({
           </View>
           <SpeciesCard
             species={starter}
+            content={contentFor(starter.id, locale) ?? null}
             locale={locale}
             tier={{ spotted: true, caught: false, helped: false }}
           />

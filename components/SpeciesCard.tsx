@@ -3,7 +3,8 @@ import type { HelpKind, TierState } from '../lib/collection';
 import { EMPTY_TIER_STATE } from '../lib/collection';
 import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
 import { createTranslator, type Locale } from '../lib/i18n';
-import { commonNameFor, contentFor } from '../lib/species/localized';
+import { commonNameFor } from '../lib/species/localized';
+import type { SpeciesContent } from '../lib/species/content';
 import type { Species } from '../lib/species/types';
 import SpeciesHero from './SpeciesHero';
 
@@ -11,13 +12,15 @@ import SpeciesHero from './SpeciesHero';
 // and the give + protect mission actions (never gated — invariant #2). Below sits the depth-tier
 // placeholder row (5 levels, climb-by-play; content authored in T-053) and a "find it nearby"
 // entry into the Caught flow. Undiscovered species show a silhouette but the mission content is
-// still free and visible. All chrome runs through i18n; content localizes via contentFor.
-// NOTE: on-device layout not yet visually verified — no simulator in this environment.
+// still free and visible. All chrome runs through i18n. Content is passed in (T-059): the caller
+// loads it through the SpeciesRepository (locale + English fallback) so the source can swap from
+// the bundled module to Supabase without touching the card. NOTE: on-device layout not yet verified.
 
 const DEPTH_TIERS = Array.from({ length: MAX_DEPTH }, (_, i) => i + 1);
 
 export default function SpeciesCard({
   species,
+  content = null,
   locale = 'en',
   tier = EMPTY_TIER_STATE,
   fullGame = false,
@@ -27,6 +30,9 @@ export default function SpeciesCard({
   onBack,
 }: {
   species: Species;
+  /** Tier-1 content (fact/when-how/give/protect), loaded by the caller via SpeciesRepository
+   * (T-059). `null` while loading or when no content exists yet — the mission block hides. */
+  content?: SpeciesContent | null;
   locale?: Locale;
   tier?: TierState;
   /** Full Game entitlement unlocks all depth tiers immediately (T-060). */
@@ -39,7 +45,6 @@ export default function SpeciesCard({
   onBack?: () => void;
 }) {
   const tr = createTranslator(locale);
-  const content = contentFor(species.id, locale);
   const name = commonNameFor(species, locale);
   const spotted = tier.spotted;
 

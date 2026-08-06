@@ -52,6 +52,9 @@ async function completeOnboarding() {
   await press(tr('onboarding.location.cta'));
   await press(tr('onboarding.hometown.cta', { region: 'Kronoberg' })); // location granted → confirm
   await press(tr('onboarding.notif.cta'));
+  // The first-spotted card shows the starter's always-free mission content (T-059: content is
+  // passed in — guards against the card losing its content when the source became a prop).
+  expect(await screen.findByText(tr('card.give'))).toBeTruthy();
   await press(tr('onboarding.firstSpotted.cta'));
   await screen.findByText(tr('thisWeek.honesty')); // landed on the tabs
 }

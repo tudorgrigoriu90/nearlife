@@ -634,11 +634,15 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     surfaces exist. ⚠️ On-device layout not visually verified.
 
 ## F4.3 — Species Card
-- **T-059 · Species card (production)** — *Claude · M · `IN-PROGRESS` (card + data seam done; async content read pending) · deps: T-055 · [USER-FLOWS §4](USER-FLOWS.md)*
+- **T-059 · Species card (production)** — *Claude · M · `IN-PROGRESS` (async content read done; share pending) · deps: T-055 · [USER-FLOWS §4](USER-FLOWS.md)*
   - ✅ The card renders fact, when/how, give/protect (always free, honest-copy enforced by T-066),
-    the real depth row (T-138) and find-it-nearby + pledge entries. Content now resolvable via
-    `SpeciesRepository.getContent` (locale + English fallback). Remaining: read content through the
-    repository (async) instead of the bundled module, and share.
+    the real depth row (T-138) and find-it-nearby + pledge entries.
+  - ✅ **Content now flows in as a prop, read through the repository** (`App.tsx` loads it via
+    `SpeciesRepository.getContent`, locale + English fallback, keyed by species id so a stale card
+    never shows the previous species' content). `SpeciesCard` is now purely presentational — no
+    direct module import; the mission block hides until content resolves. The App flow test exercises
+    the async read (a broken load ⇒ no give/protect ⇒ the pledge step fails), plus a null-content test.
+  - Remaining: a share action. (DB-backed content arrives with the seed + Supabase repo, T-055/T-145.)
 - **T-060 · Depth-tier climb-by-play logic** — *Claude · M · deps: T-059, T-053 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
   - Free users unlock depth tiers by playing (spot/catch/help); Full Game unlocks all immediately.
     Progression, not paywall — verified for both states.
