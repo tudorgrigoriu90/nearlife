@@ -861,12 +861,19 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
 manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch.**
 
 ## F10.1 — Consent & Age-Gate
-- **T-088 · Granular consent (no pre-ticked boxes)** — *Claude · M · `IN-PROGRESS` (model + UI done; persistence + feature-gating pending) · deps: T-018 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
+- **T-088 · Granular consent (no pre-ticked boxes)** — *Claude · M · `IN-PROGRESS` (model + UI + local persistence + analytics gate done; Supabase profile sync pending) · deps: T-018 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
   - ✅ `lib/consent.ts` (5 tests): `ConsentState` for location/notifications/analytics, all
     defaulting **off** (no pre-ticked boxes); `grant`/`revoke`/`setConsent`/`hasConsent`, immutable.
     **No `ads` consent kind** (no ads — invariant #3). ✅ **UI:** the Settings screen has the three
-    granular toggles (defaulting off) with the "you choose / no ads" hint. Remaining: persist to the
-    profile and wire feature gates (e.g. analytics tracker T-035 respects `analytics`).
+    granular toggles (defaulting off) with the "you choose / no ads" hint.
+  - ✅ **Persistence** `lib/consentStore.ts` (8 tests): pure `parseConsent`/`serializeConsent`
+    (only a literal `true` grants — corrupt/missing/non-true decays to OFF, so "no pre-ticked boxes"
+    survives bad data) + in-memory and `AsyncStorage` stores (mirrors the collectionStore seam).
+    App rehydrates consent on launch and saves on every toggle, so choices survive a restart.
+  - ✅ **Feature gate confirmed wired:** `useTracker` wraps the delegate in `ConsentGatedTracker`, so
+    no analytics event reaches PostHog before `analytics` consent is granted (invariant #6).
+  - Remaining: sync consent to the Supabase **profile** (pairs with the export/delete flows,
+    T-092/T-093); location/notification consent already mirror their OS-permission results.
 - **T-089 · Age-gate (GDPR-K, Sweden 13)** — *Claude · S · `IN-PROGRESS` (gate logic done; onboarding screen pending) · deps: T-088 · [PRIVACY §3](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
   - ✅ `lib/ageGate.ts` (4 tests): birth-**year**-only gate (data minimization), `DIGITAL_CONSENT_AGE_SE = 13`,
     `agePath()` → `full` | `restricted` for the minimal-data path. Remaining: the onboarding

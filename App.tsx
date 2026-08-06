@@ -14,6 +14,7 @@ import DataExportView from './components/DataExportView';
 import { useCollection } from './components/useCollection';
 import { useTracker } from './components/useTracker';
 import { DEFAULT_CONSENT, setConsent, type ConsentKind, type ConsentState } from './lib/consent';
+import { AsyncStorageConsentStore } from './lib/consentStore';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import { KRONOBERG_REGION } from './lib/hometown';
 import { spottedIds, tierStateFor } from './lib/collection';
@@ -44,6 +45,10 @@ const INITIAL_FREE_CATCH: FreeCatchState = {
 // default is the bundled Kronoberg set the app runs on today; the source swaps to a Supabase-backed
 // repo once the DB is seeded (T-055 content seed). Module-level so its identity is stable.
 const SPECIES_REPO = new HardcodedSpeciesRepository();
+
+// Device-local consent persistence (T-088) — granular opt-ins survive restarts. Module-level so
+// its identity is stable across renders.
+const CONSENT_STORE = new AsyncStorageConsentStore();
 
 // Prototype app shell (E2). Onboarding (T-022+) runs first; once complete, a minimal tab
 // switcher between the "This week" pull surface (T-117) and the Almanac grid (T-025); tapping a
@@ -82,8 +87,12 @@ export default function App() {
   const [paywall, setPaywall] = useState(false);
   const [freeCatch, setFreeCatch] = useState<FreeCatchState>(INITIAL_FREE_CATCH);
 
-  const toggleConsent = (kind: ConsentKind, value: boolean) =>
-    setConsentState((c) => setConsent(c, kind, value));
+  const toggleConsent = (kind: ConsentKind, value: boolean) => {
+    // Persist every change so the choice survives a restart (GDPR consent record, T-088).
+    const next = setConsent(consent, kind, value);
+    setConsentState(next);
+    void CONSENT_STORE.save(next);
+  };
 
   // Validation-funnel instrumentation (T-035): session start, and This Week opened whenever the
   // user is on that tab (covers both the initial view and switching back to it). `track` is
@@ -91,6 +100,22 @@ export default function App() {
   useEffect(() => {
     track('session_start', {});
   }, [track]);
+
+  // Rehydrate persisted consent on launch (T-088). Until it resolves, consent stays at the all-off
+  // default, so nothing (analytics included) fires without a stored grant.
+  useEffect(() => {
+    let cancelled = false;
+    CONSENT_STORE.load()
+      .then((stored) => {
+        if (!cancelled) setConsentState(stored);
+      })
+      .catch(() => {
+        // A load failure keeps the safe all-off default already in state.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (onboarded && tab === 'thisWeek' && !showSettings && exportJson === null) {
