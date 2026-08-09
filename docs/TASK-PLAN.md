@@ -1150,64 +1150,111 @@ locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INT
 language of their choice **at the same time** (not by switching) — for immigrants who want to
 cross-reference their mother tongue against the country language. Distinct from F13.1/F13.2's
 single-active-locale model: this stacks two locales in the same view. **Off by default, Settings
-only.** Scope note: the picker offers the **24 official EU languages** per the Director's brief —
-several languages common among immigrants in Sweden (e.g. Arabic, Somali, Persian, Tigrinya) are
-**not** official EU languages and are therefore out of scope here; flagged as a possible v2 ask,
-not assumed.
+only.**
 
-- **T-148 · Dual-language settings state (toggle + mother-tongue pick)** — *Claude · S · `TODO` · deps: T-120, T-124*
-  - Pure state `{ enabled: boolean; secondaryLocale: Locale | null }`, default `{ enabled: false,
-    secondaryLocale: null }` (invariant: no pre-enabled features). `secondaryLocale` must differ
-    from the primary display locale (rejecting/ignoring the same choice — a no-op pairing).
-    Enabling with no `secondaryLocale` chosen forces the picker rather than silently no-op-ing.
-    Tests: default-off, same-locale rejection, persisted shape. Not yet in the data-export bundle
-    (`lib/dataExport.ts`) — note the gap for when profile/settings export is extended (T-092); the
-    primary locale override has the same pre-existing gap today.
-- **T-149 · Dual-text formatting core (title "/" join, stacked body)** — *Claude · S · `TODO` · deps: T-148*
+**Scope resolved (Director, 2026-08-09):**
+1. **Translation-quality policy:** machine translation is sufficient — **no native-review gate**
+   before a language is offered in the secondary picker, give/protect included. This is narrower
+   than F13.2's UI-language-switch policy (T-125, which still requires review before a locale
+   becomes the *primary* app language) — dual display is explicitly a supplementary aid shown
+   alongside the always-reviewed primary content, not a replacement for it. The one surviving
+   requirement is **honesty labeling**: MT content is visibly tagged "machine-translated" so a
+   user never mistakes it for reviewed advice (invariant #1). T-152 below records this; T-155 is
+   downgraded from a blocker to an optional future quality pass.
+2. **Language roster widened beyond the 24 EU languages:** add Sweden's actual top immigrant
+   languages even where non-EU. Starter list (Director to confirm/reorder against real
+   Statistics Sweden data): **Arabic (ar), Somali (so), Persian/Dari (fa), Pashto (ps), Kurdish —
+   Sorani (ckb) + Kurmanji (kmr), Turkish (tr), Tigrinya (ti), Bosnian (bs), Serbian (sr),
+   Albanian (sq), Russian (ru), Ukrainian (uk), Thai (th), Vietnamese (vi), Amharic (am)**.
+   (Croatian/hr and Spanish/es already cover the EU-language side of former-Yugoslavia and
+   Latin-American immigration respectively.) Several of these are **RTL scripts** (Arabic,
+   Persian/Dari, Pashto, Sorani Kurdish) — the "24 EU languages are all LTR" assumption in
+   [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) no longer holds for this feature; T-157
+   below is new work this creates, not an existing gap.
+
+- **T-148 · Dual-language settings state (toggle + mother-tongue pick)** — *Claude · S · `TODO` · deps: T-120, T-124, T-156*
+  - Pure state `{ enabled: boolean; secondaryLocale: ContentLocale | null }` (see T-156 for
+    `ContentLocale`), default `{ enabled: false, secondaryLocale: null }` (invariant: no
+    pre-enabled features). `secondaryLocale` must differ from the primary display locale
+    (rejecting/ignoring the same choice — a no-op pairing). Enabling with no `secondaryLocale`
+    chosen forces the picker rather than silently no-op-ing. Tests: default-off, same-locale
+    rejection, persisted shape. Not yet in the data-export bundle (`lib/dataExport.ts`) — note the
+    gap for when profile/settings export is extended (T-092); the primary locale override has the
+    same pre-existing gap today.
+- **T-149 · Dual-text formatting core (title "/" join, stacked body)** — *Claude · S · `TODO` · deps: T-148, T-157*
   - `lib/dualLanguage.ts`: `formatDualTitle(primary, secondary)` → `"Primary / Secondary"`;
     `formatDualBody(primaryText, secondaryText)` → primary paragraph, then secondary paragraph
     (sequential, **not** interleaved sentence-by-sentence, per the brief). Graceful degradation is
     the core correctness property (invariant #1, honest — never a blank/`undefined` second half):
     secondary `null`/missing/equal-to-primary text → title/body render primary-only, no dangling
-    delimiter. Pure + unit-tested (both present, secondary missing, secondary === primary, empty
-    strings).
+    delimiter. Bidi-safe when the secondary is RTL (T-157) — the "/" join must not visually corrupt
+    either half. Pure + unit-tested (both present, secondary missing, secondary === primary, empty
+    strings, RTL secondary).
 - **T-150 · Wire dual display into the Species Card** — *Claude · M · `TODO` · deps: T-149, T-059, T-122*
   - `SpeciesCard` renders the common name via `formatDualTitle` and each body section (fact,
     when/how, give, protect) via `formatDualBody` when `dualLanguage.enabled`. Falls back to
     primary-only per species/field when the secondary locale has no content for that field —
-    mirrors the existing English-fallback chain, just for the secondary slot. Selection-logic unit
-    tests (picks the right content pair; handles a species missing secondary content entirely);
-    on-device layout unverified per this repo's component-testing convention.
-- **T-151 · Settings UI: toggle, language picker, "off" discoverability hint** — *Claude · S · `TODO` · deps: T-148, T-124*
+    mirrors the existing English-fallback chain, just for the secondary slot. An RTL secondary
+    paragraph gets its own text alignment/writing-direction (T-157) without flipping the rest of
+    the (LTR) card. Selection-logic unit tests (picks the right content pair; handles a species
+    missing secondary content entirely); on-device layout unverified per this repo's
+    component-testing convention.
+- **T-151 · Settings UI: toggle, language picker, "off" discoverability hint** — *Claude · S · `TODO` · deps: T-148, T-156*
   - New Settings section (below `settings.language`) with the toggle OFF by default and a picker
-    across the 23 other EU languages once ON (uses the T-124 coverage matrix, not `ALPHA_LOCALES` —
-    that list is the primary-language switcher's alpha-only set). While OFF, show one quiet,
-    honest info row noting a second language is available — no modal, no repeat nagging, no red
-    dot (invariant #4 spirit: no upsell-style pressure even though this isn't a monetization
-    moment). Copy must not overclaim translation quality — ties to T-152.
-- **T-152 · Director: translation-quality policy for the secondary language** — *Director + Claude · S · `TODO` · deps: T-124, T-151*
-  - Decide: must the secondary locale be `reviewed` (T-124 status) before it's offered, or can
-    `machine`-status content show as a clearly labeled MT convenience aid alongside the
-    always-reviewed primary? Likely-safe default to confirm: **give/protect requires `reviewed`**
-    (law/safety-sensitive, existing invariant); fact/when-how/common-name may show `machine` status
-    with a visible "machine-translated" tag. Record the decision in
-    [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md); enforced by T-153.
-- **T-153 · Extend content-honesty + coverage enforcement to the dual-display path** — *Claude · S · `TODO` · deps: T-152, T-066, T-124*
+    across the full `ContentLocale` roster (T-156: 24 EU + the priority immigrant list) once ON —
+    grouped or ordered so the ~15 added languages don't bury the EU list. Uses the widened T-156
+    coverage tracking, not `ALPHA_LOCALES` (the primary-language switcher's alpha-only set stays
+    unchanged — this picker is additive, not a replacement UI-language list). While OFF, show one
+    quiet, honest info row noting a second language is available — no modal, no repeat nagging, no
+    red dot (invariant #4 spirit). Copy is honest about MT quality (machine-translated, not
+    "translated") — ties to T-152.
+- **T-152 · Translation-quality policy for the secondary language** — *Director + Claude · S · `DONE` · deps: T-124*
+  - ✅ **Resolved (2026-08-09):** machine translation is sufficient for dual display — no
+    native-review gate, give/protect included. Dual display is a supplementary aid alongside the
+    always-reviewed primary content, not a replacement for it, which is why this is a narrower bar
+    than T-125's UI-language-switch policy. Surviving requirement: secondary content **must carry
+    a visible "machine-translated" indicator** (invariant #1 honesty) so it's never mistaken for
+    reviewed advice. Recorded here and to be folded into
+    [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) as a documented exception to the "never ship
+    unreviewed give/protect" rule, scoped explicitly to this supplementary-display feature.
+- **T-153 · Extend content-honesty enforcement to the dual-display path** — *Claude · S · `TODO` · deps: T-152, T-066, T-156*
   - `contentHonesty.ts`'s real-time-presence-phrase check extends to every locale offered in the
-    secondary picker as that locale's content lands; add a check that unreviewed content shown
-    per the T-152 policy always carries a machine-translated indicator, and that dual display never
-    surfaces an unreviewed give/protect string.
-- **T-154 · Machine-translate species content into the remaining EU languages** — *Claude + Director · XL · `TODO` · deps: T-127, T-124*
-  - The volume item flagged in INTERNATIONALIZATION.md ("4 fields × 50+ species × 24 languages").
-    Mirrors T-127's per-locale approach; registers each locale at `machine` status in the coverage
-    matrix (never `reviewed` — that's native review, T-155). Can stage language-by-language. Not a
+    secondary picker (T-156 roster) as that locale's content lands; add a check that secondary
+    content always carries the machine-translated indicator per the T-152 policy (labeling is
+    enforced; review status is not — see T-152).
+- **T-154 · Machine-translate species content into the full dual-display roster** — *Claude + Director · XL · `TODO` · deps: T-127, T-156*
+  - The volume item flagged in INTERNATIONALIZATION.md, now spanning the 24 EU languages **and**
+    the T-156 priority immigrant list (~39 locales total). Mirrors T-127's per-locale approach;
+    registers each at `machine` status in the coverage matrix — per T-152, `machine` is sufficient
+    to ship in dual display (unlike a primary-language switch, which still needs `reviewed`, T-125).
+    Can stage language-by-language, immigrant-priority languages first per T-156's ordering. Not a
     blocker for shipping T-148–T-151 — the picker is usable (degrading gracefully) with just en/sv
-    seeded; this is what makes it useful across all 24.
-- **T-155 · Native review queue for dual-display languages** — *Director · L (ongoing) · `TODO` · deps: T-154, T-152*
-  - Native-speaker review of MT output, prioritized by languages most represented among actual
-    immigrants to Sweden among the 24 (Director to confirm order — e.g. Polish, Romanian are
-    plausible starting points but unconfirmed). A locale drops its "machine-translated" tag in the
-    dual-display UI only once `reviewed` (ties to T-152's policy + the existing T-125 gate).
+    seeded.
+- **T-155 · (optional, non-blocking) Native review pass for dual-display languages** — *Director · L (ongoing) · `TODO` · deps: T-154*
+  - Downgraded from a blocker to a future quality upgrade per T-152's resolution — dual display
+    ships on `machine` status. If/when native review happens for a language (e.g. to eventually
+    retire its "machine-translated" tag), prioritize by actual Sweden immigrant-population share
+    (Director to confirm order against real data; the T-156 list is a first-pass estimate).
+- **T-156 · `ContentLocale`: widen the dual-display roster beyond the 24 EU languages** — *Claude · M · `TODO` · deps: T-124*
+  - Architecture decision: introduce a **separate `ContentLocale` type** (EU `Locale` ∪ the
+    priority immigrant languages — ar, so, fa, ps, ckb, kmr, tr, ti, bs, sr, sq, ru, uk, th, vi,
+    am) used only by species-content lookup (`species_content`) and this feature's coverage
+    tracking — rather than widening the app-wide `Locale`/UI-`Catalog` type, which would
+    compile-force UI-chrome translations for ~15 more languages that aren't in scope (this feature
+    is content-only, per the brief). Extend `lib/i18n/coverage.ts`'s status tracking (or a sibling
+    module) to the new locales, all starting `missing`. Record the rationale (content-only scope,
+    not full UI localization) in [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md). Tests: the
+    new locales are distinct from `Locale`, and `species_content` lookups accept a `ContentLocale`.
+- **T-157 · RTL-safe rendering for the secondary language slot** — *Claude · M · `TODO` · deps: T-156*
+  - Several T-156 languages are RTL scripts (Arabic, Persian/Dari, Pashto, Sorani Kurdish) —
+    the "all 24 EU languages are LTR" assumption in INTERNATIONALIZATION.md doesn't extend to this
+    feature. Scope: per-language RTL flag on `ContentLocale`; the secondary paragraph in
+    `formatDualBody`'s consumer gets its own `writingDirection`/text-align without mirroring the
+    rest of the (LTR) card layout — this is *mixed-direction-within-a-screen*, not full app RTL
+    support (out of scope). The title's "/" join (T-149) must stay legible with an RTL secondary
+    half — verify with Unicode bidi control characters if plain concatenation misorders the glyphs
+    (test with a real Arabic/Persian string, not a placeholder). Tests: RTL flag lookup per locale;
+    bidi-safe title join with an RTL secondary string.
 
 ---
 ---

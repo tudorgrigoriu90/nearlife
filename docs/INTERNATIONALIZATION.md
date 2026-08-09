@@ -24,7 +24,24 @@ Finnish (fi), French (fr), German (de), Greek (el), Hungarian (hu), Irish (ga), 
 Latvian (lv), Lithuanian (lt), Maltese (mt), Polish (pl), Portuguese (pt), Romanian (ro),
 Slovak (sk), Slovenian (sl), Spanish (es), Swedish (sv).
 
-All are left-to-right — **no RTL layout work needed.**
+All are left-to-right — **no RTL layout work needed for the primary UI-language list.**
+
+### Mother-tongue dual display (content-only, wider roster)
+A separate, opt-in feature (TASK-PLAN.md F13.3) shows species content in the primary language
+**and** a second language simultaneously, in Settings, off by default. Its language roster is
+wider than the 24 above — it adds Sweden's top immigrant languages even where non-EU (Arabic,
+Somali, Persian/Dari, Pashto, Kurdish, Turkish, Tigrinya, Bosnian, Serbian, Albanian, Russian,
+Ukrainian, Thai, Vietnamese, Amharic) via a separate `ContentLocale` type — species content only,
+not a widened UI `Locale`/`Catalog` (see T-156). Several of these are **RTL scripts**, so the
+"no RTL work needed" line above applies to the primary UI-language list only, not this feature
+(T-157 handles mixed-direction rendering for the secondary slot).
+
+**Translation-quality policy for this feature (Director, 2026-08-09):** machine translation is
+sufficient — no native-review gate before a language is offered, give/protect included. This is
+narrower than the rule below (never ship unreviewed give/protect as the *primary*, reviewed
+UI-language content) — dual display is a labeled supplementary aid alongside the always-reviewed
+primary, not a replacement for it. The one requirement carried over is honesty labeling: secondary
+content is visibly tagged "machine-translated" (T-152/T-153).
 
 ---
 
