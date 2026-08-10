@@ -68,10 +68,17 @@ describe('translation status', () => {
     expect(contentLocaleStatus('ar')).toBe(IMMIGRANT_LOCALE_STATUS.ar);
   });
 
-  it('starts every immigrant locale at missing (nothing seeded yet — T-154)', () => {
+  it('marks Arabic as machine-translated — the first seeded language (T-154)', () => {
+    expect(IMMIGRANT_LOCALE_STATUS.ar).toBe('machine');
+  });
+
+  it('leaves the not-yet-translated languages at missing', () => {
+    // Each language flips to `machine` as T-154 seeds it; none may claim `reviewed` without
+    // native review (T-155), which no immigrant-roster language has had.
     for (const locale of IMMIGRANT_LOCALES) {
-      expect(IMMIGRANT_LOCALE_STATUS[locale]).toBe('missing');
+      expect(IMMIGRANT_LOCALE_STATUS[locale]).not.toBe('reviewed');
     }
+    expect(IMMIGRANT_LOCALE_STATUS.so).toBe('missing');
   });
 });
 
@@ -86,9 +93,14 @@ describe('dual-display policy (T-152: machine translation is sufficient)', () =>
     expect(isOfferableForDualDisplay('en')).toBe(true);
   });
 
+  it('offers Arabic now that it is seeded', () => {
+    expect(isOfferableForDualDisplay('ar')).toBe(true);
+    expect(dualDisplayLocales()).toContain('ar');
+  });
+
   it('does not offer a locale with no content at all', () => {
-    expect(isOfferableForDualDisplay('ar')).toBe(false);
-    expect(dualDisplayLocales()).not.toContain('ar');
+    expect(isOfferableForDualDisplay('so')).toBe(false);
+    expect(dualDisplayLocales()).not.toContain('so');
   });
 
   it('lists only offerable locales, in roster order', () => {
@@ -99,8 +111,9 @@ describe('dual-display policy (T-152: machine translation is sufficient)', () =>
 
   it('requires the machine-translated notice only for machine-status content', () => {
     expect(needsMachineTranslationNotice('sv')).toBe(true);
+    expect(needsMachineTranslationNotice('ar')).toBe(true);
     expect(needsMachineTranslationNotice('en')).toBe(false);
     // A locale with no content never renders, so it needs no notice.
-    expect(needsMachineTranslationNotice('ar')).toBe(false);
+    expect(needsMachineTranslationNotice('so')).toBe(false);
   });
 });

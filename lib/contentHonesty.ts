@@ -15,6 +15,9 @@ import type { ContentLocale } from './i18n/contentLocale';
 export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = {
   en: ['right now', 'here now', 'here right now', 'currently here', 'near you now', 'at this moment'],
   sv: ['just nu', 'här nu', 'just här'],
+  // Multi-word, like the English list: bare «الآن» ("now") is far too common to ban outright and
+  // would flag honest seasonal copy. These are the real-time *presence* constructions.
+  ar: ['هنا الآن', 'الآن هنا', 'حاليا هنا', 'حاليًا هنا', 'في هذه اللحظة', 'بالقرب منك الآن', 'موجود الآن'],
 };
 
 /**

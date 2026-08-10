@@ -82,7 +82,7 @@ export function endonymOf(locale: ContentLocale): string {
 // language, a stricter bar (native review, T-125). These start `missing` and move to `machine` as
 // T-154 seeds them; per T-152, `machine` is sufficient to offer in dual display.
 export const IMMIGRANT_LOCALE_STATUS: Record<ImmigrantLocale, ReviewStatus> = {
-  ar: 'missing', so: 'missing', fa: 'missing', ps: 'missing', ckb: 'missing',
+  ar: 'machine', so: 'missing', fa: 'missing', ps: 'missing', ckb: 'missing',
   kmr: 'missing', tr: 'missing', ti: 'missing', bs: 'missing', sr: 'missing',
   sq: 'missing', ru: 'missing', uk: 'missing', th: 'missing', vi: 'missing',
   am: 'missing',

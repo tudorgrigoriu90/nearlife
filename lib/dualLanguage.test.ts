@@ -36,9 +36,13 @@ describe('isDualActive', () => {
     expect(isDualActive(on('sv'), 'sv')).toBe(false);
   });
 
+  it('is active for a seeded immigrant-roster language', () => {
+    expect(isDualActive(on('ar'), 'sv')).toBe(true);
+  });
+
   it('is inactive for a language with no content at all', () => {
-    // ar has no seeded content yet (T-154) — falls back to single-language, never a blank half.
-    expect(isDualActive(on('ar'), 'en')).toBe(false);
+    // Somali is not seeded yet (T-154) — falls back to single-language, never a blank half.
+    expect(isDualActive(on('so'), 'en')).toBe(false);
   });
 
   it('re-checks the primary collision at render time, not only at pick time', () => {

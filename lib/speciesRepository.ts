@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Locale } from './i18n';
 import type { ContentLocale } from './i18n/contentLocale';
 import { KRONOBERG_SPECIES } from './species/kronoberg';
-import { commonNameFor, contentFor } from './species/localized';
+import { commonNameFor, contentFor, contentInLocale } from './species/localized';
 import type { SpeciesContent } from './species/content';
 import type { Month, Rarity, Species, SpeciesCategory } from './species/types';
 
@@ -28,6 +28,11 @@ export interface RegionPresence {
 export interface SpeciesRepository {
   listSpecies(locale: Locale): Promise<LocalizedSpecies[]>;
   getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null>;
+  /**
+   * Content in exactly `locale`, with **no** English fallback — the mother-tongue half of dual
+   * display (T-154). Falling back would show a user a third language they never chose.
+   */
+  getContentInLocale(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null>;
   /** Per-region presence (from `species_presence`); drives This Week + the notification engine. */
   regionPresence(regionId: string): Promise<RegionPresence[]>;
 }
@@ -42,6 +47,10 @@ export class HardcodedSpeciesRepository implements SpeciesRepository {
 
   async getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null> {
     return contentFor(speciesId, locale) ?? null;
+  }
+
+  async getContentInLocale(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null> {
+    return contentInLocale(speciesId, locale) ?? null;
   }
 
   // The bundled set is Kronoberg-only; presence is each species' curated active window.
@@ -130,6 +139,12 @@ export class SupabaseSpeciesRepository implements SpeciesRepository {
     const row =
       (await this.gateway.fetchContent(speciesId, locale)) ??
       (locale === 'en' ? null : await this.gateway.fetchContent(speciesId, 'en'));
+    return row ? contentRowToContent(row) : null;
+  }
+
+  async getContentInLocale(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null> {
+    // Deliberately no English fallback — see the interface docs.
+    const row = await this.gateway.fetchContent(speciesId, locale);
     return row ? contentRowToContent(row) : null;
   }
 

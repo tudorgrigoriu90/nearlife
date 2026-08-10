@@ -222,7 +222,7 @@ export default function App() {
     if (!selected || secondaryLocale === null) return;
     let cancelled = false;
     const speciesId = selected.id;
-    SPECIES_REPO.getContent(speciesId, secondaryLocale)
+    SPECIES_REPO.getContentInLocale(speciesId, secondaryLocale)
       .then((content) => {
         if (!cancelled) setSecondaryCardContent({ speciesId, locale: secondaryLocale, content });
       })
