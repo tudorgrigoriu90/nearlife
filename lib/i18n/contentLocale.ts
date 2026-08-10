@@ -83,7 +83,7 @@ export function endonymOf(locale: ContentLocale): string {
 // T-154 seeds them; per T-152, `machine` is sufficient to offer in dual display.
 export const IMMIGRANT_LOCALE_STATUS: Record<ImmigrantLocale, ReviewStatus> = {
   ar: 'machine', so: 'machine', fa: 'machine', ps: 'machine', ckb: 'machine',
-  kmr: 'missing', tr: 'machine', ti: 'machine', bs: 'machine', sr: 'machine',
+  kmr: 'machine', tr: 'machine', ti: 'machine', bs: 'machine', sr: 'machine',
   sq: 'machine', ru: 'machine', uk: 'machine', th: 'missing', vi: 'missing',
   am: 'missing',
 };
