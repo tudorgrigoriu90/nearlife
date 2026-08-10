@@ -85,7 +85,7 @@ export const IMMIGRANT_LOCALE_STATUS: Record<ImmigrantLocale, ReviewStatus> = {
   ar: 'machine', so: 'machine', fa: 'machine', ps: 'machine', ckb: 'machine',
   kmr: 'machine', tr: 'machine', ti: 'machine', bs: 'machine', sr: 'machine',
   sq: 'machine', ru: 'machine', uk: 'machine', th: 'machine', vi: 'machine',
-  am: 'missing',
+  am: 'machine',
 };
 
 /** Translation status for any content locale (EU roster and immigrant roster alike). */

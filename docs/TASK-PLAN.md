@@ -1285,7 +1285,20 @@ only.**
     secondary picker (T-156 roster) as that locale's content lands; add a check that secondary
     content always carries the machine-translated indicator per the T-152 policy (labeling is
     enforced; review status is not — see T-152).
-- **T-154 · Machine-translate species content into the full dual-display roster** — *Claude + Director · XL · `TODO` · deps: T-127, T-156*
+- **T-154 · Machine-translate species content into the full dual-display roster** — *Claude + Director · XL · `DONE` (16 immigrant languages; the 22 remaining EU languages are follow-on) · deps: T-127, T-156*
+  - ✅ **All 16 immigrant-roster languages seeded**, one push each, in immigrant-population order:
+    Arabic, Somali, Persian/Dari, Tigrinya, Sorani Kurdish, Turkish, Bosnian, Serbian, Albanian,
+    Russian, Ukrainian, Pashto, Kurmanji Kurdish, Thai, Vietnamese, Amharic. Each is 54 species ×
+    4 fields plus common names, registered at `machine` status with its own banned-phrase list
+    (required by T-153, else the honesty suite passes vacuously).
+  - ✅ Picker now offers **18 languages** (en, sv + the 16). Scripts covered: Latin, Arabic (RTL),
+    Cyrillic, Ge'ez, Thai — exercising the T-157 direction table for real.
+  - ✅ Serbian was **derived** from Bosnian rather than translated afresh (same language system;
+    the honest differences are script and jat reflex). Transliteration is mechanical; the
+    ijekavian→ekavian pass used a curated word list built from the words actually present, since
+    "je" is root-internal in many words (jesen, jezero, -anje nouns) a regex would corrupt.
+  - ⏳ **Remaining:** the 22 EU languages beyond en/sv. Same mechanical pattern; not required for
+    the feature to work, since the picker only lists languages that actually have content.
   - The volume item flagged in INTERNATIONALIZATION.md, now spanning the 24 EU languages **and**
     the T-156 priority immigrant list (~39 locales total). Mirrors T-127's per-locale approach;
     registers each at `machine` status in the coverage matrix — per T-152, `machine` is sufficient
