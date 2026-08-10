@@ -37,6 +37,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
   de: ['jetzt hier', 'hier jetzt', 'gerade hier', 'im moment hier', 'derzeit hier'],
   fi: ['tässä juuri nyt', 'juuri nyt tässä', 'nyt täällä', 'täällä nyt'],
   da: ['her lige nu', 'lige nu her', 'her nu', 'netop nu'],
+  hr: ['ovdje sada', 'sada ovdje', 'upravo sada', 'trenutno ovdje'],
 };
 
 /**
