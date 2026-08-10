@@ -45,6 +45,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
   pt: ['aqui agora', 'agora aqui', 'neste momento aqui', 'atualmente aqui', 'mesmo agora aqui'],
   ro: ['aici acum', 'acum aici', 'chiar acum', 'în acest moment aici', 'în prezent aici'],
   el: ['εδώ τώρα', 'τώρα εδώ', 'αυτή τη στιγμή εδώ', 'προς το παρόν εδώ'],
+  hu: ['itt most', 'most itt', 'éppen most', 'jelenleg itt', 'ebben a pillanatban itt'],
 };
 
 /**
