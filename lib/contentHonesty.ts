@@ -23,6 +23,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
   ti: ['ኣብዚ ሕጂ', 'ሕጂ ኣብዚ', 'ኣብዚ እዋን እዚ'],
   ckb: ['لێرە ئێستا', 'ئێستا لێرە', 'لەم ساتەدا'],
   tr: ['şu anda burada', 'burada şu anda', 'şimdi burada', 'şu an burada'],
+  bs: ['ovdje sada', 'sada ovdje', 'upravo sada', 'trenutno ovdje'],
 };
 
 /**
