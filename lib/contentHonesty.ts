@@ -42,6 +42,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
   nl: ['hier nu', 'nu hier', 'op dit moment hier', 'momenteel hier', 'nu ter plekke'],
   fr: ['ici maintenant', 'maintenant ici', 'ici en ce moment', 'en ce moment ici', 'actuellement ici'],
   it: ['qui ora', 'qui adesso', 'adesso qui', 'proprio adesso', 'in questo momento qui', 'attualmente qui'],
+  pt: ['aqui agora', 'agora aqui', 'neste momento aqui', 'atualmente aqui', 'mesmo agora aqui'],
 };
 
 /**
