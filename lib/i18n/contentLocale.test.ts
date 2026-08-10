@@ -1,6 +1,7 @@
 import { SUPPORTED_LOCALES } from './index';
 import { LOCALE_STATUS } from './coverage';
 import {
+  anUnseededContentLocale,
   CONTENT_LOCALES,
   contentLocaleStatus,
   dualDisplayLocales,
@@ -72,13 +73,12 @@ describe('translation status', () => {
     expect(IMMIGRANT_LOCALE_STATUS.ar).toBe('machine');
   });
 
-  it('leaves the not-yet-translated languages at missing', () => {
-    // Each language flips to `machine` as T-154 seeds it; none may claim `reviewed` without
-    // native review (T-155), which no immigrant-roster language has had.
+  it('never claims `reviewed` for an immigrant-roster language', () => {
+    // Each flips to `machine` as T-154 seeds it; `reviewed` needs native review (T-155), which
+    // none has had.
     for (const locale of IMMIGRANT_LOCALES) {
       expect(IMMIGRANT_LOCALE_STATUS[locale]).not.toBe('reviewed');
     }
-    expect(IMMIGRANT_LOCALE_STATUS.so).toBe('missing');
   });
 });
 
@@ -99,8 +99,9 @@ describe('dual-display policy (T-152: machine translation is sufficient)', () =>
   });
 
   it('does not offer a locale with no content at all', () => {
-    expect(isOfferableForDualDisplay('so')).toBe(false);
-    expect(dualDisplayLocales()).not.toContain('so');
+    const unseeded = anUnseededContentLocale();
+    expect(isOfferableForDualDisplay(unseeded)).toBe(false);
+    expect(dualDisplayLocales()).not.toContain(unseeded);
   });
 
   it('lists only offerable locales, in roster order', () => {
@@ -114,6 +115,6 @@ describe('dual-display policy (T-152: machine translation is sufficient)', () =>
     expect(needsMachineTranslationNotice('ar')).toBe(true);
     expect(needsMachineTranslationNotice('en')).toBe(false);
     // A locale with no content never renders, so it needs no notice.
-    expect(needsMachineTranslationNotice('so')).toBe(false);
+    expect(needsMachineTranslationNotice(anUnseededContentLocale())).toBe(false);
   });
 });

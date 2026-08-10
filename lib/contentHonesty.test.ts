@@ -1,5 +1,6 @@
 import { findRealtimeClaims, hasHonestyPhrasesFor, isHonest } from './contentHonesty';
 import {
+  anUnseededContentLocale,
   CONTENT_LOCALES,
   contentLocaleStatus,
   dualDisplayLocales,
@@ -73,11 +74,10 @@ describe('dual-display honesty enforcement', () => {
   });
 
   it('does not silently pass unknown-locale text through the English list', () => {
-    // Documents the trap the check above guards, using a language that has no phrase list yet:
-    // Somali text claiming presence is NOT caught by the English phrases, so the fallback must
-    // never be relied on for a real language.
-    expect(hasHonestyPhrasesFor('so')).toBe(false);
-    expect(findRealtimeClaims('waa halkan hadda', 'so')).toEqual([]);
+    // Documents the trap the check above guards, using whichever language is not yet seeded:
+    // its text is NOT inspected by the English phrases, so the fallback must never be relied on.
+    const unseeded = anUnseededContentLocale();
+    expect(hasHonestyPhrasesFor(unseeded)).toBe(false);
     // Arabic, by contrast, now has its own list — and it genuinely catches an Arabic overclaim.
     expect(hasHonestyPhrasesFor('ar')).toBe(true);
     expect(findRealtimeClaims('إنه هنا الآن قرب البحيرة', 'ar')).toContain('هنا الآن');

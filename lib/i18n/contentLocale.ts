@@ -82,7 +82,7 @@ export function endonymOf(locale: ContentLocale): string {
 // language, a stricter bar (native review, T-125). These start `missing` and move to `machine` as
 // T-154 seeds them; per T-152, `machine` is sufficient to offer in dual display.
 export const IMMIGRANT_LOCALE_STATUS: Record<ImmigrantLocale, ReviewStatus> = {
-  ar: 'machine', so: 'missing', fa: 'missing', ps: 'missing', ckb: 'missing',
+  ar: 'machine', so: 'machine', fa: 'missing', ps: 'missing', ckb: 'missing',
   kmr: 'missing', tr: 'missing', ti: 'missing', bs: 'missing', sr: 'missing',
   sq: 'missing', ru: 'missing', uk: 'missing', th: 'missing', vi: 'missing',
   am: 'missing',
@@ -113,4 +113,15 @@ export function dualDisplayLocales(): ContentLocale[] {
 /** True when content in this locale must carry the "machine-translated" notice (invariant #1). */
 export function needsMachineTranslationNotice(locale: ContentLocale): boolean {
   return contentLocaleStatus(locale) === 'machine';
+}
+
+/**
+ * A content locale that has no content yet — for tests that need to exercise the not-translated
+ * path. Derived rather than hardcoded so it stays valid as T-154 seeds languages one by one;
+ * hardcoding one meant every new language broke a handful of unrelated tests.
+ */
+export function anUnseededContentLocale(): ContentLocale {
+  const unseeded = CONTENT_LOCALES.find((l) => !isOfferableForDualDisplay(l));
+  if (!unseeded) throw new Error('every content locale is seeded — update these tests');
+  return unseeded;
 }

@@ -6,6 +6,7 @@ import {
   setSecondaryLocale,
   type DualLanguageSettings,
 } from './dualLanguage';
+import { anUnseededContentLocale } from './i18n/contentLocale';
 
 const on = (secondaryLocale: DualLanguageSettings['secondaryLocale']): DualLanguageSettings => ({
   enabled: true,
@@ -41,8 +42,8 @@ describe('isDualActive', () => {
   });
 
   it('is inactive for a language with no content at all', () => {
-    // Somali is not seeded yet (T-154) — falls back to single-language, never a blank half.
-    expect(isDualActive(on('so'), 'en')).toBe(false);
+    // Not seeded yet (T-154) — falls back to single-language, never a blank half.
+    expect(isDualActive(on(anUnseededContentLocale()), 'en')).toBe(false);
   });
 
   it('re-checks the primary collision at render time, not only at pick time', () => {

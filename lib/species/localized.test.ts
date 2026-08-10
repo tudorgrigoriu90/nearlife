@@ -1,4 +1,5 @@
 import { commonNameFor, commonNameInLocale, contentFor, contentInLocale } from './localized';
+import { anUnseededContentLocale } from '../i18n/contentLocale';
 import { AR_CONTENT } from './content.ar';
 import { AR_NAMES } from './names.ar';
 import { KRONOBERG_CONTENT } from './content';
@@ -68,8 +69,9 @@ describe('contentInLocale / commonNameInLocale', () => {
   it('returns nothing for an unseeded language rather than English', () => {
     // The point of the exact lookup: a Swedish-speaking user with an unseeded second language must
     // not be handed English as if it were their own language.
-    expect(contentInLocale('common-swift', 'so')).toBeUndefined();
-    expect(commonNameInLocale(swift, 'so')).toBeUndefined();
+    const unseeded = anUnseededContentLocale();
+    expect(contentInLocale('common-swift', unseeded)).toBeUndefined();
+    expect(commonNameInLocale(swift, unseeded)).toBeUndefined();
   });
 
   it('still resolves English to the base name', () => {
@@ -77,6 +79,8 @@ describe('contentInLocale / commonNameInLocale', () => {
   });
 
   it('contrasts with contentFor, which deliberately does fall back to English', () => {
-    expect(contentFor('common-swift', 'so')).toBe(KRONOBERG_CONTENT['common-swift']);
+    expect(contentFor('common-swift', anUnseededContentLocale())).toBe(
+      KRONOBERG_CONTENT['common-swift'],
+    );
   });
 });

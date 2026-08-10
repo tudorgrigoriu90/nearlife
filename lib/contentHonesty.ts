@@ -18,6 +18,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
   // Multi-word, like the English list: bare «الآن» ("now") is far too common to ban outright and
   // would flag honest seasonal copy. These are the real-time *presence* constructions.
   ar: ['هنا الآن', 'الآن هنا', 'حاليا هنا', 'حاليًا هنا', 'في هذه اللحظة', 'بالقرب منك الآن', 'موجود الآن'],
+  so: ['halkan hadda', 'hadda halkan', 'hadda halkan joogaa'],
 };
 
 /**
