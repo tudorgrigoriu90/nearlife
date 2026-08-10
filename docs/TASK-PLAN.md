@@ -1293,6 +1293,16 @@ only.**
     Can stage language-by-language, immigrant-priority languages first per T-156's ordering. Not a
     blocker for shipping T-148–T-151 — the picker is usable (degrading gracefully) with just en/sv
     seeded.
+- **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
+  - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
+    `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
+    need. A new language now needs only its content, its names and its registrations — and cannot
+    skip the checks by forgetting to write a test.
+  - ✅ Checks per locale: full species parity + no orphans, all four fields non-empty, **content
+    differs from the English base** (catches an entry copied in to fill a slot — works for every
+    script, unlike a character-range check), expected script where non-Latin, its own honesty
+    phrases declared (T-153), honesty clean, names complete, and status `machine` + offerable.
+
 - **T-155 · (optional, non-blocking) Native review pass for dual-display languages** — *Director · L (ongoing) · `TODO` · deps: T-154*
   - Downgraded from a blocker to a future quality upgrade per T-152's resolution — dual display
     ships on `machine` status. If/when native review happens for a language (e.g. to eventually

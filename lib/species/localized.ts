@@ -16,13 +16,13 @@ import type { Species } from './types';
 // mother-tongue roster (non-EU immigrant languages) that the UI-string system deliberately does not
 // cover. Unseeded locales simply miss the lookup and fall back to English, exactly as before.
 
-const CONTENT_BY_LOCALE: Partial<Record<ContentLocale, Record<string, SpeciesContent>>> = {
+export const CONTENT_BY_LOCALE: Partial<Record<ContentLocale, Record<string, SpeciesContent>>> = {
   en: KRONOBERG_CONTENT,
   sv: SV_CONTENT, // T-127 — machine status, native review pending (INTERNATIONALIZATION.md)
   ar: AR_CONTENT, // T-154 — machine status; dual-display aid only (T-152), never a primary UI language
 };
 
-const NAMES_BY_LOCALE: Partial<Record<ContentLocale, Record<string, string>>> = {
+export const NAMES_BY_LOCALE: Partial<Record<ContentLocale, Record<string, string>>> = {
   sv: SV_NAMES,
   ar: AR_NAMES,
   // English names come from species.commonName (the base).
@@ -58,4 +58,9 @@ export function contentInLocale(
 export function commonNameInLocale(species: Species, locale: ContentLocale): string | undefined {
   if (locale === 'en') return species.commonName;
   return NAMES_BY_LOCALE[locale]?.[species.id];
+}
+
+/** Locales with bundled content beyond the English base — the roster tests iterate over this. */
+export function seededContentLocales(): ContentLocale[] {
+  return (Object.keys(CONTENT_BY_LOCALE) as ContentLocale[]).filter((l) => l !== 'en');
 }

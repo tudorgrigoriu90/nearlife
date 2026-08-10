@@ -1,4 +1,6 @@
-import { commonNameFor, contentFor } from './localized';
+import { commonNameFor, commonNameInLocale, contentFor, contentInLocale } from './localized';
+import { AR_CONTENT } from './content.ar';
+import { AR_NAMES } from './names.ar';
 import { KRONOBERG_CONTENT } from './content';
 import { KRONOBERG_SPECIES } from './kronoberg';
 import { SV_NAMES } from './names.sv';
@@ -52,5 +54,29 @@ describe('contentFor', () => {
 
   it('returns undefined for an unknown species', () => {
     expect(contentFor('made-up', 'en')).toBeUndefined();
+  });
+});
+
+// ── Exact-locale lookup, no English fallback (T-154) ─────────────────────────
+describe('contentInLocale / commonNameInLocale', () => {
+
+  it('returns the content for a seeded language', () => {
+    expect(contentInLocale('common-swift', 'ar')).toBe(AR_CONTENT['common-swift']);
+    expect(commonNameInLocale(swift, 'ar')).toBe(AR_NAMES['common-swift']);
+  });
+
+  it('returns nothing for an unseeded language rather than English', () => {
+    // The point of the exact lookup: a Swedish-speaking user with an unseeded second language must
+    // not be handed English as if it were their own language.
+    expect(contentInLocale('common-swift', 'so')).toBeUndefined();
+    expect(commonNameInLocale(swift, 'so')).toBeUndefined();
+  });
+
+  it('still resolves English to the base name', () => {
+    expect(commonNameInLocale(swift, 'en')).toBe(swift.commonName);
+  });
+
+  it('contrasts with contentFor, which deliberately does fall back to English', () => {
+    expect(contentFor('common-swift', 'so')).toBe(KRONOBERG_CONTENT['common-swift']);
   });
 });
