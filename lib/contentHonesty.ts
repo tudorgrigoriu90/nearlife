@@ -21,6 +21,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
   so: ['halkan hadda', 'hadda halkan', 'hadda halkan joogaa'],
   fa: ['اینجا الان', 'الان اینجا', 'همین حالا اینجا', 'در حال حاضر اینجا', 'در این لحظه'],
   ti: ['ኣብዚ ሕጂ', 'ሕጂ ኣብዚ', 'ኣብዚ እዋን እዚ'],
+  ckb: ['لێرە ئێستا', 'ئێستا لێرە', 'لەم ساتەدا'],
 };
 
 /**
