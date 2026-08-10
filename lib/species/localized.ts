@@ -24,6 +24,7 @@ import { HR_CONTENT } from './content.hr';
 import { ES_CONTENT } from './content.es';
 import { NL_CONTENT } from './content.nl';
 import { FR_CONTENT } from './content.fr';
+import { IT_CONTENT } from './content.it';
 import { SV_CONTENT } from './content.sv';
 import { AR_NAMES } from './names.ar';
 import { SO_NAMES } from './names.so';
@@ -49,6 +50,7 @@ import { HR_NAMES } from './names.hr';
 import { ES_NAMES } from './names.es';
 import { NL_NAMES } from './names.nl';
 import { FR_NAMES } from './names.fr';
+import { IT_NAMES } from './names.it';
 import { SV_NAMES } from './names.sv';
 import type { Species } from './types';
 
@@ -88,6 +90,7 @@ export const CONTENT_BY_LOCALE: Partial<Record<ContentLocale, Record<string, Spe
   es: ES_CONTENT, // T-154
   nl: NL_CONTENT, // T-154
   fr: FR_CONTENT, // T-154
+  it: IT_CONTENT, // T-154
   ar: AR_CONTENT, // T-154 — machine status; dual-display aid only (T-152), never a primary UI language
 };
 
@@ -116,6 +119,7 @@ export const NAMES_BY_LOCALE: Partial<Record<ContentLocale, Record<string, strin
   es: ES_NAMES,
   nl: NL_NAMES,
   fr: FR_NAMES,
+  it: IT_NAMES,
   ar: AR_NAMES,
   // English names come from species.commonName (the base).
 };
