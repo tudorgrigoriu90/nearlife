@@ -15,7 +15,7 @@ export type ReviewStatus =
 export const LOCALE_STATUS: Record<Locale, ReviewStatus> = {
   en: 'reviewed',
   sv: 'machine',
-  bg: 'missing', hr: 'machine', cs: 'missing', da: 'machine', nl: 'machine',
+  bg: 'missing', hr: 'machine', cs: 'machine', da: 'machine', nl: 'machine',
   et: 'missing', fi: 'machine', fr: 'machine', de: 'machine', el: 'machine',
   hu: 'machine', ga: 'missing', it: 'machine', lv: 'missing', lt: 'missing',
   mt: 'missing', pl: 'machine', pt: 'machine', ro: 'machine', sk: 'missing',
