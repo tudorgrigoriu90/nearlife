@@ -2,9 +2,11 @@ import type { ContentLocale } from '../i18n/contentLocale';
 import { KRONOBERG_CONTENT, type SpeciesContent } from './content';
 import { AR_CONTENT } from './content.ar';
 import { SO_CONTENT } from './content.so';
+import { FA_CONTENT } from './content.fa';
 import { SV_CONTENT } from './content.sv';
 import { AR_NAMES } from './names.ar';
 import { SO_NAMES } from './names.so';
+import { FA_NAMES } from './names.fa';
 import { SV_NAMES } from './names.sv';
 import type { Species } from './types';
 
@@ -22,12 +24,14 @@ export const CONTENT_BY_LOCALE: Partial<Record<ContentLocale, Record<string, Spe
   en: KRONOBERG_CONTENT,
   sv: SV_CONTENT, // T-127 — machine status, native review pending (INTERNATIONALIZATION.md)
   so: SO_CONTENT, // T-154
+  fa: FA_CONTENT, // T-154
   ar: AR_CONTENT, // T-154 — machine status; dual-display aid only (T-152), never a primary UI language
 };
 
 export const NAMES_BY_LOCALE: Partial<Record<ContentLocale, Record<string, string>>> = {
   sv: SV_NAMES,
   so: SO_NAMES,
+  fa: FA_NAMES,
   ar: AR_NAMES,
   // English names come from species.commonName (the base).
 };

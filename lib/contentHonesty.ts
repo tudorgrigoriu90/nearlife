@@ -19,6 +19,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
   // would flag honest seasonal copy. These are the real-time *presence* constructions.
   ar: ['هنا الآن', 'الآن هنا', 'حاليا هنا', 'حاليًا هنا', 'في هذه اللحظة', 'بالقرب منك الآن', 'موجود الآن'],
   so: ['halkan hadda', 'hadda halkan', 'hadda halkan joogaa'],
+  fa: ['اینجا الان', 'الان اینجا', 'همین حالا اینجا', 'در حال حاضر اینجا', 'در این لحظه'],
 };
 
 /**
