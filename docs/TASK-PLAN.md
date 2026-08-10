@@ -1270,7 +1270,17 @@ only.**
     reviewed advice. Recorded here and to be folded into
     [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) as a documented exception to the "never ship
     unreviewed give/protect" rule, scoped explicitly to this supplementary-display feature.
-- **T-153 · Extend content-honesty enforcement to the dual-display path** — *Claude · S · `TODO` · deps: T-152, T-066, T-156*
+- **T-153 · Extend content-honesty enforcement to the dual-display path** — *Claude · S · `DONE` · deps: T-152, T-066, T-156*
+  - ✅ `contentHonesty.ts` keyed by `ContentLocale`; new `hasHonestyPhrasesFor(locale)`.
+  - ✅ **The hole this closes:** `findRealtimeClaims` falls back to the *English* phrase list for an
+    unknown locale, and English substrings never match Arabic or Tigrinya text — so a language
+    shipped without its own banned phrases would pass the honesty suite **vacuously**, reporting
+    "honest" without examining a word. A test now fails the build for any offerable locale missing
+    its phrase list, so T-154 must add phrases alongside each language's content. A second test
+    documents the trap directly (Arabic "here now" is *not* caught by the English list).
+  - ✅ Invariant test: every offerable locale is either `reviewed` **or** carries the
+    machine-translated notice — never unlabelled-and-unreviewed (T-152's one surviving requirement).
+    Plus: a `missing`-status locale is never offered.
   - `contentHonesty.ts`'s real-time-presence-phrase check extends to every locale offered in the
     secondary picker (T-156 roster) as that locale's content lands; add a check that secondary
     content always carries the machine-translated indicator per the T-152 policy (labeling is

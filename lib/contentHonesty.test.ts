@@ -1,4 +1,10 @@
-import { findRealtimeClaims, isHonest } from './contentHonesty';
+import { findRealtimeClaims, hasHonestyPhrasesFor, isHonest } from './contentHonesty';
+import {
+  CONTENT_LOCALES,
+  contentLocaleStatus,
+  dualDisplayLocales,
+  needsMachineTranslationNotice,
+} from './i18n/contentLocale';
 import { en, t, type TranslationKey } from './i18n';
 import { KRONOBERG_CONTENT } from './species/content';
 import { SV_CONTENT } from './species/content.sv';
@@ -51,5 +57,42 @@ describe('all UI catalog strings are honest (en + sv)', () => {
   });
   it('Swedish catalog', () => {
     for (const key of keys) expect(findRealtimeClaims(t('sv', key), 'sv')).toEqual([]);
+  });
+});
+
+// ── Dual-display honesty (T-153 · F13.3) ─────────────────────────────────────
+describe('dual-display honesty enforcement', () => {
+  it('every offerable second language declares its own banned-phrase list', () => {
+    // The load-bearing check. findRealtimeClaims falls back to the ENGLISH phrase list for an
+    // unknown locale, and English substrings never appear in Arabic or Tigrinya text — so a new
+    // language shipped without its own phrases would pass the honesty suite vacuously, reporting
+    // "honest" without having examined a single word. This fails the build instead, which is why
+    // T-154 must add phrases alongside each language's content.
+    const missing = dualDisplayLocales().filter((locale) => !hasHonestyPhrasesFor(locale));
+    expect(missing).toEqual([]);
+  });
+
+  it('does not silently pass unknown-locale text through the English list', () => {
+    // Documents the trap the check above guards: Arabic text claiming "right now" is NOT caught by
+    // the English phrases, so the fallback must never be relied on for a real language.
+    expect(hasHonestyPhrasesFor('ar')).toBe(false);
+    expect(findRealtimeClaims('إنه هنا الآن', 'ar')).toEqual([]);
+  });
+
+  it('machine-status content is always flagged for the machine-translated notice', () => {
+    // T-152 allows unreviewed content in dual display; the honesty requirement it keeps is the
+    // label. Anything offerable is either reviewed or labelled — never unlabelled-and-unreviewed.
+    for (const locale of dualDisplayLocales()) {
+      const status = contentLocaleStatus(locale);
+      expect(status === 'reviewed' || needsMachineTranslationNotice(locale)).toBe(true);
+    }
+  });
+
+  it('a locale with no content is never offered as a second language', () => {
+    for (const locale of CONTENT_LOCALES) {
+      if (contentLocaleStatus(locale) === 'missing') {
+        expect(dualDisplayLocales()).not.toContain(locale);
+      }
+    }
   });
 });
