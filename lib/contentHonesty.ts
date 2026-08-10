@@ -33,6 +33,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
   th: ['ที่นี่ตอนนี้', 'ตอนนี้ที่นี่', 'ขณะนี้ที่นี่'],
   vi: ['ở đây ngay bây giờ', 'ngay bây giờ ở đây', 'hiện đang ở đây', 'lúc này ở đây'],
   am: ['እዚህ አሁን', 'አሁን እዚህ', 'በዚህ ቅጽበት'],
+  pl: ['tutaj teraz', 'teraz tutaj', 'właśnie tutaj', 'w tej chwili tutaj'],
 };
 
 /**

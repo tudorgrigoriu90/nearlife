@@ -18,7 +18,7 @@ export const LOCALE_STATUS: Record<Locale, ReviewStatus> = {
   bg: 'missing', hr: 'missing', cs: 'missing', da: 'missing', nl: 'missing',
   et: 'missing', fi: 'missing', fr: 'missing', de: 'missing', el: 'missing',
   hu: 'missing', ga: 'missing', it: 'missing', lv: 'missing', lt: 'missing',
-  mt: 'missing', pl: 'missing', pt: 'missing', ro: 'missing', sk: 'missing',
+  mt: 'missing', pl: 'machine', pt: 'missing', ro: 'missing', sk: 'missing',
   sl: 'missing', es: 'missing',
 };
 
