@@ -1235,7 +1235,21 @@ only.**
     ships on `machine` status. If/when native review happens for a language (e.g. to eventually
     retire its "machine-translated" tag), prioritize by actual Sweden immigrant-population share
     (Director to confirm order against real data; the T-156 list is a first-pass estimate).
-- **T-156 · `ContentLocale`: widen the dual-display roster beyond the 24 EU languages** — *Claude · M · `TODO` · deps: T-124*
+- **T-156 · `ContentLocale`: widen the dual-display roster beyond the 24 EU languages** — *Claude · M · `DONE` · deps: T-124*
+  - ✅ `lib/i18n/contentLocale.ts` (15 tests): `ImmigrantLocale` (16 languages, ordered by rough
+    immigrant-population share = the T-154 translation priority), `ContentLocale = Locale |
+    ImmigrantLocale`, `CONTENT_LOCALES`, `isImmigrantLocale`. `LOCALE_ENDONYMS` gives every locale
+    its **own-script name** (العربية, ትግርኛ, Soomaali) — a mother-tongue picker must show endonyms,
+    and they're a data table rather than `Catalog` keys precisely because an endonym is identical in
+    every UI language. `contentLocaleStatus` reads EU status from the existing `coverage.ts` matrix
+    and immigrant status from a new one (all `missing` until T-154 seeds them).
+  - ✅ **T-152's policy encoded in one place**: `isOfferableForDualDisplay` (status ≠ `missing` —
+    `machine` is enough), `dualDisplayLocales()`, `needsMachineTranslationNotice` (status =
+    `machine`). Tested explicitly against the stricter `isLiveForUsers` bar so the two policies
+    can't silently converge.
+  - ✅ `species/localized.ts` `contentFor`/`commonNameFor` now accept a `ContentLocale`; unseeded
+    locales miss the lookup and fall back to English exactly as before. `Locale` (UI chrome) is
+    deliberately **unchanged** — see the rationale in the module header.
   - Architecture decision: introduce a **separate `ContentLocale` type** (EU `Locale` ∪ the
     priority immigrant languages — ar, so, fa, ps, ckb, kmr, tr, ti, bs, sr, sq, ru, uk, th, vi,
     am) used only by species-content lookup (`species_content`) and this feature's coverage
