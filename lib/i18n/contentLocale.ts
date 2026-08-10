@@ -84,7 +84,7 @@ export function endonymOf(locale: ContentLocale): string {
 export const IMMIGRANT_LOCALE_STATUS: Record<ImmigrantLocale, ReviewStatus> = {
   ar: 'machine', so: 'machine', fa: 'machine', ps: 'missing', ckb: 'machine',
   kmr: 'missing', tr: 'machine', ti: 'machine', bs: 'machine', sr: 'machine',
-  sq: 'missing', ru: 'missing', uk: 'missing', th: 'missing', vi: 'missing',
+  sq: 'machine', ru: 'missing', uk: 'missing', th: 'missing', vi: 'missing',
   am: 'missing',
 };
 
