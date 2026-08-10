@@ -7,6 +7,7 @@ module.exports = [
   ...expoConfig,
   eslintConfigPrettier,
   {
-    ignores: ['dist/*', 'node_modules/*', '.expo/*', 'coverage/*'],
+    // supabase/functions/* are Deno Edge Functions (separate runtime + globals) — not linted here.
+    ignores: ['dist/*', 'node_modules/*', '.expo/*', 'coverage/*', 'supabase/functions/*'],
   },
 ];

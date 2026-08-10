@@ -186,6 +186,16 @@ export const en = {
   'dual.machineTranslatedHint':
     'Translated automatically — helpful, but not checked by a native speaker.',
   'dual.none': 'None',
+
+  // Account deletion (T-093 · GDPR right to erasure)
+  'settings.deleteAccount': 'Delete account & data',
+  'delete.title': 'Delete account & data',
+  'delete.body':
+    'This permanently erases your account and everything Nearby holds about you — your sightings, catches, and pledges. This cannot be undone.',
+  'delete.confirm': 'Delete permanently',
+  'delete.cancel': 'Cancel',
+  'delete.deleting': 'Deleting…',
+  'delete.error': 'Something went wrong. Your account was not deleted — please try again.',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -359,6 +369,16 @@ const sv: Catalog = {
   'dual.machineTranslatedHint':
     'Automatiskt översatt — till hjälp, men inte granskat av en modersmålstalare.',
   'dual.none': 'Inget',
+
+  // Account deletion (T-093 · GDPR rätt till radering)
+  'settings.deleteAccount': 'Radera konto och data',
+  'delete.title': 'Radera konto och data',
+  'delete.body':
+    'Detta raderar permanent ditt konto och allt Nearby har om dig – dina observationer, fångster och löften. Detta kan inte ångras.',
+  'delete.confirm': 'Radera permanent',
+  'delete.cancel': 'Avbryt',
+  'delete.deleting': 'Raderar…',
+  'delete.error': 'Något gick fel. Ditt konto raderades inte – försök igen.',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

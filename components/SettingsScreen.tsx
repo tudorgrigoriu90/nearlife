@@ -33,6 +33,7 @@ export default function SettingsScreen({
   onToggleDualLanguage,
   onSelectSecondaryLocale,
   onExportData,
+  onDeleteAccount,
   onDone,
 }: {
   locale?: Locale;
@@ -46,6 +47,8 @@ export default function SettingsScreen({
   onToggleDualLanguage?: (enabled: boolean) => void;
   onSelectSecondaryLocale?: (locale: ContentLocale) => void;
   onExportData: () => void;
+  /** Open the account/data deletion flow (T-093 · GDPR erasure, reachable from Settings). */
+  onDeleteAccount?: () => void;
   onDone: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -153,6 +156,16 @@ export default function SettingsScreen({
             <Text style={styles.rowLabel}>{tr('settings.exportData')}</Text>
             <Text style={styles.chevron}>›</Text>
           </Pressable>
+          {onDeleteAccount ? (
+            <Pressable
+              onPress={onDeleteAccount}
+              accessibilityRole="button"
+              style={[styles.row, styles.rowBorder]}
+            >
+              <Text style={[styles.rowLabel, styles.danger]}>{tr('settings.deleteAccount')}</Text>
+              <Text style={[styles.chevron, styles.danger]}>›</Text>
+            </Pressable>
+          ) : null}
         </View>
 
         <Text style={styles.sectionLabel}>{tr('settings.dataAttribution')}</Text>
@@ -198,5 +211,6 @@ const styles = StyleSheet.create({
   infoGlyph: { fontSize: 16, lineHeight: 20 },
   infoText: { flex: 1, fontSize: 13, lineHeight: 19, color: '#4a5c4d' },
   attribution: { paddingVertical: 14, fontSize: 13, color: '#4a5c4d', lineHeight: 19 },
+  danger: { color: '#b3261e' },
   about: { marginTop: 28, fontSize: 12, color: '#9fb0a0', textAlign: 'center' },
 });

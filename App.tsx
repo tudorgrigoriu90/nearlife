@@ -11,6 +11,7 @@ import FreeCatchSheet from './components/catch/FreeCatchSheet';
 import PledgeConfirm from './components/helped/PledgeConfirm';
 import SettingsScreen from './components/SettingsScreen';
 import DataExportView from './components/DataExportView';
+import DeleteAccountConfirm from './components/DeleteAccountConfirm';
 import { useCollection } from './components/useCollection';
 import { useTracker } from './components/useTracker';
 import { DEFAULT_CONSENT, setConsent, type ConsentKind, type ConsentState } from './lib/consent';
@@ -24,6 +25,8 @@ import {
 } from './lib/dualLanguage';
 import { AsyncStorageDualLanguageStore } from './lib/dualLanguageStore';
 import type { ContentLocale } from './lib/i18n/contentLocale';
+import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
+import { getSupabase } from './lib/supabase';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import { KRONOBERG_REGION } from './lib/hometown';
 import { spottedIds, tierStateFor } from './lib/collection';
@@ -98,6 +101,7 @@ export default function App() {
   const [previewMode, setPreviewMode] = useState(false);
   const [tab, setTab] = useState<Tab>('thisWeek');
   const [showSettings, setShowSettings] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
   const [exportJson, setExportJson] = useState<string | null>(null);
   const [consent, setConsentState] = useState<ConsentState>(DEFAULT_CONSENT);
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
@@ -245,6 +249,24 @@ export default function App() {
     setExportJson(exportToJson(bundle));
   };
 
+  // GDPR erasure (T-093): invoke the server-side delete, then return to a fresh, signed-out state.
+  // Returns whether it succeeded so the confirm screen can show a retryable error on failure.
+  const confirmDeleteAccount = async (): Promise<boolean> => {
+    try {
+      const result = await deleteAccount(new SupabaseDeletionGateway(getSupabase()));
+      if (!result.ok) return false;
+    } catch {
+      return false;
+    }
+    setShowDelete(false);
+    setShowSettings(false);
+    setSelected(null);
+    setConsentState(DEFAULT_CONSENT);
+    void CONSENT_STORE.save(DEFAULT_CONSENT);
+    setOnboarded(false); // back to first-run — the account is gone
+    return true;
+  };
+
   const seasonKey = seasonKeyOf(new Date());
   const remaining = remainingFreeCatches(freeCatch, seasonKey);
 
@@ -286,6 +308,19 @@ export default function App() {
     );
   }
 
+  if (showDelete) {
+    return (
+      <>
+        <DeleteAccountConfirm
+          locale={locale}
+          onConfirm={confirmDeleteAccount}
+          onCancel={() => setShowDelete(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (showSettings) {
     return (
       <>
@@ -303,6 +338,7 @@ export default function App() {
             updateDualLanguage(setSecondaryLocale(dualLanguage, loc, locale as ContentLocale))
           }
           onExportData={exportMyData}
+          onDeleteAccount={() => setShowDelete(true)}
           onDone={() => setShowSettings(false)}
         />
         <StatusBar style="auto" />

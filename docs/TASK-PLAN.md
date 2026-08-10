@@ -905,11 +905,22 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     `DataExportView` showing the full bundle as selectable JSON the user can copy — reachable
     anytime (invariant #6). Later: a file/share download and reading server-authoritative profile/
     consent once those persist.
-- **T-093 · Account + data deletion** — *Claude · M · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
-  - "Delete account & data" fully erases user data (and cascades); build-time feature, not ops.
-    *(Schema groundwork in place: `collection`/`profiles` FK to `auth.users` with `on delete
-    cascade`, so deleting the auth user erases their rows — the delete flow is an Edge Function
-    calling the auth admin API. No pure core to extract; done with the Settings + server work.)*
+- **T-093 · Account + data deletion** — *Claude + Director · M · `IN-PROGRESS` (client flow + tested seam + Edge Function written; deploy pending) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
+  - ✅ **Client flow** reachable from Settings at all times (invariant #6): a danger-styled
+    "Delete account & data" row → `components/DeleteAccountConfirm.tsx` (4 tests) — an explicit,
+    irreversible-delete confirmation (equal-weight Cancel, no dark patterns, retryable error on
+    failure). i18n en+sv.
+  - ✅ **Tested seam** `lib/accountDeletion.ts` (4 tests): pure `deleteAccount(gateway)` guards
+    (signed-in → erase → local sign-out; failed erase is retryable and leaves the session intact;
+    a post-erase sign-out failure is non-fatal) + `SupabaseDeletionGateway` (invokes the Edge
+    Function, then `auth.signOut`). On success the app resets to a fresh, signed-out state.
+  - ✅ **Edge Function written** `supabase/functions/delete-account/index.ts` — deletes the *calling*
+    user (id from their own verified JWT, never the request body) via the service-role admin API; the
+    `ON DELETE CASCADE` on `collection`/`profiles` wipes their rows. Excluded from app eslint/tsc
+    (Deno runtime).
+  - ⏳ **Director:** deploy the function (`supabase functions deploy delete-account`). Until then,
+    `functions.invoke` errors and the confirm screen shows the retryable "not deleted" message — by
+    design. Executing a real deletion + on-device verify is a Director/device step.
 - **T-094 · Retention policy & auto-expiry** — *Claude · S · `IN-PROGRESS` (policy + expiry logic done; scheduled job pending) · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - ✅ `lib/retention.ts` (3 tests): `DEFAULT_RETENTION` windows (runtime location 30d < inactive
     anonymous 90d < analytics 365d) + `isExpired`/`expiryMs`. Remaining: the pg_cron job that
