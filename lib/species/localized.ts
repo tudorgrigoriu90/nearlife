@@ -33,6 +33,7 @@ import { CS_CONTENT } from './content.cs';
 import { SK_CONTENT } from './content.sk';
 import { BG_CONTENT } from './content.bg';
 import { LT_CONTENT } from './content.lt';
+import { LV_CONTENT } from './content.lv';
 import { SV_CONTENT } from './content.sv';
 import { AR_NAMES } from './names.ar';
 import { SO_NAMES } from './names.so';
@@ -67,6 +68,7 @@ import { CS_NAMES } from './names.cs';
 import { SK_NAMES } from './names.sk';
 import { BG_NAMES } from './names.bg';
 import { LT_NAMES } from './names.lt';
+import { LV_NAMES } from './names.lv';
 import { SV_NAMES } from './names.sv';
 import type { Species } from './types';
 
@@ -115,6 +117,7 @@ export const CONTENT_BY_LOCALE: Partial<Record<ContentLocale, Record<string, Spe
   sk: SK_CONTENT, // T-154
   bg: BG_CONTENT, // T-154
   lt: LT_CONTENT, // T-154
+  lv: LV_CONTENT, // T-154
   ar: AR_CONTENT, // T-154 — machine status; dual-display aid only (T-152), never a primary UI language
 };
 
@@ -152,6 +155,7 @@ export const NAMES_BY_LOCALE: Partial<Record<ContentLocale, Record<string, strin
   sk: SK_NAMES,
   bg: BG_NAMES,
   lt: LT_NAMES,
+  lv: LV_NAMES,
   ar: AR_NAMES,
   // English names come from species.commonName (the base).
 };

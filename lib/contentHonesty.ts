@@ -50,6 +50,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
   sk: ['tu teraz', 'teraz tu', 'práve teraz', 'v tejto chvíli tu', 'momentálne tu'],
   bg: ['тук сега', 'сега тук', 'точно сега', 'в момента тук'],
   lt: ['čia dabar', 'dabar čia', 'kaip tik dabar', 'šiuo metu čia'],
+  lv: ['šeit tagad', 'tagad šeit', 'tieši tagad', 'pašlaik šeit'],
 };
 
 /**
