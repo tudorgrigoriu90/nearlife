@@ -1193,7 +1193,19 @@ only.**
     rejection, persisted shape. Not yet in the data-export bundle (`lib/dataExport.ts`) — note the
     gap for when profile/settings export is extended (T-092); the primary locale override has the
     same pre-existing gap today.
-- **T-149 · Dual-text formatting core (title "/" join, stacked body)** — *Claude · S · `TODO` · deps: T-148, T-157*
+- **T-149 · Dual-text formatting core (title "/" join, stacked body)** — *Claude · S · `DONE` · deps: T-148, T-157*
+  - ✅ `lib/dualLanguageFormat.ts` (13 tests): `dualTitle` → `"Primary / Secondary"` with each half
+    bidi-isolated (T-157), `dualSegments` → body paragraphs in reading order, `hasSecondary`.
+  - ⚠️ **Deviation from the planned signature, deliberate:** the body returns *structured segments*
+    rather than a `"a\n\nb"` joined string. An RTL secondary needs its own `writingDirection` and
+    alignment, which only works if it's a separate `Text` element — a joined string would collapse
+    both halves into one run and make the RTL half unstylable, defeating T-157. The title stays a
+    string (single line, halves held apart by isolates instead).
+  - ✅ Graceful degradation is the tested correctness property: missing / empty / whitespace-only /
+    **identical-to-primary** secondary all collapse to ordinary single-language output — no dangling
+    delimiter, no blank paragraph, no `undefined` on screen. The duplicate check matters in practice
+    (many species names are identical across languages). Single-segment output means callers render
+    dual and single-language content through one path.
   - `lib/dualLanguage.ts`: `formatDualTitle(primary, secondary)` → `"Primary / Secondary"`;
     `formatDualBody(primaryText, secondaryText)` → primary paragraph, then secondary paragraph
     (sequential, **not** interleaved sentence-by-sentence, per the brief). Graceful degradation is
