@@ -1285,7 +1285,7 @@ only.**
     secondary picker (T-156 roster) as that locale's content lands; add a check that secondary
     content always carries the machine-translated indicator per the T-152 policy (labeling is
     enforced; review status is not — see T-152).
-- **T-154 · Machine-translate species content into the full dual-display roster** — *Claude + Director · XL · `DONE` (16 immigrant languages; the 22 remaining EU languages are follow-on) · deps: T-127, T-156*
+- **T-154 · Machine-translate species content into the full dual-display roster** — *Claude + Director · XL · `DONE` (16 immigrant + 20 EU languages; ga/mt split out as T-159) · deps: T-127, T-156*
   - ✅ **All 16 immigrant-roster languages seeded**, one push each, in immigrant-population order:
     Arabic, Somali, Persian/Dari, Tigrinya, Sorani Kurdish, Turkish, Bosnian, Serbian, Albanian,
     Russian, Ukrainian, Pashto, Kurmanji Kurdish, Thai, Vietnamese, Amharic. Each is 54 species ×
@@ -1297,8 +1297,15 @@ only.**
     the honest differences are script and jat reflex). Transliteration is mechanical; the
     ijekavian→ekavian pass used a curated word list built from the words actually present, since
     "je" is root-internal in many words (jesen, jezero, -anje nouns) a regex would corrupt.
-  - ⏳ **Remaining:** the 22 EU languages beyond en/sv. Same mechanical pattern; not required for
-    the feature to work, since the picker only lists languages that actually have content.
+  - ✅ **20 of the 22 remaining EU languages seeded**, one push each: Polish, German, Finnish,
+    Danish, Croatian, Spanish, Dutch, French, Italian, Portuguese, Romanian, Greek, Hungarian,
+    Czech, Slovak, Bulgarian, Lithuanian, Latvian, Slovenian, Estonian. Picker now offers **38
+    languages**. `EXPECTED_SCRIPT` in the T-158 suite gained Greek and a Bulgarian Cyrillic entry.
+  - Croatian was **derived** from Bosnian (same ijekavian Latin system — only genuine lexical
+    divergences substituted, deliberately a short list). Slovak was **not** derived from Czech:
+    the species nomenclature diverges (mlynárik/bělásek, záružlie/blatouch), so a mechanical
+    conversion would have produced plausible-looking wrong names.
+  - ⏳ **Irish (ga) and Maltese (mt) deliberately deferred to T-159** — see that task for why.
   - The volume item flagged in INTERNATIONALIZATION.md, now spanning the 24 EU languages **and**
     the T-156 priority immigrant list (~39 locales total). Mirrors T-127's per-locale approach;
     registers each at `machine` status in the coverage matrix — per T-152, `machine` is sufficient
@@ -1306,6 +1313,20 @@ only.**
     Can stage language-by-language, immigrant-priority languages first per T-156's ordering. Not a
     blocker for shipping T-148–T-151 — the picker is usable (degrading gracefully) with just en/sv
     seeded.
+- **T-159 · Irish and Maltese species content** — *Claude + Director · M · `BLOCKED` (needs a naming source) · deps: T-154*
+  - Blocked on a **names** problem, not a translation one. Most of the 54 Kronoberg species do not
+    occur in Ireland and almost none occur in Malta, so there is no established Irish or Maltese
+    common name to use for a large share of the list. Writing 54 plausible-sounding coinages per
+    language and shipping them at `machine` status would put invented names in front of readers
+    under the same label as the checked ones — the picker rule exists precisely to stop a language
+    from rendering something that looks authoritative and is not.
+  - Unblock by choosing a source of truth for the names: for Irish, téarma.ie / Irish Wikipedia and
+    the National Biodiversity Data Centre; for Maltese, BirdLife Malta's checklist plus a marked
+    fallback for the species with genuinely no Maltese name. Prose translation is then routine and
+    follows the same per-language push pattern as the other 36 locales.
+  - Both are EU official languages, so leaving them out is a real gap — but the honest failure mode
+    is a shorter picker (the language is simply not offered), which is exactly how the roster is
+    designed to degrade.
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
