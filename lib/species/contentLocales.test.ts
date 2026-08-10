@@ -27,6 +27,7 @@ const EXPECTED_SCRIPT: Partial<Record<ContentLocale, RegExp>> = {
   ru: /[Ѐ-ӿ]/, // Cyrillic
   uk: /[Ѐ-ӿ]/,
   sr: /[Ѐ-ӿ]/,
+  bg: /[Ѐ-ӿ]/,
   th: /[฀-๿]/, // Thai
   el: /[Ͱ-Ͽἀ-῿]/, // Greek and Coptic + Greek Extended
 };
