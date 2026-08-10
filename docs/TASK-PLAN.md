@@ -1333,7 +1333,14 @@ only.**
     "/" visually jumps to the wrong side. Isolating each half keeps it anchored between them.
     Tested with real Arabic/Persian strings — a Latin placeholder would pass while the device broke.
   - ⚠️ Scope is **mixed-direction-within-a-screen**, not app RTL mirroring (layout/nav stay LTR).
-    Glyph-level rendering still needs on-device confirmation.
+  - ✅ **Verified on a real render** (web build driven headlessly), which caught a bug the unit
+    tests could not: React Native Web emits `dir="auto"` on `Text`, and Chromium resolves that from
+    the first strong character **without** skipping isolate contents — unlike UAX #9's own P2 rule.
+    A line starting with an RTL endonym therefore flipped entirely, displaying
+    "Machine-translated · العربية" instead of "العربية · Machine-translated". **Isolates alone do
+    not fix this**; mixed-direction chrome lines need an explicit `writingDirection`. Applied to the
+    card title and the MT notice, with a regression test asserting the style. Lesson recorded: bidi
+    correctness cannot be fully unit-tested — it needs looking at pixels.
   - Several T-156 languages are RTL scripts (Arabic, Persian/Dari, Pashto, Sorani Kurdish) —
     the "all 24 EU languages are LTR" assumption in INTERNATIONALIZATION.md doesn't extend to this
     feature. Scope: per-language RTL flag on `ContentLocale`; the secondary paragraph in

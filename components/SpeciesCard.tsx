@@ -3,6 +3,7 @@ import type { HelpKind, TierState } from '../lib/collection';
 import { EMPTY_TIER_STATE } from '../lib/collection';
 import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
 import { dualTitle, type DualTextInput } from '../lib/dualLanguageFormat';
+import { isolate, writingDirectionFor } from '../lib/i18n/bidi';
 import { createTranslator, type Locale } from '../lib/i18n';
 import {
   endonymOf,
@@ -77,10 +78,19 @@ export default function SpeciesCard({
   );
   // Honesty (T-152/T-153): machine-translated content is always labelled, so the aid is never
   // mistaken for reviewed advice. Shown once for the card rather than repeated per section.
+  //
+  // This line mixes an RTL endonym with LTR chrome ("العربية · Machine-translated"), which caught
+  // a real rendering bug (found by looking at a render, not by a test). React Native Web emits
+  // `dir="auto"` on Text, and Chromium resolves that from the first strong character *without*
+  // skipping isolate contents — unlike UAX #9's own P2 rule. So a leading Arabic endonym flipped
+  // the whole line and it displayed reversed as "Machine-translated · العربية". Isolates alone do
+  // NOT fix it; the line needs an explicit writing direction, taken from the primary (chrome)
+  // language. The isolate stays as defence in depth around the embedded endonym.
   const mtNotice =
     secondaryLocale !== null && needsMachineTranslationNotice(secondaryLocale)
-      ? `${endonymOf(secondaryLocale)} · ${tr('dual.machineTranslated')}`
+      ? `${isolate(endonymOf(secondaryLocale))} · ${tr('dual.machineTranslated')}`
       : null;
+  const chromeDirection = writingDirectionFor(locale as ContentLocale);
 
   return (
     <View style={styles.container}>
@@ -93,9 +103,11 @@ export default function SpeciesCard({
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
           <SpeciesHero species={species} spotted={spotted} />
-          <Text style={styles.name}>{name}</Text>
+          <Text style={[styles.name, { writingDirection: chromeDirection }]}>{name}</Text>
           <Text style={styles.scientific}>{species.scientificName}</Text>
-          {mtNotice ? <Text style={styles.mtNotice}>{mtNotice}</Text> : null}
+          {mtNotice ? (
+            <Text style={[styles.mtNotice, { writingDirection: chromeDirection }]}>{mtNotice}</Text>
+          ) : null}
           {!spotted ? <Text style={styles.notSpotted}>{tr('card.notSpotted')}</Text> : null}
         </View>
 

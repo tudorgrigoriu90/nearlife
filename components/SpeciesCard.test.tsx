@@ -5,6 +5,7 @@ import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import { commonNameFor, contentFor } from '../lib/species/localized';
 import { createTranslator } from '../lib/i18n';
 import { FSI, PDI, stripIsolates } from '../lib/i18n/bidi';
+import { AR_NAMES } from '../lib/species/names.ar';
 
 const tr = createTranslator('en');
 const swift = KRONOBERG_SPECIES.find((s) => s.id === 'common-swift')!;
@@ -96,7 +97,7 @@ describe('SpeciesCard — dual language', () => {
       />,
     );
     // sv is `machine` status; the notice names the language in its own script.
-    expect(screen.getByText(`Svenska · ${tr('dual.machineTranslated')}`)).toBeTruthy();
+    expect(screen.getByText(`${FSI}Svenska${PDI} · ${tr('dual.machineTranslated')}`)).toBeTruthy();
   });
 
   it('degrades to the primary alone when the secondary content is missing', async () => {
@@ -131,6 +132,20 @@ describe('SpeciesCard — dual language', () => {
         secondaryLocale="ar"
       />,
     );
+    // Regression: this line mixes an RTL endonym with LTR chrome. React Native Web emits
+    // dir="auto", and Chromium resolves that from the first strong character WITHOUT skipping
+    // isolates (unlike UAX #9's own P2 rule), so a leading Arabic endonym flipped the whole line
+    // and it displayed reversed as "Machine-translated · العربية". Isolates alone do NOT fix it —
+    // an explicit writing direction does. Found by looking at a real render, not by a test.
+    const notice = screen.getByText(`${FSI}العربية${PDI} · ${tr('dual.machineTranslated')}`);
+    expect(StyleSheet.flatten(notice.props.style)).toMatchObject({ writingDirection: 'ltr' });
+    expect(stripIsolates(notice.props.children as string)).toBe(
+      `العربية · ${tr('dual.machineTranslated')}`,
+    );
+    // The title mixes directions the same way and is pinned to the chrome direction too.
+    const title = screen.getByText(`${FSI}${commonNameFor(swift, 'en')}${PDI} / ${FSI}${AR_NAMES[swift.id]}${PDI}`);
+    expect(StyleSheet.flatten(title.props.style)).toMatchObject({ writingDirection: 'ltr' });
+
     const arabicGive = screen.getByText(arabic.give);
     expect(arabicGive).toBeTruthy();
     // The Arabic paragraph carries rtl direction; the English one must not.
