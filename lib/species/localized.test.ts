@@ -18,7 +18,7 @@ describe('commonNameFor', () => {
   });
 
   it('falls back to the English name for an untranslated locale', () => {
-    expect(commonNameFor(swift, 'de')).toBe('Common Swift');
+    expect(commonNameFor(swift, anUnseededContentLocale())).toBe('Common Swift');
   });
 });
 
@@ -50,7 +50,9 @@ describe('contentFor', () => {
   });
 
   it('still falls back to English content for an untranslated locale', () => {
-    expect(contentFor('common-swift', 'de')).toBe(KRONOBERG_CONTENT['common-swift']);
+    expect(contentFor('common-swift', anUnseededContentLocale())).toBe(
+      KRONOBERG_CONTENT['common-swift'],
+    );
   });
 
   it('returns undefined for an unknown species', () => {
