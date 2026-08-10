@@ -19,7 +19,7 @@ export const LOCALE_STATUS: Record<Locale, ReviewStatus> = {
   et: 'missing', fi: 'machine', fr: 'machine', de: 'machine', el: 'machine',
   hu: 'machine', ga: 'missing', it: 'machine', lv: 'machine', lt: 'machine',
   mt: 'missing', pl: 'machine', pt: 'machine', ro: 'machine', sk: 'machine',
-  sl: 'missing', es: 'machine',
+  sl: 'machine', es: 'machine',
 };
 
 /** A locale may be offered to users only when its content is native-reviewed. */
