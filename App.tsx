@@ -15,6 +15,15 @@ import { useCollection } from './components/useCollection';
 import { useTracker } from './components/useTracker';
 import { DEFAULT_CONSENT, setConsent, type ConsentKind, type ConsentState } from './lib/consent';
 import { AsyncStorageConsentStore } from './lib/consentStore';
+import {
+  DEFAULT_DUAL_LANGUAGE,
+  isDualActive,
+  setDualEnabled,
+  setSecondaryLocale,
+  type DualLanguageSettings,
+} from './lib/dualLanguage';
+import { AsyncStorageDualLanguageStore } from './lib/dualLanguageStore';
+import type { ContentLocale } from './lib/i18n/contentLocale';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import { KRONOBERG_REGION } from './lib/hometown';
 import { spottedIds, tierStateFor } from './lib/collection';
@@ -50,6 +59,9 @@ const SPECIES_REPO = new HardcodedSpeciesRepository();
 // its identity is stable across renders.
 const CONSENT_STORE = new AsyncStorageConsentStore();
 
+// Mother-tongue dual display preference (T-148) — device-local, off by default, survives restarts.
+const DUAL_LANGUAGE_STORE = new AsyncStorageDualLanguageStore();
+
 // Prototype app shell (E2). Onboarding (T-022+) runs first; once complete, a minimal tab
 // switcher between the "This week" pull surface (T-117) and the Almanac grid (T-025); tapping a
 // species opens its card (T-026). No navigation library yet — local state is enough for the
@@ -73,6 +85,15 @@ export default function App() {
   const [cardContent, setCardContent] = useState<{ speciesId: string; content: SpeciesContent | null } | null>(
     null,
   );
+  // Mother-tongue dual display (F13.3). The settings live here; the secondary content is loaded
+  // through the same repository seam as the primary, keyed by species id AND locale so a stale
+  // result can never be painted against the wrong species or a language the user just changed.
+  const [dualLanguage, setDualLanguage] = useState<DualLanguageSettings>(DEFAULT_DUAL_LANGUAGE);
+  const [secondaryCardContent, setSecondaryCardContent] = useState<{
+    speciesId: string;
+    locale: ContentLocale;
+    content: SpeciesContent | null;
+  } | null>(null);
   const [onboarded, setOnboarded] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [tab, setTab] = useState<Tab>('thisWeek');
@@ -166,6 +187,53 @@ export default function App() {
       cancelled = true;
     };
   }, [selected, locale]);
+
+  // Rehydrate the dual-display preference (T-148); until it resolves the feature stays off.
+  useEffect(() => {
+    let cancelled = false;
+    DUAL_LANGUAGE_STORE.load()
+      .then((stored) => {
+        if (!cancelled) setDualLanguage(stored);
+      })
+      .catch(() => {
+        // A load failure keeps the safe off default already in state.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Is a second language actually being shown? Re-derived every render because it depends on the
+  // primary locale, which the user can change at any time (isDualActive, T-148).
+  const dualActive = isDualActive(dualLanguage, locale as ContentLocale);
+  const secondaryLocale = dualActive ? dualLanguage.secondaryLocale : null;
+
+  const updateDualLanguage = (next: DualLanguageSettings) => {
+    setDualLanguage(next);
+    void DUAL_LANGUAGE_STORE.save(next);
+  };
+
+  // Load the selected species' content in the mother tongue, alongside the primary read above.
+  // Skipped entirely when dual display is off, so the default experience does no extra work.
+  // No clean-up branch needed when dual display is off: the render site only paints this when it
+  // matches both the open species and the currently-selected language, so a stale value can never
+  // reach the card and clearing it here would just be an extra render.
+  useEffect(() => {
+    if (!selected || secondaryLocale === null) return;
+    let cancelled = false;
+    const speciesId = selected.id;
+    SPECIES_REPO.getContent(speciesId, secondaryLocale)
+      .then((content) => {
+        if (!cancelled) setSecondaryCardContent({ speciesId, locale: secondaryLocale, content });
+      })
+      .catch(() => {
+        // A failed secondary read degrades to the single-language card, never a blank half.
+        if (!cancelled) setSecondaryCardContent({ speciesId, locale: secondaryLocale, content: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selected, secondaryLocale]);
 
   const exportMyData = () => {
     const bundle = buildDataExport({
@@ -296,6 +364,15 @@ export default function App() {
           species={selected}
           content={cardContent?.speciesId === selected.id ? cardContent.content : null}
           locale={locale}
+          secondaryLocale={secondaryLocale}
+          secondaryContent={
+            // Only paint the mother-tongue half when it belongs to *this* species and to the
+            // language currently selected — otherwise a slow read could land on the wrong card.
+            secondaryCardContent?.speciesId === selected.id &&
+            secondaryCardContent.locale === secondaryLocale
+              ? secondaryCardContent.content
+              : null
+          }
           tier={tierStateFor(collection.records, selected.id)}
           fullGame={freeCatch.fullGame}
           onBack={() => setSelected(null)}

@@ -2,10 +2,17 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { HelpKind, TierState } from '../lib/collection';
 import { EMPTY_TIER_STATE } from '../lib/collection';
 import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
+import { dualTitle, type DualTextInput } from '../lib/dualLanguageFormat';
 import { createTranslator, type Locale } from '../lib/i18n';
+import {
+  endonymOf,
+  needsMachineTranslationNotice,
+  type ContentLocale,
+} from '../lib/i18n/contentLocale';
 import { commonNameFor } from '../lib/species/localized';
 import type { SpeciesContent } from '../lib/species/content';
 import type { Species } from '../lib/species/types';
+import DualText from './DualText';
 import SpeciesHero from './SpeciesHero';
 
 // Species card (T-026 · USER-FLOWS §4). The always-free Tier-1 layer: fact, when/how trivia,
@@ -22,6 +29,8 @@ export default function SpeciesCard({
   species,
   content = null,
   locale = 'en',
+  secondaryContent = null,
+  secondaryLocale = null,
   tier = EMPTY_TIER_STATE,
   fullGame = false,
   onFindNearby,
@@ -34,6 +43,10 @@ export default function SpeciesCard({
    * (T-059). `null` while loading or when no content exists yet — the mission block hides. */
   content?: SpeciesContent | null;
   locale?: Locale;
+  /** Mother-tongue content shown alongside the primary (T-150). `null` ⇒ single-language card. */
+  secondaryContent?: SpeciesContent | null;
+  /** The mother tongue. `null` unless the user enabled dual display and picked a language. */
+  secondaryLocale?: ContentLocale | null;
   tier?: TierState;
   /** Full Game entitlement unlocks all depth tiers immediately (T-060). */
   fullGame?: boolean;
@@ -45,8 +58,29 @@ export default function SpeciesCard({
   onBack?: () => void;
 }) {
   const tr = createTranslator(locale);
-  const name = commonNameFor(species, locale);
   const spotted = tier.spotted;
+
+  // Dual display (F13.3): every text field pairs the app language with the mother tongue. The
+  // formatter drops the second half per-field whenever it is missing, blank or identical, so a
+  // partially-translated species degrades field by field instead of all-or-nothing.
+  const dual = (primary: string, secondary?: string) => ({
+    primary,
+    primaryLocale: locale as ContentLocale,
+    secondary: secondaryLocale ? secondary : null,
+    secondaryLocale,
+  });
+  const name = dualTitle(
+    dual(
+      commonNameFor(species, locale),
+      secondaryLocale ? commonNameFor(species, secondaryLocale) : undefined,
+    ),
+  );
+  // Honesty (T-152/T-153): machine-translated content is always labelled, so the aid is never
+  // mistaken for reviewed advice. Shown once for the card rather than repeated per section.
+  const mtNotice =
+    secondaryLocale !== null && needsMachineTranslationNotice(secondaryLocale)
+      ? `${endonymOf(secondaryLocale)} · ${tr('dual.machineTranslated')}`
+      : null;
 
   return (
     <View style={styles.container}>
@@ -61,19 +95,31 @@ export default function SpeciesCard({
           <SpeciesHero species={species} spotted={spotted} />
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.scientific}>{species.scientificName}</Text>
+          {mtNotice ? <Text style={styles.mtNotice}>{mtNotice}</Text> : null}
           {!spotted ? <Text style={styles.notSpotted}>{tr('card.notSpotted')}</Text> : null}
         </View>
 
         {content ? (
           <>
-            <Text style={styles.fact}>{content.fact}</Text>
+            <DualText input={dual(content.fact, secondaryContent?.fact)} style={styles.fact} />
 
-            <Section title={tr('thisWeek.title')} body={content.whenAndHow} />
-            <Section title={tr('card.give')} body={content.give} accent="give" />
+            <Section
+              title={tr('thisWeek.title')}
+              input={dual(content.whenAndHow, secondaryContent?.whenAndHow)}
+            />
+            <Section
+              title={tr('card.give')}
+              input={dual(content.give, secondaryContent?.give)}
+              accent="give"
+            />
             {onPledge && !tier.helped ? (
               <PledgeButton label={tr('card.pledge')} onPress={() => onPledge(species, 'give')} />
             ) : null}
-            <Section title={tr('card.protect')} body={content.protect} accent="protect" />
+            <Section
+              title={tr('card.protect')}
+              input={dual(content.protect, secondaryContent?.protect)}
+              accent="protect"
+            />
             {onPledge && !tier.helped ? (
               <PledgeButton label={tr('card.pledge')} onPress={() => onPledge(species, 'protect')} />
             ) : null}
@@ -123,11 +169,11 @@ function PledgeButton({ label, onPress }: { label: string; onPress: () => void }
 
 function Section({
   title,
-  body,
+  input,
   accent,
 }: {
   title: string;
-  body: string;
+  input: DualTextInput;
   accent?: 'give' | 'protect';
 }) {
   const titleStyle = [
@@ -138,7 +184,7 @@ function Section({
   return (
     <View style={styles.section}>
       <Text style={titleStyle}>{title}</Text>
-      <Text style={styles.sectionBody}>{body}</Text>
+      <DualText input={input} style={styles.sectionBody} />
     </View>
   );
 }
@@ -151,6 +197,7 @@ const styles = StyleSheet.create({
   hero: { alignItems: 'center', paddingVertical: 20 },
   name: { marginTop: 8, fontSize: 26, fontWeight: '700', color: '#22331f', textAlign: 'center' },
   scientific: { marginTop: 2, fontSize: 14, fontStyle: 'italic', color: '#6a7c6d' },
+  mtNotice: { marginTop: 6, fontSize: 11, color: '#7a8a7c' },
   notSpotted: { marginTop: 8, fontSize: 12, fontWeight: '700', color: '#7a8a7c', letterSpacing: 1 },
   fact: { fontSize: 17, lineHeight: 24, color: '#2f3d2c', marginBottom: 8 },
   section: { marginTop: 14 },

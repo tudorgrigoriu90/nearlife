@@ -1214,7 +1214,23 @@ only.**
     delimiter. Bidi-safe when the secondary is RTL (T-157) — the "/" join must not visually corrupt
     either half. Pure + unit-tested (both present, secondary missing, secondary === primary, empty
     strings, RTL secondary).
-- **T-150 · Wire dual display into the Species Card** — *Claude · M · `TODO` · deps: T-149, T-059, T-122*
+- **T-150 · Wire dual display into the Species Card** — *Claude · M · `DONE` · deps: T-149, T-059, T-122*
+  - ✅ `components/DualText.tsx` renders each half as its own `Text` with that half's writing
+    direction/alignment, so an RTL paragraph reads correctly inside the otherwise-LTR card. The
+    mother tongue is set apart by a left rule + muted colour — an aid beside the primary, never
+    mistakable for one continuous paragraph.
+  - ✅ `SpeciesCard` takes `secondaryContent`/`secondaryLocale`; the title uses `dualTitle` and
+    fact/when-how/give/protect each go through `DualText`. Degradation is **per field**, so a
+    partially-translated species shows the mother tongue for the fields that have it rather than
+    all-or-nothing. `App.tsx` loads the secondary through the same repository seam, keyed by species
+    id **and** locale so a slow read can't paint onto the wrong card or a just-changed language;
+    the whole read is skipped when the feature is off (no cost to the default experience).
+  - ✅ Machine-translated content carries a notice naming the language in its own script
+    ("Svenska · Machine-translated"), shown once per card rather than repeated per section (T-152).
+  - ✅ 6 new card tests incl. a real-Arabic case asserting the secondary gets `writingDirection:
+    'rtl'` while the primary stays `ltr`, and give/protect appearing in both languages.
+  - ✅ `SpeciesRepository.getContent` widened to `ContentLocale` (content exists in the wider
+    roster; `listSpecies` stays on `Locale` since names follow the UI language).
   - `SpeciesCard` renders the common name via `formatDualTitle` and each body section (fact,
     when/how, give, protect) via `formatDualBody` when `dualLanguage.enabled`. Falls back to
     primary-only per species/field when the secondary locale has no content for that field —

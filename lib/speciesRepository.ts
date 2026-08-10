@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Locale } from './i18n';
+import type { ContentLocale } from './i18n/contentLocale';
 import { KRONOBERG_SPECIES } from './species/kronoberg';
 import { commonNameFor, contentFor } from './species/localized';
 import type { SpeciesContent } from './species/content';
@@ -26,7 +27,7 @@ export interface RegionPresence {
 
 export interface SpeciesRepository {
   listSpecies(locale: Locale): Promise<LocalizedSpecies[]>;
-  getContent(speciesId: string, locale: Locale): Promise<SpeciesContent | null>;
+  getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null>;
   /** Per-region presence (from `species_presence`); drives This Week + the notification engine. */
   regionPresence(regionId: string): Promise<RegionPresence[]>;
 }
@@ -39,7 +40,7 @@ export class HardcodedSpeciesRepository implements SpeciesRepository {
     return this.species.map((species) => ({ species, commonName: commonNameFor(species, locale) }));
   }
 
-  async getContent(speciesId: string, locale: Locale): Promise<SpeciesContent | null> {
+  async getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null> {
     return contentFor(speciesId, locale) ?? null;
   }
 
@@ -124,7 +125,7 @@ export class SupabaseSpeciesRepository implements SpeciesRepository {
     });
   }
 
-  async getContent(speciesId: string, locale: Locale): Promise<SpeciesContent | null> {
+  async getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null> {
     // Requested locale, falling back to English if the locale has no row (mirrors contentFor).
     const row =
       (await this.gateway.fetchContent(speciesId, locale)) ??

@@ -174,6 +174,18 @@ export const en = {
   'settings.exportData': 'Export my data',
   'export.title': 'Your data',
   'export.hint': 'Everything Nearby holds about you. Select the text to copy it.',
+
+  // Mother-tongue dual display (F13.3 — T-148/T-150/T-151)
+  'dual.title': 'Second language',
+  'dual.toggle': 'Show a second language',
+  'dual.hint':
+    'Read species text in your own language alongside the app language. Off by default.',
+  'dual.choose': 'Choose your language',
+  'dual.chooseHint': 'Pick the language to show alongside {primary}.',
+  'dual.machineTranslated': 'Machine-translated',
+  'dual.machineTranslatedHint':
+    'Translated automatically — helpful, but not checked by a native speaker.',
+  'dual.none': 'None',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -335,6 +347,18 @@ const sv: Catalog = {
   'settings.exportData': 'Exportera mina uppgifter',
   'export.title': 'Dina uppgifter',
   'export.hint': 'Allt Nearby har om dig. Markera texten för att kopiera den.',
+
+  // Mother-tongue dual display (F13.3 — T-148/T-150/T-151)
+  'dual.title': 'Andra språk',
+  'dual.toggle': 'Visa ett andra språk',
+  'dual.hint':
+    'Läs artternas text på ditt eget språk vid sidan av appens språk. Avstängt som standard.',
+  'dual.choose': 'Välj ditt språk',
+  'dual.chooseHint': 'Välj språket som ska visas tillsammans med {primary}.',
+  'dual.machineTranslated': 'Maskinöversatt',
+  'dual.machineTranslatedHint':
+    'Automatiskt översatt — till hjälp, men inte granskat av en modersmålstalare.',
+  'dual.none': 'Inget',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };
