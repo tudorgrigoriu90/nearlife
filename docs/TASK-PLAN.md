@@ -1172,7 +1172,19 @@ only.**
    [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) no longer holds for this feature; T-157
    below is new work this creates, not an existing gap.
 
-- **T-148 · Dual-language settings state (toggle + mother-tongue pick)** — *Claude · S · `TODO` · deps: T-120, T-124, T-156*
+- **T-148 · Dual-language settings state (toggle + mother-tongue pick)** — *Claude · S · `DONE` · deps: T-120, T-124, T-156*
+  - ✅ `lib/dualLanguage.ts` (16 tests): `DualLanguageSettings` defaulting to
+    `{ enabled: false, secondaryLocale: null }`; `setDualEnabled` (disabling **keeps** the chosen
+    language so re-enabling doesn't mean hunting through 40 languages again), `setSecondaryLocale`
+    (rejects picking the app's own language — a no-op pairing), `needsLanguageChoice`.
+  - ✅ `isDualActive(settings, primaryLocale)` is the single render guard, and **re-checks
+    conditions that change after pick time**: the user can switch the app's primary language to the
+    one they chose as secondary, and a content-less locale gains content when T-154 seeds it. Every
+    failure mode degrades to normal single-language display, never a blank half.
+  - ✅ `lib/dualLanguageStore.ts` (12 tests): parse/serialize + in-memory and AsyncStorage stores,
+    mirroring `consentStore`. Defensive parse — only a literal `true` enables, and an unknown
+    language code (dropped from the roster, or corrupt data) decays to `null` rather than reaching
+    the renderer. Device-local, versioned key, no PII.
   - Pure state `{ enabled: boolean; secondaryLocale: ContentLocale | null }` (see T-156 for
     `ContentLocale`), default `{ enabled: false, secondaryLocale: null }` (invariant: no
     pre-enabled features). `secondaryLocale` must differ from the primary display locale
