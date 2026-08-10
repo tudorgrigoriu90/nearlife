@@ -11,6 +11,7 @@ import { SR_CONTENT } from './content.sr';
 import { SQ_CONTENT } from './content.sq';
 import { RU_CONTENT } from './content.ru';
 import { UK_CONTENT } from './content.uk';
+import { PS_CONTENT } from './content.ps';
 import { SV_CONTENT } from './content.sv';
 import { AR_NAMES } from './names.ar';
 import { SO_NAMES } from './names.so';
@@ -23,6 +24,7 @@ import { SR_NAMES } from './names.sr';
 import { SQ_NAMES } from './names.sq';
 import { RU_NAMES } from './names.ru';
 import { UK_NAMES } from './names.uk';
+import { PS_NAMES } from './names.ps';
 import { SV_NAMES } from './names.sv';
 import type { Species } from './types';
 
@@ -49,6 +51,7 @@ export const CONTENT_BY_LOCALE: Partial<Record<ContentLocale, Record<string, Spe
   sq: SQ_CONTENT, // T-154
   ru: RU_CONTENT, // T-154
   uk: UK_CONTENT, // T-154
+  ps: PS_CONTENT, // T-154
   ar: AR_CONTENT, // T-154 — machine status; dual-display aid only (T-152), never a primary UI language
 };
 
@@ -64,6 +67,7 @@ export const NAMES_BY_LOCALE: Partial<Record<ContentLocale, Record<string, strin
   sq: SQ_NAMES,
   ru: RU_NAMES,
   uk: UK_NAMES,
+  ps: PS_NAMES,
   ar: AR_NAMES,
   // English names come from species.commonName (the base).
 };

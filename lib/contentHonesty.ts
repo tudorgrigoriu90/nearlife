@@ -28,6 +28,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
   sq: ['këtu tani', 'tani këtu', 'pikërisht tani', 'aktualisht këtu'],
   ru: ['здесь сейчас', 'сейчас здесь', 'прямо сейчас', 'в данный момент здесь'],
   uk: ['тут зараз', 'зараз тут', 'просто зараз', 'наразі тут'],
+  ps: ['دلته اوس', 'اوس دلته', 'همدا اوس دلته'],
 };
 
 /**
