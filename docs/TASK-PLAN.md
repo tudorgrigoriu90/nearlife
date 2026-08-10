@@ -1259,7 +1259,18 @@ only.**
     module) to the new locales, all starting `missing`. Record the rationale (content-only scope,
     not full UI localization) in [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md). Tests: the
     new locales are distinct from `Locale`, and `species_content` lookups accept a `ContentLocale`.
-- **T-157 · RTL-safe rendering for the secondary language slot** — *Claude · M · `TODO` · deps: T-156*
+- **T-157 · RTL-safe rendering for the secondary language slot** — *Claude · M · `DONE` · deps: T-156*
+  - ✅ `lib/i18n/bidi.ts` (12 tests): `RTL_CONTENT_LOCALES` (ar, fa, ps, ckb), `isRtlLocale`,
+    `writingDirectionFor`, `textAlignFor`, and `isolate`/`stripIsolates` using Unicode FSI/PDI
+    (UAX #9). **Script decides direction, not language family** — Sorani (ckb, Arabic script) is
+    RTL while Kurmanji (kmr, Latin script) is LTR; Tigrinya/Amharic (Ge'ez) and Thai are non-Latin
+    but LTR. Both are pinned by tests.
+  - ✅ **Why the "/" join can't be a plain template literal:** the delimiter and spaces are
+    directionally *neutral*, so next to an RTL run the bidi algorithm absorbs them into it and the
+    "/" visually jumps to the wrong side. Isolating each half keeps it anchored between them.
+    Tested with real Arabic/Persian strings — a Latin placeholder would pass while the device broke.
+  - ⚠️ Scope is **mixed-direction-within-a-screen**, not app RTL mirroring (layout/nav stay LTR).
+    Glyph-level rendering still needs on-device confirmation.
   - Several T-156 languages are RTL scripts (Arabic, Persian/Dari, Pashto, Sorani Kurdish) —
     the "all 24 EU languages are LTR" assumption in INTERNATIONALIZATION.md doesn't extend to this
     feature. Scope: per-language RTL flag on `ContentLocale`; the secondary paragraph in
