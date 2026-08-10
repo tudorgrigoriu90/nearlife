@@ -28,6 +28,7 @@ const EXPECTED_SCRIPT: Partial<Record<ContentLocale, RegExp>> = {
   uk: /[Ѐ-ӿ]/,
   sr: /[Ѐ-ӿ]/,
   th: /[฀-๿]/, // Thai
+  el: /[Ͱ-Ͽἀ-῿]/, // Greek and Coptic + Greek Extended
 };
 
 describe('every seeded content locale', () => {
