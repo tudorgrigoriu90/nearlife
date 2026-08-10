@@ -1313,20 +1313,33 @@ only.**
     Can stage language-by-language, immigrant-priority languages first per T-156's ordering. Not a
     blocker for shipping T-148–T-151 — the picker is usable (degrading gracefully) with just en/sv
     seeded.
-- **T-159 · Irish and Maltese species content** — *Claude + Director · M · `BLOCKED` (needs a naming source) · deps: T-154*
+- **T-159 · Irish and Maltese species content** — *Claude + Director · M · `BLOCKED` (egress policy) · deps: T-154*
   - Blocked on a **names** problem, not a translation one. Most of the 54 Kronoberg species do not
     occur in Ireland and almost none occur in Malta, so there is no established Irish or Maltese
-    common name to use for a large share of the list. Writing 54 plausible-sounding coinages per
-    language and shipping them at `machine` status would put invented names in front of readers
-    under the same label as the checked ones — the picker rule exists precisely to stop a language
-    from rendering something that looks authoritative and is not.
-  - Unblock by choosing a source of truth for the names: for Irish, téarma.ie / Irish Wikipedia and
-    the National Biodiversity Data Centre; for Maltese, BirdLife Malta's checklist plus a marked
-    fallback for the species with genuinely no Maltese name. Prose translation is then routine and
-    follows the same per-language push pattern as the other 36 locales.
+    common name for a large share of the list. Writing 54 plausible-sounding coinages per language
+    and shipping them at `machine` status would put invented names in front of readers under the
+    same label as the checked ones — the picker rule exists precisely to stop a language from
+    rendering something that looks authoritative and is not.
+  - ✅ **The sourcing step is now built, not pending research** — `pipeline/build_vernacular_names.py`
+    plus `pipeline/vernacular/` generate `lib/species/names.<locale>.ts` from Wikidata taxon common
+    names (P1843), falling back to the locale's Wikipedia article title. 13 offline tests
+    (`pipeline/tests/test_vernacular.py`) pin the rules that matter: a "common name" equal to the
+    binomial is rejected (both sources fall back to Latin when no vernacular exists), an explicit
+    P1843 statement beats an article title, output is deterministic, and a **partial module is
+    refused outright** — `contentInLocale` has no English fallback by design, so a locale missing
+    names renders blank halves.
+  - 🔴 **Remaining blocker is environmental, not technical.** `query.wikidata.org`,
+    `en.wikipedia.org`, `www.teanglann.ie` and `api.gbif.org` are all refused (403 at the proxy
+    CONNECT) by this session's egress policy, so the generator cannot run here; it exits 2 with a
+    plain message rather than a traceback. Unblock by running it where Wikimedia is reachable and
+    committing the output, or by widening the egress allowlist. WebSearch is *not* a substitute —
+    it returns paraphrase, and mistranslated *clamhán* (buzzard) as "thyme" when tried.
+  - After names land, the prose follows the routine per-language push pattern used for the other
+    36 locales, and the species with genuinely no Maltese name still need a Director call: drop
+    them from the locale, or leave mt unregistered.
   - Both are EU official languages, so leaving them out is a real gap — but the honest failure mode
-    is a shorter picker (the language is simply not offered), which is exactly how the roster is
-    designed to degrade.
+    is a shorter picker (the language is simply not offered), which is how the roster is designed
+    to degrade.
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
