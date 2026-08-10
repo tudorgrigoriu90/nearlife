@@ -1239,7 +1239,20 @@ only.**
     the (LTR) card. Selection-logic unit tests (picks the right content pair; handles a species
     missing secondary content entirely); on-device layout unverified per this repo's
     component-testing convention.
-- **T-151 · Settings UI: toggle, language picker, "off" discoverability hint** — *Claude · S · `TODO` · deps: T-148, T-156*
+- **T-151 · Settings UI: toggle, language picker, "off" discoverability hint** — *Claude · S · `DONE` · deps: T-148, T-156*
+  - ✅ New "Second language" section in `SettingsScreen`, toggle OFF by default. While off, a
+    quiet **info box** (🌍 + one honest line) tells the user the option exists — no modal, no badge,
+    no repeat nagging (invariant #4 spirit). It's replaced by the picker once enabled, having done
+    its job.
+  - ✅ Picker lists `dualDisplayLocales()` minus the app's own language, each row showing the
+    language's **endonym** (Svenska, العربية, ትግርኛ) — someone looking for their language scans for
+    its native name. Machine-translated languages carry an `MT` tag **at choice time**, not only
+    later on the card, plus a one-line caveat under the list (T-152 honesty).
+  - ✅ 6 tests incl. off-by-default + info-box-instead-of-picker, endonym-not-exonym, and that the
+    app's current language is never offered as its own secondary.
+  - ⚠️ **The picker is short until T-154 seeds languages** — only locales with real content are
+    listed, since offering a language that would render nothing is exactly the dishonesty this
+    feature is supposed to avoid. Today that means en/sv; each T-154 language makes it longer.
   - New Settings section (below `settings.language`) with the toggle OFF by default and a picker
     across the full `ContentLocale` roster (T-156: 24 EU + the priority immigrant list) once ON —
     grouped or ordered so the ~15 added languages don't bury the EU list. Uses the widened T-156

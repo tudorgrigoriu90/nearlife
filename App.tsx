@@ -293,8 +293,15 @@ export default function App() {
           locale={locale}
           consent={consent}
           analyticsLocked={analyticsLocked}
+          dualLanguage={dualLanguage}
           onToggleConsent={toggleConsent}
           onSelectLocale={(loc) => setLocaleOverride(loc)}
+          onToggleDualLanguage={(enabled) =>
+            updateDualLanguage(setDualEnabled(dualLanguage, enabled))
+          }
+          onSelectSecondaryLocale={(loc) =>
+            updateDualLanguage(setSecondaryLocale(dualLanguage, loc, locale as ContentLocale))
+          }
           onExportData={exportMyData}
           onDone={() => setShowSettings(false)}
         />
