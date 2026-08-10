@@ -1285,7 +1285,7 @@ only.**
     secondary picker (T-156 roster) as that locale's content lands; add a check that secondary
     content always carries the machine-translated indicator per the T-152 policy (labeling is
     enforced; review status is not — see T-152).
-- **T-154 · Machine-translate species content into the full dual-display roster** — *Claude + Director · XL · `DONE` (16 immigrant + 20 EU languages; ga/mt split out as T-159) · deps: T-127, T-156*
+- **T-154 · Machine-translate species content into the full dual-display roster** — *Claude + Director · XL · `DONE` (16 immigrant + 20 EU languages; ga/mt cut — T-159) · deps: T-127, T-156*
   - ✅ **All 16 immigrant-roster languages seeded**, one push each, in immigrant-population order:
     Arabic, Somali, Persian/Dari, Tigrinya, Sorani Kurdish, Turkish, Bosnian, Serbian, Albanian,
     Russian, Ukrainian, Pashto, Kurmanji Kurdish, Thai, Vietnamese, Amharic. Each is 54 species ×
@@ -1305,7 +1305,7 @@ only.**
     divergences substituted, deliberately a short list). Slovak was **not** derived from Czech:
     the species nomenclature diverges (mlynárik/bělásek, záružlie/blatouch), so a mechanical
     conversion would have produced plausible-looking wrong names.
-  - ⏳ **Irish (ga) and Maltese (mt) deliberately deferred to T-159** — see that task for why.
+  - ✂️ **Irish (ga) and Maltese (mt) cut** — see T-159. 36 of the 38 roster locales ship.
   - The volume item flagged in INTERNATIONALIZATION.md, now spanning the 24 EU languages **and**
     the T-156 priority immigrant list (~39 locales total). Mirrors T-127's per-locale approach;
     registers each at `machine` status in the coverage matrix — per T-152, `machine` is sufficient
@@ -1313,7 +1313,7 @@ only.**
     Can stage language-by-language, immigrant-priority languages first per T-156's ordering. Not a
     blocker for shipping T-148–T-151 — the picker is usable (degrading gracefully) with just en/sv
     seeded.
-- **T-159 · Irish and Maltese species content** — *Claude + Director · M · `BLOCKED` (egress policy) · deps: T-154*
+- **T-159 · Irish and Maltese species content** — *Claude + Director · M · `CUT` (Director decision, 2026-08-10) · deps: T-154*
   - Blocked on a **names** problem, not a translation one. Most of the 54 Kronoberg species do not
     occur in Ireland and almost none occur in Malta, so there is no established Irish or Maltese
     common name for a large share of the list. Writing 54 plausible-sounding coinages per language
@@ -1334,9 +1334,14 @@ only.**
     plain message rather than a traceback. Unblock by running it where Wikimedia is reachable and
     committing the output, or by widening the egress allowlist. WebSearch is *not* a substitute —
     it returns paraphrase, and mistranslated *clamhán* (buzzard) as "thyme" when tried.
-  - After names land, the prose follows the routine per-language push pattern used for the other
-    36 locales, and the species with genuinely no Maltese name still need a Director call: drop
-    them from the locale, or leave mt unregistered.
+  - ✂️ **Cut (2026-08-10):** Director's call is to leave Maltese unregistered and drop Irish for
+    now. Neither locale is seeded, so both stay `missing` in `LOCALE_STATUS` and the picker simply
+    does not offer them — no app change was needed, because that is already how the roster degrades.
+    `contentLocale.test.ts` now pins this by name so a future half-seeding fails loudly instead of
+    quietly putting coinages in the picker.
+  - The generator stays on the shelf, tested and ready: if this is revisited, run it where Wikimedia
+    is reachable and the names arrive sourced rather than authored. The remaining judgement call is
+    unchanged — species with genuinely no Maltese name would still need dropping from the locale.
   - Both are EU official languages, so leaving them out is a real gap — but the honest failure mode
     is a shorter picker (the language is simply not offered), which is how the roster is designed
     to degrade.

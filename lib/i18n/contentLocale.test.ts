@@ -104,6 +104,17 @@ describe('dual-display policy (T-152: machine translation is sufficient)', () =>
     expect(dualDisplayLocales()).not.toContain(unseeded);
   });
 
+  it('does not offer Irish or Maltese (T-159, cut by Director decision)', () => {
+    // Deliberate, not an oversight. Most Kronoberg species have no Irish name and almost none
+    // have a Maltese one, so seeding these would mean inventing names and labelling them the same
+    // as the sourced ones. This test exists so a future half-seeding fails loudly rather than
+    // quietly putting coinages in the picker.
+    for (const locale of ['ga', 'mt'] as const) {
+      expect(contentLocaleStatus(locale)).toBe('missing');
+      expect(dualDisplayLocales()).not.toContain(locale);
+    }
+  });
+
   it('lists only offerable locales, in roster order', () => {
     const offerable = dualDisplayLocales();
     expect(offerable).toEqual(CONTENT_LOCALES.filter(isOfferableForDualDisplay));
