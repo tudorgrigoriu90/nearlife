@@ -1345,6 +1345,27 @@ only.**
   - Both are EU official languages, so leaving them out is a real gap — but the honest failure mode
     is a shorter picker (the language is simply not offered), which is how the roster is designed
     to degrade.
+- **T-160 · Seed species_content for every content locale** — *Claude · S · `DONE` · deps: T-154*
+  - 🐛 **Found by inspection, not by a failing test:** the database held only en and sv (108 rows).
+    `scripts/gen-species-seed.ts` imported those two locales by name, so the 36 locales T-154 added
+    never reached Postgres. Invisible on the app's default `HardcodedSpeciesRepository` path, which
+    is why the whole dual-language feature tested green while being broken against Supabase:
+    `SupabaseSpeciesRepository.getContentInLocale` deliberately has **no** English fallback (the
+    mother-tongue half must never quietly show a third language), so the secondary half would have
+    rendered nothing for every locale but en/sv.
+  - ✅ **No DDL was required.** `species_content.locale` is plain `text` with no check constraint —
+    the 0004 schema already accepted these rows. This was a data gap, not a schema gap.
+  - ✅ Generator now drives off `CONTENT_BY_LOCALE` / `NAMES_BY_LOCALE` instead of a hand-written
+    locale list, so registering a locale is what seeds it — there is no second list to forget.
+  - ✅ `supabase/migrations/20260810000001_seed_species_content_all_locales.sql` — 2052 rows
+    (54 species × 38 locales), idempotent (`on conflict do update`), one transaction.
+  - ✅ `pipeline/tests/test_seed_migration.py` (5 tests) fails the build if the migration and the
+    registry ever diverge again, and checks quote-escaping by parity — an unescaped apostrophe
+    would not raise, it would insert garbage via syntactically valid SQL.
+  - ⏳ **Not yet applied to the live database.** The Supabase connector is connected at org level
+    but `enabledInChat: false` in the session that wrote this, and `*.supabase.co` / `api.supabase.com`
+    are refused by the egress policy, so there was no path to execute it. Apply by enabling the
+    connector for the chat, or `supabase db push` from an environment with access.
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
