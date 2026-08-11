@@ -1,5 +1,12 @@
 module.exports = {
   preset: 'jest-expo',
+  // Mock expo-notifications everywhere (T-161): its real import registers a push-token listener
+  // (DevicePushTokenAutoRegistration.fx) that leaks an open handle and makes Jest hang on teardown.
+  // The app uses only requestPermissionsAsync (lib/permissions.ts), so the stub in __mocks__ is
+  // behaviour-equivalent for tests and lets workers exit cleanly.
+  moduleNameMapper: {
+    '^expo-notifications$': '<rootDir>/__mocks__/expo-notifications.js',
+  },
   // Honest coverage: measure every source file, not just the ones a test happens to import.
   // Generated data manifests and test files are excluded.
   collectCoverageFrom: [

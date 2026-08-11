@@ -2,14 +2,18 @@ import { render, screen } from '@testing-library/react-native';
 import AlmanacScreen from './AlmanacScreen';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import { createTranslator } from '../lib/i18n';
+import type { Species } from '../lib/species/types';
 
 const tr = createTranslator('en');
 
-// Rendering the full 54-species grid (a FlatList of Cells) is a heavy RNTL render: ~420ms in
-// isolation, but it exceeds jest's 5000ms default under CPU load (observed flaking while a clean
-// install saturated the machine). A generous explicit budget removes the false-red without hiding
-// a genuine hang. Mirrors App.test's FLOW_TIMEOUT convention.
-const RENDER_TIMEOUT = 20000;
+// One species per category — exercises the grid + every category chip without rendering all 54
+// cells. The full-54 render was CPU-heavy and load-sensitive (it timed out even at 20s when the
+// machine was saturated, T-147/T-161); a handful of real cells makes this test fast and stable.
+// The full-set almanac logic (counts, filtering, discovery) is covered by lib/almanac.test.ts.
+const ONE_PER_CATEGORY: Species[] = [
+  ...new Map(KRONOBERG_SPECIES.map((s) => [s.category, s])).values(),
+];
+const RENDER_TIMEOUT = 15000; // headroom for a busy CI runner; the render itself is sub-second
 
 describe('AlmanacScreen', () => {
   it('shows a loading state', async () => {
@@ -18,10 +22,13 @@ describe('AlmanacScreen', () => {
   });
 
   it(
-    'renders the grid with category filters over the curated set',
+    'renders the grid with category filters',
     async () => {
-      await render(<AlmanacScreen species={KRONOBERG_SPECIES} records={[]} />);
+      await render(<AlmanacScreen species={ONE_PER_CATEGORY} records={[]} />);
       expect(screen.getByText(tr('almanac.filter.all'))).toBeTruthy();
+      // Every represented category yields a chip (e.g. "🐦 Birds") — grid + chip chrome is wired.
+      // Regex (partial) match tolerates the emoji prefix on the chip label.
+      expect(screen.getByText(new RegExp(tr('category.bird')))).toBeTruthy();
     },
     RENDER_TIMEOUT,
   );

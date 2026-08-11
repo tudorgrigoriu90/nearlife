@@ -226,6 +226,19 @@ before pushing — CI runs after the push and reports (does not block) a red `ma
     under jest's 5000ms default: ~420ms in isolation but a false-red under CPU load (seen twice while
     a clean install saturated the machine). Gave it an explicit 20s budget (mirrors App.test's
     `FLOW_TIMEOUT`) — removes the flake without hiding a genuine hang. Keeps `main`/CI reliably green.
+- **T-161 · Test-suite reliability: teardown leak + de-fragilize the Almanac render** — *Claude · S · `DONE` · deps: T-143 · [CLAUDE.md](../CLAUDE.md)*
+  - ✅ **Teardown leak.** After the F13.3 merge the suite logged *"a worker process failed to exit
+    gracefully"* and Jest hung on teardown, pushing `npm run verify` past 10 min. Root cause:
+    `expo-notifications`' import runs a push-token auto-registration side effect
+    (`DevicePushTokenAutoRegistration.fx` → `addPushTokenListener`) that leaves an open handle. The
+    app uses it in exactly one spot (`lib/permissions.ts`, only `requestPermissionsAsync`). Fix: a
+    minimal side-effect-free `__mocks__/expo-notifications.js`, wired via `jest.config.js`
+    `moduleNameMapper`. Workers now exit cleanly — chose a real mock over `--forceExit` so a future
+    genuine leak still surfaces. Full suite dropped from a >10-min hang to ~65s, clean exit.
+  - ✅ **Almanac render.** `AlmanacScreen.test.tsx` rendered the full 54-species FlatList and timed
+    out even at T-147's 20s under CPU load — proving a bigger timeout was the wrong medicine. Now it
+    renders **one species per category** (all chips exercised, ~0.6s vs ~40s), with the full-set
+    logic still covered by `lib/almanac.test.ts`. Supersedes the T-147 timeout bump.
 
 ### S1.3.0 — Client wiring
 - **T-129 · Supabase client + config** — *Claude · S · `DONE` · deps: T-003 · [TSD §1,§3](TSD.md)*
