@@ -44,17 +44,24 @@ def test_maps_content_item_to_species_content_row():
     assert row["when_how"] == "Active in your region year-round. Look for it in mammal cover."
     assert row["give"] == "give-template" and row["protect"] == "protect-template"
     assert row["always_free"] is True  # invariant #2 — Tier-1 + give/protect always free
-    assert summary == {"total": 1, "with_fact": 1, "skipped_no_fact": 0, "skipped_dup": 0}
+    assert summary == {"total": 1, "with_fact": 1, "without_fact": 0, "skipped_dup": 0}
 
 
-def test_skips_species_without_a_grounded_fact():
-    # invariant #1: never fabricate a fact. species_content.fact is NOT NULL and the app treats
-    # fact as required, so a null/blank fact yields NO row — reported, never invented.
+def test_loads_fact_less_species_with_null_fact_for_the_mission_content():
+    # T-146: a species with no article still gets a row (fact=None) so its give/protect are free
+    # for every species (invariant #2). A blank/whitespace fact is normalized to None — never
+    # fabricated (invariant #1).
     payload = {"content": [_item(1, "A b", None), _item(2, "C d", "   "), _item(3, "E f", "a real fact")]}
     rows, summary = build_content_rows([payload])
 
-    assert [r["species_id"] for r in rows] == [species_id_for(3)]
-    assert summary["total"] == 3 and summary["with_fact"] == 1 and summary["skipped_no_fact"] == 2
+    by_id = {r["species_id"]: r for r in rows}
+    assert len(rows) == 3  # every species loaded
+    assert by_id[species_id_for(1)]["fact"] is None
+    assert by_id[species_id_for(2)]["fact"] is None  # whitespace-only → None
+    assert by_id[species_id_for(3)]["fact"] == "a real fact"
+    # mission content is present regardless of whether a fact exists
+    assert by_id[species_id_for(1)]["give"] == "give-template"
+    assert summary == {"total": 3, "with_fact": 1, "without_fact": 2, "skipped_dup": 0}
 
 
 def test_dedupes_by_species_and_locale_keeping_first():

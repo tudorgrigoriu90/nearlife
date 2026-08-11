@@ -47,6 +47,17 @@ describe('row mapping', () => {
     };
     expect(contentRowToContent(row)).toEqual({ speciesId: 'pike', fact: 'f', whenAndHow: 'w', give: 'g', protect: 'p' });
   });
+
+  it('maps a null fact (no article, T-146) to an empty string, keeping the mission content', () => {
+    const row: SpeciesContentRow = {
+      species_id: 'gbif:999', locale: 'en', common_name: null,
+      fact: null, when_how: 'w', give: 'g', protect: 'p',
+    };
+    const content = contentRowToContent(row);
+    expect(content.fact).toBe(''); // card treats empty as "no fact" and hides that block
+    expect(content.give).toBe('g'); // mission is still free for every species (invariant #2)
+    expect(content.protect).toBe('p');
+  });
 });
 
 describe('SupabaseSpeciesRepository', () => {

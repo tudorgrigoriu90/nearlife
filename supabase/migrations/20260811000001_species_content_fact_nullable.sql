@@ -1,0 +1,11 @@
+-- T-146: allow public.species_content.fact to be NULL.
+--
+-- A species with no Wikipedia article has no grounded fact — and we never fabricate one
+-- (invariant #1). But its safe, taxon-level give/protect/when-how mission content must still be
+-- free for EVERY species (invariant #2). Making `fact` nullable lets the content loader
+-- (gbif/supabase_load_content) write a mission-only row (fact = NULL) instead of skipping the
+-- species entirely; the app hides the fact block and still renders the mission (SpeciesCard, T-146).
+--
+-- Data-only intent: no other column, index, RLS policy, or table is touched. Idempotent — dropping
+-- NOT NULL on an already-nullable column is a no-op.
+alter table public.species_content alter column fact drop not null;

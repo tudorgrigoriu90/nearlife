@@ -560,11 +560,18 @@ key before loading into Supabase.**
     is NOT NULL and the app treats `fact` as required); fact-less species are counted + reported,
     **never fabricated** (invariant #1). Smoke on `content_mammal.json`: 156/157 rows, 1 skipped.
   - ⏳ Run inside the T-144 workflow **after** the species/presence load (FK order), with the service key.
-- **T-146 · Decide how fact-less species surface mission content (give/protect)** — *Claude + Director · S · `TODO` · deps: T-145 · [GDD §5](GDD.md)*
-  - Invariant #2 wants give/protect free for **every** species, but `species_content.fact` is NOT NULL,
-    so a species with no grounded fact currently gets **no** row — dropping its (safe, templated)
-    give/protect too. Decide: make `fact` nullable + render mission-only cards, or accept fact-gated
-    content. A schema + app-render + honest-copy call; Director confirms. Surfaced by T-145.
+- **T-146 · Fact-less species surface mission content (nullable fact)** — *Claude · S · `DONE` (Director decision: make `fact` nullable) · deps: T-145 · [GDD §5](GDD.md)*
+  - ✅ **Decision (Director):** make `species_content.fact` nullable + render mission-only cards, so
+    give/protect stay free for **every** species (invariant #2) even when there's no Wikipedia article
+    — a fact is never fabricated (invariant #1).
+  - ✅ **Migration** `…20260811000001_species_content_fact_nullable.sql`: `alter column fact drop not
+    null` (data-only; no other column/index/RLS touched; idempotent). Director applies via the connector.
+  - ✅ **Loader** `gbif/content_rows.py` now writes a row for **every** species — `fact = None` when
+    absent (was: skipped) — reporting `with_fact` / `without_fact` honestly. Tests updated.
+  - ✅ **App:** `SpeciesContentRow.fact` is `string | null`; `contentRowToContent` maps a DB `NULL` →
+    `''`; `SpeciesCard` hides the fact block on empty and still renders give/protect/when-how. New
+    tests on the repository mapping + the card. `SpeciesContent.fact` stays `string` (curated content
+    + dual-language path untouched).
 - **T-043 · H3 cell aggregation (res 7–8)** — *Claude · M · deps: T-042 · [TSD §3](TSD.md)*
   - Occurrences aggregated into H3 cells at chosen resolution; cell geometry stored.
 - **T-044 · Per-cell per-month presence probability** — *Claude · L · deps: T-043 · [TSD §4](TSD.md)*
@@ -601,8 +608,11 @@ key before loading into Supabase.**
 - **T-052 · Author give/protect (safe defaults + follow-law line)** — *Claude · XL · deps: T-051 · [GDD §5](GDD.md)*
   - Give + protect per species; universally safe actions; standing "follow local law" line;
     threat framing where it adds value; **no risky plant/release specifics**.
-- **T-053 · Author depth tiers 2–5** — *Claude · XL · deps: T-051 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
+- **T-053 · Author depth tiers 2–5** — *Claude · XL · `DEFERRED` (Director, 2026-08-11 — post-validation) · deps: T-051 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
   - 5 depth levels of trivia/lore/audio/deep-dive per species (climb-by-play / unlock content).
+  - ⏸️ Large content effort with unpinned scope (what fills each level, and at 54 vs 12k scale) and
+    no generation pipeline — deferred until post-validation. The depth row stays a locked placeholder;
+    the unlock *logic* (T-060) is deferred with it.
 - **T-054 · Regional invasive-check for any plant/release advice** — *Claude + Director · M · deps: T-052 · [GDD §5](GDD.md), [TSD §7](TSD.md)*
   - Any advice naming a species to plant/release is checked against Kronoberg invasives; risky
     items removed or genericized. Director confirms the review pass.
@@ -661,9 +671,10 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     direct module import; the mission block hides until content resolves. The App flow test exercises
     the async read (a broken load ⇒ no give/protect ⇒ the pledge step fails), plus a null-content test.
   - Remaining: a share action. (DB-backed content arrives with the seed + Supabase repo, T-055/T-145.)
-- **T-060 · Depth-tier climb-by-play logic** — *Claude · M · deps: T-059, T-053 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
+- **T-060 · Depth-tier climb-by-play logic** — *Claude · M · `DEFERRED` (Director, 2026-08-11 — with T-053) · deps: T-059, T-053 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
   - Free users unlock depth tiers by playing (spot/catch/help); Full Game unlocks all immediately.
     Progression, not paywall — verified for both states.
+  - ⏸️ Deferred alongside T-053: the unlock logic is only meaningful once depth content exists.
 
 ---
 ---

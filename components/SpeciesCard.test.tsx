@@ -28,6 +28,16 @@ describe('SpeciesCard', () => {
     expect(screen.queryByText(tr('card.give'))).toBeNull();
   });
 
+  it('shows the mission with no fact block when the species has no article (T-146)', async () => {
+    // A species with no Wikipedia article arrives with fact = '' (repository maps DB NULL → '').
+    await render(<SpeciesCard species={swift} content={{ ...swiftContent!, fact: '' }} locale="en" />);
+    // Mission is still free for every species (invariant #2)…
+    expect(screen.getByText(tr('card.give'))).toBeTruthy();
+    expect(screen.getByText(tr('card.protect'))).toBeTruthy();
+    // …but the (now absent) fact text is not rendered.
+    expect(screen.queryByText(swiftContent!.fact)).toBeNull();
+  });
+
   it('launches the catch flow from "find it nearby"', async () => {
     const onFindNearby = jest.fn();
     await render(

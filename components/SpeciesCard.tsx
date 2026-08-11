@@ -113,7 +113,10 @@ export default function SpeciesCard({
 
         {content ? (
           <>
-            <DualText input={dual(content.fact, secondaryContent?.fact)} style={styles.fact} />
+            {/* No Wikipedia article → no fact (T-146); hide the block, keep the mission below. */}
+            {content.fact ? (
+              <DualText input={dual(content.fact, secondaryContent?.fact)} style={styles.fact} />
+            ) : null}
 
             <Section
               title={tr('thisWeek.title')}

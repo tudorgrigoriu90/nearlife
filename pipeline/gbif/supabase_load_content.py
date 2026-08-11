@@ -2,10 +2,10 @@
 
 The "content JSON -> table" step called for by T-135/T-144 — the last pipeline piece before the
 ~12k species can render from the DB (T-057/T-059). Upserts locale-keyed fact / when-how / give /
-protect rows from pipeline/data/content_*.json. Only species with a grounded Wikipedia fact are
-loaded (the table + app require one); fact-less species are reported, never fabricated (invariant
-#1). English (status=machine) content only — Swedish arrives after the review-gated translation
-(T-127/T-135).
+protect rows from pipeline/data/content_*.json. Every species is loaded — those with no Wikipedia
+article get a mission-only row with `fact = NULL` (T-146), so give/protect stay free for every
+species (invariant #2); a fact is never fabricated (invariant #1). English (status=machine) content
+only — Swedish arrives after the review-gated translation (T-127/T-135).
 
 Run order: the species/presence loader (gbif.supabase_load) must run first — species_content.species_id
 FK-references public.species. Runs in CI (or locally) with a **service-role** Postgres connection
@@ -62,8 +62,9 @@ def main() -> None:
         conn.commit()
 
     print(
-        f"loaded {summary['with_fact']} content rows of {summary['total']} species "
-        f"({summary['skipped_no_fact']} skipped: no grounded fact, {summary['skipped_dup']} dup)"
+        f"loaded {len(rows)} content rows of {summary['total']} species "
+        f"({summary['with_fact']} with a fact, {summary['without_fact']} mission-only, "
+        f"{summary['skipped_dup']} dup)"
     )
 
 

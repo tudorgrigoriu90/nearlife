@@ -74,7 +74,8 @@ export interface SpeciesContentRow {
   species_id: string;
   locale: string;
   common_name: string | null;
-  fact: string;
+  /** Null for species with no Wikipedia article (T-146) — mission content still ships. */
+  fact: string | null;
   when_how: string;
   give: string;
   protect: string;
@@ -108,7 +109,9 @@ export function speciesRowToSpecies(row: SpeciesRow): Species {
 export function contentRowToContent(row: SpeciesContentRow): SpeciesContent {
   return {
     speciesId: row.species_id,
-    fact: row.fact,
+    // A null DB fact (no article, T-146) becomes an empty string in the domain object; the card
+    // treats empty as "no fact" and hides the fact block while still showing the mission content.
+    fact: row.fact ?? '',
     whenAndHow: row.when_how,
     give: row.give,
     protect: row.protect,
