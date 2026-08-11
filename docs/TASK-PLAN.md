@@ -921,11 +921,17 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - Device location resolved once to a region; **coordinates discarded**, only `home_region_id`
     stored; hometown locked (support-only change). No manual picker.
   - Location-denied → preview mode; hometown set on first grant.
-- **T-091 · Cell-level location storage only** — *Claude · S · `IN-PROGRESS` (cell core done; H3 + wiring pending) · deps: T-090 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [TSD §3](TSD.md)*
-  - ✅ `lib/cell.ts` (4 tests): `cellKey(coords, resolutionDeg)` snaps a location to a coarse grid
-    cell so no precise lat/long is retained (PRIVACY §1); tests assert nearby points share a cell
-    and the precise coordinates aren't exposed. Production swaps to H3 res 7–8 (T-043); wiring the
-    runtime catch-location through this remains.
+- **T-091 · Cell-level location storage only** — *Claude · S · `IN-PROGRESS` (H3 adopted; runtime wiring pending) · deps: T-090 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [TSD §3](TSD.md)*
+  - ✅ **H3 adopted (Director decision).** `lib/cell.ts` (5 tests) now uses **`h3-js`** — `cellKey`
+    returns an H3 index at `DEFAULT_CELL_RESOLUTION = 8` (~0.74 km² hex), so only a coarse area is
+    ever retained, never a precise point (PRIVACY §1). Same H3 system the pipeline's per-cell presence
+    uses (TSD §3, T-043/T-044), so app + data cells line up; `cellResolution` exposes the grid level.
+    `h3-js@4.5.0` is MIT + pure-JS (already in the approved stack). Tests: valid cell + resolution,
+    a point reduces to its containing cell, distant points differ, opaque index, coarser buckets more.
+  - ✅ **Jest fix (T-091):** h3-js' emscripten build calls `TextDecoder` on import, which jest-expo's
+    winter runtime stubs and throws on — restored Node's `TextDecoder`/`TextEncoder` via a
+    `setupFilesAfterEnv` (`jest.setup.js`; the preset left that unset, so it adds not clobbers).
+  - Remaining: wire the runtime catch-location through `cellKey` (deferred with the catch/geo work).
 
 ## F10.3 — GDPR Rights
 - **T-092 · Data export endpoint** — *Claude · M · `DONE` (reachable + produces the bundle; file-share later) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
