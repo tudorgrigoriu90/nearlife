@@ -993,6 +993,14 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
     Settings (consent, export, language). Fix layout/runtime issues so testers get a working app.
     Confirm Supabase anonymous auth + collection persistence work on-device (closes the T-027
     device-run gap). This pays down the "not visually verified" debt across the screens.
+- **T-162 · Align SDK-57 dependencies + add expo-dev-client (dev-build enablement)** — *Claude · S · `DONE` · deps: T-140 · [TSD §1](TSD.md)*
+  - ✅ Expo Go can't run this SDK-57 app, so device testing needs an EAS **dev build** — which needs
+    `expo-dev-client`. Installing it required aligning the SDK-57 patch set: `expo` ~57.0.2 → ~57.0.10,
+    `react-native` 0.86.0 → 0.86.2, and the `expo-*` packages, resolved with a clean install (a stale
+    tree produced a phantom `@react-native/jest-preset` peer conflict).
+  - ✅ All verify (1129 tests / lint / typecheck) runs on the aligned set; `package-lock.json`
+    normalized so CI `npm ci` stays consistent. **Director:** `eas build --profile development` +
+    install the APK, then `npx expo start --dev-client` (the on-device run is T-141).
 
 ## F11.1 — Store Submission
 - **T-097 · Store listings + assets** — *Claude + Director · M · `IN-PROGRESS` (copy + form answers drafted; final name/graphics/submission pending) · deps: T-084 · [review]*
