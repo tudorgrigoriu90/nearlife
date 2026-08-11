@@ -12,6 +12,7 @@ import PledgeConfirm from './components/helped/PledgeConfirm';
 import SettingsScreen from './components/SettingsScreen';
 import DataExportView from './components/DataExportView';
 import DeleteAccountConfirm from './components/DeleteAccountConfirm';
+import LinkEmail from './components/LinkEmail';
 import { useCollection } from './components/useCollection';
 import { useTracker } from './components/useTracker';
 import { DEFAULT_CONSENT, setConsent, type ConsentKind, type ConsentState } from './lib/consent';
@@ -26,6 +27,7 @@ import {
 import { AsyncStorageDualLanguageStore } from './lib/dualLanguageStore';
 import type { ContentLocale } from './lib/i18n/contentLocale';
 import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
+import { SupabaseAuthGateway } from './lib/accountLinking';
 import { getSupabase } from './lib/supabase';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import { KRONOBERG_REGION } from './lib/hometown';
@@ -102,6 +104,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('thisWeek');
   const [showSettings, setShowSettings] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showLinkEmail, setShowLinkEmail] = useState(false);
   const [exportJson, setExportJson] = useState<string | null>(null);
   const [consent, setConsentState] = useState<ConsentState>(DEFAULT_CONSENT);
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
@@ -321,6 +324,19 @@ export default function App() {
     );
   }
 
+  if (showLinkEmail) {
+    return (
+      <>
+        <LinkEmail
+          locale={locale}
+          gateway={new SupabaseAuthGateway(getSupabase())}
+          onDone={() => setShowLinkEmail(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (showSettings) {
     return (
       <>
@@ -338,6 +354,7 @@ export default function App() {
             updateDualLanguage(setSecondaryLocale(dualLanguage, loc, locale as ContentLocale))
           }
           onExportData={exportMyData}
+          onLinkEmail={() => setShowLinkEmail(true)}
           onDeleteAccount={() => setShowDelete(true)}
           onDone={() => setShowSettings(false)}
         />

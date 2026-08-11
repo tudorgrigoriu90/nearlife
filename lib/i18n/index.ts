@@ -196,6 +196,20 @@ export const en = {
   'delete.cancel': 'Cancel',
   'delete.deleting': 'Deleting…',
   'delete.error': 'Something went wrong. Your account was not deleted — please try again.',
+
+  // Link email (T-133 · reinstall / cross-device survival). Optional; off the onboarding path.
+  'settings.linkEmail': 'Link an email',
+  'link.title': 'Keep your data safe',
+  'link.body':
+    'Link an email so your collection survives reinstalling the app or switching phones. We’ll send a confirmation link. Optional.',
+  'link.placeholder': 'you@example.com',
+  'link.cta': 'Link email',
+  'link.linking': 'Linking…',
+  'link.sent': 'Confirmation sent to {email}. Open the link in that email to finish.',
+  'link.current': 'Linked to {email}.',
+  'link.error.invalid': 'That doesn’t look like a valid email address.',
+  'link.error.already': 'This account already has an email linked.',
+  'link.error.failed': 'Something went wrong. Please try again.',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -379,6 +393,20 @@ const sv: Catalog = {
   'delete.cancel': 'Avbryt',
   'delete.deleting': 'Raderar…',
   'delete.error': 'Något gick fel. Ditt konto raderades inte – försök igen.',
+
+  // Link email (T-133 · överlever ominstallation / flera enheter)
+  'settings.linkEmail': 'Koppla en e-post',
+  'link.title': 'Skydda dina uppgifter',
+  'link.body':
+    'Koppla en e-post så att din samling överlever ominstallation av appen eller byte av telefon. Vi skickar en bekräftelselänk. Valfritt.',
+  'link.placeholder': 'du@exempel.se',
+  'link.cta': 'Koppla e-post',
+  'link.linking': 'Kopplar…',
+  'link.sent': 'Bekräftelse skickad till {email}. Öppna länken i mejlet för att slutföra.',
+  'link.current': 'Kopplad till {email}.',
+  'link.error.invalid': 'Det där ser inte ut som en giltig e-postadress.',
+  'link.error.already': 'Det här kontot har redan en e-post kopplad.',
+  'link.error.failed': 'Något gick fel. Försök igen.',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

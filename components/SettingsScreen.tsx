@@ -33,6 +33,7 @@ export default function SettingsScreen({
   onToggleDualLanguage,
   onSelectSecondaryLocale,
   onExportData,
+  onLinkEmail,
   onDeleteAccount,
   onDone,
 }: {
@@ -47,6 +48,8 @@ export default function SettingsScreen({
   onToggleDualLanguage?: (enabled: boolean) => void;
   onSelectSecondaryLocale?: (locale: ContentLocale) => void;
   onExportData: () => void;
+  /** Open the link-email flow (T-133 · make the account durable across reinstall/devices). */
+  onLinkEmail?: () => void;
   /** Open the account/data deletion flow (T-093 · GDPR erasure, reachable from Settings). */
   onDeleteAccount?: () => void;
   onDone: () => void;
@@ -156,6 +159,16 @@ export default function SettingsScreen({
             <Text style={styles.rowLabel}>{tr('settings.exportData')}</Text>
             <Text style={styles.chevron}>›</Text>
           </Pressable>
+          {onLinkEmail ? (
+            <Pressable
+              onPress={onLinkEmail}
+              accessibilityRole="button"
+              style={[styles.row, styles.rowBorder]}
+            >
+              <Text style={styles.rowLabel}>{tr('settings.linkEmail')}</Text>
+              <Text style={styles.chevron}>›</Text>
+            </Pressable>
+          ) : null}
           {onDeleteAccount ? (
             <Pressable
               onPress={onDeleteAccount}

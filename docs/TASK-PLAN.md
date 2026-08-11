@@ -358,7 +358,7 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
   - ⚠️ **On-device run pending** (sandbox can't reach `*.supabase.co` and has no simulator) — needs
     `.env.local` (URL + publishable key) on the device. **Reinstall-survival is NOT met by anonymous
     auth** (anonymous users don't survive reinstall/other devices); tracked as **T-133**.
-- **T-133 · Link email to an anonymous user (reinstall / cross-device survival)** — *Claude · S · `IN-PROGRESS` (link core + seam + adapter done + tested; Settings entry point + on-device verify pending) · deps: T-027 · [PRIVACY §1](PRIVACY-COMPLIANCE.md)*
+- **T-133 · Link email to an anonymous user (reinstall / cross-device survival)** — *Claude · S · `IN-PROGRESS` (core + seam + Settings entry + screen done + tested; live confirmation-flow verify pending) · deps: T-027 · [PRIVACY §1](PRIVACY-COMPLIANCE.md)*
   - Anonymous sessions survive restarts but not reinstall. Add optional email-linking
     (`updateUser({ email })` / identity linking) so a user can make their collection durable across
     reinstall and devices — the "survives reinstall (tied to account)" half of T-027. Kept optional
@@ -368,7 +368,12 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     mapping gateway throws to a retryable `link-failed`. `normalizeEmail`/`isValidEmail` catch typos
     before a round-trip. `SupabaseAuthGateway` is the thin `updateUser({ email })` adapter (identity
     linking preserves the same `user.id`, so existing owner-scoped collection rows carry over). 7 tests.
-  - ⏳ Remaining: a Settings "Link email" entry point + on-device confirmation-flow verification.
+  - ✅ **Settings entry + screen** `components/LinkEmail.tsx` (5 tests): a Settings "Link an email" row
+    opens a gateway-injected screen that reads the current identity (shows an already-linked state, no
+    input), validates + submits via `linkEmail`, surfaces each typed `LinkFailure` as its own message,
+    and confirms "check your email" on success (Supabase sends a confirmation; the link completes when
+    the user taps it). i18n en+sv. App wires it with a `SupabaseAuthGateway`.
+  - ⏳ Remaining: live confirmation-flow verification on a device (send → tap link → durable account).
 
 ### S2.2.3 — This Week screen
 - **T-028 · "Active this week" list** — *Claude · S · `DONE` · deps: T-025 · [USER-FLOWS §3](USER-FLOWS.md), [GDD §7](GDD.md)*
