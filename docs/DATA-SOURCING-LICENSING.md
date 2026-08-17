@@ -100,3 +100,30 @@ threat content — **no blocking dependency on eBird or the IUCN API.** That is 
       Helped advice is hand-written; see GDD §5).
 - [ ] Decide eBird agreement application (post-MVP, only if birds need richer data).
 - [ ] Legal review of ODbL derived-database obligations before any data export/publish.
+
+---
+
+## Nordic scope and per-country checklists (v1, T-167)
+
+v1 covers Sweden, Norway, Denmark, Finland and Iceland. GBIF stays the occurrence source, but
+"recorded in GBIF" is not "encounterable": raw output carries zoo animals, escapees, one-off
+vagrants and misidentifications. Presenting those as *active in your region this season* would
+break invariant #1 as surely as an invented fact would.
+
+Each country's noise filter (T-136) is therefore checked against its own national authority:
+
+| Country | Authority | Use |
+|---|---|---|
+| Sweden | Artdatabanken / Dyntaxa | native + established status, accepted names |
+| Norway | Artsdatabanken | as above, incl. alien-species risk list |
+| Denmark | Allearter.dk | national species register |
+| Finland | FinBIF / laji.fi | national register, occurrence status |
+| Iceland | Náttúrufræðistofnun Íslands | national register (small, distinct biota) |
+
+Two consequences worth stating up front:
+
+- **Region ids are fetched, never hardcoded.** GADM level-1 ids come from
+  `/geocode/gadm/<ISO3>/subdivisions` at ingest time. A wrong id does not error — it slices
+  occurrences by the wrong region and emits well-formed wrong data.
+- **Licensing is unchanged and still binding.** Only CC0 / CC-BY occurrences are ingested
+  (§1), and only CC0 / CC-BY / CC-BY-SA media (§5), across all five countries.

@@ -2,7 +2,8 @@
 
 > Design of the experience: the loops, the collection model, the mechanics.
 > Money → [ECONOMY.md](ECONOMY.md). Tech → [TSD.md](TSD.md). Screens → [USER-FLOWS.md](USER-FLOWS.md).
-> Starting region: **Kronoberg, Sweden.**
+> Scope: **v1 covers the Nordics** — Sweden, Norway, Denmark, Finland, Iceland (T-167).
+> Kronoberg, Sweden was the validation prototype's region and remains the content benchmark.
 
 ---
 

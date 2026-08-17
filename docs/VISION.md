@@ -63,5 +63,9 @@ Development discussion extended the vision in three important ways (detailed in 
 - Retention: without a go-outside hook, what keeps people opening the app day to day?
 
 ## Next step
-Scope a lean MVP — species data, notification design, collection UI — targeting a narrow
-initial region (**Kronoberg, Sweden**) to validate before expanding.
+**v1 targets the five Nordic countries** — Sweden, Norway, Denmark, Finland, Iceland — with as
+many genuinely encounterable species as the data supports, fauna and flora (T-167).
+
+The narrow initial region (**Kronoberg, Sweden**) served its purpose as the validation prototype:
+it answered whether passive collecting feels rewarding before the data layer was built. Expansion
+is no longer a later phase — it is v1.

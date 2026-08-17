@@ -1,5 +1,10 @@
 # Way of Working — Nearby (nearlife)
 
+> **v1 scope:** the five Nordic countries — Sweden, Norway, Denmark, Finland, Iceland — showing as
+> many genuinely encounterable species as the data supports, fauna and flora, with observation
+> noise filtered (**T-167**). The 54-species Kronoberg set is the *validation prototype* and the
+> content-quality benchmark, not the shipping catalogue.
+
 Operating rules for Claude on this repository. These are binding defaults, not suggestions.
 When a rule here conflicts with a one-off user instruction in the moment, the in-the-moment
 instruction wins for that task only — the defaults below resume afterward.

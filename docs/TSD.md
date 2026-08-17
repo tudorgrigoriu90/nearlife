@@ -186,7 +186,11 @@ makes the product usable with notifications declined or muted (screen spec in
 
 ## 8. MVP sequencing
 
-1. **Fake-it prototype (≈2 weeks):** hardcode Kronoberg species list, hand-curate ~50 cards
+> **Superseded for scope by T-167:** v1 ships the five Nordic countries, not one region. Steps 1–2
+> below are kept because they describe what was actually built and why; the catalogue size they
+> assume (~50 curated cards) is the prototype's, not v1's.
+
+1. **Fake-it prototype (≈2 weeks) — done:** hardcode Kronoberg species list, hand-curate ~50 cards
    (fact + trivia + give + protect each), wire Expo notifications + collection UI + the
    **"Active this week" screen** + **one fake catch minigame** (bird timing, no real GPS
    gating) so the free 3-catch taste is testable end-to-end. 20–30 real users. **Measure

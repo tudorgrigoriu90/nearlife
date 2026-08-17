@@ -74,11 +74,24 @@ Docs follow the Helix studio taxonomy. Start with the index: **[docs/README.md](
 | [PRIVACY-COMPLIANCE](docs/PRIVACY-COMPLIANCE.md) | **Go/no-go:** GDPR, location, kids (ads: none — resolved) |
 | [TASK-PLAN](docs/TASK-PLAN.md) | Delivery backlog — epics → features → stories → tasks, phased |
 
+## Scope (v1)
+
+**v1 covers the five Nordic countries — Sweden, Norway, Denmark, Finland and Iceland — showing as
+many genuinely encounterable species as possible, fauna and flora, with observation noise
+filtered out.** Director decision, 2026-08-11; tracked as **T-167** in
+[docs/TASK-PLAN.md](docs/TASK-PLAN.md).
+
+The 54-species Kronoberg set is the **validation prototype** (T-019), not the shipping catalogue.
+It did its job — it answered "does passive collecting feel rewarding or hollow?" — and it remains
+the quality benchmark for what a card should read like. It was never the ceiling: Kronoberg alone
+has 3,018 recorded species, 1,295 of them with more than 100 observations. Birds alone are 357
+recorded against 17 in the prototype.
+
 ## Status
 
-**Design phase.** Documentation is being finalized ahead of a lean MVP targeting a single
-region — **Kronoberg, Sweden** — to validate the core question before building the data layer:
+**Building v1.** The Kronoberg prototype validated the core question:
 
 > Does passive collecting feel *rewarding* or *hollow*?
 
-That thesis is what the first prototype exists to answer.
+Work is now on widening the catalogue to the Nordics (T-167) — regional ingest, noise filtering
+against each country's authoritative checklist, and content at scale.

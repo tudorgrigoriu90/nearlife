@@ -71,7 +71,8 @@ EU far more cheaply than text.
 - **Locale resolution:** device locale via `expo-localization`, mapped to the nearest supported
   locale; user can override in Settings. Region (hometown, [ECONOMY.md](ECONOMY.md)) and
   language are **independent** — a Swede abroad keeps Swedish; a German in Sweden gets German UI
-  with Kronoberg content.
+  with Swedish species content. From v1 the region roster spans the Nordics (T-167), so this
+  separation carries more weight: a Finn living in Denmark reads Finnish about Danish species.
 - **Formatting:** numbers, dates, and lists via the platform `Intl` APIs, not hand-rolled.
 - **Runtime:** a lightweight, dependency-light i18n layer (typed string keys + per-locale
   catalogs) so missing keys are a **type error**, not a runtime blank. See TSD for the stack.
