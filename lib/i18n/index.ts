@@ -216,6 +216,8 @@ export const en = {
   'share.message': 'I found {name} on Nearby — one of the wild lives sharing my region this season. 🌿',
 
   // Badges (T-082)
+  'nav.badges': 'Badges',
+  'nav.impact': 'Impact',
   'badges.title': 'Badges',
   'badges.progress': '{earned} of {total} earned',
   'badges.empty': 'No badges yet — spot and help species to earn your first.',
@@ -434,6 +436,8 @@ const sv: Catalog = {
   'share.message': 'Jag hittade {name} på Nearby – ett av de vilda liv som delar min region den här säsongen. 🌿',
 
   // Badges (T-082)
+  'nav.badges': 'Märken',
+  'nav.impact': 'Påverkan',
   'badges.title': 'Märken',
   'badges.progress': '{earned} av {total} intjänade',
   'badges.empty': 'Inga märken än – hitta och hjälp arter för att tjäna ditt första.',

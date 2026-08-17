@@ -13,6 +13,8 @@ import SettingsScreen from './components/SettingsScreen';
 import DataExportView from './components/DataExportView';
 import DeleteAccountConfirm from './components/DeleteAccountConfirm';
 import LinkEmail from './components/LinkEmail';
+import BadgesScreen from './components/BadgesScreen';
+import ImpactScreen from './components/ImpactScreen';
 import { useCollection } from './components/useCollection';
 import { useTracker } from './components/useTracker';
 import { DEFAULT_CONSENT, setConsent, type ConsentKind, type ConsentState } from './lib/consent';
@@ -105,6 +107,8 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [showLinkEmail, setShowLinkEmail] = useState(false);
+  const [showBadges, setShowBadges] = useState(false);
+  const [showImpact, setShowImpact] = useState(false);
   const [exportJson, setExportJson] = useState<string | null>(null);
   const [consent, setConsentState] = useState<ConsentState>(DEFAULT_CONSENT);
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
@@ -337,6 +341,33 @@ export default function App() {
     );
   }
 
+  if (showBadges) {
+    return (
+      <>
+        <BadgesScreen
+          locale={locale}
+          species={almanacSpecies}
+          records={collection.records}
+          onDone={() => setShowBadges(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
+  if (showImpact) {
+    return (
+      <>
+        <ImpactScreen
+          locale={locale}
+          records={collection.records}
+          onDone={() => setShowImpact(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (showSettings) {
     return (
       <>
@@ -477,6 +508,8 @@ export default function App() {
             records={collection.records}
             locale={locale}
             onSelectSpecies={setSelected}
+            onOpenBadges={() => setShowBadges(true)}
+            onOpenImpact={() => setShowImpact(true)}
           />
         )}
       </View>

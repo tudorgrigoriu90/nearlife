@@ -655,11 +655,15 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     seeded. App integration test asserts the loaded total (fails if the async load regresses).
   - Remaining: inject the Supabase-backed repo + apply the content seed (needs the seeded DB,
     T-055/T-145 load), and add season/habitat secondary filters (habitat needs E3).
-- **T-058 · Almanac states & progress summary** — *Claude · S · `IN-PROGRESS` (summary + states done; entry points pending) · deps: T-057 · [USER-FLOWS §2](USER-FLOWS.md)*
+- **T-058 · Almanac states & progress summary** — *Claude · S · `DONE` · deps: T-057 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ 3-tier progress summary row (● Spotted / ◐ Caught / ◑ Helped counts via the tested
     `progressSummary`, T-115) added to the Almanac header; empty + loading states already present
-    (T-025). Remaining: entry points to Badges (T-082) / Impact (T-081) / This Week once those
-    surfaces exist. ⚠️ On-device layout not visually verified.
+    (T-025).
+  - ✅ **Entry points** (T-058): a "🏅 Badges" / "🌱 Impact" link row under the summary opens the
+    Badges (T-082) and Impact (T-081) screens; App wires them (`onOpenBadges`/`onOpenImpact`) and the
+    screens take the loaded catalogue + collection. Links hide when no handler is given. Tested: the
+    entry points fire their callbacks, and are absent without handlers. (This Week already has its own
+    tab, so no redundant entry point there.) ⚠️ On-device layout not visually verified.
 
 ## F4.3 — Species Card
 - **T-059 · Species card (production)** — *Claude · M · `DONE` · deps: T-055 · [USER-FLOWS §4](USER-FLOWS.md)*

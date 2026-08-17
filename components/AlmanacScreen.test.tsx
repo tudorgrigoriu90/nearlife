@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import AlmanacScreen from './AlmanacScreen';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import { createTranslator } from '../lib/i18n';
@@ -32,4 +32,31 @@ describe('AlmanacScreen', () => {
     },
     RENDER_TIMEOUT,
   );
+
+  it(
+    'opens the Badges and Impact screens from the header entry points (T-058)',
+    async () => {
+      const onOpenBadges = jest.fn();
+      const onOpenImpact = jest.fn();
+      await render(
+        <AlmanacScreen
+          species={ONE_PER_CATEGORY}
+          records={[]}
+          onOpenBadges={onOpenBadges}
+          onOpenImpact={onOpenImpact}
+        />,
+      );
+      // Labels carry an emoji prefix, so match partially.
+      await fireEvent.press(screen.getByText(new RegExp(tr('nav.badges'))));
+      await fireEvent.press(screen.getByText(new RegExp(tr('nav.impact'))));
+      expect(onOpenBadges).toHaveBeenCalledTimes(1);
+      expect(onOpenImpact).toHaveBeenCalledTimes(1);
+    },
+    RENDER_TIMEOUT,
+  );
+
+  it('hides the entry points when no handlers are given', async () => {
+    await render(<AlmanacScreen species={ONE_PER_CATEGORY} records={[]} />);
+    expect(screen.queryByText(new RegExp(tr('nav.badges')))).toBeNull();
+  });
 });

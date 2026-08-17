@@ -73,12 +73,17 @@ export default function AlmanacScreen({
   locale = 'en',
   loading = false,
   onSelectSpecies,
+  onOpenBadges,
+  onOpenImpact,
 }: {
   species: Species[];
   records?: CollectionRecord[];
   locale?: Locale;
   loading?: boolean;
   onSelectSpecies?: (species: Species) => void;
+  /** Entry points to the Badges (T-082) / Impact (T-081) screens, shown when provided (T-058). */
+  onOpenBadges?: () => void;
+  onOpenImpact?: () => void;
 }) {
   const tr = createTranslator(locale);
   const [category, setCategory] = useState<SpeciesCategory | null>(null);
@@ -108,6 +113,21 @@ export default function AlmanacScreen({
         <TierStat glyph="◐" label={tr('tier.caught')} count={summary.caught} />
         <TierStat glyph="◑" label={tr('tier.helped')} count={summary.helped} />
       </View>
+
+      {onOpenBadges || onOpenImpact ? (
+        <View style={styles.linkRow}>
+          {onOpenBadges ? (
+            <Pressable onPress={onOpenBadges} accessibilityRole="button" style={styles.linkBtn}>
+              <Text style={styles.linkText}>🏅 {tr('nav.badges')}</Text>
+            </Pressable>
+          ) : null}
+          {onOpenImpact ? (
+            <Pressable onPress={onOpenImpact} accessibilityRole="button" style={styles.linkBtn}>
+              <Text style={styles.linkText}>🌱 {tr('nav.impact')}</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
 
       <ScrollView
         horizontal
@@ -169,6 +189,9 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34', paddingHorizontal: 4 },
   subtitle: { marginTop: 4, marginBottom: 8, fontSize: 14, color: '#4a5c4d', paddingHorizontal: 4 },
   summaryRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 4, marginBottom: 10 },
+  linkRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 4, marginBottom: 10 },
+  linkBtn: { flex: 1, backgroundColor: '#eaf4ea', borderRadius: 10, paddingVertical: 10, alignItems: 'center' },
+  linkText: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
   tierStat: { flex: 1, backgroundColor: '#fff', borderRadius: 10, paddingVertical: 8, alignItems: 'center' },
   tierStatCount: { fontSize: 16, fontWeight: '700', color: '#3a7d44' },
   tierStatLabel: { marginTop: 2, fontSize: 11, color: '#4a5c4d' },
