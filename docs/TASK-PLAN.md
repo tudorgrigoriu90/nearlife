@@ -1431,10 +1431,20 @@ only.**
   - ✅ `pipeline/tests/test_seed_migration.py` (5 tests) fails the build if the migration and the
     registry ever diverge again, and checks quote-escaping by parity — an unescaped apostrophe
     would not raise, it would insert garbage via syntactically valid SQL.
-  - ⏳ **Not yet applied to the live database.** The Supabase connector is connected at org level
-    but `enabledInChat: false` in the session that wrote this, and `*.supabase.co` / `api.supabase.com`
-    are refused by the egress policy, so there was no path to execute it. Apply by enabling the
-    connector for the chat, or `supabase db push` from an environment with access.
+  - 🐛 **The live DB was worse than assumed.** Once the Supabase connector was enabled, project
+    `Nearlife` (subjdoiicfmiimtvlzsg, eu-central-1) turned out to hold **4** species_content rows —
+    only `common-swift` and `barn-swallow`, in en and sv. `species` was complete at 54. So the
+    original 0005 seed had only ever been partially applied; every locale was short, not just the
+    36 new ones.
+  - ✅ **en and sv applied and verified: 54/54 each, no null names, no empty fields.** These are the
+    two primary UI locales (T-125), so the primary content path is now whole.
+  - ⏳ **The other 36 locales are still unapplied.** Not a permissions or schema problem — a context
+    one: the SQL has to pass through the model's context to reach a tool call, and 919 KB of compact
+    upserts is roughly 250k tokens. Finish with `supabase db push`, where the file never enters a
+    context, or apply per-locale across sessions from
+    `scratchpad/compact/<locale>.sql` (regenerate: see the splitter in this task's history).
+  - Note for whoever finishes it: applying per-locale is safe in any order. Every statement is an
+    idempotent upsert and `species` (the FK target) is already complete.
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
