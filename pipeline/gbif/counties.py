@@ -1,8 +1,13 @@
-"""The 21 Swedish counties (län) as GBIF GADM level-1 areas.
+"""Nordic regions as GBIF GADM level-1 areas (T-167; Sweden-only until then).
 
-GIDs are the authoritative keys used to slice GBIF occurrences per county
-(`gadmGid=` in the occurrence API). Sourced from GBIF's GADM subdivisions for SWE
-(api.gbif.org/v1/geocode/gadm/SWE/subdivisions); names use their Swedish spelling.
+GIDs are the authoritative keys used to slice GBIF occurrences per region
+(`gadmGid=` in the occurrence API). Sweden's list is checked in because it is verified and already
+in use; the other four countries are **fetched** from
+api.gbif.org/v1/geocode/gadm/<ISO3>/subdivisions rather than hardcoded.
+
+That asymmetry is deliberate. A wrong GADM id does not fail — it silently slices occurrences by
+the wrong region, or by nothing at all, and the output looks perfectly well-formed. Writing down
+codes nobody has verified would be the data equivalent of inventing a species name.
 """
 
 SWEDISH_COUNTIES = [
@@ -30,3 +35,37 @@ SWEDISH_COUNTIES = [
 ]
 
 COUNTY_NAME_BY_GID = {c["gid"]: c["name"] for c in SWEDISH_COUNTIES}
+
+
+# The five Nordic countries. `iso2` is what /occurrence/search filters on; `iso3` is what the
+# /geocode/gadm subdivision endpoint takes. Carrying both stops a caller deriving one from the
+# other and getting it wrong for the awkward cases.
+NORDIC_COUNTRIES = [
+    {"iso3": "SWE", "iso2": "SE", "name": "Sweden"},
+    {"iso3": "NOR", "iso2": "NO", "name": "Norway"},
+    {"iso3": "DNK", "iso2": "DK", "name": "Denmark"},
+    {"iso3": "FIN", "iso2": "FI", "name": "Finland"},
+    {"iso3": "ISL", "iso2": "IS", "name": "Iceland"},
+]
+
+ISO2_BY_ISO3 = {c["iso3"]: c["iso2"] for c in NORDIC_COUNTRIES}
+
+
+def country_of(gid: str) -> str:
+    """`SWE.9_1` → `SWE`. The GADM id already carries its country, so nothing needs to track it."""
+    return gid.split(".", 1)[0]
+
+
+def parse_subdivisions(payload: list) -> list:
+    """GBIF /geocode/gadm/<ISO3>/subdivisions → [{gid, name}], sorted for a stable diff.
+
+    Accepts either the `id` or `gid` spelling: GBIF has used both, and silently returning an empty
+    list would make the ingest fetch nothing while reporting success.
+    """
+    regions = []
+    for entry in payload:
+        gid = entry.get("id") or entry.get("gid")
+        if not gid:
+            raise ValueError(f"subdivision entry has no id/gid: {entry!r}")
+        regions.append({"gid": gid, "name": entry.get("name") or gid})
+    return sorted(regions, key=lambda r: r["gid"])

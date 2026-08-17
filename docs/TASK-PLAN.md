@@ -1538,6 +1538,36 @@ only.**
   - Depends on T-160 completing: fetching a locale that is not seeded returns nothing, and
     `getContentInLocale` has no English fallback by design.
   - Cheap on the backend either way — see the storage/egress figures under T-057.
+- **T-167 · v1 scope: all Nordic species, fauna and flora** — *Claude + Director · XL · `IN-PROGRESS` · deps: T-042, T-136*
+  - 🔭 **Director decision (2026-08-11): v1 covers the five Nordic countries** — Sweden, Norway,
+    Denmark, Finland, Iceland — showing as many genuinely encounterable species as possible, fauna
+    and flora, with noise filtered. This supersedes the 54-species Kronoberg prototype (T-019) as
+    the shipping catalogue; that set remains the curated quality benchmark.
+  - **Why the 54 was never the ceiling:** Kronoberg alone has 3,018 recorded species, 1,295 with
+    >100 observations and 425 with >1,000. Birds alone: 357 recorded, 179 with >1,000 observations
+    against 17 in the app. Someone spotting a nuthatch finds nothing — a product problem, not a
+    backlog item.
+  - ✅ **Regions are now Nordic-wide and fetched, not guessed** (`gbif/counties.py`, 9 tests).
+    Sweden's 21 counties stay checked in (verified, in use, and they double as the parser fixture);
+    the other four countries resolve through `/geocode/gadm/<ISO3>/subdivisions` at ingest time.
+    Hardcoding unverified GADM ids would not fail — it would slice occurrences by the wrong region
+    and emit well-formed wrong data.
+  - ✅ **Country filter derived from the GADM id** (`gbif/client.py`), replacing a hardcoded
+    `country=SE`. Asking for a Norwegian region while filtering on Sweden returns zero rather than
+    an error, so the two must never be able to disagree. Adds `GbifClient.subdivisions()`.
+  - ⏳ **Next, in order:** (1) run the ingest for NOR/DNK/FIN/ISL — needs CI, since `api.gbif.org`
+    is refused by the sandbox egress policy; (2) T-136 noise filtering, now per-country
+    (Artdatabanken/Dyntaxa SE, Artsdatabanken NO, Allearter DK, FinBIF/laji.fi FI,
+    Náttúrufræðistofnun IS); (3) content generation at scale; (4) T-166 becomes mandatory —
+    bundling dies at this size.
+  - 📐 **Scale to plan against:** Sweden alone is 11,908 species / 78,530 records. Five countries
+    plausibly 20–30k distinct species. At 38 locales that is ~1M content rows and a few hundred MB
+    — still inside the 500 MB free tier, but the end of shipping content in the app bundle.
+  - ⚠️ **Content is the dominant cost, and the Director's bar is high:** generated everywhere, but
+    rewritten into the card voice, from official sources, verified per species. The mammals pilot
+    (157 species) shows the gap — its facts are Wikipedia lead sentences, and its give/protect are
+    taxon templates rather than per-species advice. Meeting this bar across ~25k species is the
+    single largest piece of work in the project and needs its own plan before it is attempted.
 - **T-163 · `common-dandelion` has no presence data** — *Claude + Director · S · `TODO` · deps: T-042*
   - The app ships 54 species but `species_presence` covers **53**: `common-dandelion` is absent from
     the live DB *and* from `20260707000004_seed_kronoberg_presence.sql` itself, so this is a

@@ -8,6 +8,8 @@ import time
 
 import requests
 
+from .counties import ISO2_BY_ISO3, country_of
+
 API = "https://api.gbif.org/v1"
 
 # License filter — only these may be used commercially (with attribution). NC/ND excluded.
@@ -56,12 +58,21 @@ class GbifClient:
             )
         return int(key)
 
+    def subdivisions(self, iso3: str) -> list:
+        """GADM level-1 areas for a country, so region ids are fetched rather than guessed (T-167)."""
+        return self._get(f"/geocode/gadm/{iso3}/subdivisions", [])
+
     def species_facet(
         self, gadm_gid: str, taxon_key: int, month: int, facet_limit: int = 300
     ) -> tuple[list[tuple[int, int]], bool]:
-        """Species recorded in a county in a given month → [(speciesKey, count)], truncated?"""
+        """Species recorded in a region in a given month → [(speciesKey, count)], truncated?
+
+        The country filter is derived from the GADM id rather than passed separately: the two must
+        agree, and deriving it removes the chance of asking for a Norwegian region while filtering
+        on Sweden — which returns zero rather than an error.
+        """
         params = [
-            ("country", "SE"),
+            ("country", ISO2_BY_ISO3[country_of(gadm_gid)]),
             ("gadmGid", gadm_gid),
             ("taxonKey", taxon_key),
             ("month", month),
