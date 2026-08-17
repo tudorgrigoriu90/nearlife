@@ -1515,6 +1515,17 @@ only.**
     trigger it. Replaced with a serialised promise chain; three tests covered it.
   - `App.test.tsx` needed `AsyncStorage.clear()` in `beforeEach`: the collection now genuinely
     survives between renders, so it also survived between test cases.
+  - ✅ **Drains on app foreground too** (`AppState` listener in `useCollection`, 3 tests in
+    `components/useCollection.test.tsx`). Without it the outbox only moved on a write or a cold
+    start, so a catch made in a forest would stay queued even after the user walked back into
+    signal — they would have had to catch something else to push it out. `AppState` ships with
+    React Native, so this added no dependency (a connectivity library like NetInfo would have).
+  - Deliberately untested: that unmount calls `subscription.remove()`, and that the handler ignores
+    non-active states. The effect returns `() => subscription.remove()`, so the first is React's
+    cleanup contract rather than our logic; and React Native subscribes to `AppState` internally,
+    so neither spying on the last subscription nor replacing `addEventListener` isolates ours —
+    stubbing it wholesale hangs the render. Noted in the test file so the gap is deliberate rather
+    than forgotten.
 - **T-166 · Ship content per-locale instead of bundling all 38** — *Claude + Director · M · `TODO` · deps: T-160, T-057*
   - Content is already offline-first — it is bundled — but every user downloads **all 38 locales**
     (~761 KiB of field text) to read at most two. That is the cost of the current approach, and it

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import type { CollectionRecord, HelpKind } from '../lib/collection';
 import type { CollectionStore } from '../lib/collectionStore';
 import {
@@ -63,6 +64,21 @@ export function useCollection(): Collection {
       .then(() => store.sync())
       .then(refresh)
       .catch((e: unknown) => console.warn('collection load failed', e));
+  }, [getStore, refresh]);
+
+  // Drain again whenever the app comes back to the foreground. Without this the outbox only moves
+  // on a write or a cold start, so a catch made in a forest would sit queued even after the user
+  // walked back into signal — they would have to catch something else to push it out.
+  // AppState is built into React Native, so this needs no connectivity dependency.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') return;
+      void getStore()
+        .sync()
+        .then(refresh)
+        .catch((e: unknown) => console.warn('collection sync failed', e));
+    });
+    return () => subscription.remove();
   }, [getStore, refresh]);
 
   const spot = useCallback(
