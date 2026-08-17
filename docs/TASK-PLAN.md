@@ -655,6 +655,21 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     seeded. App integration test asserts the loaded total (fails if the async load regresses).
   - Remaining: inject the Supabase-backed repo + apply the content seed (needs the seeded DB,
     T-055/T-145 load), and add season/habitat secondary filters (habitat needs E3).
+  - 🚦 **Do not inject the Supabase repo until all 38 locales are seeded (T-160).** The live DB
+    currently has en, sv and so only. `SupabaseSpeciesRepository.getContentInLocale` has no English
+    fallback by design, so switching the app over today would silently blank the dual-language
+    secondary half for the other 33 languages — the same class of bug T-160 fixed, in reverse. The
+    bundled `HardcodedSpeciesRepository` is currently the *more* complete source, which is why the
+    swap is sequenced after the seed, not before it.
+  - 💰 **Storage cost of moving all content to Postgres: negligible.** 2052 rows carry ~761 KiB of
+    field text; with names, row overhead and the PK/locale indexes it lands around 1–2 MB against
+    the 500 MB free-tier allowance (~0.3%). Invariant #7 holds with a wide margin.
+  - Egress is the dimension to watch, not storage: `SupabaseSpeciesGateway.fetchContent` reads a
+    single `(species_id, locale)` row per card (~1 KiB), so normal use is trivial against the 5 GB
+    monthly allowance. Only a "fetch the whole catalogue on launch" change would matter — at 761 KiB
+    per cold start that would be ~6,500 sessions/month, so keep the per-row read.
+  - Moving content to the DB also *shrinks* the app bundle: today every user downloads all 38
+    languages to read at most two.
 - **T-058 · Almanac states & progress summary** — *Claude · S · `DONE` · deps: T-057 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ 3-tier progress summary row (● Spotted / ◐ Caught / ◑ Helped counts via the tested
     `progressSummary`, T-115) added to the Almanac header; empty + loading states already present
