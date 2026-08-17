@@ -1442,13 +1442,44 @@ only.**
     36 new ones.
   - ✅ **en and sv applied and verified: 54/54 each, no null names, no empty fields.** These are the
     two primary UI locales (T-125), so the primary content path is now whole.
-  - ⏳ **The other 36 locales are still unapplied.** Not a permissions or schema problem — a context
-    one: the SQL has to pass through the model's context to reach a tool call, and 919 KB of compact
-    upserts is roughly 250k tokens. Finish with `supabase db push`, where the file never enters a
-    context, or apply per-locale across sessions from
-    `scratchpad/compact/<locale>.sql` (regenerate: see the splitter in this task's history).
+  - ✅ **Applied: en, sv, so — 54/54 each**, verified with no null names and no empty fields.
+  - ⏳ **33 locales still unapplied.** Not a permissions or schema problem — a context one: the SQL
+    must pass through the model's context to reach a tool call, and the remaining ~860 KB of compact
+    upserts is roughly 240k tokens. Finish with `supabase db push`, where the file never enters a
+    context, or apply per-locale across sessions.
   - Note for whoever finishes it: applying per-locale is safe in any order. Every statement is an
     idempotent upsert and `species` (the FK target) is already complete.
+  - 🔎 **Migration history is out of step with the repo.** `list_migrations` shows 5 applied, with
+    version stamps that do not match the filenames (e.g. `20260705183144` vs
+    `20260705000001_harden_rls_auto_enable_grants.sql`) — they were applied ad-hoc via
+    `apply_migration`, not `db push`. The un-recorded ones (`seed_species`,
+    `seed_kronoberg_presence`, and this task's seed) are all idempotent, so a later `db push` is
+    safe, but the history should be reconciled before anyone relies on it.
+  - ✅ **T-146's DDL was missing from the live DB** and has now been applied: `species_content.fact`
+    was still `NOT NULL`, so the mission-only rows T-146 exists to allow would have been rejected
+    outright. `give`/`when_how`/`protect` remain `NOT NULL`, which is the intended shape.
+- **T-163 · `common-dandelion` has no presence data** — *Claude + Director · S · `TODO` · deps: T-042*
+  - The app ships 54 species but `species_presence` covers **53**: `common-dandelion` is absent from
+    the live DB *and* from `20260707000004_seed_kronoberg_presence.sql` itself, so this is a
+    pipeline gap, not a failed apply. It also has no `gbif_key`.
+  - Cause: GBIF has no Kronoberg records under the exact binomial `Taraxacum officinale`. Dandelion
+    is an apomictic aggregate that GBIF splits into hundreds of microspecies — `presence_flora.json`
+    carries `Taraxacum croceum` and siblings, but never the aggregate name the seed list uses.
+  - **Deliberately not patched with an invented occurrence count.** Presence drives "active in your
+    region this season"; a fabricated number would be a dishonest claim in the one place invariant
+    #1 most matters. Fix by aggregating the `Taraxacum` microspecies in the pipeline, or by pointing
+    the species at the aggregate GBIF key — a data decision, not a hotfix.
+  - Until then dandelion can never surface in This Week on the Supabase path.
+- **T-164 · Review Supabase security advisories** — *Director · S · `TODO` · deps: —*
+  - `get_advisors(security)` reports 5 warnings on the live project. None are caused by the
+    T-146/T-160 changes; recorded here so they are triaged rather than rediscovered.
+  - `public.profiles` and `public.collection` RLS policies include the `anon` role. This is likely
+    *intentional* — the app signs users in anonymously and only later links an email (T-133) — but
+    it needs an explicit decision rather than an assumption, since tightening it would lock out
+    every pre-link user. Not changed unilaterally.
+  - Leaked-password protection (HaveIBeenPwned) is disabled in Auth — a dashboard toggle, Director's
+    call, and relevant once email/password linking is live.
+  - `cron.job` / `cron.job_run_details` warnings are Supabase-managed tables, not ours.
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
