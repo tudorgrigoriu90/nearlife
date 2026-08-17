@@ -854,8 +854,15 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
     Kronoberg set with E3 (T-079/T-044).
 
 ## F8.3 — Impact & Badges
-- **T-081 · Collective impact counters** — *Claude · M · deps: T-077 · [GDD §7](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
-  - Community totals ("4,200 nest boxes this spring"); refreshed by cron; shareable.
+- **T-081 · Collective impact counters** — *Claude · M · `IN-PROGRESS` (personal impact screen done; community aggregation is server-side) · deps: T-077 · [GDD §7](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
+  - ✅ `components/ImpactScreen.tsx` (2 tests) shows the help the user has pledged this season —
+    species helped / give / protect counts from the tested `lib/impact.ts` `impactSummary`. Honest by
+    construction (invariant #1): counts only real pledges, and shows a plain "community totals coming"
+    note rather than a fabricated figure. No upsell (invariant #4). i18n en+sv. Reached from the
+    Almanac (T-058).
+  - ⏳ Remaining (server): **community totals** ("4,200 nest boxes this spring") from
+    `impact_counters` refreshed by cron (needs T-077 table + pg_cron), then swap the note for the real
+    aggregate. Shareable once the community number is real.
 - **T-082 · Badges & completion** — *Claude · M · `DONE` (category + spotted/helped milestones; season/habitat need E3) · deps: T-057 · [GDD §8](GDD.md)*
   - ✅ `components/BadgesScreen.tsx` (3 tests) renders the full badge set — earned ones lit, the rest
     as locked goals with a "{earned} of {total} earned" line — over the tested earn rules in
