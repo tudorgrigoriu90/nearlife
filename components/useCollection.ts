@@ -1,15 +1,25 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CollectionRecord, HelpKind } from '../lib/collection';
-import { InMemoryCollectionStore, type CollectionStore } from '../lib/collectionStore';
+import type { CollectionStore } from '../lib/collectionStore';
+import {
+  AsyncStorageOfflineCache,
+  OfflineCollectionStore,
+} from '../lib/offlineCollectionStore';
 import { ensureAnonymousSession, getSupabase } from '../lib/supabase';
 import { hasSupabaseConfig } from '../lib/supabaseConfig';
 import { SupabaseCollectionGateway, SupabaseCollectionStore } from '../lib/supabaseCollectionStore';
 
-// React glue over the collection store (T-027). When Supabase config is present the hook persists
-// to the live DB via SupabaseCollectionStore (signing in anonymously on first use, session cached
-// in AsyncStorage so it survives restarts); otherwise it falls back to the in-memory store so the
-// app still runs without a backend (tests, or a device with no .env.local). The store is built
-// lazily off-render to avoid side effects during render; domain rules live in the store.
+// React glue over the collection store (T-027, offline-first since T-165).
+//
+// The device is always the source of truth: every spot/catch/help is written to
+// OfflineCollectionStore, which persists locally and returns immediately, then drains an outbox to
+// Supabase in the background. Previously these calls went straight to the network and swallowed
+// the rejection in a console.warn, so a catch made without signal was silently lost — which is the
+// worst possible failure on a delight moment, in exactly the places this app is used.
+//
+// Supabase config present → the outbox has somewhere to drain to. Absent (tests, or a device with
+// no .env.local) → the same store runs with no remote and still persists across restarts.
 
 export interface Collection {
   records: CollectionRecord[];
@@ -18,19 +28,21 @@ export interface Collection {
   help: (speciesId: string, kind: HelpKind) => void;
 }
 
-function createStore(): CollectionStore {
-  if (hasSupabaseConfig()) {
-    return new SupabaseCollectionStore(
-      new SupabaseCollectionGateway(getSupabase()),
-      ensureAnonymousSession,
-    );
-  }
-  return new InMemoryCollectionStore();
+function createRemote(): CollectionStore | null {
+  if (!hasSupabaseConfig()) return null;
+  return new SupabaseCollectionStore(
+    new SupabaseCollectionGateway(getSupabase()),
+    ensureAnonymousSession,
+  );
+}
+
+function createStore(): OfflineCollectionStore {
+  return new OfflineCollectionStore(new AsyncStorageOfflineCache(AsyncStorage), createRemote());
 }
 
 export function useCollection(): Collection {
-  const storeRef = useRef<CollectionStore | null>(null);
-  const getStore = useCallback((): CollectionStore => {
+  const storeRef = useRef<OfflineCollectionStore | null>(null);
+  const getStore = useCallback((): OfflineCollectionStore => {
     storeRef.current ??= createStore();
     return storeRef.current;
   }, []);
@@ -41,11 +53,17 @@ export function useCollection(): Collection {
     setRecords(await getStore().list());
   }, [getStore]);
 
-  // Load any persisted collection on mount (also triggers the anonymous sign-in when backed by
-  // Supabase). Failures are swallowed to a console warning so the app still renders offline.
+  // Load the on-device collection first so the UI is correct before any network work, then let the
+  // outbox drain whatever last session could not deliver.
   useEffect(() => {
-    refresh().catch((e: unknown) => console.warn('collection load failed', e));
-  }, [refresh]);
+    const store = getStore();
+    void store
+      .hydrate()
+      .then(refresh)
+      .then(() => store.sync())
+      .then(refresh)
+      .catch((e: unknown) => console.warn('collection load failed', e));
+  }, [getStore, refresh]);
 
   const spot = useCallback(
     (speciesId: string) => {

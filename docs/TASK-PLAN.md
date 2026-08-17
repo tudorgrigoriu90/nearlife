@@ -1473,7 +1473,7 @@ only.**
   - ✅ **T-146's DDL was missing from the live DB** and has now been applied: `species_content.fact`
     was still `NOT NULL`, so the mission-only rows T-146 exists to allow would have been rejected
     outright. `give`/`when_how`/`protect` remain `NOT NULL`, which is the intended shape.
-- **T-165 · Offline-first collection writes (outbox + local source of truth)** — *Claude · L · `TODO` · deps: T-027, T-116*
+- **T-165 · Offline-first collection writes (outbox + local source of truth)** — *Claude · L · `DONE` · deps: T-027, T-116*
   - 🔴 **Today a catch made without signal is silently lost.** `useCollection.spot/markCaught/help`
     call the store and end in `.catch((e) => console.warn(...))` — the write goes straight to
     Supabase, the failure is swallowed, `refresh()` never runs, so the UI does not update and
@@ -1496,6 +1496,25 @@ only.**
   - Note `InMemoryCollectionStore` is the fallback when Supabase config is absent — it loses
     everything on restart. Local persistence fixes that case too, so the app is honest offline
     rather than merely quiet.
+  - ✅ `lib/collectionMerge.ts` (10 tests): field-wise earliest-non-null-wins, with commutativity,
+    associativity and idempotence pinned as explicit tests — those three properties are the whole
+    argument for not needing a CRDT, so they are asserted rather than assumed. `primeBonus` and
+    `helpedKind` travel with the timestamp that won instead of merging independently; OR-ing
+    `primeBonus` would award a bonus for a catch that never happened in the active window.
+  - ✅ `lib/offlineCollectionStore.ts` (13 tests): local cache + append-only outbox behind the
+    existing `CollectionStore` interface, so it drops in with no screen changes. Writes return
+    immediately and **cannot reject**; a mid-queue failure drops only what the server accepted;
+    draining twice is a no-op; corrupt cached JSON decays to empty rather than losing the session;
+    reads never touch the network.
+  - ✅ Wired into `components/useCollection.ts`. Mount order is now hydrate → render → sync, so the
+    UI is correct from on-device state before any network work, and last session's undelivered
+    writes drain in the background.
+  - 🐛 Found while building: a boolean `syncing` re-entrancy guard made an explicit `sync()` a
+    silent no-op whenever the fire-and-forget sync from a write was still in flight — so coming
+    back online right after a failed write left the queue sitting until the next write happened to
+    trigger it. Replaced with a serialised promise chain; three tests covered it.
+  - `App.test.tsx` needed `AsyncStorage.clear()` in `beforeEach`: the collection now genuinely
+    survives between renders, so it also survived between test cases.
 - **T-166 · Ship content per-locale instead of bundling all 38** — *Claude + Director · M · `TODO` · deps: T-160, T-057*
   - Content is already offline-first — it is bundled — but every user downloads **all 38 locales**
     (~761 KiB of field text) to read at most two. That is the cost of the current approach, and it

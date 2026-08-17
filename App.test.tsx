@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import App from './App';
 import { createTranslator } from './lib/i18n';
@@ -9,6 +10,13 @@ import { monthOf } from './lib/season';
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
+
+// The collection is persisted on-device since T-165, so it now survives between renders — which is
+// the point, but it also means it survives between *tests*. Clear it so each case starts from a
+// known collection rather than inheriting the previous one's spots.
+beforeEach(async () => {
+  await AsyncStorage.clear();
+});
 
 // Onboarding asks the OS for permissions; mock to a deterministic "granted" so the flow is drivable.
 jest.mock('./lib/permissions', () => ({
