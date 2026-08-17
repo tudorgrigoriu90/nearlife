@@ -214,6 +214,23 @@ export const en = {
   // Share a species (T-059). Honest copy (season, never "here right now"); no upsell (invariant #4).
   'share.cta': 'Share',
   'share.message': 'I found {name} on Nearby — one of the wild lives sharing my region this season. 🌿',
+
+  // Badges (T-082)
+  'badges.title': 'Badges',
+  'badges.progress': '{earned} of {total} earned',
+  'badges.empty': 'No badges yet — spot and help species to earn your first.',
+  'badge.category': 'All {category} spotted',
+  'badge.spotted': '{count} species spotted',
+  'badge.helped': 'Helped {count} species',
+
+  // Impact (T-081)
+  'impact.title': 'Your impact',
+  'impact.subtitle': 'The help you’ve pledged this season.',
+  'impact.helpedSpecies': 'Species helped',
+  'impact.give': 'Give actions',
+  'impact.protect': 'Protect actions',
+  'impact.empty': 'No pledges yet — open a species and choose a give or protect action.',
+  'impact.community': 'Community totals arrive once more neighbours are helping.',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -415,6 +432,23 @@ const sv: Catalog = {
   // Share a species (T-059)
   'share.cta': 'Dela',
   'share.message': 'Jag hittade {name} på Nearby – ett av de vilda liv som delar min region den här säsongen. 🌿',
+
+  // Badges (T-082)
+  'badges.title': 'Märken',
+  'badges.progress': '{earned} av {total} intjänade',
+  'badges.empty': 'Inga märken än – hitta och hjälp arter för att tjäna ditt första.',
+  'badge.category': 'Alla {category} sedda',
+  'badge.spotted': '{count} arter sedda',
+  'badge.helped': 'Hjälpt {count} arter',
+
+  // Impact (T-081)
+  'impact.title': 'Din påverkan',
+  'impact.subtitle': 'Hjälpen du lovat den här säsongen.',
+  'impact.helpedSpecies': 'Arter hjälpta',
+  'impact.give': 'Ge-handlingar',
+  'impact.protect': 'Skydda-handlingar',
+  'impact.empty': 'Inga löften än – öppna en art och välj en ge- eller skydda-handling.',
+  'impact.community': 'Gemensamma summor kommer när fler grannar hjälper till.',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };

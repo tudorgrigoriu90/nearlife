@@ -856,8 +856,12 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
 ## F8.3 — Impact & Badges
 - **T-081 · Collective impact counters** — *Claude · M · deps: T-077 · [GDD §7](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
   - Community totals ("4,200 nest boxes this spring"); refreshed by cron; shareable.
-- **T-082 · Badges & completion** — *Claude · M · deps: T-057 · [GDD §8](GDD.md)*
-  - Badges by category, season, habitat, Helped-count; completion tracking in almanac.
+- **T-082 · Badges & completion** — *Claude · M · `DONE` (category + spotted/helped milestones; season/habitat need E3) · deps: T-057 · [GDD §8](GDD.md)*
+  - ✅ `components/BadgesScreen.tsx` (3 tests) renders the full badge set — earned ones lit, the rest
+    as locked goals with a "{earned} of {total} earned" line — over the tested earn rules in
+    `lib/badges.ts` (category completion + spotted 10/25/50 + helped 1/5/10). Labels are i18n en+sv;
+    no upsell (invariant #4). Season/habitat badges arrive with the real data layer (E3).
+  - ℹ️ Reached from the Almanac (T-058). On-device layout not visually verified.
 
 ---
 ---
