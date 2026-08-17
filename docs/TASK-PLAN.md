@@ -1473,6 +1473,41 @@ only.**
   - ✅ **T-146's DDL was missing from the live DB** and has now been applied: `species_content.fact`
     was still `NOT NULL`, so the mission-only rows T-146 exists to allow would have been rejected
     outright. `give`/`when_how`/`protect` remain `NOT NULL`, which is the intended shape.
+- **T-165 · Offline-first collection writes (outbox + local source of truth)** — *Claude · L · `TODO` · deps: T-027, T-116*
+  - 🔴 **Today a catch made without signal is silently lost.** `useCollection.spot/markCaught/help`
+    call the store and end in `.catch((e) => console.warn(...))` — the write goes straight to
+    Supabase, the failure is swallowed, `refresh()` never runs, so the UI does not update and
+    nothing is queued. There is no retry and no local copy. `markCaught` is worse than a blind
+    write: it does a read-modify-write (`selectOne` then `upsert`), so offline it fails at the read.
+  - This lands on the exact moment the product cares most about. Invariant #4 keeps collect,
+    catch-success and help clean of upsell; a tap that appears to do nothing and then loses the
+    record is a far worse violation of that spirit than any upsell would be.
+  - It also lands where the app is *actually used*: Kronoberg forests, wetlands and lake shores —
+    precisely where signal is worst. Requiring the network at the moment of a catch inverts the
+    product.
+  - Fix: make the device the source of truth. Write to a local store (AsyncStorage, mirroring
+    `consentStore`/`dualLanguageStore`) synchronously, render from it, and drain an append-only
+    outbox to Supabase in the background with retry/backoff. Fall back to the current path only
+    when the outbox is empty.
+  - Merge is easy here and does **not** need a CRDT: a collection row is per-species with monotonic
+    one-way timestamps (`spotted_at` → `caught_at` → `helped_at`, plus `prime_bonus`). Field-wise
+    earliest-non-null-wins converges regardless of delivery order, which also makes the outbox
+    safely re-drainable after a crash.
+  - Note `InMemoryCollectionStore` is the fallback when Supabase config is absent — it loses
+    everything on restart. Local persistence fixes that case too, so the app is honest offline
+    rather than merely quiet.
+- **T-166 · Ship content per-locale instead of bundling all 38** — *Claude + Director · M · `TODO` · deps: T-160, T-057*
+  - Content is already offline-first — it is bundled — but every user downloads **all 38 locales**
+    (~761 KiB of field text) to read at most two. That is the cost of the current approach, and it
+    grows with every locale added.
+  - Preferred shape: keep the **primary** locale bundled so a cold install works with zero network
+    (a nature app must not need signal at first run, and onboarding is the worst place to add a
+    network dependency), and fetch the **secondary** dual-display locale on demand, caching it
+    locally on first use. That keeps T-166 and T-165 consistent: device-first, network as a
+    top-up.
+  - Depends on T-160 completing: fetching a locale that is not seeded returns nothing, and
+    `getContentInLocale` has no English fallback by design.
+  - Cheap on the backend either way — see the storage/egress figures under T-057.
 - **T-163 · `common-dandelion` has no presence data** — *Claude + Director · S · `TODO` · deps: T-042*
   - The app ships 54 species but `species_presence` covers **53**: `common-dandelion` is absent from
     the live DB *and* from `20260707000004_seed_kronoberg_presence.sql` itself, so this is a
