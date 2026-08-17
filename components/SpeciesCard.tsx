@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import type { HelpKind, TierState } from '../lib/collection';
 import { EMPTY_TIER_STATE } from '../lib/collection';
 import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
@@ -11,6 +11,7 @@ import {
   type ContentLocale,
 } from '../lib/i18n/contentLocale';
 import { commonNameFor } from '../lib/species/localized';
+import { buildShareMessage } from '../lib/shareSpecies';
 import type { SpeciesContent } from '../lib/species/content';
 import type { Species } from '../lib/species/types';
 import DualText from './DualText';
@@ -92,13 +93,32 @@ export default function SpeciesCard({
       : null;
   const chromeDirection = writingDirectionFor(locale as ContentLocale);
 
+  // Share is a clean delight moment — no upsell (invariant #4); honest, season-framed copy
+  // (invariant #1). Text only for now; a deep link arrives with the store work. Failures/dismissal
+  // are swallowed (Share rejects if a share is already open, or the user cancels).
+  const shareSpecies = () => {
+    void Share.share({ message: buildShareMessage(name, locale) }).catch(() => {});
+  };
+
   return (
     <View style={styles.container}>
-      {onBack ? (
-        <Pressable onPress={onBack} accessibilityRole="button" style={styles.back}>
-          <Text style={styles.backText}>‹ {tr('card.back')}</Text>
+      <View style={styles.headerRow}>
+        {onBack ? (
+          <Pressable onPress={onBack} accessibilityRole="button" style={styles.back}>
+            <Text style={styles.backText}>‹ {tr('card.back')}</Text>
+          </Pressable>
+        ) : (
+          <View />
+        )}
+        <Pressable
+          onPress={shareSpecies}
+          accessibilityRole="button"
+          accessibilityLabel={tr('share.cta')}
+          style={styles.share}
+        >
+          <Text style={styles.shareText}>↗ {tr('share.cta')}</Text>
         </Pressable>
-      ) : null}
+      </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
@@ -206,8 +226,18 @@ function Section({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f8f2' },
-  back: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 4 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 56,
+    paddingHorizontal: 20,
+    paddingBottom: 4,
+  },
+  back: { paddingVertical: 2 },
   backText: { fontSize: 16, color: '#3a7d44', fontWeight: '600' },
+  share: { paddingVertical: 2, paddingLeft: 12 },
+  shareText: { fontSize: 15, color: '#3a7d44', fontWeight: '600' },
   scroll: { paddingHorizontal: 20, paddingBottom: 24 },
   hero: { alignItems: 'center', paddingVertical: 20 },
   name: { marginTop: 8, fontSize: 26, fontWeight: '700', color: '#22331f', textAlign: 'center' },

@@ -662,7 +662,7 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     surfaces exist. ⚠️ On-device layout not visually verified.
 
 ## F4.3 — Species Card
-- **T-059 · Species card (production)** — *Claude · M · `IN-PROGRESS` (async content read done; share pending) · deps: T-055 · [USER-FLOWS §4](USER-FLOWS.md)*
+- **T-059 · Species card (production)** — *Claude · M · `DONE` · deps: T-055 · [USER-FLOWS §4](USER-FLOWS.md)*
   - ✅ The card renders fact, when/how, give/protect (always free, honest-copy enforced by T-066),
     the real depth row (T-138) and find-it-nearby + pledge entries.
   - ✅ **Content now flows in as a prop, read through the repository** (`App.tsx` loads it via
@@ -670,7 +670,11 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     never shows the previous species' content). `SpeciesCard` is now purely presentational — no
     direct module import; the mission block hides until content resolves. The App flow test exercises
     the async read (a broken load ⇒ no give/protect ⇒ the pledge step fails), plus a null-content test.
-  - Remaining: a share action. (DB-backed content arrives with the seed + Supabase repo, T-055/T-145.)
+  - ✅ **Share** (T-059): a header "↗ Share" action → RN `Share.share` with honest, season-framed
+    copy (`lib/shareSpecies.ts`, invariant #1) and no upsell (invariant #4). Text only for now; a deep
+    link arrives with the store/deep-linking work. Pure message builder unit-tested (name present, no
+    real-time claim, no upsell, sv localized) + a card test asserting the share call.
+  - ℹ️ DB-backed content arrives with the seed + Supabase repo (T-055/T-145). On-device layout unverified.
 - **T-060 · Depth-tier climb-by-play logic** — *Claude · M · `DEFERRED` (Director, 2026-08-11 — with T-053) · deps: T-059, T-053 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
   - Free users unlock depth tiers by playing (spot/catch/help); Full Game unlocks all immediately.
     Progression, not paywall — verified for both states.

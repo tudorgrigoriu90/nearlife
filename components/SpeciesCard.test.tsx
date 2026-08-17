@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { StyleSheet } from 'react-native';
+import { Share, StyleSheet } from 'react-native';
 import SpeciesCard from './SpeciesCard';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import { commonNameFor, contentFor } from '../lib/species/localized';
@@ -36,6 +36,17 @@ describe('SpeciesCard', () => {
     expect(screen.getByText(tr('card.protect'))).toBeTruthy();
     // …but the (now absent) fact text is not rendered.
     expect(screen.queryByText(swiftContent!.fact)).toBeNull();
+  });
+
+  it('shares the species with honest, name-bearing copy (T-059)', async () => {
+    const spy = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' } as never);
+    await render(<SpeciesCard species={swift} content={swiftContent} locale="en" />);
+    await fireEvent.press(screen.getByText(tr('share.cta'), { exact: false }));
+    expect(spy).toHaveBeenCalledTimes(1);
+    const message = (spy.mock.calls[0][0] as { message: string }).message;
+    expect(message).toContain(commonNameFor(swift, 'en'));
+    expect(message.toLowerCase()).not.toContain('right now'); // honest copy (invariant #1)
+    spy.mockRestore();
   });
 
   it('launches the catch flow from "find it nearby"', async () => {

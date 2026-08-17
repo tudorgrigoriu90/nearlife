@@ -210,6 +210,10 @@ export const en = {
   'link.error.invalid': 'That doesn’t look like a valid email address.',
   'link.error.already': 'This account already has an email linked.',
   'link.error.failed': 'Something went wrong. Please try again.',
+
+  // Share a species (T-059). Honest copy (season, never "here right now"); no upsell (invariant #4).
+  'share.cta': 'Share',
+  'share.message': 'I found {name} on Nearby — one of the wild lives sharing my region this season. 🌿',
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -407,6 +411,10 @@ const sv: Catalog = {
   'link.error.invalid': 'Det där ser inte ut som en giltig e-postadress.',
   'link.error.already': 'Det här kontot har redan en e-post kopplad.',
   'link.error.failed': 'Något gick fel. Försök igen.',
+
+  // Share a species (T-059)
+  'share.cta': 'Dela',
+  'share.message': 'Jag hittade {name} på Nearby – ett av de vilda liv som delar min region den här säsongen. 🌿',
 };
 
 const CATALOGS: Partial<Record<Locale, Catalog>> = { en, sv };
