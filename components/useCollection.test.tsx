@@ -13,15 +13,23 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 // There is no Supabase config in tests, so the hook runs the offline store with no remote — which
 // is exactly the case that used to lose everything on restart (T-165).
 
+// Each test mounts under its own testID. Auto-cleanup plus the fire-and-forget writes mean a
+// previous test's host can still be in the tree; a shared testID then matches two nodes and the
+// query throws, which shows up as an unrelated timeout.
+let hostSeq = 0;
+let TID = 'ids';
+
 function Host({ onReady }: { onReady?: (c: ReturnType<typeof useCollection>) => void }) {
   const collection = useCollection();
   onReady?.(collection);
-  return <Text testID="ids">{collection.records.map((r) => r.speciesId).join(',')}</Text>;
+  return <Text testID={TID}>{collection.records.map((r) => r.speciesId).join(',')}</Text>;
 }
 
 beforeEach(async () => {
   await AsyncStorage.clear();
   jest.restoreAllMocks();
+  hostSeq += 1;
+  TID = `ids-${hostSeq}`;
 });
 
 describe('useCollection', () => {
@@ -30,7 +38,7 @@ describe('useCollection', () => {
     await render(<Host onReady={(c) => (api = c)} />);
     await waitFor(() => expect(api).toBeDefined());
     api?.markCaught('red-fox', true);
-    await waitFor(() => expect(screen.getByTestId('ids')).toHaveTextContent('red-fox'));
+    await waitFor(() => expect(screen.getByTestId(TID)).toHaveTextContent('red-fox'));
   });
 
   it('restores the collection on a fresh mount — a relaunch does not lose a catch', async () => {
@@ -38,11 +46,11 @@ describe('useCollection', () => {
     const first = await render(<Host onReady={(c) => (api = c)} />);
     await waitFor(() => expect(api).toBeDefined());
     api?.spot('moose');
-    await waitFor(() => expect(screen.getByTestId('ids')).toHaveTextContent('moose'));
+    await waitFor(() => expect(screen.getByTestId(TID)).toHaveTextContent('moose'));
     first.unmount();
 
     await render(<Host />);
-    await waitFor(() => expect(screen.getByTestId('ids')).toHaveTextContent('moose'));
+    await waitFor(() => expect(screen.getByTestId(TID)).toHaveTextContent('moose'));
   });
 
   it('drains the outbox when the app returns to the foreground', async () => {
