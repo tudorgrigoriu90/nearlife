@@ -329,6 +329,122 @@ UK_MONTHS_GEN = ("січня", "лютого", "березня", "квітня",
                  "липня", "серпня", "вересня", "жовтня", "листопада", "грудня")
 
 
+FA_TEMPLATES = {
+    "bird": {
+        "give": "لانهٔ مصنوعی مناسب گونه‌های محلی نصب کنید، در تابستان آب تمیز فراهم کنید و در فصل جوجه‌آوری گربه‌ها را داخل خانه نگه دارید.",
+        "protect": "لانه‌ها و محل‌های لانه‌سازی را آشفته نکنید، نزدیک پرندگانی که روی زمین لانه می‌سازند سگ را ببندید و نور شبانه و برخورد با پنجره‌ها را کم کنید.",
+        "habitat": "در جنگل‌ها، تالاب‌ها و باغ‌هایی که در آن‌ها غذا می‌خورد و لانه می‌سازد",
+    },
+    "mammal": {
+        "give": "گوشه‌های وحشی و پرچین‌ها را رها کنید، شکافی در حصار برای عبور جانوران کوچک بگذارید و توده‌های چوب و برگ را دست‌نخورده نگه دارید.",
+        "protect": "سپیده‌دم و غروب با احتیاط رانندگی کنید، در زیستگاه‌های حیات وحش سگ را کنترل کنید و هرگز به پستانداران وحشی غذا ندهید و به آن‌ها نزدیک نشوید.",
+        "habitat": "در حاشیهٔ جنگل‌ها، مرغزارها و پناهگاه‌های آرام",
+    },
+    "insect": {
+        "give": "بخشی از چمن را بگذارید رشد کند، گل‌های متنوع مناسب گرده‌افشان‌ها بکارید و برگ‌ها و چوب مرده را برای زمستان‌گذرانی رها کنید.",
+        "protect": "از آفت‌کش‌ها و حشره‌کش‌ها پرهیز کنید، بخشی از زمین را وحشی و دست‌نخورده نگه دارید و روشنایی غیرضروری بیرون را کم کنید.",
+        "habitat": "پیرامون مرغزارها، گل‌ها و چوب مرده",
+    },
+    "arachnid": {
+        "give": "گوشه‌های دست‌نخورده، خاشاک برگ و چوب مرده را که در آن شکار می‌کنند و پناه می‌گیرند رها کنید.",
+        "protect": "از آفت‌کش‌ها پرهیز کنید و آن‌هایی را که در خانه می‌یابید به‌جای آسیب‌رساندن جابه‌جا کنید.",
+        "habitat": "در پوشش گیاهی دست‌نخورده، خاشاک برگ و چوب مرده",
+    },
+    "fish": {
+        "give": "به پاکیزه و سایه‌دار ماندن آبراه‌ها با پوشش گیاهی کناره کمک کنید و از برداشتن موانع مهاجرت ماهی پشتیبانی کنید.",
+        "protect": "آبراه‌ها را آلوده نکنید و در آن‌ها زباله نریزید، قوانین ماهیگیری و صید و رهاسازی را رعایت کنید و محل‌های تخم‌ریزی را آشفته نکنید.",
+        "habitat": "در دریاچه‌ها، رودها و جویبارهایی که در آن‌ها زندگی می‌کند",
+    },
+    "amphibian": {
+        "give": "برکه یا گوشه‌ای نمناک و سرپوشیده نگه دارید، توده‌های چوب و سنگ را رها کنید و مسیرهای امن میان آب و خشکی را حفظ کنید.",
+        "protect": "در بهار مراقب عبورشان از جاده‌ها باشید، آن‌ها را جابه‌جا نکنید و در دست نگیرید و آب را از آلودگی و زباله دور نگه دارید.",
+        "habitat": "نزدیک برکه‌ها، آبراه‌های کوچک و زمین نمناک",
+    },
+    "reptile": {
+        "give": "توده‌های سنگ و چوب آفتاب‌گیر برای گرم‌شدن و زمین ناهموار دست‌نخورده برای پناه رها کنید.",
+        "protect": "جانوران را در دست نگیرید و جابه‌جا نکنید، در زیستگاه خزندگان سگ را در مسیر نگه دارید و محل‌های آفتاب‌گرفتن را آشفته نکنید.",
+        "habitat": "روی شیب‌های آفتاب‌گیر، بوته‌زارها و توده‌های سنگ",
+    },
+    "mollusc": {
+        "give": "پناهگاه‌های نمناک و سایه‌دار مانند توده‌های چوب را نگه دارید و بخشی از خاشاک برگ را رها کنید.",
+        "protect": "از سموم حلزون‌کش و آفت‌کش‌ها پرهیز کنید و آبراه‌ها را برای گونه‌های آب شیرین پاکیزه نگه دارید.",
+        "habitat": "در جاهای نمناک و سایه‌دار و آب شیرین پاکیزه",
+    },
+    "plant": {
+        "give": "بگذارید گیاهان بومی رشد کنند، کمتر و دیرتر در سال چمن بزنید و غوزه‌های بذر را در زمستان سرِ پا رها کنید.",
+        "protect": "گیاهان وحشی را نچینید و از ریشه درنیاورید، در مناطق حساس از مسیرها خارج نشوید و هرگز گیاه غیربومی وارد نکنید.",
+        "habitat": "در مرغزارها، جنگل‌ها و حاشیهٔ راه‌ها که در آن می‌روید",
+    },
+    "fungus": {
+        "give": "چوب مرده و خاشاک برگ را در جایی که قارچ‌ها میوه می‌دهند رها کنید و در جنگل آرام گام بردارید.",
+        "protect": "تنها آنچه قوانین محلی اجازه می‌دهد بردارید، اندام‌های زایشی را لگد نکنید و هرگز برای تشخیص خوراکی‌بودن قارچ به یک اپلیکیشن تکیه نکنید.",
+        "habitat": "روی کف جنگل، چوب مرده و خاشاک برگ",
+    },
+}
+FA_MONTHS = ("ژانویه", "فوریه", "مارس", "آوریل", "مه", "ژوئن",
+             "ژوئیه", "اوت", "سپتامبر", "اکتبر", "نوامبر", "دسامبر")
+
+TR_TEMPLATES = {
+    "bird": {
+        "give": "Yöredeki türlere uygun bir kuş yuvası asın, yazın temiz su bulundurun ve kuluçka döneminde kedileri içeride tutun.",
+        "protect": "Yuvaları ve yuvalama alanlarını rahatsız etmeyin, yerde kuluçkaya yatan kuşların yakınında köpeğinizi tasmalı gezdirin, gece aydınlatmasını ve cam çarpmalarını azaltın.",
+        "habitat": "beslendiği ve yuva yaptığı ormanlarda, sulak alanlarda ve bahçelerde",
+    },
+    "mammal": {
+        "give": "Yabani köşeler ve çalı çitleri bırakın, küçük memelilerin geçebileceği bir aralık açın ve odun ile yaprak yığınlarını el değmemiş bırakın.",
+        "protect": "Şafakta ve alacakaranlıkta dikkatli sürün, yaban hayatı alanlarında köpeğinizi kontrol altında tutun, yabani memelileri asla beslemeyin ve onlara yaklaşmayın.",
+        "habitat": "orman kenarlarında, çayırlarda ve sessiz sığınaklarda",
+    },
+    "insect": {
+        "give": "Çimin bir bölümünü uzamaya bırakın, tozlayıcılara uygun çeşitli çiçekler ekin ve kışlamaları için yaprak ve ölü odun bırakın.",
+        "protect": "Böcek ilaçlarından kaçının, bir miktar yeri yabani ve el değmemiş bırakın ve gereksiz dış aydınlatmayı azaltın.",
+        "habitat": "çayırların, çiçeklerin ve ölü odunun çevresinde",
+    },
+    "arachnid": {
+        "give": "Avlandıkları ve barındıkları el değmemiş köşeleri, yaprak döküntüsünü ve ölü odunu bırakın.",
+        "protect": "Böcek ilaçlarından kaçının ve evde bulduklarınıza zarar vermek yerine onları dışarı taşıyın.",
+        "habitat": "el değmemiş bitki örtüsünde, yaprak döküntüsünde ve ölü odunda",
+    },
+    "fish": {
+        "give": "Su yollarının temiz kalmasına ve kıyı bitkileriyle gölgelenmesine yardım edin, balıkların göç edebilmesi için engellerin kaldırılmasını destekleyin.",
+        "protect": "Su yollarını kirletmeyin ve çöp atmayın, balıkçılık kurallarına ve yakala-bırak ilkesine uyun, yumurtlama alanlarını rahatsız etmeyin.",
+        "habitat": "yaşadığı göllerde, nehirlerde ve derelerde",
+    },
+    "amphibian": {
+        "give": "Bir gölet ya da nemli, korunaklı bir köşe bulundurun, kütük ve taş yığınları bırakın, su ile kara arasında güvenli geçitler koruyun.",
+        "protect": "İlkbaharda yol geçişlerine dikkat edin, hayvanları taşımayın ve elinizle tutmayın, suyu kirlilikten ve çöpten uzak tutun.",
+        "habitat": "göletlerin, hendeklerin ve nemli toprağın yakınında",
+    },
+    "reptile": {
+        "give": "Güneşlenecekleri güneşli taş ve kütük yığınları ile barınacakları engebeli, el değmemiş zemin bırakın.",
+        "protect": "Hayvanları elinizle tutmayın ve taşımayın, sürüngen alanlarında köpeğinizi patikada tutun ve güneşlenme yerlerini rahatsız etmeyin.",
+        "habitat": "güneşli yamaçlarda, fundalıklarda ve taş yığınlarında",
+    },
+    "mollusc": {
+        "give": "Kütük yığınları gibi nemli, gölgeli sığınakları koruyun ve bir miktar yaprak döküntüsü bırakın.",
+        "protect": "Sümüklüböcek ilaçlarından ve pestisitlerden kaçının, tatlı su türleri için su yollarını temiz tutun.",
+        "habitat": "nemli, gölgeli yerlerde ve temiz tatlı suda",
+    },
+    "plant": {
+        "give": "Yerli bitkilerin büyümesine izin verin, daha seyrek ve yılın daha geç bir döneminde biçin, tohum başlarını kış boyunca ayakta bırakın.",
+        "protect": "Yabani bitkileri koparmayın ve sökmeyin, hassas alanlarda patikalardan ayrılmayın ve asla yabancı tür dikmeyin.",
+        "habitat": "yetiştiği çayırlarda, ormanlarda ve yol kenarlarında",
+    },
+    "fungus": {
+        "give": "Mantarların ürediği yerlerde ölü odunu ve yaprak döküntüsünü bırakın ve ormanda hafif adımlarla yürüyün.",
+        "protect": "Yalnızca yerel kuralların izin verdiği kadarını alın, şapkalara basmayın ve bir mantarın yenebilir olup olmadığına karar vermek için asla bir uygulamaya güvenmeyin.",
+        "habitat": "orman tabanında, ölü odunda ve yaprak döküntüsünde",
+    },
+}
+# Turkish suffixes are vowel-harmonised, so each slot carries its own written-out form.
+TR_MONTHS_LOC = ("Ocak'ta", "Şubat'ta", "Mart'ta", "Nisan'da", "Mayıs'ta", "Haziran'da",
+                 "Temmuz'da", "Ağustos'ta", "Eylül'de", "Ekim'de", "Kasım'da", "Aralık'ta")
+TR_MONTHS_ABL = ("Ocak'tan", "Şubat'tan", "Mart'tan", "Nisan'dan", "Mayıs'tan", "Haziran'dan",
+                 "Temmuz'dan", "Ağustos'tan", "Eylül'den", "Ekim'den", "Kasım'dan", "Aralık'tan")
+TR_MONTHS_DAT = ("Ocak'a", "Şubat'a", "Mart'a", "Nisan'a", "Mayıs'a", "Haziran'a",
+                 "Temmuz'a", "Ağustos'a", "Eylül'e", "Ekim'e", "Kasım'a", "Aralık'a")
+
+
 LOCALES: dict[str, LocaleStrings] = {
     "en": LocaleStrings(
         months=EN_MONTHS,
@@ -401,6 +517,30 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="у різні пори року",
         sentence="Активний у вашому регіоні {when}. Шукайте його {hint}.",
         templates=UK_TEMPLATES,
+    ),
+    "fa": LocaleStrings(
+        months=FA_MONTHS,
+        months_from=FA_MONTHS,
+        months_to=FA_MONTHS,
+        year_round="در تمام طول سال",
+        range_pattern="از {first} تا {last}",
+        list_pattern="در {months}",
+        list_separator="، ",
+        unknown="در زمان‌های گوناگون سال",
+        sentence="در منطقهٔ شما {when} فعال است. آن را {hint} بجویید.",
+        templates=FA_TEMPLATES,
+    ),
+    "tr": LocaleStrings(
+        months=TR_MONTHS_LOC,
+        months_from=TR_MONTHS_ABL,
+        months_to=TR_MONTHS_DAT,
+        year_round="yıl boyunca",
+        range_pattern="{first} {last}",
+        list_pattern="{months}",
+        list_separator=", ",
+        unknown="yılın farklı zamanlarında",
+        sentence="Bölgenizde {when} etkindir. Onu {hint} arayın.",
+        templates=TR_TEMPLATES,
     ),
 }
 
