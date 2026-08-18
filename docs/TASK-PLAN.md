@@ -2130,6 +2130,36 @@ only.**
     so **Full Game revenue rests on client-side honesty**. Not urgent before launch, but it should
     be a deliberate decision rather than an accident — either enforce it in a trigger/Edge Function,
     or amend the invariant to say client-side and accept the leakage.
+- **T-201 · Push notifications: the whole chain is missing, not just the sender** — *Claude + Director · L · `TODO` · deps: T-063*
+  - The app's premise is a passive notification, and **nothing sends one**. `expo-notifications` is
+    imported in exactly one file (`lib/permissions.ts`) to request permission — and the granted
+    answer is then **thrown away**. There is no `getExpoPushTokenAsync`, no column to store a token,
+    no Edge Function, and `cron.job` is empty.
+  - So four layers are missing, not one. The decision engine (T-063) and per-user send slots (T-186)
+    are built and tested; everything that would carry their output to a phone is absent.
+  - **Claude:** (1) obtain and store an Expo push token per device — a `profiles.push_token` column
+    with RLS, written on permission grant and refreshed on change; (2) an Edge Function that runs
+    `decideNotification` for each due user and posts to Expo's push API; (3) the `pg_cron` schedule
+    that calls it hourly (hourly, because T-186 spreads users across 13 waking hours).
+  - **Director:** credentials only — see the runbook. Android via Firebase is free and needs no
+    Apple account, which makes it the fastest way to see a real notification on a real phone.
+  - 📌 **Rich notifications should carry the thumbnail.** Both platforms support an image
+    attachment and the photos are ~40 KB — well within budget. A lock screen showing the *animal*
+    is a different product from one showing a line of text, and the URL is already in the payload.
+    Decide this while building rather than retrofitting.
+  - ⚠️ **Photos currently cover 54 species, not 6,824** (`SpeciesHero` reads the bundled
+    `KRONOBERG_MEDIA`). The rest fall back to a category glyph, which is a working fallback but
+    means an image attachment would be blank for most species — see T-202.
+- **T-202 · Photos exist for 54 of 6,824 species** — *Claude · L · `TODO` · deps: T-119, T-177*
+  - `build_kronoberg_media.py` sources photos for the curated 54 only, and `SpeciesHero` reads that
+    bundled manifest. Every other species renders its category glyph.
+  - The pipeline already knows how to do this — `wikimedia.py` fetches a licence-clear lead image
+    at 400 px for any scientific name — so this is a scale change, not new capability: run it over
+    the catalogue, upload to the `species-media` bucket, and read media from the database rather
+    than a bundled module.
+  - Cost check before running: 6,824 images at ~40–160 KB is roughly **0.4 GB** in Storage, against
+    Supabase's 1 GB free tier. That is close enough to matter, so measure before uploading — and it
+    may argue for hotlinking thumbnails or a smaller width for the long tail.
 - **T-192 · Refuse a load that looks like a broken ingest** — *Claude · S · `DONE` · deps: T-172*
   - From the loader's point of view a partial ingest and a genuine decline are **identical**: both
     arrive as fewer rows. With a human in the loop that ambiguity was survivable; with T-172's
