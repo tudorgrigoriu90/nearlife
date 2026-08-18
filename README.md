@@ -100,9 +100,53 @@ runs purely on-device, and nothing is lost (T-165). That is the quickest way to 
 rather than Expo Go. Push notifications are the one thing Expo Go cannot fully exercise on Android
 (SDK 53+) — everything else in the app works.
 
-**If the QR code cannot connect,** it is almost always Windows Firewall blocking Node on the local
-network, or the phone being on a different SSID (a 5 GHz/2.4 GHz split counts). `npx expo start
---go --tunnel` routes around both at the cost of some latency.
+### Over USB instead (Android) — no Wi-Fi, no firewall
+
+The QR code needs the phone and the PC on the same network with Node reachable, which corporate
+and home firewalls routinely block. A USB cable sidesteps the network entirely.
+
+The one command that matters is `adb reverse`: it maps the **phone's** `localhost:8081` to the
+**PC's**, so Metro is reached down the cable. No SSID matching, no firewall rule, no tunnel.
+
+**On the phone, once:** Settings → About phone → tap *Build number* seven times → back → System →
+Developer options → enable **USB debugging**. Plug in the cable and accept the RSA prompt.
+
+**Option A — Expo Go over USB** (~10 MB, no Android Studio)
+
+Install just the Android platform-tools (`adb`): download Google's *SDK Platform-Tools for Windows*
+and put the folder on your PATH, or `winget install --id Google.PlatformTools`.
+
+```powershell
+adb devices                          # your phone must appear as "device", not "unauthorized"
+adb reverse tcp:8081 tcp:8081
+npx expo start --go --localhost
+```
+
+In Expo Go choose **Enter URL manually** and type `exp://127.0.0.1:8081`. The QR code is irrelevant
+here — the phone is talking to your PC through the cable.
+
+**Option B — a real dev build** (~4 GB, no Expo Go at all)
+
+Needs **Android Studio** and **JDK 17**, with `ANDROID_HOME` pointing at the SDK.
+
+```powershell
+npx expo run:android
+```
+
+This runs `expo prebuild` (generating `android/`, which is gitignored), compiles a debug APK,
+installs it over USB and starts Metro. Later runs are just `npx expo start --dev-client` with the
+app already installed. This is the option that exercises `expo-dev-client`, `expo-notifications`
+and `expo-location` exactly as the store build will.
+
+**Re-run `adb reverse tcp:8081 tcp:8081` after every unplug** — it does not survive a disconnect,
+and a stale mapping is the usual cause of "Metro is not running" when everything else looks right.
+
+**iOS from Windows is not possible** — it needs Xcode. Expo Go on a physical iPhone is the only way
+to see the iOS build without a Mac, and that one does need the network to work.
+
+**If the QR code cannot connect** and you want to stay on Wi-Fi, it is almost always Windows
+Firewall blocking Node on the local network, or the phone being on a different SSID (a 5 GHz/2.4 GHz
+split counts). `npx expo start --go --tunnel` routes around both at the cost of some latency.
 
 **Checks before pushing** (the same gate CI runs):
 

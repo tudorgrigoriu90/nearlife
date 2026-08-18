@@ -1861,6 +1861,20 @@ only.**
     back in a log the API's tail cannot reach. The artifact (9320514029) held **19 files against
     Sweden's 12 committed**, so **7 of 9 Norwegian taxa succeeded** and 2 failed. Norway is v2 under
     T-177, so this is not a v1 blocker.
+- **T-185 · Document running on a phone over USB** — *Claude · S · `DONE` · deps: T-175*
+  - T-175 documented the Expo Go path, which needs the phone and PC on one network with Node
+    reachable — and the Director's firewall blocks exactly that. A QR code is not a usable
+    instruction if it cannot connect.
+  - Documents `adb reverse tcp:8081 tcp:8081` as the key move: it maps the *phone's* localhost:8081
+    to the *PC's*, so Metro is reached down the cable and the network is not involved at all. No
+    SSID matching, no firewall exception, no tunnel latency.
+  - Two options, because they cost very differently: **Expo Go over USB** needs only platform-tools
+    (~10 MB), while **`npx expo run:android`** needs Android Studio and JDK 17 (~4 GB) but produces
+    a real dev build that exercises `expo-dev-client`, notifications and location as the store build
+    will. `android/` is already gitignored, so prebuild does not pollute the repo.
+  - Notes that `adb reverse` does not survive an unplug — a stale mapping is the usual cause of
+    "Metro is not running" when everything else looks correct.
+  - iOS from Windows is stated as impossible rather than left to be discovered: it needs Xcode.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
