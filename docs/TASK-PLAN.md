@@ -1770,6 +1770,33 @@ only.**
     invents a name.
   - ⏳ Remaining 14: fa, ti, ckb, kmr, tr, bs, sr, sq, ru, uk, ps, th, vi, am. RTL needs no special
     handling here — these are data strings; mixed-direction *rendering* is T-157.
+- **T-181 · `build_content` emits one row per (species, locale)** — *Claude · M · `DONE` · deps: T-179, T-180*
+  - The step that actually uses T-179 and T-180. Before it, the pipeline emitted English-only rows
+    and the free immigrant roster (T-178) had nothing to load.
+  - `build_localized(species, taxon, client, locales)` fetches each locale's fact from **that
+    language's Wikipedia** and takes give/protect/whenAndHow from that locale's templates.
+  - **A missing article leaves the fact null and does not fall back to English.** Unlabelled English
+    prose inside a Somali card is worse than no fact, and the card already handles an absent one
+    (T-146). give/protect/whenAndHow are template-based, so they are present in every row whatever
+    Wikipedia has — a language gap can never gate the mission (invariant #2). Tested explicitly.
+  - `needsReview` is now **False** and `curationStatus` is `noise-filtered`, matching T-177: the
+    filter is the quality bar, and leaving a review flag set would have implied a gate that no
+    longer exists.
+  - 7 tests against a fake client — no network — asserting the per-language fetch actually happens
+    per language rather than being translated from one call.
+  - ⚠️ **Cost note for the Director:** rows are now species × locales. At 6,824 species × 18 locales
+    that is ~123k Wikipedia fetches at the client's polite 0.6s pause ≈ **20 hours**, well past the
+    6-hour Actions job cap. It needs chunking by taxon or by locale before a full run — see T-182.
+- **T-182 · Chunk the content build so it fits the Actions job cap** — *Claude · M · `TODO` · deps: T-181*
+  - T-181 multiplied the work by the locale count: ~6,824 species × 18 locales ≈ 123k Wikipedia
+    fetches, ≈20 hours at the current pacing. The job cap is 6 hours, so a single `--all` run cannot
+    finish and would be killed mid-taxon.
+  - Options: a `--locales` flag so one dispatch does one language (18 shorter runs, each well under
+    the cap); a matrix job fanning out by taxon; or batching titles per request — the MediaWiki API
+    accepts up to 50 titles in one `titles=` query, which would cut fetches ~50× and is the biggest
+    single win available.
+  - Prefer the batched query first: it reduces total work rather than redistributing it, and it is
+    politer to Wikipedia than 123k individual requests.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.

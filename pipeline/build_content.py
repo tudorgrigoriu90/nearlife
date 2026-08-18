@@ -1,13 +1,14 @@
 """Generate machine/pending-review species content at national scale (T-135).
 
 For each species in a presence file it produces:
-  - fact       : a grounded 1-2 sentence intro from Wikipedia (CC BY-SA — attributed), never invented.
+  - fact       : a grounded 1-2 sentence intro from that locale's Wikipedia (CC BY-SA — attributed),
+                 never invented and never machine-translated (T-179).
   - whenAndHow : an honest season + habitat line templated from the real active-months data.
   - give/protect: SAFE taxon-level templates (media/content_templates.py) — never per-species
                   plant/release advice.
 
-Every entry is status='machine', needsReview=True, curationStatus='uncurated' — it must pass
-Director + native review (T-125/T-135) and GBIF-noise curation (T-136) before it ships. Writes
+Emits one row per (species, locale) across every locale registered in templates_i18n (T-181).
+The T-136 noise filter is the quality bar; there is no human verification gate (T-177). Writes
 `data/content_<taxon>.json`. Idempotent-ish: re-runs overwrite. Coverage is reported honestly.
 
 Usage:  python pipeline/build_content.py data/presence_mammals.json
@@ -24,7 +25,8 @@ except (AttributeError, ValueError):
     pass
 
 sys.path.insert(0, str(Path(__file__).parent))
-from media.content_templates import TAXON_FROM_FILE, TEMPLATES, when_and_how  # noqa: E402
+from media.content_templates import TAXON_FROM_FILE  # noqa: E402
+from media.templates_i18n import LOCALES, strings_for, when_and_how  # noqa: E402
 from media.wikimedia import WikimediaClient  # noqa: E402
 
 DATA = Path(__file__).resolve().parent / "data"
@@ -49,51 +51,69 @@ def distinct_species(presence: dict) -> list[dict]:
             for s in agg.values()]
 
 
-def build(presence_path: Path, client: WikimediaClient) -> dict:
-    taxon = taxon_of(presence_path)
-    tpl = TEMPLATES[taxon]
-    species = distinct_species(json.loads(presence_path.read_text(encoding="utf-8")))
+def build_localized(species: list[dict], taxon: str, client, locales: list[str]) -> list[dict]:
+    """One content row per (species, locale).
 
-    content = []
-    with_fact = 0
-    for i, sp in enumerate(species, 1):
-        fact = None
-        try:
-            fact = client.fetch_extract(sp["scientificName"])
-        except Exception as exc:
-            print(f"  ! {sp['scientificName']}: {exc}", flush=True)
-        if fact:
-            with_fact += 1
-        content.append(
-            {
-                "speciesKey": sp["speciesKey"],
-                "scientificName": sp["scientificName"],
-                "taxonGroup": taxon,
-                "fact": fact,  # None when Wikipedia has no article — never fabricated
-                "factSource": "Wikipedia" if fact else None,
-                "factLicense": "CC BY-SA" if fact else None,
-                "whenAndHow": when_and_how(taxon, sp["months"]),
-                "give": tpl["give"],
-                "protect": tpl["protect"],
-                "status": "machine",
-                "needsReview": True,
-                "curationStatus": "uncurated",  # GBIF-noise curation is T-136
-            }
-        )
-        if i % 50 == 0:
-            print(f"  {i}/{len(species)} processed, {with_fact} with a fact", flush=True)
+    The fact is fetched from each locale's own Wikipedia edition rather than translated (T-179), so
+    a missing article means a null fact in *that* language only. It deliberately does not fall back
+    to English: unlabelled English prose inside a Somali card is worse than no fact, and the card
+    already handles an absent one (T-146). give/protect/whenAndHow come from the locale's templates
+    and are always present, so a language gap never gates the mission (invariant #2).
+    """
+    rows = []
+    for sp in species:
+        for locale in locales:
+            tpl = strings_for(locale).templates[taxon]
+            fact = None
+            try:
+                fact = client.fetch_extract(sp["scientificName"], locale)
+            except Exception as exc:
+                print(f"  ! {sp['scientificName']} [{locale}]: {exc}", flush=True)
+            rows.append(
+                {
+                    "speciesKey": sp["speciesKey"],
+                    "scientificName": sp["scientificName"],
+                    "taxonGroup": taxon,
+                    "locale": locale,
+                    "fact": fact,  # None when that edition has no article — never fabricated
+                    "factSource": "Wikipedia" if fact else None,
+                    "factLicense": "CC BY-SA" if fact else None,
+                    "whenAndHow": when_and_how(taxon, sp["months"], locale),
+                    "give": tpl["give"],
+                    "protect": tpl["protect"],
+                    "status": "machine",
+                    "needsReview": False,  # no human verification gate (T-177)
+                    "curationStatus": "noise-filtered",  # T-136 is the quality bar
+                }
+            )
+    return rows
+
+
+def build(presence_path: Path, client: WikimediaClient, locales: list[str] | None = None) -> dict:
+    taxon = taxon_of(presence_path)
+    locales = locales or list(LOCALES)
+    species = distinct_species(json.loads(presence_path.read_text(encoding="utf-8")))
+    print(f"  {len(species)} species x {len(locales)} locales", flush=True)
+
+    content = build_localized(species, taxon, client, locales)
+    with_fact = sum(1 for r in content if r["fact"])
 
     return {
         "meta": {
             "taxon": taxon,
             "source": presence_path.name,
             "totalSpecies": len(species),
+            "locales": locales,
+            "rows": len(content),
             "withFact": with_fact,
-            "factCoveragePct": round(100 * with_fact / len(species), 1) if species else 0,
+            "factCoveragePct": round(100 * with_fact / len(content), 1) if content else 0,
             "note": (
-                "status=machine, needsReview=true. Facts grounded from Wikipedia (CC BY-SA, "
-                "attributed), never invented. give/protect are safe taxon templates, not per-species "
-                "advice. Curate GBIF noise (T-136) + native review (T-125) before shipping."
+                "One row per (species, locale). Facts are SOURCED from each locale's own Wikipedia "
+                "edition (CC BY-SA, attributed), never invented and never machine-translated "
+                "(T-179); a null fact means that edition has no article, and is not filled from "
+                "English. give/protect are safe taxon templates in the row's locale (T-180), never "
+                "per-species advice. Quality bar is the T-136 noise filter — no human verification "
+                "gate (T-177)."
             ),
         },
         "content": content,
