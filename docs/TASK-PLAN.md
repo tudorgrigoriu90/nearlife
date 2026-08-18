@@ -674,7 +674,7 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     T-102 (households) lands; the current `user_id` shape covers v1.
 
 ## F4.2 — Almanac
-- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (async wiring done; **species+presence now loaded** T-184; content seed + secondary filters pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
+- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (async wiring done; species+presence loaded T-184; **content seed applied — gate cleared**; repo injection + secondary filters pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ Data-access seam `lib/speciesRepository.ts` (7 tests): `SpeciesRepository` (`listSpecies` +
     `getContent`) with a `HardcodedSpeciesRepository` (the bundled set the app runs on today) and a
     `SupabaseSpeciesRepository` (reads the seeded `species`/`species_content` tables via a fakeable
@@ -685,12 +685,13 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     seeded. App integration test asserts the loaded total (fails if the async load regresses).
   - Remaining: inject the Supabase-backed repo + apply the content seed (needs the seeded DB,
     T-055/T-145 load), and add season/habitat secondary filters (habitat needs E3).
-  - 🚦 **Do not inject the Supabase repo until all 38 locales are seeded (T-160).** The live DB
-    currently has en, sv and so only. `SupabaseSpeciesRepository.getContentInLocale` has no English
-    fallback by design, so switching the app over today would silently blank the dual-language
-    secondary half for the other 33 languages — the same class of bug T-160 fixed, in reverse. The
-    bundled `HardcodedSpeciesRepository` is currently the *more* complete source, which is why the
-    swap is sequenced after the seed, not before it.
+  - 🚦→✅ **The seed gate is CLEARED (2026-08-18).** The gate read: do not inject the Supabase repo
+    until all 38 locales are seeded, because `SupabaseSpeciesRepository.getContentInLocale` has no
+    English fallback by design — switching over with only en/sv/so live would have silently blanked
+    the dual-language secondary half for the other 35 languages, the same class of bug T-160 fixed,
+    in reverse. `20260810000001` is now applied (Director, via T-176 `Database migrate`) and
+    `species_content` holds **2052 rows = 38 locales × 54 species**. The bundled repository is no
+    longer the more complete source, so the swap is now unblocked.
   - 💰 **Storage cost of moving all content to Postgres: negligible.** 2052 rows carry ~761 KiB of
     field text; with names, row overhead and the PK/locale indexes it lands around 1–2 MB against
     the 500 MB free-tier allowance (~0.3%). Invariant #7 holds with a wide margin.
@@ -1955,6 +1956,20 @@ only.**
   - `Data pipeline` gained a **`vernacular`** input, ordered before content generation since the
     content step consumes its output.
   - 14 new tests (8 ingest + 3 content + 3 loader), all network-free.
+- **T-189 · Milestone: the database is now the complete content source** — *Director + Claude · — · `DONE` · deps: T-176, T-184*
+  - Director ran `Database migrate` twice on 2026-08-18 — `repair` for the six migrations already
+    live under MCP-stamped versions, then `apply` for `20260810000001`. `species_content` went from
+    **162 → 2052 rows** (38 locales × 54 species).
+  - Combined with T-184's load (21 regions / 11,936 species / 78,530 presence rows), **every source
+    the app needs is now in Postgres**: taxonomy, presence, content in all 38 locales, and 54 photos
+    in Storage.
+  - **This clears the T-057 seed gate.** The bundled `HardcodedSpeciesRepository` is no longer the
+    more complete source, so injecting `SupabaseSpeciesRepository` no longer risks blanking the
+    dual-language secondary half. That swap is the next app-side task.
+  - Worth recording how long this took to become true: the load had **never once succeeded** before
+    today. It was blocked in turn by a signature mismatch (T-173), an IPv6-only connection string
+    (T-174), a curated/GBIF id collision (T-184), and a migration history whose stamps did not match
+    its filenames (T-176). Each looked like the last one until it was fixed.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
