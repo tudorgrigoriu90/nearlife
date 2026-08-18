@@ -445,6 +445,174 @@ TR_MONTHS_DAT = ("Ocak'a", "Şubat'a", "Mart'a", "Nisan'a", "Mayıs'a", "Haziran
                  "Temmuz'a", "Ağustos'a", "Eylül'e", "Ekim'e", "Kasım'a", "Aralık'a")
 
 
+BS_TEMPLATES = {
+    "bird": {
+        "give": "Postavite kućicu za ptice prilagođenu lokalnim vrstama, ljeti držite čistu vodu, a u sezoni gniježđenja mačke držite u kući.",
+        "protect": "Ne uznemiravajte gnijezda i gnjezdilišta, držite psa na povodcu blizu ptica koje se gnijezde na tlu, smanjite noćno osvjetljenje i sudare sa staklima.",
+        "habitat": "u šumama, močvarama i vrtovima gdje se hrani i gnijezdi",
+    },
+    "mammal": {
+        "give": "Ostavite divlje kutke i živice, otvor u ogradi kuda prolaze male životinje i netaknute hrpe drva i lišća za sklonište.",
+        "protect": "Vozite oprezno u zoru i suton, držite psa pod kontrolom u staništima divljači i nikada ne hranite divlje sisare niti im prilazite.",
+        "habitat": "na rubovima šuma, livadama i u mirnim zaklonima",
+    },
+    "insect": {
+        "give": "Pustite dio travnjaka da naraste, posadite raznovrsno cvijeće za oprašivače i ostavite lišće i mrtvo drvo za prezimljavanje.",
+        "protect": "Izbjegavajte pesticide i insekticide, ostavite dio zemljišta divljim i netaknutim i smanjite nepotrebno vanjsko osvjetljenje.",
+        "habitat": "oko livada, cvijeća i mrtvog drva",
+    },
+    "arachnid": {
+        "give": "Ostavite netaknute kutke, listinac i mrtvo drvo gdje love i sklanjaju se.",
+        "protect": "Izbjegavajte pesticide, a one koje nađete u kući radije premjestite nego da im naudite.",
+        "habitat": "u netaknutom raslinju, listincu i mrtvom drvu",
+    },
+    "fish": {
+        "give": "Pomozite da vodotoci ostanu čisti i zasjenjeni obalnim raslinjem i podržite uklanjanje prepreka kako bi ribe mogle migrirati.",
+        "protect": "Ne zagađujte vodotoke i ne bacajte otpad u njih, poštujte pravila ribolova i načelo uhvati-pa-pusti i ne uznemiravajte mrijestilišta.",
+        "habitat": "u jezerima, rijekama i potocima u kojima živi",
+    },
+    "amphibian": {
+        "give": "Održavajte baru ili vlažan, zaklonjen kutak, ostavite hrpe trupaca i kamenja i čuvajte sigurne prolaze između vode i kopna.",
+        "protect": "U proljeće pazite na njihove prelaske preko cesta, ne premještajte ih i ne uzimajte u ruke, a vodu čuvajte od zagađenja i otpada.",
+        "habitat": "blizu bara, jaraka i vlažnog tla",
+    },
+    "reptile": {
+        "give": "Ostavite sunčane hrpe kamenja i trupaca za grijanje i neravno, netaknuto tlo za sklonište.",
+        "protect": "Ne uzimajte životinje u ruke i ne premještajte ih, držite psa na stazi u područjima gmizavaca i ne uznemiravajte mjesta za sunčanje.",
+        "habitat": "na sunčanim padinama, vrištinama i hrpama kamenja",
+    },
+    "mollusc": {
+        "give": "Zadržite vlažna, sjenovita skloništa poput hrpa trupaca i ostavite dio listinca.",
+        "protect": "Izbjegavajte sredstva protiv puževa i pesticide i držite vodotoke čistima za slatkovodne vrste.",
+        "habitat": "na vlažnim, sjenovitim mjestima i u čistoj slatkoj vodi",
+    },
+    "plant": {
+        "give": "Pustite samonikle biljke da rastu, kosite rjeđe i kasnije u godini i ostavite sjemenke da stoje preko zime.",
+        "protect": "Ne berite i ne iskopavajte divlje biljke, držite se staza u osjetljivim područjima i nikada ne unosite strane vrste.",
+        "habitat": "na livadama, u šumama i uz rubove puteva gdje raste",
+    },
+    "fungus": {
+        "give": "Ostavljajte mrtvo drvo i listinac ondje gdje gljive plodonose i hodajte šumom obazrivo.",
+        "protect": "Uzmite samo ono što lokalna pravila dopuštaju, ne gazite plodišta i nikada se ne oslanjajte na aplikaciju da procijenite je li gljiva jestiva.",
+        "habitat": "na šumskom tlu, mrtvom drvu i u listincu",
+    },
+}
+BS_MONTHS = ("januaru", "februaru", "martu", "aprilu", "maju", "junu",
+             "julu", "avgustu", "septembru", "oktobru", "novembru", "decembru")
+BS_MONTHS_GEN = ("januara", "februara", "marta", "aprila", "maja", "juna",
+                 "jula", "avgusta", "septembra", "oktobra", "novembra", "decembra")
+
+SQ_TEMPLATES = {
+    "bird": {
+        "give": "Vendosni një fole artificiale të përshtatshme për llojet vendase, mbani ujë të pastër në verë dhe mbajini macet brenda gjatë sezonit të folezimit.",
+        "protect": "Mos shqetësoni foletë dhe vendfolezimet, mbajeni qenin me rrip pranë zogjve që folezojnë në tokë, zvogëloni ndriçimin e natës dhe përplasjet me xhamat.",
+        "habitat": "në pyje, ligatina dhe kopshte ku ushqehet dhe folezon",
+    },
+    "mammal": {
+        "give": "Lini cepa të egra dhe gardhe të gjalla, një hapësirë në gardh që kafshët e vogla të kalojnë dhe grumbuj druri e gjethesh të paprekur për strehë.",
+        "protect": "Ngisni me kujdes në agim dhe muzg, mbajeni qenin nën kontroll në zonat e faunës dhe kurrë mos ushqeni e mos u afroni gjitarëve të egër.",
+        "habitat": "në buzë pyjesh, livadhe dhe strehë të qeta",
+    },
+    "insect": {
+        "give": "Lëreni një pjesë të lëndinës të rritet, mbillni lule të larmishme për pluhurizuesit dhe lini gjethe e dru të vdekur për dimërim.",
+        "protect": "Shmangni pesticidet dhe insekticidet, lini një pjesë toke të egër e të paprekur dhe zvogëloni ndriçimin e panevojshëm të jashtëm.",
+        "habitat": "rreth livadheve, luleve dhe drurit të vdekur",
+    },
+    "arachnid": {
+        "give": "Lini cepa të paprekur, shtresë gjethesh dhe dru të vdekur ku gjuajnë e strehohen.",
+        "protect": "Shmangni pesticidet dhe ato që gjeni brenda shtëpisë zhvendosini në vend që t'i dëmtoni.",
+        "habitat": "në bimësi të paprekur, shtresë gjethesh dhe dru të vdekur",
+    },
+    "fish": {
+        "give": "Ndihmoni që rrjedhat ujore të mbeten të pastra e të hijezuara nga bimësia bregore dhe mbështetni heqjen e pengesave që peshqit të migrojnë.",
+        "protect": "Mos ndotni dhe mos hidhni mbeturina në rrjedhat ujore, respektoni rregullat e peshkimit dhe parimin kap-e-lësho dhe mos shqetësoni vendet e shumimit.",
+        "habitat": "në liqene, lumenj dhe përrenj ku jeton",
+    },
+    "amphibian": {
+        "give": "Mbani një pellg ose një cep të lagësht e të strehuar, lini grumbuj trungjesh e gurësh dhe ruani kalime të sigurta midis ujit dhe tokës.",
+        "protect": "Në pranverë kini kujdes kalimet e tyre nëpër rrugë, mos i zhvendosni dhe mos i merrni në dorë, mbajeni ujin pa ndotje e mbeturina.",
+        "habitat": "pranë pellgjeve, kanaleve dhe tokës së lagësht",
+    },
+    "reptile": {
+        "give": "Lini grumbuj gurësh e trungjesh me diell për t'u ngrohur dhe tokë të ashpër e të paprekur për strehë.",
+        "protect": "Mos i merrni kafshët në dorë dhe mos i zhvendosni, mbajeni qenin në shteg në zonat e zvarranikëve dhe mos shqetësoni vendet ku ngrohen.",
+        "habitat": "në shpate me diell, shkurreta dhe grumbuj gurësh",
+    },
+    "mollusc": {
+        "give": "Ruani strehë të lagështa e me hije si grumbujt e trungjeve dhe lini një pjesë të shtresës së gjetheve.",
+        "protect": "Shmangni granulat kundër kërmijve dhe pesticidet dhe mbajini rrjedhat ujore të pastra për llojet e ujërave të ëmbla.",
+        "habitat": "në vende të lagështa e me hije dhe në ujë të ëmbël të pastër",
+    },
+    "plant": {
+        "give": "Lëreni bimësinë vendase të rritet, kositni më rrallë e më vonë gjatë vitit dhe lini kokrrat e farës në këmbë gjatë dimrit.",
+        "protect": "Mos këputni dhe mos shkulni bimët e egra, qëndroni në shtigje në zonat e ndjeshme dhe kurrë mos futni bimë jovendase.",
+        "habitat": "në livadhe, pyje dhe buzë rrugësh ku rritet",
+    },
+    "fungus": {
+        "give": "Lini dru të vdekur dhe shtresë gjethesh aty ku kërpudhat frytëzojnë dhe ecni butë nëpër pyll.",
+        "protect": "Merrni vetëm sa lejojnë rregullat vendase, mos shkelni trupat frytëzues dhe kurrë mos u mbështetni te një aplikacion për të gjykuar nëse një kërpudhë është e ngrënshme.",
+        "habitat": "në dyshemenë e pyllit, drurin e vdekur dhe shtresën e gjetheve",
+    },
+}
+SQ_MONTHS = ("janar", "shkurt", "mars", "prill", "maj", "qershor",
+             "korrik", "gusht", "shtator", "tetor", "nëntor", "dhjetor")
+
+VI_TEMPLATES = {
+    "bird": {
+        "give": "Treo tổ nhân tạo phù hợp với các loài bản địa, giữ nguồn nước sạch vào mùa hè và nhốt mèo trong nhà suốt mùa làm tổ.",
+        "protect": "Đừng quấy nhiễu tổ và nơi làm tổ, xích chó khi ở gần những loài làm tổ dưới đất, giảm ánh sáng ban đêm và va chạm vào cửa kính.",
+        "habitat": "ở rừng, vùng đất ngập nước và vườn nơi nó kiếm ăn và làm tổ",
+    },
+    "mammal": {
+        "give": "Chừa lại những góc hoang và hàng rào cây, một khe hở dưới hàng rào cho thú nhỏ đi qua, cùng đống củi và lá khô không bị xáo trộn để làm nơi trú.",
+        "protect": "Lái xe cẩn thận lúc bình minh và hoàng hôn, kiểm soát chó ở khu vực có thú hoang, và đừng bao giờ cho ăn hay lại gần thú hoang.",
+        "habitat": "ở bìa rừng, đồng cỏ và những nơi trú ẩn yên tĩnh",
+    },
+    "insect": {
+        "give": "Để một phần bãi cỏ mọc tự nhiên, trồng nhiều loại hoa cho loài thụ phấn, và giữ lại lá rụng cùng gỗ mục cho chúng qua đông.",
+        "protect": "Tránh thuốc trừ sâu, giữ lại một khoảng đất hoang không bị xáo trộn, và giảm ánh sáng ngoài trời không cần thiết.",
+        "habitat": "quanh đồng cỏ, hoa và gỗ mục",
+    },
+    "arachnid": {
+        "give": "Chừa lại những góc yên tĩnh, lớp lá rụng và gỗ mục nơi chúng săn mồi và trú ẩn.",
+        "protect": "Tránh thuốc trừ sâu, và hãy đưa những con bạn gặp trong nhà ra ngoài thay vì làm hại chúng.",
+        "habitat": "trong thảm thực vật yên tĩnh, lá rụng và gỗ mục",
+    },
+    "fish": {
+        "give": "Giúp giữ dòng nước sạch và có bóng mát nhờ thảm thực vật ven bờ, và ủng hộ việc dỡ bỏ vật cản để cá di cư.",
+        "protect": "Đừng gây ô nhiễm hay xả rác xuống dòng nước, tuân thủ quy định câu cá và nguyên tắc bắt rồi thả, và đừng quấy nhiễu bãi đẻ.",
+        "habitat": "ở hồ, sông và suối nơi nó sinh sống",
+    },
+    "amphibian": {
+        "give": "Giữ một ao nhỏ hoặc góc ẩm có che chắn, chừa lại đống gỗ và đá, và duy trì lối đi an toàn giữa nước và cạn.",
+        "protect": "Mùa xuân hãy để ý chúng băng qua đường, đừng di dời hay cầm nắm chúng, và giữ nước sạch khỏi ô nhiễm và rác.",
+        "habitat": "gần ao, mương và vùng đất ẩm",
+    },
+    "reptile": {
+        "give": "Chừa lại đống đá và gỗ có nắng để chúng sưởi, cùng nền đất gồ ghề không bị xáo trộn để trú ẩn.",
+        "protect": "Đừng cầm nắm hay di dời chúng, giữ chó trên lối đi ở khu vực có bò sát, và đừng quấy nhiễu nơi chúng sưởi nắng.",
+        "habitat": "trên sườn dốc nhiều nắng, vùng cây bụi và đống đá",
+    },
+    "mollusc": {
+        "give": "Giữ lại những nơi trú ẩm và râm mát như đống gỗ, và chừa lại một phần lá rụng.",
+        "protect": "Tránh thuốc diệt sên và thuốc trừ sâu, và giữ dòng nước sạch cho các loài nước ngọt.",
+        "habitat": "ở nơi ẩm ướt, râm mát và trong nước ngọt sạch",
+    },
+    "plant": {
+        "give": "Để cây bản địa mọc tự nhiên, cắt cỏ thưa hơn và muộn hơn trong năm, và giữ lại phần đầu hạt đứng qua mùa đông.",
+        "protect": "Đừng hái hay đào cây hoang dã, đi đúng lối mòn ở khu vực nhạy cảm, và đừng bao giờ đưa cây ngoại lai vào.",
+        "habitat": "ở đồng cỏ, rừng và ven đường nơi nó mọc",
+    },
+    "fungus": {
+        "give": "Chừa lại gỗ mục và lá rụng nơi nấm mọc, và bước nhẹ khi đi trong rừng.",
+        "protect": "Chỉ lấy phần quy định địa phương cho phép, đừng giẫm lên thể quả, và đừng bao giờ dựa vào một ứng dụng để phán đoán nấm có ăn được hay không.",
+        "habitat": "trên nền rừng, gỗ mục và lá rụng",
+    },
+}
+VI_MONTHS = ("tháng Một", "tháng Hai", "tháng Ba", "tháng Tư", "tháng Năm", "tháng Sáu",
+             "tháng Bảy", "tháng Tám", "tháng Chín", "tháng Mười", "tháng Mười Một", "tháng Mười Hai")
+
+
 LOCALES: dict[str, LocaleStrings] = {
     "en": LocaleStrings(
         months=EN_MONTHS,
@@ -541,6 +709,42 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="yılın farklı zamanlarında",
         sentence="Bölgenizde {when} etkindir. Onu {hint} arayın.",
         templates=TR_TEMPLATES,
+    ),
+    "bs": LocaleStrings(
+        months=BS_MONTHS,  # locative, after "u"
+        months_from=BS_MONTHS_GEN,
+        months_to=BS_MONTHS_GEN,  # both slots take the genitive after od/do
+        year_round="tokom cijele godine",
+        range_pattern="od {first} do {last}",
+        list_pattern="u {months}",
+        list_separator=", ",
+        unknown="u različito doba godine",
+        sentence="Aktivan je u vašoj regiji {when}. Tražite ga {hint}.",
+        templates=BS_TEMPLATES,
+    ),
+    "sq": LocaleStrings(
+        months=SQ_MONTHS,
+        months_from=SQ_MONTHS,
+        months_to=SQ_MONTHS,
+        year_round="gjatë gjithë vitit",
+        range_pattern="nga {first} deri në {last}",
+        list_pattern="në {months}",
+        list_separator=", ",
+        unknown="në kohë të ndryshme të vitit",
+        sentence="Është aktiv në rajonin tuaj {when}. Kërkojeni {hint}.",
+        templates=SQ_TEMPLATES,
+    ),
+    "vi": LocaleStrings(
+        months=VI_MONTHS,
+        months_from=VI_MONTHS,
+        months_to=VI_MONTHS,
+        year_round="quanh năm",
+        range_pattern="từ {first} đến {last}",
+        list_pattern="vào {months}",
+        list_separator=", ",
+        unknown="vào những thời điểm khác nhau trong năm",
+        sentence="Hoạt động ở khu vực của bạn {when}. Hãy tìm nó {hint}.",
+        templates=VI_TEMPLATES,
     ),
 }
 

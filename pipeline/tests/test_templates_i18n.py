@@ -98,3 +98,31 @@ def test_when_and_how_composes_both_halves():
     out = when_and_how("bird", [5, 6], "sv")
     assert "från maj till juni" in out
     assert strings_for("sv").templates["bird"]["habitat"] in out
+
+
+def test_no_locale_contains_a_meaningless_invisible_character():
+    """Bans invisible characters that carry no meaning — but not the ones that do.
+
+    A soft hyphen typed into Bosnian survived review because it renders as nothing; the same class
+    of bug put a Cyrillic 'ј' inside a Slovenian word earlier in this project. Invisible characters
+    break search, sorting and word-wrap, and no proofread catches them.
+
+    ZWNJ (U+200C) and ZWJ (U+200D) are deliberately NOT banned: they are load-bearing orthography in
+    Persian and Arabic script — "زمان‌های" needs one — and a blanket strip misspells the language it
+    was meant to protect. This test exists in this shape because a blanket strip was tried first and
+    quietly removed 92 of them.
+    """
+    banned = {
+        "­": "SOFT HYPHEN",
+        "​": "ZERO WIDTH SPACE",
+        "﻿": "BYTE ORDER MARK",
+        "⁠": "WORD JOINER",
+    }
+    for loc in LOCALES:
+        st = strings_for(loc)
+        blobs = [st.year_round, st.unknown, st.sentence, *st.months, *st.months_from, *st.months_to]
+        for fields in st.templates.values():
+            blobs.extend(fields.values())
+        for text in blobs:
+            for ch, name in banned.items():
+                assert ch not in text, f"{loc}: {name} in {text[:40]!r}"
