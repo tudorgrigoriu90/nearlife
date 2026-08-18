@@ -11,7 +11,11 @@ Run order: the species/presence loader (gbif.supabase_load) must run first — s
 FK-references public.species. Runs in CI (or locally) with a **privileged** Postgres connection
 string in $SUPABASE_DB_URL (the `postgres` role — never an API key of any kind). Idempotent (upsert):
 
-    SUPABASE_DB_URL=postgres://...pooler.supabase.com:6543/postgres  python -m gbif.supabase_load_content
+    SUPABASE_DB_URL=postgres://...pooler.supabase.com:5432/postgres  python -m gbif.supabase_load_content
+
+Use the SESSION pooler (5432), not the direct host and not transaction mode (6543): the
+direct host is IPv6-only and unreachable from CI, and transaction mode rejects the
+prepared statements psycopg3 creates for these executemany calls. See gbif/connect.py.
 """
 
 import json
@@ -54,9 +58,17 @@ def main() -> None:
 
     import psycopg  # imported lazily so the module imports without the DB driver (tests/CLI help)
 
+    from gbif.connect import connection_hint
+
     rows, summary = build_content_rows(load_content_files())
 
-    with psycopg.connect(dsn) as conn, conn.cursor() as cur:
+    try:
+        conn_ctx = psycopg.connect(dsn)
+    except psycopg.OperationalError as err:
+        hint = connection_hint(dsn, str(err))
+        raise SystemExit(f"{err}\n\nLikely cause: {hint}" if hint else str(err)) from err
+
+    with conn_ctx as conn, conn.cursor() as cur:
         for chunk in _chunks(rows, 1000):
             cur.executemany(CONTENT_SQL, chunk)
         conn.commit()

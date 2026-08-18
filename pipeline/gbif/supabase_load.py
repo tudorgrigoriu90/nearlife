@@ -8,7 +8,11 @@ Runs in CI (or locally) with a **privileged** Postgres connection string in $SUP
 (the `postgres` role, which bypasses RLS — never an API key of any kind). Idempotent (upserts), so re-running after a pipeline refresh is
 safe:
 
-    SUPABASE_DB_URL=postgres://...pooler.supabase.com:6543/postgres  python -m gbif.supabase_load
+    SUPABASE_DB_URL=postgres://...pooler.supabase.com:5432/postgres  python -m gbif.supabase_load
+
+Use the SESSION pooler (5432), not the direct host and not transaction mode (6543): the
+direct host is IPv6-only and unreachable from CI, and transaction mode rejects the
+prepared statements psycopg3 creates for these executemany calls. See gbif/connect.py.
 """
 
 import json
@@ -62,6 +66,8 @@ def main() -> None:
 
     import psycopg  # imported lazily so the module imports without the DB driver (tests/CLI help)
 
+    from gbif.connect import connection_hint
+
     datasets = load_datasets()
     species_rows, presence_rows = build_rows(datasets)
     # Regions come from the data, not from a country constant: presence rows carry an FK to
@@ -69,7 +75,13 @@ def main() -> None:
     # transaction on the first Norwegian row (T-167).
     regions = list(regions_from_records(datasets))
 
-    with psycopg.connect(dsn) as conn, conn.cursor() as cur:
+    try:
+        conn_ctx = psycopg.connect(dsn)
+    except psycopg.OperationalError as err:
+        hint = connection_hint(dsn, str(err))
+        raise SystemExit(f"{err}\n\nLikely cause: {hint}" if hint else str(err)) from err
+
+    with conn_ctx as conn, conn.cursor() as cur:
         cur.executemany(REGION_SQL, regions)
         for chunk in _chunks(species_rows, 1000):
             cur.executemany(SPECIES_SQL, chunk)

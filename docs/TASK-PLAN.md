@@ -1645,6 +1645,20 @@ only.**
     an empty result, loudly.
   - ✅ **Confirmed working from the same run:** `[presence] country=NOR regions=19` — the GADM
     subdivisions endpoint resolves and Norway's 19 counties come back fetched, not guessed.
+- **T-174 · Explain the connect failures that are configuration, not outages** — *Claude · S · `DONE` · deps: T-167*
+  - The first Nordic load failed with `connection to server at "2a05:d014:415:500:…", port 5432
+    failed: Network is unreachable` — which reads like the database is down, and is not. Supabase's
+    **direct** host `db.<ref>.supabase.co` resolves to **IPv6 only**, and GitHub Actions runners
+    have no IPv6, so a direct connection can never work from CI whatever the password is. Working
+    that out from a raw traceback cost a round trip; it should not cost the next one.
+  - `gbif/connect.py` (`connection_hint`, 6 tests) recognises the two connection-string mistakes we
+    can actually hit and prints the fix. Both loaders now wrap `psycopg.connect` and append the
+    hint. It stays silent on anything it does not recognise — a wrong password must not be reported
+    as a network problem, and an unreachable *pooler* is a real outage, not a wrong choice.
+  - Also corrects both loaders' docstrings, which recommended `pooler.supabase.com:**6543**` —
+    transaction mode. psycopg3 promotes repeated statements to prepared ones and PgBouncer's
+    transaction mode rejects them, which both loaders would hit on their `executemany` over
+    thousands of rows. **Session pooler, port 5432** is the correct target.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
