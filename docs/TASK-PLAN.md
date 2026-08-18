@@ -2101,6 +2101,35 @@ only.**
     refresh, and the refresh is annual.
   - If it does become worth fixing, downloading the previous run's artifact at job start is the
     right shape — resumability across runs, without committing a derived 2 MB file.
+- **T-199 · Audit: do the four "critical rules" actually have tests?** — *Claude · S · `DONE` · deps: —*
+  - CLAUDE.md names four rules that must get explicit tests: free-catch enforcement (T-075),
+    catch-spot safety exclusions (T-049), NC-license filtering (T-042), honest copy (T-066).
+    **None of them cited a task id in any test file**, so the claim was unverifiable by search —
+    which is how a governance rule quietly stops being true. Audited each by behaviour instead.
+  - ✅ **Honest copy** — well covered: `lib/contentHonesty.test.ts`, `shareSpecies.test.ts`,
+    `pipeline/tests/test_content.py`, plus the honesty-phrase checks in every locale (T-153).
+  - ✅ **Media licence filtering** — covered in `pipeline/tests/test_media.py`.
+  - 🐛 **Occurrence licence filtering had NO test** — fixed here (`test_licence_filter.py`, 6 tests).
+    The rule lives in exactly one place, the `license` params on `/occurrence/search`, and it is
+    what makes commercial use lawful at all (DATA-SOURCING-LICENSING §1). The asymmetry with media
+    is the dangerous part: a dropped *media* check shows up as a missing photo, while a dropped
+    *occurrence* check shows up as nothing — NC records look identical to CC-BY ones once counted.
+    Silent, legal, and discoverable only by reading the code.
+  - ⚠️ **Free-catch enforcement is client-side only** — see T-200.
+  - ℹ️ **Catch-spot safety (T-049) is not built at all** (no `catchSpot`/`hazard` anywhere). That is
+    unbuilt scope rather than an untested rule, and it is E4 — but it should not be listed among
+    rules that "get explicit tests" as though it were shipping.
+- **T-200 · Free-catch enforcement is client-side only** — *Claude + Director · M · `TODO` · deps: T-075*
+  - `profiles.free_catches_used` / `free_catch_season` exist, but **nothing on the server enforces
+    them**: no RLS policy, no trigger, no Edge Function. All the logic is in `lib/freeCatch.ts`,
+    which is well tested — and which runs on the user's device.
+  - CLAUDE.md states this rule is enforced server-side. It is not. That is a gap between a stated
+    invariant and reality, which is worth more than the paywall itself: the whole point of writing
+    invariants down is that they can be relied on.
+  - Practically: the 3-catches-per-season limit is bypassable by anyone willing to edit local state,
+    so **Full Game revenue rests on client-side honesty**. Not urgent before launch, but it should
+    be a deliberate decision rather than an accident — either enforce it in a trigger/Edge Function,
+    or amend the invariant to say client-side and accept the leakage.
 - **T-192 · Refuse a load that looks like a broken ingest** — *Claude · S · `DONE` · deps: T-172*
   - From the loader's point of view a partial ingest and a genuine decline are **identical**: both
     arrive as fewer rows. With a human in the loop that ambiguity was survivable; with T-172's
