@@ -2058,6 +2058,26 @@ only.**
     Recorded so the next person does not spend the same hour: the logic underneath is covered by
     `offlineCollectionStore.test.ts` (13 tests), and the untested part is the thin React adapter.
     Making it testable means extracting the effect bodies, not adding more tests to that file.
+- **T-196 · `species.common_name` must be nullable — and rows must match the schema** — *Claude · M · `DONE` · deps: T-187*
+  - **A bug I introduced.** T-187 stopped `common_name` copying the binomial and sent NULL instead —
+    right reasoning, tested — but `species.common_name` is `not null`, and the unit test asserted
+    the *value* without knowing the *constraint*. The load then failed in production after a
+    52-minute run: `NotNullViolation … Failing row contains (gbif:2426805, Rana temporaria, null…)`.
+  - Fixed the way T-187 intended rather than by reinstating the lie:
+    `20260818000001_species_common_name_nullable.sql` drops the constraint. The column was
+    `not null` from when the only species were the curated 54, every one with a hand-written name;
+    most of GBIF's 11,936 have no common name in any language. Same shape as `species_content.fact`
+    (T-146) and nullable for the same reason — absent is a real state, and encoding it as a
+    plausible-looking value is worse than encoding it as nothing.
+  - 🛡️ **The real fix is the test that would have caught it.** A unit test on a row builder cannot
+    see a database constraint, and no live DB is available here — but **the schema is in the repo**.
+    `test_schema_nullability.py` parses the migrations for `not null` (and `primary key`, which
+    implies it in Postgres), honours later `drop not null`, and asserts the loader never sends None
+    for a required column. It reproduced the production failure exactly before the fix.
+  - App side: `SpeciesRow.common_name` is now `string | null` and the mapper falls back to the
+    scientific name, so a card always has a title. That fallback is honest **at the display layer** —
+    it is the name we actually have — while the row still records that no common name is known,
+    which is what T-187 was protecting. Blank strings are treated as absent.
 - **T-192 · Refuse a load that looks like a broken ingest** — *Claude · S · `DONE` · deps: T-172*
   - From the loader's point of view a partial ingest and a genuine decline are **identical**: both
     arrive as fewer rows. With a human in the loop that ambiguity was survivable; with T-172's

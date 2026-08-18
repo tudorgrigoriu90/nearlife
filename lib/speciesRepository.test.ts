@@ -99,3 +99,33 @@ describe('SupabaseSpeciesRepository', () => {
     expect(await repo.regionPresence('SWE.13_1')).toEqual([]);
   });
 });
+
+// T-196: species.common_name is nullable now that the GBIF catalogue is loaded — most of its
+// 11,936 species have no common name in any language. The row mapper has to produce something
+// renderable without reinstating the lie T-187 removed.
+describe('speciesRowToSpecies with no common name', () => {
+  const row = {
+    id: 'gbif:2426805',
+    scientific_name: 'Rana temporaria',
+    common_name: null,
+    category: 'amphibian',
+    rarity: 'common',
+    active_months: [4, 5, 6],
+  };
+
+  it('falls back to the scientific name so the card has a title', () => {
+    expect(speciesRowToSpecies(row as never).commonName).toBe('Rana temporaria');
+  });
+
+  it('still prefers a real common name when there is one', () => {
+    expect(
+      speciesRowToSpecies({ ...row, common_name: 'Common frog' } as never).commonName,
+    ).toBe('Common frog');
+  });
+
+  it('treats a blank name as absent rather than rendering an empty title', () => {
+    expect(speciesRowToSpecies({ ...row, common_name: '   ' } as never).commonName).toBe(
+      'Rana temporaria',
+    );
+  });
+});

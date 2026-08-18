@@ -64,7 +64,7 @@ export class HardcodedSpeciesRepository implements SpeciesRepository {
 export interface SpeciesRow {
   id: string;
   scientific_name: string;
-  common_name: string;
+  common_name: string | null;
   category: SpeciesCategory;
   rarity: Rarity;
   active_months: number[];
@@ -99,7 +99,10 @@ export function speciesRowToSpecies(row: SpeciesRow): Species {
   return {
     id: row.id,
     scientificName: row.scientific_name,
-    commonName: row.common_name,
+    // Nullable since T-196: most GBIF species have no common name in any language. Falling
+    // back to the binomial is honest *here* — it is the name we actually have, and the row
+    // still records that no common name is known, which is what T-187 was protecting.
+    commonName: row.common_name?.trim() || row.scientific_name,
     category: row.category,
     rarity: row.rarity,
     activeMonths: [...row.active_months].sort((a, b) => a - b) as Month[],
