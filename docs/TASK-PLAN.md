@@ -2039,6 +2039,25 @@ only.**
     pipeline whose real work succeeded. A *failed* load still raises — the distinction is between
     "nothing to load" and "loading went wrong", which the unattended schedule (T-172) makes worth
     being precise about.
+- **T-195 · Cover the supabase-js collection adapter** — *Claude · S · `DONE` · deps: T-165*
+  - `supabaseCollectionStore.ts` sat at **56.6% statements / 28.6% branches** — the worst-covered
+    file with real logic, and the one holding the user's catches. Now **93.3% / 100%**. Global
+    coverage moved 90.58 → 91.02 statements and 83.13 → 84 branches, restoring headroom above the
+    thresholds (90/80/85/90) that had shrunk to half a point.
+  - **The branches that were missing are the ones that matter.** Every supabase-js call returns
+    `{ data, error }` rather than rejecting, so a swallowed `error` looks exactly like an empty
+    collection — the user's catches silently gone with nothing having failed. Worse since T-165: the
+    offline store reads a throw as "stay queued, retry", so returning empty instead would make it
+    drop the outbox believing it had been delivered. Both error paths are now pinned.
+  - Also pins the column list and the `onConflict: 'user_id,species_id'` upsert key: a column
+    dropped from the select becomes a silently-null field on every record, and a wrong conflict key
+    duplicates rows instead of updating them.
+  - ⚠️ **Attempted first and reverted: four more `useCollection` tests.** They pass individually and
+    fail in-suite — the same order-sensitivity that already cost this file two tests. Its
+    fire-and-forget writes are still resolving when the next test's `AsyncStorage.clear()` runs.
+    Recorded so the next person does not spend the same hour: the logic underneath is covered by
+    `offlineCollectionStore.test.ts` (13 tests), and the untested part is the thin React adapter.
+    Making it testable means extracting the effect bodies, not adding more tests to that file.
 - **T-192 · Refuse a load that looks like a broken ingest** — *Claude · S · `DONE` · deps: T-172*
   - From the loader's point of view a partial ingest and a genuine decline are **identical**: both
     arrive as fewer rows. With a human in the loop that ambiguity was survivable; with T-172's
