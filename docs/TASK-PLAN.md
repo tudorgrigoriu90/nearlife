@@ -1706,12 +1706,13 @@ only.**
     resurface anywhere occurrence counts are used as a proxy for "common".
   - **Scope effect:** ~25,000 species across 5 countries → **6,824 in 1 country**. Presence data is
     already ingested and loaded. NOR/DNK/FIN/ISL become v2.
-  - ⚠️ **Still open, not decided here:** whether dual-language display is free or a €2 unlock. See
-    T-178.
-- **T-178 · Decide: is the dual-language second locale free or paid?** — *Director · S · `TODO` · deps: T-154*
-  - Director floated a **€2 one-time unlock** for the second content language as a monetization
-    lever. Not yet decided either way.
-  - **Recorded objection (Claude):** the dual-display roster is deliberately *Sweden's immigrant
+  - ✅ **Also decided (T-178):** the dual-language second locale is **free**, and the full
+    immigrant-language roster is v1 scope.
+- **T-178 · Dual-language second locale is FREE** — *Director · S · `DONE` (decided 2026-08-18) · deps: T-154*
+  - 🔭 **Director, final:** the second content language is **free for every user**. All content must
+    be translated into the full immigrant-language roster at no charge. The €2 unlock is dropped.
+  - A **€2 one-time unlock** was floated and rejected. Reasoning, kept because it constrains
+    future monetization proposals: the dual-display roster is deliberately *Sweden's immigrant
     languages* (Arabic, Somali, Persian/Dari, Pashto, Kurdish ×2, Tigrinya, Bosnian, Albanian,
     Ukrainian…), per [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md). Pricing it means a
     Swedish reader gets the whole app for free while a resident who cannot read Swedish pays to
@@ -1722,8 +1723,10 @@ only.**
   - There is also **no enforceable distinction** between a Somali speaker who needs Arabic and a
     Swede who wants Spanish for fun — both just pick a second language in Settings. So the only
     implementable lines are free-for-all or paid-for-all.
-  - **Suggested alternative:** keep dual display free; monetize *breadth* through the v2 region
-    packs ("Norwegian species, in your language"), which is already the ECONOMY.md plan.
+  - **Monetization stays on one axis** (Free → Full Game $9.99) and grows through v2 region packs
+    ("Norwegian species, in your language") — charging for *breadth*, never for comprehension.
+  - **Consequence for the build:** the immigrant-language roster is now v1 scope, not a nice-to-have.
+    Translating all shipped content into all 16 is required work — see T-179/T-180.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.

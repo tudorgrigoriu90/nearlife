@@ -4,7 +4,8 @@
 > T-136 noise filter ships — **6,824 species**, fauna and flora, carrying **99.63%** of all
 > recorded observations. There is **no per-species human verification gate**: the noise filter
 > is the quality bar. The other four Nordic countries are v2. The 54-species Kronoberg set
-> remains the content-voice benchmark, not the catalogue.
+> remains the content-voice benchmark, not the catalogue. **All shipped content is translated
+> into the full immigrant-language roster, free for every user (T-178)** — no language paywall.
 
 Operating rules for Claude on this repository. These are binding defaults, not suggestions.
 When a rule here conflicts with a one-off user instruction in the moment, the in-the-moment
