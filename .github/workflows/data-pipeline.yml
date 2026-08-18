@@ -39,6 +39,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Seconds, and it runs first on purpose: the load steps are silently skipped when their
+      # secret is missing, and that only becomes visible hours later, at the end of an ingest that
+      # then has nowhere to write. Names only — never the values.
+      - name: Preflight — which destinations are configured
+        run: |
+          for v in SUPABASE_DB_URL SUPABASE_URL SUPABASE_SERVICE_KEY; do
+            if [ -n "${!v}" ]; then echo "$v: set"; else echo "$v: MISSING — its load step will be skipped"; fi
+          done
+          echo "countries='${{ inputs.countries }}' content_scope='${{ inputs.content_scope }}'"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

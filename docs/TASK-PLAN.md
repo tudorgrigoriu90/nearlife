@@ -1612,6 +1612,26 @@ only.**
     (157 species) shows the gap — its facts are Wikipedia lead sentences, and its give/protect are
     taxon templates rather than per-species advice. Meeting this bar across ~25k species is the
     single largest piece of work in the project and needs its own plan before it is attempted.
+- **T-171 · Delete the superseded `pipeline.yml`; preflight the secrets** — *Claude · S · `DONE` · deps: T-167*
+  - Two workflow files both declared `name: Data pipeline`, so the Actions sidebar listed the same
+    entry twice with no way to tell which was which — and the wrong one has no `countries` /
+    `content_scope` inputs, so picking it silently offers a different job.
+  - `pipeline.yml` was the T-015 skeleton: it runs `pipeline/run.py`, which prints "skeleton OK"
+    and returns. Harmless on its own — but it also carried `cron: '0 3 1 * *'` and a real
+    `gbif.supabase_load` step, so it would have started writing to the production database
+    unattended on the 1st of every month the moment `SUPABASE_DB_URL` was set. Deleted.
+  - **The monthly refresh cadence is intentionally not carried over** (see T-172). A six-hour
+    unattended GBIF ingest on a schedule is a thing to switch on deliberately, once the ingest has
+    proven itself once by hand — not something to inherit from a skeleton.
+  - ✅ `data-pipeline.yml` gained a **preflight step**: it prints which of the three secrets are set
+    (names only, never values) and echoes the chosen inputs, in seconds. The load steps skip
+    silently when their secret is missing, and until now that only became visible at the end of a
+    multi-hour ingest that then had nowhere to write.
+- **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
+  - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
+    season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
+  - Open until the Nordic ingest has run once by hand and we know its real cost per country. A
+    schedule is also a standing external-API commitment, so it wants an explicit decision.
 - **T-170 · A partial ingest must not discard the whole run** — *Claude · S · `DONE` · deps: T-167*
   - `build_presence.py --all` returns 1 when *any* single taxon fails, and it deliberately keeps
     going so one failure does not lose the rest. But a non-zero step in Actions skips every step
