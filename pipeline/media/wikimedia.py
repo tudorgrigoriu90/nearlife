@@ -8,6 +8,7 @@ the caller records the species with a null image and the app falls back to the c
 
 import time
 import urllib.parse
+from dataclasses import dataclass
 
 import requests
 
@@ -16,6 +17,34 @@ from media.text import strip_html
 
 WIKI_API = "https://en.wikipedia.org/w/api.php"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+
+
+# Width of the thumbnail the app ships. ~40 KB at this size; see docs/DATA-SOURCING-LICENSING.md.
+# Full resolution is never re-hosted — the card links out to the Commons file page instead, which
+# costs no storage and gives the reader the licence and author alongside the image.
+THUMB_WIDTH = 400
+
+
+@dataclass(frozen=True)
+class ImageUrls:
+    """`display` is what the app shows; `original` is what "view full size" links to."""
+
+    display: str
+    original: str
+
+
+def pick_image_urls(info: dict) -> "ImageUrls | None":
+    """Choose the shipped image and its full-size counterpart from a Commons imageinfo blob.
+
+    Returns None when there is no original: a thumbnail with nothing behind it cannot be
+    attributed properly, and attribution is a licence condition, not a nicety.
+    """
+    original = info.get("url")
+    if not original:
+        return None
+    # Some files (SVGs, already-small images) come back with no thumburl. A large image beats no
+    # image — the alternative is a glyph on a card where a real photo exists.
+    return ImageUrls(display=info.get("thumburl") or original, original=original)
 
 
 class WikimediaClient:
@@ -64,7 +93,7 @@ class WikimediaClient:
         page = next(iter(pages.values()))
         return page.get("pageimage"), page.get("title")
 
-    def _commons_info(self, file_name: str) -> dict | None:
+    def _commons_info(self, file_name: str) -> dict | None:  # noqa: D401
         data = self._get(
             COMMONS_API,
             {
@@ -73,6 +102,10 @@ class WikimediaClient:
                 "prop": "imageinfo",
                 "titles": f"File:{file_name}",
                 "iiprop": "url|extmetadata",
+                # Let Commons do the resizing: the pipeline then downloads ~40 KB instead of a
+                # multi-megabyte original, which matters over thousands of species and is far
+                # kinder to Wikimedia's servers than fetching full-res and shrinking locally.
+                "iiurlwidth": THUMB_WIDTH,
             },
         )
         pages = data.get("query", {}).get("pages", {})
@@ -116,8 +149,12 @@ class WikimediaClient:
         license_name = md.get("LicenseShortName", {}).get("value")
         if not is_allowed_license(license_name):
             return None
+        urls = pick_image_urls(info)
+        if urls is None:
+            return None
         return {
-            "imageUrl": info.get("url"),
+            "imageUrl": urls.display,
+            "originalUrl": urls.original,
             "license": license_name,
             "licenseUrl": md.get("LicenseUrl", {}).get("value"),
             "author": strip_html(md.get("Artist", {}).get("value")),

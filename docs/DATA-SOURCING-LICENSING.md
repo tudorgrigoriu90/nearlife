@@ -127,3 +127,16 @@ Two consequences worth stating up front:
   occurrences by the wrong region and emits well-formed wrong data.
 - **Licensing is unchanged and still binding.** Only CC0 / CC-BY occurrences are ingested
   (§1), and only CC0 / CC-BY / CC-BY-SA media (§5), across all five countries.
+
+### Image tiers (T-168)
+
+The app ships a **~40 KB, 400px thumbnail** per species, re-hosted on Supabase Storage. Full
+resolution is **never re-hosted**: the card links to the Wikimedia Commons file page instead.
+
+- **Storage.** ~6,800 kept Swedish species at full size would exhaust the 1 GB free tier before
+  the other four countries are ingested. At 400px it is ~270 MB for Sweden.
+- **Attribution.** The full-size destination is the Commons file page, which carries the author and
+  licence — the page CC-BY / CC-BY-SA ask you to credit. The card also shows author + licence
+  inline whenever a photo is displayed.
+- **Politeness.** Thumbnails are requested via `iiurlwidth`, so Commons resizes server-side and we
+  transfer ~40 KB instead of multi-megabyte originals across thousands of species.

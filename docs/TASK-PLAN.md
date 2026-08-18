@@ -1598,6 +1598,26 @@ only.**
     (157 species) shows the gap — its facts are Wikipedia lead sentences, and its give/protect are
     taxon templates rather than per-species advice. Meeting this bar across ~25k species is the
     single largest piece of work in the project and needs its own plan before it is attempted.
+- **T-168 · Thumbnail tier: ship ~40 KB, link out for full size** — *Claude · M · `IN-PROGRESS` (pipeline + card done; bulk upload is Director) · deps: T-118, T-119, T-126, T-167*
+  - 💾 **Storage forced the design.** At ~6,800 kept Swedish species a full-size photo each would
+    fill the 1 GB Supabase free tier before Norway, Denmark, Finland and Iceland are ingested. A
+    400px thumbnail is ~40 KB → ~270 MB for Sweden, leaving room for the rest. Invariant #7 holds.
+  - ✅ **Commons does the resizing** (`iiurlwidth=400`), so the pipeline downloads ~40 KB rather
+    than fetching a multi-megabyte original and shrinking it locally — much faster over thousands
+    of species, and considerably kinder to Wikimedia.
+  - ✅ `pick_image_urls` (4 tests) picks the shipped image and its full-size counterpart, falling
+    back to the original when Commons returns no thumb (SVGs, already-small files): a large image
+    beats a glyph on a card where a real photo exists. Returns `None` when there is no original at
+    all, because a thumbnail with nothing behind it cannot be attributed — and attribution is a
+    licence condition, not a nicety.
+  - ✅ **Card hero is tappable** → opens the Commons file page (3 tests). The destination is a happy
+    accident of the licence: the page holding the full resolution is the same page holding the
+    author and licence, which is exactly what CC-BY / CC-BY-SA ask you to point at. `openURL`
+    failure is swallowed — a dead link must not break a delight moment.
+  - Full-resolution images are **never re-hosted**. Zero storage, zero egress, and no dependence
+    on Wikimedia hotlinking policy for the images we serve.
+  - ⏳ Remaining: regenerate the manifests at the new width and run the Storage upload (needs the
+    service key — Director), then `media.*.ts` regeneration.
 - **T-163 · `common-dandelion` has no presence data** — *Claude + Director · S · `TODO` · deps: T-042*
   - The app ships 54 species but `species_presence` covers **53**: `common-dandelion` is absent from
     the live DB *and* from `20260707000004_seed_kronoberg_presence.sql` itself, so this is a
