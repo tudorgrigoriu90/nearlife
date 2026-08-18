@@ -1784,19 +1784,25 @@ only.**
     longer exists.
   - 7 tests against a fake client — no network — asserting the per-language fetch actually happens
     per language rather than being translated from one call.
-  - ⚠️ **Cost note for the Director:** rows are now species × locales. At 6,824 species × 18 locales
-    that is ~123k Wikipedia fetches at the client's polite 0.6s pause ≈ **20 hours**, well past the
-    6-hour Actions job cap. It needs chunking by taxon or by locale before a full run — see T-182.
-- **T-182 · Chunk the content build so it fits the Actions job cap** — *Claude · M · `TODO` · deps: T-181*
-  - T-181 multiplied the work by the locale count: ~6,824 species × 18 locales ≈ 123k Wikipedia
-    fetches, ≈20 hours at the current pacing. The job cap is 6 hours, so a single `--all` run cannot
-    finish and would be killed mid-taxon.
-  - Options: a `--locales` flag so one dispatch does one language (18 shorter runs, each well under
-    the cap); a matrix job fanning out by taxon; or batching titles per request — the MediaWiki API
-    accepts up to 50 titles in one `titles=` query, which would cut fetches ~50× and is the biggest
-    single win available.
-  - Prefer the batched query first: it reduces total work rather than redistributing it, and it is
-    politer to Wikipedia than 123k individual requests.
+  - ⚠️ Rows are now species × locales, which took a full run to ~20 hours. Solved by batching in
+    **T-182** (~50× fewer requests); a full Swedish build now fits inside the job cap.
+- **T-182 · Batch the Wikipedia extract fetches** — *Claude · M · `DONE` · deps: T-181*
+  - T-181 multiplied the build by the locale count: ~6,824 species × 18 locales ≈ **123k requests**,
+    roughly **20 hours** at the client's polite pacing, against a 6-hour Actions cap. A single run
+    could not finish and would be killed mid-taxon.
+  - Fixed by **reducing** the work, not redistributing it: MediaWiki accepts **50 titles per
+    query**, so the same build is ~2,500 requests — ~50× fewer, inside the cap, and far politer to
+    Wikipedia than 123k individual hits. `build_localized` makes one batched pass per locale.
+  - **Mapping the response back is what silently goes wrong.** MediaWiki keys pages by page id and
+    reports normalisation and redirects in *separate arrays*, so a lookup by requested title loses
+    every species whose article sits behind a synonym — and taxonomy is full of synonyms
+    (`Parus caeruleus` → `Cyanistes caeruleus`). `map_extracts` follows both hops and chains them in
+    the order the API applies them. 10 tests.
+  - Every requested name appears in the result, mapping to None when there is no article, so the
+    caller can distinguish "no article" from "never asked".
+  - A failed batch costs that locale's facts, not the run. The **request count is pinned by a
+    test**, because a regression to per-species fetching would pass every other test here while
+    quietly restoring the 20 hours.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
