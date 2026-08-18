@@ -19,7 +19,12 @@ import json
 import os
 from pathlib import Path
 
-from gbif.db_rows import build_rows, regions_from_records, taxon_key_for
+from gbif.db_rows import (
+    adopt_existing_ids,
+    build_rows,
+    regions_from_records,
+    taxon_key_for,
+)
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
@@ -82,6 +87,14 @@ def main() -> None:
         raise SystemExit(f"{err}\n\nLikely cause: {hint}" if hint else str(err)) from err
 
     with conn_ctx as conn, conn.cursor() as cur:
+        # The curated species already hold gbif_keys, and species.gbif_key is uniquely indexed, so
+        # minting gbif:<key> for one of them aborts the whole transaction. Adopt the existing id
+        # instead: same animal, and the curated id is what content and photos are keyed to.
+        cur.execute("select gbif_key, id from public.species where gbif_key is not null")
+        existing = {int(k): i for k, i in cur.fetchall()}
+        species_rows, presence_rows = adopt_existing_ids(species_rows, presence_rows, existing)
+        print(f"adopted {sum(1 for r in species_rows if not r['id'].startswith('gbif:'))} curated ids")
+
         cur.executemany(REGION_SQL, regions)
         for chunk in _chunks(species_rows, 1000):
             cur.executemany(SPECIES_SQL, chunk)

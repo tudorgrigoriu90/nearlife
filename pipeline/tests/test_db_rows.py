@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from gbif.db_rows import (  # noqa: E402
+    adopt_existing_ids,
     build_rows,
     region_rows,
     regions_from_records,
@@ -121,3 +122,50 @@ def test_regions_from_records_dedupes_and_is_deterministic():
         ("flora_DNK", [_rec("DNK.1_1", 3, "C", [5], 3)]),
     ]
     assert [r["id"] for r in regions_from_records(datasets)] == ["DNK.1_1", "DNK.2_1"]
+
+
+# T-184: the curated 54 and the GBIF catalogue are the same species. `great-tit` already holds
+# gbif_key 9705453, so minting `gbif:9705453` for Parus major violates species_gbif_key_idx and
+# rolls back the entire load — which is exactly what happened after a 1h48m ingest.
+#
+# The curated id is the one to keep: 38 locales of hand-written content and the Storage photos are
+# keyed to it. The GBIF row is the same animal arriving by a different route.
+
+
+def test_a_gbif_species_adopts_the_curated_id_that_already_owns_its_key():
+    species = [{"id": "gbif:9705453", "gbif_key": 9705453, "scientific_name": "Parus major"}]
+    presence = [{"region_id": "SWE.9_1", "species_id": "gbif:9705453", "occurrences": 10}]
+    sp, pr = adopt_existing_ids(species, presence, {9705453: "great-tit"})
+    assert sp[0]["id"] == "great-tit"
+    assert pr[0]["species_id"] == "great-tit"
+
+
+def test_species_with_no_curated_counterpart_are_untouched():
+    species = [{"id": "gbif:111", "gbif_key": 111, "scientific_name": "Pica pica"}]
+    presence = [{"region_id": "SWE.9_1", "species_id": "gbif:111", "occurrences": 3}]
+    sp, pr = adopt_existing_ids(species, presence, {9705453: "great-tit"})
+    assert sp[0]["id"] == "gbif:111"
+    assert pr[0]["species_id"] == "gbif:111"
+
+
+def test_the_gbif_key_is_preserved_when_adopting():
+    # The key is what proves the two rows are one species; losing it would let them split again.
+    species = [{"id": "gbif:9705453", "gbif_key": 9705453, "scientific_name": "Parus major"}]
+    sp, _ = adopt_existing_ids(species, [], {9705453: "great-tit"})
+    assert sp[0]["gbif_key"] == 9705453
+
+
+def test_every_presence_row_follows_its_species():
+    species = [{"id": "gbif:9705453", "gbif_key": 9705453, "scientific_name": "Parus major"}]
+    presence = [
+        {"region_id": r, "species_id": "gbif:9705453", "occurrences": 1}
+        for r in ("SWE.1_1", "SWE.9_1", "SWE.21_1")
+    ]
+    _, pr = adopt_existing_ids(species, presence, {9705453: "great-tit"})
+    assert {p["species_id"] for p in pr} == {"great-tit"}
+
+
+def test_an_empty_existing_map_is_a_no_op():
+    species = [{"id": "gbif:1", "gbif_key": 1, "scientific_name": "A"}]
+    sp, _ = adopt_existing_ids(species, [], {})
+    assert sp[0]["id"] == "gbif:1"

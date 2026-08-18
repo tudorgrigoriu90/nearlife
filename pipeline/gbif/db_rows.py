@@ -126,3 +126,34 @@ def regions_from_records(
                 names[gid] = name
     for gid in sorted(names):
         yield {"id": gid, "name": names[gid]}
+
+
+def adopt_existing_ids(
+    species_rows: list[dict],
+    presence_rows: list[dict],
+    id_by_gbif_key: dict[int, str],
+) -> tuple[list[dict], list[dict]]:
+    """Rewrite GBIF-minted ids to the id that already owns that gbif_key.
+
+    The curated species and the GBIF catalogue are the same animals arriving by different routes:
+    `great-tit` already holds gbif_key 9705453, so inserting `gbif:9705453` for *Parus major*
+    violates the unique index on species.gbif_key and rolls back the whole load — after the ingest
+    that produced it has already run for hours.
+
+    The curated id wins because everything else is keyed to it: 38 locales of hand-written content
+    and the photos in Storage. The GBIF row carries the taxonomy and presence, which the upsert
+    merges onto the existing row instead of creating a second one.
+    """
+    if not id_by_gbif_key:
+        return species_rows, presence_rows
+    remap = {}
+    for row in species_rows:
+        existing = id_by_gbif_key.get(row.get("gbif_key"))
+        if existing and existing != row["id"]:
+            remap[row["id"]] = existing
+            row["id"] = existing
+    for row in presence_rows:
+        target = remap.get(row["species_id"])
+        if target:
+            row["species_id"] = target
+    return species_rows, presence_rows

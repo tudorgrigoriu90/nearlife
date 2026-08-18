@@ -1832,6 +1832,26 @@ only.**
   - A failed batch costs that locale's facts, not the run. The **request count is pinned by a
     test**, because a regression to per-species fetching would pass every other test here while
     quietly restoring the 20 hours.
+- **T-184 · GBIF species must adopt the curated id that already owns their key** — *Claude · M · `DONE` · deps: T-167*
+  - The Norway run (32116983847) ingested for **1h48m**, then the load died in 4 seconds:
+    `duplicate key value violates unique constraint "species_gbif_key_idx"` on
+    `gbif_key=9705453`. **The whole transaction rolled back, so nothing persisted — not Norway, and
+    not Sweden's 78,530 committed rows either.**
+  - Cause: the curated 54 and the GBIF catalogue are **the same species arriving by two routes**.
+    `great-tit` already holds gbif_key 9705453, and `species.gbif_key` is uniquely indexed
+    (20260707000003), so inserting `gbif:9705453` for *Parus major* is a second row for one animal.
+    `on conflict (id)` never fires because the ids differ. This would have hit most of the 54 —
+    they are common Swedish species and GBIF has them all.
+  - `adopt_existing_ids` resolves gbif_key → existing id before writing and rewrites the presence
+    rows to follow. **The curated id wins**: 38 locales of hand-written content and the Storage
+    photos are keyed to it, while the GBIF row only carries taxonomy and presence, which the upsert
+    merges onto the existing row. 5 tests.
+  - The unique index is *correct* and stays — one species, one GBIF key. The bug was the loader
+    minting a second identity for a species that already had one.
+  - ✅ Unrelated but confirmed by the same run: the photo upload succeeded again (54/54,
+    `bucket already exists`), so T-119/T-168 are genuinely idempotent.
+  - ⏳ The Norway ingest itself also failed after 1h48m; cause not yet diagnosed. Its partial data
+    survived as artifact 9320514029 (19 files, 2.8 MB) thanks to T-170.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
