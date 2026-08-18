@@ -14,6 +14,8 @@ insect/plant); the rest keep ``category = None`` and are classified by ``taxon_g
 
 from typing import Iterable, Iterator
 
+from gbif.counties import NORDIC_COUNTRIES
+
 # file taxon key → (taxon_group, vertebrate, app category or None)
 TAXON_MAP: dict[str, tuple[str, bool, str | None]] = {
     "birds": ("bird", True, "bird"),
@@ -86,3 +88,41 @@ def region_rows(counties: Iterable[dict]) -> Iterator[dict]:
     """Map the county definitions (gbif/counties.py) to `public.regions` rows."""
     for c in counties:
         yield {"id": c["gid"], "name": c["name"]}
+
+
+# Presence files are `presence_<taxon>.json` for Sweden and `presence_<taxon>_<ISO3>.json` for the
+# other Nordic countries (T-167), so the loader's taxon lookup has to strip the country back off.
+_ISO3 = {c["iso3"] for c in NORDIC_COUNTRIES}
+
+
+def taxon_key_for(stem: str) -> str:
+    """`birds` → birds, `birds_NOR` → birds. Raises on a suffix we never wrote."""
+    head, sep, tail = stem.rpartition("_")
+    if sep and tail.isupper():
+        if tail not in _ISO3:
+            raise KeyError(f"unknown country suffix in presence file: {stem}")
+        return head
+    return stem
+
+
+def regions_from_records(
+    datasets: Iterable[tuple[str, Iterable[dict]]],
+) -> Iterator[dict]:
+    """Derive `public.regions` rows from the presence data itself.
+
+    Every presence row carries a foreign key to `regions`, so the loader must insert a region for
+    each id the ingest actually produced. Reading them off the records rather than a checked-in
+    country list is what makes the loader country-agnostic: a Norwegian ingest brings its own
+    regions with it, and no presence row can reference a region that was never inserted.
+    """
+    names: dict[str, str] = {}
+    for _taxon, records in datasets:
+        for r in records:
+            gid = r["county"]
+            # The ingest falls back to the gid when it has no name; never let that overwrite a
+            # real one from another file.
+            name = r.get("countyName") or gid
+            if gid not in names or names[gid] == gid:
+                names[gid] = name
+    for gid in sorted(names):
+        yield {"id": gid, "name": names[gid]}

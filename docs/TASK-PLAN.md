@@ -1591,6 +1591,14 @@ only.**
     it is a workflow_dispatch away rather than a code change. Previously `build_presence.py` was
     hardcoded to Sweden **and in no workflow at all** — the existing Swedish data had been generated
     off-repo.
+  - ✅ **The load path is country-agnostic too.** Three defects would each have wasted the ingest
+    *after* it ran: `load_datasets` fed `birds_NOR` straight into `TAXON_MAP` (KeyError); the
+    loader inserted only Sweden's 21 counties, so every non-Swedish presence row violated
+    `species_presence.region_id`'s FK and rolled back the whole transaction; and region names for
+    fetched subdivisions fell back to their gid. Regions are now derived from the presence records
+    themselves (`db_rows.regions_from_records`) — a country's ingest carries its own regions, so a
+    presence row can never reference a region that was not inserted. `taxon_key_for` strips the
+    ISO3 suffix and **raises** on one we never wrote rather than mis-keying the taxon.
   - ⏳ **Next, in order:** (1) dispatch `Data pipeline` with `countries: NOR DNK FIN ISL` — hours per
     country, which is why it belongs in Actions rather than a laptop or a chat session; (2) T-136 noise filtering, now per-country
     (Artdatabanken/Dyntaxa SE, Artsdatabanken NO, Allearter DK, FinBIF/laji.fi FI,

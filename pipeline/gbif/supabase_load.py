@@ -15,8 +15,7 @@ import json
 import os
 from pathlib import Path
 
-from gbif.counties import SWEDISH_COUNTIES
-from gbif.db_rows import build_rows, region_rows
+from gbif.db_rows import build_rows, regions_from_records, taxon_key_for
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
@@ -25,7 +24,7 @@ def load_datasets() -> list[tuple[str, list[dict]]]:
     """Read every presence_*.json as (taxon_key, records)."""
     datasets = []
     for path in sorted(DATA_DIR.glob("presence_*.json")):
-        taxon = path.stem[len("presence_") :]
+        taxon = taxon_key_for(path.stem[len("presence_") :])
         doc = json.loads(path.read_text())
         datasets.append((taxon, doc["records"]))
     return datasets
@@ -63,8 +62,12 @@ def main() -> None:
 
     import psycopg  # imported lazily so the module imports without the DB driver (tests/CLI help)
 
-    species_rows, presence_rows = build_rows(load_datasets())
-    regions = list(region_rows(SWEDISH_COUNTIES))
+    datasets = load_datasets()
+    species_rows, presence_rows = build_rows(datasets)
+    # Regions come from the data, not from a country constant: presence rows carry an FK to
+    # regions, so a Nordic ingest that inserted only Sweden's counties would fail the whole
+    # transaction on the first Norwegian row (T-167).
+    regions = list(regions_from_records(datasets))
 
     with psycopg.connect(dsn) as conn, conn.cursor() as cur:
         cur.executemany(REGION_SQL, regions)

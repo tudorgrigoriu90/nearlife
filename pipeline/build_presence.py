@@ -33,7 +33,7 @@ except (AttributeError, ValueError):
 
 from gbif.aggregate import build_presence, presence_records
 from gbif.client import ALLOWED_LICENSES, GbifClient
-from gbif.counties import COUNTY_NAME_BY_GID, SWEDISH_COUNTIES, parse_subdivisions
+from gbif.counties import SWEDISH_COUNTIES, parse_subdivisions
 from gbif.taxa import TARGET_TAXA
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
@@ -77,7 +77,10 @@ def build_for_taxon(client: GbifClient, taxon: dict) -> dict:
     species_keys = {sk for (_gid, sk) in presence.keys()}
     print(f"  resolving {len(species_keys)} species names…", flush=True)
     species_names = {k: client.scientific_name(k) for k in species_keys}
-    records = list(presence_records(presence, COUNTY_NAME_BY_GID, species_names))
+    # Name map from the regions actually in play, so non-Swedish regions get real names
+    # instead of falling back to their gid (T-167).
+    name_by_gid = {c["gid"]: c["name"] for c in (regions or SWEDISH_COUNTIES)}
+    records = list(presence_records(presence, name_by_gid, species_names))
 
     if truncations:
         print(
