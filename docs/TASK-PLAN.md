@@ -2055,18 +2055,26 @@ only.**
     on Wikimedia hotlinking policy for the images we serve.
   - ⏳ Remaining: regenerate the manifests at the new width and run the Storage upload (needs the
     service key — Director), then `media.*.ts` regeneration.
-- **T-163 · `common-dandelion` has no presence data** — *Claude + Director · S · `TODO` · deps: T-042*
-  - The app ships 54 species but `species_presence` covers **53**: `common-dandelion` is absent from
-    the live DB *and* from `20260707000004_seed_kronoberg_presence.sql` itself, so this is a
-    pipeline gap, not a failed apply. It also has no `gbif_key`.
-  - Cause: GBIF has no Kronoberg records under the exact binomial `Taraxacum officinale`. Dandelion
-    is an apomictic aggregate that GBIF splits into hundreds of microspecies — `presence_flora.json`
-    carries `Taraxacum croceum` and siblings, but never the aggregate name the seed list uses.
-  - **Deliberately not patched with an invented occurrence count.** Presence drives "active in your
-    region this season"; a fabricated number would be a dishonest claim in the one place invariant
-    #1 most matters. Fix by aggregating the `Taraxacum` microspecies in the pipeline, or by pointing
-    the species at the aggregate GBIF key — a data decision, not a hotfix.
-  - Until then dandelion can never surface in This Week on the Supabase path.
+- **T-163 · Dandelion: aggregate the *Taraxacum* microspecies** — *Claude · S · `DONE` (Director chose (a), 2026-08-18) · deps: T-042*
+  - GBIF splits *Taraxacum officinale* into hundreds of apomictic microspecies. Sweden's flora data
+    holds **216 of them carrying 89,286 observations**, so the app either offered `Taraxacum
+    piceatum` as something to spot, or showed a dandelion with a sliver of its real presence.
+    Neither is what anyone means by *maskros*.
+  - 🔭 **Director decision:** aggregate the microspecies into one card — option (a), over pointing at
+    GBIF's aggregate key or dropping the species.
+  - `gbif/aggregate_genus.py` merges configured genera per county, summing occurrences and unioning
+    active months. Effect on the real data: flora records **23,555 → 22,680**, and dandelion becomes
+    present in **all 21 counties with 89,286 observations** — one of Sweden's commonest plants,
+    which is the truth a person would recognise.
+  - **Configured, never automatic.** Collapsing any genus with many members would be a lie in the
+    other direction: most genera hold species a person can genuinely tell apart. Only listed genera
+    merge.
+  - A genus whose target binomial is absent from the data is **left untouched**: the target's
+    `speciesKey` is the app's species id, and borrowing a microspecies' key would produce an id that
+    renames itself when the ingest reorders. 8 tests, including that `Taraxacum` cannot swallow a
+    hypothetical `Taraxacumoides`.
+  - Applied inside `build_presence.py` *before* meta is computed, so the reported counts describe
+    what ships rather than GBIF's split. Takes effect on the next ingest.
 - **T-164 · Review Supabase security advisories** — *Director · S · `TODO` · deps: —*
   - `get_advisors(security)` reports 5 warnings on the live project. None are caused by the
     T-146/T-160 changes; recorded here so they are triaged rather than rediscovered.

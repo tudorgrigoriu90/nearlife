@@ -32,6 +32,7 @@ except (AttributeError, ValueError):
     pass
 
 from gbif.aggregate import build_presence, presence_records
+from gbif.aggregate_genus import aggregate_genus
 from gbif.client import ALLOWED_LICENSES, GbifClient
 from gbif.counties import SWEDISH_COUNTIES, parse_subdivisions
 from gbif.taxa import TARGET_TAXA
@@ -81,6 +82,9 @@ def build_for_taxon(client: GbifClient, taxon: dict, regions: list) -> dict:
     # instead of falling back to their gid (T-167).
     name_by_gid = {c["gid"]: c["name"] for c in regions}
     records = list(presence_records(presence, name_by_gid, species_names))
+    # Collapse configured apomictic genera (T-163) before the counts are reported, so meta
+    # describes what actually ships rather than GBIF's microspecies split.
+    records = aggregate_genus(records)
 
     if truncations:
         print(
