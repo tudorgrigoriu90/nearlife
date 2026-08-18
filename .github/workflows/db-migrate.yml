@@ -1,0 +1,57 @@
+name: Database migrate
+
+# Applies the repo's supabase/migrations to the live project using $SUPABASE_DB_URL, so a 1.5 MB
+# content seed does not need the Supabase CLI on a laptop (T-176). Manual only: it writes to
+# production.
+#
+# Modes:
+#   plan    (default) report what would be applied and stop — never writes
+#   apply   run each pending migration in its own transaction, then record it
+#   repair  record pending versions as applied WITHOUT running them
+#
+# `repair` is for DDL already applied by other means. The live project's history was written by the
+# Supabase MCP tool, which stamped its own timestamps, so several files' contents are already in
+# place under versions that do not match their filenames. Run `plan` first and read the list: any
+# version there whose changes are already live wants `repair`, not `apply`.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "plan (report only) | apply (run pending) | repair (stamp as applied, run nothing)"
+        required: true
+        default: "plan"
+        type: choice
+        options: [plan, apply, repair]
+
+concurrency:
+  group: db-migrate
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: ${{ inputs.mode }} migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preflight
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "SUPABASE_DB_URL is not set — nothing can be applied."; exit 1
+          fi
+          echo "SUPABASE_DB_URL: set; mode=${{ inputs.mode }}"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r pipeline/requirements.txt
+
+      - name: ${{ inputs.mode }}
+        working-directory: pipeline
+        run: python -m db.migrate ${{ inputs.mode }}

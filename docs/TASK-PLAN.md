@@ -1659,6 +1659,25 @@ only.**
     transaction mode. psycopg3 promotes repeated statements to prepared ones and PgBouncer's
     transaction mode rejects them, which both loaders would hit on their `executemany` over
     thousands of rows. **Session pooler, port 5432** is the correct target.
+- **T-176 · `Database migrate` workflow — apply migrations without the CLI** — *Claude · M · `DONE` · deps: T-160, T-174*
+  - `supabase db push` needs the CLI and a linked project on a laptop, and the migration that
+    actually matters (`20260810000001`, the all-locales content seed) is **1.5 MB** — far too large
+    to move through a chat session. `.github/workflows/db-migrate.yml` runs the same job from
+    Actions against `$SUPABASE_DB_URL`, so it is a dispatch rather than a local toolchain.
+  - **Three modes, `plan` the default.** `plan` reports and never writes; `apply` runs each pending
+    migration **in its own transaction** and records it; `repair` stamps versions as applied without
+    executing them.
+  - `repair` is not a convenience — it is required here. The live history was written by the MCP
+    tool, which stamps its own timestamps, so six files' contents are applied under versions that do
+    not match their filenames (e.g. `20260705000001` is live as `20260705183144`). Without repair,
+    `apply` re-runs DDL that is already in place.
+  - A version recorded in the database with no local file is **ignored, not reported as drift**: it
+    is history from another tool, not work to do. Tested (`test_migrate.py`, 6 tests) because
+    getting this wrong either re-runs DDL or silently skips the one migration that matters.
+  - One transaction per migration rather than one for the batch: a failure then leaves that
+    migration entirely unapplied *and* unrecorded, instead of half-done under a stamp claiming it
+    succeeded.
+  - ⏳ **Director:** run it `plan` first and read the pending list — see the T-160 gate below.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
