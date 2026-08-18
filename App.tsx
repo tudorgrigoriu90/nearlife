@@ -17,7 +17,12 @@ import BadgesScreen from './components/BadgesScreen';
 import ImpactScreen from './components/ImpactScreen';
 import { useCollection } from './components/useCollection';
 import { useTracker } from './components/useTracker';
-import { DEFAULT_CONSENT, setConsent, type ConsentKind, type ConsentState } from './lib/consent';
+import {
+  applyConsentChange,
+  DEFAULT_CONSENT,
+  type ConsentKind,
+  type ConsentState,
+} from './lib/consent';
 import { AsyncStorageConsentStore } from './lib/consentStore';
 import {
   DEFAULT_DUAL_LANGUAGE,
@@ -123,10 +128,13 @@ export default function App() {
   const [freeCatch, setFreeCatch] = useState<FreeCatchState>(INITIAL_FREE_CATCH);
 
   const toggleConsent = (kind: ConsentKind, value: boolean) => {
-    // Minors can never enable analytics (T-089 minimal-data path), even if a toggle is reached.
-    if (analyticsLocked && kind === 'analytics') return;
+    // The age gate lives in `applyConsentChange` (T-197) rather than here: it is a T-089 safety
+    // rule, and a rule that exists only inside a component handler is one refactor away from
+    // vanishing without a test going red. It returns the same object when it refuses, so a
+    // blocked change costs no write.
+    const next = applyConsentChange(consent, kind, value, analyticsLocked);
+    if (next === consent) return;
     // Persist every change so the choice survives a restart (GDPR consent record, T-088).
-    const next = setConsent(consent, kind, value);
     setConsentState(next);
     void CONSENT_STORE.save(next);
   };

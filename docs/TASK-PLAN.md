@@ -2078,6 +2078,18 @@ only.**
     scientific name, so a card always has a title. That fallback is honest **at the display layer** —
     it is the name we actually have — while the row still records that no common name is known,
     which is what T-187 was protecting. Blank strings are treated as absent.
+- **T-197 · Move the consent age gate out of a component closure** — *Claude · S · `DONE` · deps: T-089*
+  - "Minors can never enable analytics" (T-089, the minimal-data path) lived as two lines inside an
+    untested handler in `App.tsx`. A **safety rule that exists only inside a component closure is
+    one refactor away from disappearing without a single test going red** — and `App.tsx` sits at
+    56% function coverage, so nothing was watching it.
+  - `applyConsentChange(state, kind, value, analyticsLocked)` in `lib/consent.ts`, 6 tests.
+  - **The lock is one-way, and that is the point.** A minor can always turn analytics *off*;
+    blocking the toggle in both directions would trap someone with analytics on, which is the
+    opposite of what a minimal-data path is for. Only analytics is age-gated — location and
+    notifications are functional consents the app asks for openly.
+  - Returns the **same object** when it refuses, so a blocked change costs no write to the consent
+    store. `App.tsx` checks identity and returns early.
 - **T-192 · Refuse a load that looks like a broken ingest** — *Claude · S · `DONE` · deps: T-172*
   - From the loader's point of view a partial ingest and a genuine decline are **identical**: both
     arrive as fewer rows. With a human in the loop that ambiguity was survivable; with T-172's
