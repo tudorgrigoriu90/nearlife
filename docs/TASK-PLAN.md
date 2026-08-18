@@ -1786,6 +1786,15 @@ only.**
     per language rather than being translated from one call.
   - ⚠️ Rows are now species × locales, which took a full run to ~20 hours. Solved by batching in
     **T-182** (~50× fewer requests); a full Swedish build now fits inside the job cap.
+- **T-183 · The content loader must read each row's own locale** — *Claude · S · `DONE` · deps: T-181*
+  - `build_content_rows` stamped every row with a single caller-supplied `locale`, from when all
+    generated content was English. With per-locale items (T-181) that would have collapsed all 18
+    languages onto the same `(species_id, locale)` dedupe key and kept whichever arrived first —
+    **seventeen languages of work discarded by a load that reports success.**
+  - Each item's own `locale` now wins; the argument survives only as the fallback for
+    `content_*.json` payloads written before the field existed, which must still load as English.
+  - 4 tests, including that a genuine duplicate *within* one locale is still skipped — the dedupe
+    is still doing its job, it is just keyed correctly now.
 - **T-182 · Batch the Wikipedia extract fetches** — *Claude · M · `DONE` · deps: T-181*
   - T-181 multiplied the build by the locale count: ~6,824 species × 18 locales ≈ **123k requests**,
     roughly **20 hours** at the client's polite pacing, against a 6-hour Actions cap. A single run

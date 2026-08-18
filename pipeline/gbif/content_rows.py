@@ -26,10 +26,14 @@ def _content_items(payload) -> list[dict]:
 def build_content_rows(payloads: Iterable, locale: str = "en") -> tuple[list[dict], dict]:
     """payloads: iterable of content payloads (or bare content lists).
 
-    Returns ``(rows, summary)``. ``rows`` are species_content upsert dicts (one per distinct
-    species); ``summary`` reports coverage honestly: ``total`` items seen, ``with_fact`` /
-    ``without_fact`` loaded, and ``skipped_dup``. The generated content is English (status=machine);
-    Swedish rows arrive later via the review-gated translation (T-127/T-135), hence ``locale='en'``.
+    Returns ``(rows, summary)``. ``rows`` are species_content upsert dicts, one per distinct
+    (species, locale); ``summary`` reports coverage honestly: ``total`` items seen, ``with_fact`` /
+    ``without_fact`` loaded, and ``skipped_dup``.
+
+    Each item carries its own ``locale`` (T-181/T-183). The ``locale`` argument is only the fallback
+    for payloads written before that field existed. Stamping every row with one locale instead would
+    collapse all 18 languages onto the same dedupe key and silently keep whichever arrived first —
+    a successful-looking load that discards seventeen languages of work.
     """
     rows: list[dict] = []
     seen: set[tuple[str, str]] = set()
@@ -39,7 +43,8 @@ def build_content_rows(payloads: Iterable, locale: str = "en") -> tuple[list[dic
         for item in _content_items(payload):
             total += 1
             species_id = species_id_for(item["speciesKey"])
-            key = (species_id, locale)
+            row_locale = item.get("locale") or locale
+            key = (species_id, row_locale)
             if key in seen:
                 skipped_dup += 1
                 continue
@@ -55,7 +60,7 @@ def build_content_rows(payloads: Iterable, locale: str = "en") -> tuple[list[dic
             rows.append(
                 {
                     "species_id": species_id,
-                    "locale": locale,
+                    "locale": row_locale,
                     "common_name": None,  # localized names come from names.sv / review, not here
                     "fact": fact,  # None when there's no article — never fabricated (invariant #1)
                     "when_how": item["whenAndHow"],

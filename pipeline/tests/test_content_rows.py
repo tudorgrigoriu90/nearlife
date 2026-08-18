@@ -81,3 +81,45 @@ def test_locale_override_tags_rows():
 def test_accepts_a_bare_content_list():
     rows, summary = build_content_rows([[_item(5, "Bare", "fact")]])
     assert len(rows) == 1 and summary["total"] == 1
+
+
+# T-183: content items now carry their own `locale` (T-181). The loader previously stamped every
+# row with a single caller-supplied locale, which would have collapsed all 18 languages onto
+# ('species', 'en') — the dedupe key — and silently kept whichever arrived first. Eighteen
+# languages of work, seventeen of them discarded, with a successful-looking load.
+
+
+def _loc_item(locale, name="Pica pica", fact="A magpie."):
+    return {
+        "speciesKey": 1,
+        "scientificName": name,
+        "locale": locale,
+        "fact": fact,
+        "whenAndHow": f"[{locale}] when",
+        "give": f"[{locale}] give",
+        "protect": f"[{locale}] protect",
+    }
+
+
+def test_each_item_keeps_its_own_locale():
+    rows, _ = build_content_rows([[_loc_item("en"), _loc_item("sv"), _loc_item("ar")]])
+    assert {r["locale"] for r in rows} == {"en", "sv", "ar"}
+
+
+def test_the_same_species_in_three_languages_is_three_rows_not_one():
+    rows, summary = build_content_rows([[_loc_item("en"), _loc_item("sv"), _loc_item("ar")]])
+    assert len(rows) == 3
+    assert summary["skipped_dup"] == 0
+
+
+def test_a_genuine_duplicate_within_one_locale_is_still_skipped():
+    rows, summary = build_content_rows([[_loc_item("sv"), _loc_item("sv")]])
+    assert len(rows) == 1
+    assert summary["skipped_dup"] == 1
+
+
+def test_items_without_a_locale_fall_back_to_the_argument():
+    # Older content_*.json payloads predate the locale field; they must still load as English.
+    legacy = {k: v for k, v in _loc_item("en").items() if k != "locale"}
+    rows, _ = build_content_rows([[legacy]], locale="en")
+    assert rows[0]["locale"] == "en"
