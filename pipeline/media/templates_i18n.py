@@ -47,7 +47,7 @@ SV_TEMPLATES: dict[str, dict[str, str]] = {
     "mammal": {
         "give": "Lämna vildvuxna hörn och buskridåer, en glugg i staketet för smådjur, och ostörda ved- och lövhögar som skydd.",
         "protect": "Kör försiktigt i gryning och skymning, ha hunden under uppsikt i viltrika marker, och mata eller närma dig aldrig vilda däggdjur.",
-        "habitat": "i skogsbryn, ängsmark och lugna gömslen",
+        "habitat": "i skogsbryn, ängsmark, våtmarker och lugna gömslen",
     },
     "insect": {
         "give": "Låt en del av gräsmattan växa, plantera blommor för pollinatörer, och lämna löv och död ved kvar för övervintring.",
@@ -109,7 +109,7 @@ AR_TEMPLATES = {
     "mammal": {
         "give": "اترك زوايا برّية وأسيجة نباتية، وفتحة في السياج تمرّ منها الحيوانات الصغيرة، وأكوام حطب وأوراق غير مُزعَجة للإيواء.",
         "protect": "قُد بحذر عند الفجر والغسق، وأبقِ الكلب تحت السيطرة في مناطق الحياة البرية، ولا تُطعم الثدييات البرية ولا تقترب منها.",
-        "habitat": "عند أطراف الغابات والمروج والمخابئ الهادئة",
+        "habitat": "عند أطراف الغابات والمروج والأراضي الرطبة والمخابئ الهادئة",
     },
     "insect": {
         "give": "اترك جزءًا من العشب ينمو، وازرع أزهارًا متنوعة تناسب الملقِّحات، واترك أوراق الشجر والخشب الميت لتقضي فيها الشتاء.",
@@ -164,7 +164,7 @@ SO_TEMPLATES = {
     "mammal": {
         "give": "U dhaaf geeso duurjoog ah iyo xayndaab dhir ah, dalool xayndaabka ah oo xayawaanka yaryari ka gudbaan, iyo tuulmooyin qoryo iyo caleemo ah oo aan la dhaqaajin.",
         "protect": "Si taxaddar leh u wad waaberiga iyo fiidkii, eeyga ku hay ilaalo meelaha duurjoogta, oo weligaa ha quudin ama ha u dhowaan naasleyda duurjoogta ah.",
-        "habitat": "cidhifyada kaymaha, doogga iyo meelaha xasilloon ee qarsoon",
+        "habitat": "cidhifyada kaymaha, doogga, meelaha qoyan iyo meelaha xasilloon ee qarsoon",
     },
     "insect": {
         "give": "Qayb ka mid ah cawska u daa inuu koro, beero ubaxyo kala duwan oo ku habboon wax-shubta, oo u daa caleemaha iyo qoryaha dhintay si ay jiilaalka ugu noolaadaan.",
@@ -220,7 +220,7 @@ RU_TEMPLATES = {
     "mammal": {
         "give": "Оставьте дикие уголки и живые изгороди, лаз в заборе для мелких зверей и нетронутые кучи валежника и листвы для укрытия.",
         "protect": "Ездите осторожно на рассвете и в сумерках, держите собаку под контролем в местах обитания зверей и никогда не подкармливайте диких животных и не подходите к ним.",
-        "habitat": "на опушках, лугах и в тихих укрытиях",
+        "habitat": "на опушках, лугах, у воды и в тихих укрытиях",
     },
     "insect": {
         "give": "Дайте части газона зарасти, посадите разные растения для опылителей и оставьте листву и валежник для зимовки.",
@@ -280,7 +280,7 @@ UK_TEMPLATES = {
     "mammal": {
         "give": "Залиште дикі закутки й живоплоти, отвір у паркані для дрібних звірів і незаймані купи хмизу та листя для схову.",
         "protect": "Їдьте обережно на світанку й у сутінках, тримайте собаку під контролем у місцях мешкання звірів і ніколи не годуйте диких тварин і не наближайтеся до них.",
-        "habitat": "на узліссях, луках і в тихих схованках",
+        "habitat": "на узліссях, луках, біля води та в тихих схованках",
     },
     "insect": {
         "give": "Дайте частині газону зарости, посадіть різні квіти для запилювачів і залиште листя та мертву деревину для зимівлі.",
@@ -338,7 +338,7 @@ FA_TEMPLATES = {
     "mammal": {
         "give": "گوشه‌های وحشی و پرچین‌ها را رها کنید، شکافی در حصار برای عبور جانوران کوچک بگذارید و توده‌های چوب و برگ را دست‌نخورده نگه دارید.",
         "protect": "سپیده‌دم و غروب با احتیاط رانندگی کنید، در زیستگاه‌های حیات وحش سگ را کنترل کنید و هرگز به پستانداران وحشی غذا ندهید و به آن‌ها نزدیک نشوید.",
-        "habitat": "در حاشیهٔ جنگل‌ها، مرغزارها و پناهگاه‌های آرام",
+        "habitat": "در حاشیهٔ جنگل‌ها، مرغزارها، تالاب‌ها و پناهگاه‌های آرام",
     },
     "insect": {
         "give": "بخشی از چمن را بگذارید رشد کند، گل‌های متنوع مناسب گرده‌افشان‌ها بکارید و برگ‌ها و چوب مرده را برای زمستان‌گذرانی رها کنید.",
@@ -393,7 +393,7 @@ TR_TEMPLATES = {
     "mammal": {
         "give": "Yabani köşeler ve çalı çitleri bırakın, küçük memelilerin geçebileceği bir aralık açın ve odun ile yaprak yığınlarını el değmemiş bırakın.",
         "protect": "Şafakta ve alacakaranlıkta dikkatli sürün, yaban hayatı alanlarında köpeğinizi kontrol altında tutun, yabani memelileri asla beslemeyin ve onlara yaklaşmayın.",
-        "habitat": "orman kenarlarında, çayırlarda ve sessiz sığınaklarda",
+        "habitat": "orman kenarlarında, çayırlarda, sulak alanlarda ve sessiz sığınaklarda",
     },
     "insect": {
         "give": "Çimin bir bölümünü uzamaya bırakın, tozlayıcılara uygun çeşitli çiçekler ekin ve kışlamaları için yaprak ve ölü odun bırakın.",
@@ -454,7 +454,7 @@ BS_TEMPLATES = {
     "mammal": {
         "give": "Ostavite divlje kutke i živice, otvor u ogradi kuda prolaze male životinje i netaknute hrpe drva i lišća za sklonište.",
         "protect": "Vozite oprezno u zoru i suton, držite psa pod kontrolom u staništima divljači i nikada ne hranite divlje sisare niti im prilazite.",
-        "habitat": "na rubovima šuma, livadama i u mirnim zaklonima",
+        "habitat": "na rubovima šuma, livadama, uz vodu i u mirnim zaklonima",
     },
     "insect": {
         "give": "Pustite dio travnjaka da naraste, posadite raznovrsno cvijeće za oprašivače i ostavite lišće i mrtvo drvo za prezimljavanje.",
@@ -511,7 +511,7 @@ SQ_TEMPLATES = {
     "mammal": {
         "give": "Lini cepa të egra dhe gardhe të gjalla, një hapësirë në gardh që kafshët e vogla të kalojnë dhe grumbuj druri e gjethesh të paprekur për strehë.",
         "protect": "Ngisni me kujdes në agim dhe muzg, mbajeni qenin nën kontroll në zonat e faunës dhe kurrë mos ushqeni e mos u afroni gjitarëve të egër.",
-        "habitat": "në buzë pyjesh, livadhe dhe strehë të qeta",
+        "habitat": "në buzë pyjesh, livadhe, pranë ujit dhe strehë të qeta",
     },
     "insect": {
         "give": "Lëreni një pjesë të lëndinës të rritet, mbillni lule të larmishme për pluhurizuesit dhe lini gjethe e dru të vdekur për dimërim.",
@@ -566,7 +566,7 @@ VI_TEMPLATES = {
     "mammal": {
         "give": "Chừa lại những góc hoang và hàng rào cây, một khe hở dưới hàng rào cho thú nhỏ đi qua, cùng đống củi và lá khô không bị xáo trộn để làm nơi trú.",
         "protect": "Lái xe cẩn thận lúc bình minh và hoàng hôn, kiểm soát chó ở khu vực có thú hoang, và đừng bao giờ cho ăn hay lại gần thú hoang.",
-        "habitat": "ở bìa rừng, đồng cỏ và những nơi trú ẩn yên tĩnh",
+        "habitat": "ở bìa rừng, đồng cỏ, ven nước và những nơi trú ẩn yên tĩnh",
     },
     "insect": {
         "give": "Để một phần bãi cỏ mọc tự nhiên, trồng nhiều loại hoa cho loài thụ phấn, và giữ lại lá rụng cùng gỗ mục cho chúng qua đông.",
@@ -622,7 +622,7 @@ SR_TEMPLATES = {
     "mammal": {
         "give": "Оставите дивље кутке и живице, отвор у огради куда пролазе мале животиње и нетакнуте гомиле дрвета и лишћа за склониште.",
         "protect": "Возите опрезно у зору и сумрак, држите пса под контролом у стаништима дивљачи и никада не храните дивље сисаре нити им прилазите.",
-        "habitat": "на рубовима шума, ливадама и у мирним заклонима",
+        "habitat": "на рубовима шума, ливадама, уз воду и у мирним заклонима",
     },
     "insect": {
         "give": "Пустите део травњака да нарасте, посадите разноврсно цвеће за опрашиваче и оставите лишће и мртво дрво за презимљавање.",
@@ -679,7 +679,7 @@ TH_TEMPLATES = {
     "mammal": {
         "give": "เว้นมุมรกร้างและแนวพุ่มไม้ไว้ เปิดช่องรั้วให้สัตว์เล็กลอดผ่าน และกองไม้กองใบไม้ที่ไม่ถูกรบกวนไว้เป็นที่หลบภัย",
         "protect": "ขับรถอย่างระมัดระวังช่วงเช้ามืดและพลบค่ำ ควบคุมสุนัขในพื้นที่สัตว์ป่า และอย่าให้อาหารหรือเข้าใกล้สัตว์ป่าเด็ดขาด",
-        "habitat": "ตามชายป่า ทุ่งหญ้า และที่กำบังอันเงียบสงบ",
+        "habitat": "ตามชายป่า ทุ่งหญ้า ริมน้ำ และที่กำบังอันเงียบสงบ",
     },
     "insect": {
         "give": "ปล่อยให้สนามหญ้าบางส่วนขึ้นรก ปลูกดอกไม้หลากชนิดสำหรับแมลงผสมเกสร และเว้นใบไม้ร่วงกับไม้ผุไว้ให้ข้ามฤดูหนาว",
@@ -734,7 +734,7 @@ AM_TEMPLATES = {
     "mammal": {
         "give": "የዱር ማዕዘኖችንና አጥር ቁጥቋጦዎችን ይተዉ፣ ትናንሽ እንስሳት የሚያልፉበት የአጥር ክፍተት ይተዉ፣ ያልተነኩ የእንጨትና የቅጠል ክምሮችንም ለመጠለያ ይተዉ።",
         "protect": "በንጋትና በመሸት በጥንቃቄ ይንዱ፣ በዱር እንስሳት አካባቢ ውሻን ይቆጣጠሩ፣ የዱር አጥቢዎችን በፍጹም አይመግቡ አይቅረቡም።",
-        "habitat": "በጫካ ዳርቻ፣ በሜዳና በጸጥታ መጠለያዎች",
+        "habitat": "በጫካ ዳርቻ፣ በሜዳ፣ በውሃ ዳርና በጸጥታ መጠለያዎች",
     },
     "insect": {
         "give": "የሳር ሜዳው ከፊሉ እንዲያድግ ይተዉ፣ ለአበባ አዳፊዎች የተለያዩ አበቦችን ይትከሉ፣ ለክረምት ማሳለፊያም ቅጠልና የሞተ እንጨት ይተዉ።",
@@ -790,7 +790,7 @@ TI_TEMPLATES = {
     "mammal": {
         "give": "በረኻዊ ኩርናዓትን ሓጹር ቁጥቋጦን ግደፍ፣ ንናእሽቱ እንስሳ ዝሓልፍሉ ኣብ ሓጹር ነዃል ግደፍ፣ ንመዕቆቢ ከኣ ዘይተተንከፈ ኩምራ ዕንጨይትን ቆጽልን ግደፍ።",
         "protect": "ብወጋሕታን ብምሸትን ብጥንቃቐ ዘውር፣ ኣብ ናይ በረኻ እንስሳታት ቦታ ከልቢ ተቖጻጸር፣ ንበረኻዊ ኣጥባዊታት ከኣ ፈጺምካ ኣይትምገቦም ኣይትቕረቦም።",
-        "habitat": "ኣብ ዳር ጫካ፣ ሽኻን ጸጥ ዝበለ መጸግዒን",
+        "habitat": "ኣብ ዳር ጫካ፣ ሽኻ፣ ጥቓ ማይን ጸጥ ዝበለ መጸግዒን",
     },
     "insect": {
         "give": "ገለ ክፋል ሳዕሪ ክዓቢ ግደፍ፣ ንመንቀሳቐስቲ ዘርኢ ዝኸውን እተፈላለየ ዕምባባ ትከል፣ ንኽረምቲ መሕለፊ ከኣ ቆጽልን ዝሞተ ዕንጨይትን ግደፍ።",
@@ -845,7 +845,7 @@ CKB_TEMPLATES = {
     "mammal": {
         "give": "گۆشە کێوییەکان و پەرژینە دارەکان بەجێبهێڵە، کەلێنێک لە پەرژیندا بۆ تێپەڕبوونی ئاژەڵە بچووکەکان، هەروەها کۆمەڵە دار و گەڵای دەستنەخراو بۆ پەناگە.",
         "protect": "لە بەرەبەیان و ئێواراندا بە وریاییەوە لێبخوڕە، لە ناوچەی ژیانی کێوی سەگ کۆنتڕۆڵ بکە، هەرگیز خۆراک بە شیردەرە کێوییەکان مەدە و لێیان نزیک مەبەوە.",
-        "habitat": "لە قەراغی دارستان، مەرگزار و پەناگە هێمنەکان",
+        "habitat": "لە قەراغی دارستان، مەرگزار، لای ئاو و پەناگە هێمنەکان",
     },
     "insect": {
         "give": "بەشێک لە سەوزەڵانەکە بەجێبهێڵە با گەشە بکات، گوڵی جۆراوجۆر بۆ تۆزهەڵگرەکان بچێنە، گەڵا و داری مردوویش بۆ زستانگوزەرانی بەجێبهێڵە.",
@@ -900,7 +900,7 @@ KMR_TEMPLATES = {
     "mammal": {
         "give": "Quncikên çolî û çeperên darî bihêle, di çeperê de kelekek ji bo derbasbûna ajalên biçûk, û komên dar û pelên nelivandî ji bo stargehê.",
         "protect": "Di berbangê û êvarê de bi baldarî ajotinê bike, li deverên jiyana çolê kûçik kontrol bike, û tu carî xwarinê nede memikdarên çolê û nêzîkî wan nebe.",
-        "habitat": "li perên daristanan, mêrgan û stargehên bêdeng",
+        "habitat": "li perên daristanan, mêrgan, ber avê û stargehên bêdeng",
     },
     "insect": {
         "give": "Bihêle beşek ji çîmenê mezin bibe, kulîlkên cûrbecûr ji bo tozvekiran biçîne, û pel û darê mirî ji bo derbasbûna zivistanê bihêle.",
@@ -955,7 +955,7 @@ PS_TEMPLATES = {
     "mammal": {
         "give": "ځنګلي ګوټونه او د بوټو پولې پرېږدئ، په پولې کې یوه سوړه چې کوچني څاروي ترې تېر شي، او د پناه لپاره نه لمس شوي د لرګیو او پاڼو ډېرۍ.",
         "protect": "په سهار او ماښام کې په احتیاط سره موټر چلوئ، د ځنګلي ژوند په سیمو کې سپی تر کنټرول لاندې وساتئ، او هېڅکله ځنګلي تی لرونکو ته خواړه مه ورکوئ او مه ورنږدې کېږئ.",
-        "habitat": "د ځنګلونو په څنډو، شنو ډګرونو او آرامو پناهځایونو کې",
+        "habitat": "د ځنګلونو په څنډو، شنو ډګرونو، د اوبو غاړو او آرامو پناهځایونو کې",
     },
     "insect": {
         "give": "پرېږدئ د واښو یوه برخه وغځېږي، د ګرد لېږدوونکو لپاره بېلابېل ګلونه وکرئ، او د ژمي تېرولو لپاره پاڼې او مړ لرګی پرېږدئ.",

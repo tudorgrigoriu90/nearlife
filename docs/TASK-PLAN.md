@@ -1970,6 +1970,30 @@ only.**
     today. It was blocked in turn by a signature mismatch (T-173), an IPv6-only connection string
     (T-174), a curated/GBIF id collision (T-184), and a migration history whose stamps did not match
     its filenames (T-176). Each looked like the last one until it was fixed.
+- **T-190 · The mammal habitat hint told readers to look for otters in meadows** — *Claude · S · `DONE` · deps: T-180*
+  - The mammals pilot rendered *Lutra lutra* as "Active in your region year-round. Look for it **in
+    woodland edges, meadows, and quiet cover**." That is not dull, it is **false** — and false in
+    the one field the app can least afford it (invariant #1). Otter, beaver, water vole and seals
+    all get the same line.
+  - Cause is structural, not a typo: habitat hints are **per taxon**, shared by every species in it,
+    so any hint naming only one kind of place is wrong for the members that live somewhere else.
+    `mollusc` already had the right shape — "in damp, shady places and clean fresh water" — naming
+    both rather than picking one.
+  - Fixed by widening the mammal hint to include water, **in all 18 locales**. Regression test
+    anchored in English, where the bug was found; the other 17 were widened by hand in the same
+    commit and are covered by the differs-from-English conformance check.
+  - 📌 **This is a mitigation, not the real fix.** The honest solution is *per-species* habitat, and
+    GBIF already publishes it: `/species/{key}/speciesProfiles` returns `marine`, `freshwater` and
+    `terrestrial` flags. That would let an otter get a water hint and a badger a woodland one from
+    real data instead of a taxon average — filed as **T-191**.
+- **T-191 · Per-species habitat from GBIF species profiles** — *Claude · M · `TODO` · deps: T-188, T-190*
+  - T-190 widened the taxon hints so they stop being false, but a hint that names every habitat a
+    taxon might occupy is vague by construction. `/species/{key}/speciesProfiles` returns `marine`,
+    `freshwater`, `terrestrial` and a free-text `habitat` per species.
+  - Fetch it in the same pass as vernacular names (T-188), which already walks all 6,824 species and
+    is resumable — that makes this a second field in an existing loop rather than a second ingest.
+  - Each locale then needs an **aquatic** variant of its habitat hint (18 more strings), selected by
+    the flag. Terrestrial species keep the current wording, so the change is additive.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.

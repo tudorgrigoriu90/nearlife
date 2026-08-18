@@ -18,7 +18,7 @@ TEMPLATES: dict[str, dict[str, str]] = {
     "mammal": {
         "give": "Leave wild corners and hedgerows, a gap in the fence for small mammals to pass, and undisturbed log or leaf piles for shelter.",
         "protect": "Drive carefully at dawn and dusk, keep dogs under control in wildlife areas, and never feed or approach wild mammals.",
-        "habitat": "in woodland edges, meadows, and quiet cover",
+        "habitat": "in woodland edges, meadows, wetlands, and quiet cover",
     },
     "insect": {
         "give": "Let part of your lawn grow, plant a variety of pollinator-friendly flowers, and leave leaf litter and deadwood for overwintering.",

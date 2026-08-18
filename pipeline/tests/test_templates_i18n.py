@@ -145,3 +145,20 @@ def test_no_locale_composes_a_doubled_word():
                     assert stripped != b.strip(".,;:!?()") or not stripped, (
                         f"{loc}/{taxon}: doubled word {a!r} in composed sentence"
                     )
+
+
+def test_the_mammal_habitat_does_not_exclude_the_ones_that_live_in_water():
+    """Regression: the mammals pilot told a reader to look for an otter "in woodland edges,
+    meadows, and quiet cover".
+
+    That is not dull, it is false — and false in the field the app is least able to afford it
+    (invariant #1, honest copy). The taxon habitat hints are shared by every species in the taxon,
+    so any hint that names only one kind of place is wrong for the ones that live somewhere else:
+    otter, beaver, water vole, seals. `mollusc` already showed the right pattern by naming both
+    land and fresh water.
+
+    Anchored in English because that is the string the bug was found in; the other 17 were widened
+    by hand in the same commit and are covered by the differs-from-English check above.
+    """
+    hint = strings_for("en").templates["mammal"]["habitat"]
+    assert "wetland" in hint, hint
