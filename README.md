@@ -59,6 +59,58 @@ post-validation (v2). Details in [docs/ECONOMY.md](docs/ECONOMY.md).
 
 ---
 
+## Run it locally
+
+Works the same on Windows, macOS and Linux. Nothing here needs Xcode or Android Studio — the
+fastest path is Expo Go on a physical phone.
+
+**Prerequisites:** Node **≥ 20.19.4** (`node -v`) and Git. On Windows, plain PowerShell is fine;
+WSL is not required.
+
+```bash
+git clone https://github.com/tudorgrigoriu90/nearlife.git
+cd nearlife
+npm install
+```
+
+**Configure the client keys.** Copy `.env.example` to `.env.local` (git-ignored) and fill in the
+two Supabase values from the dashboard → Project Settings → API:
+
+```
+EXPO_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
+EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+
+Take the **publishable** key, never a secret one — everything `EXPO_PUBLIC_*` is embedded in the
+client bundle by design and protected by RLS, not by being hidden. The PostHog vars are optional;
+leave them blank and analytics stays off.
+
+The app also runs with **no `.env.local` at all**: `createRemote()` returns null, the collection
+runs purely on-device, and nothing is lost (T-165). That is the quickest way to see the UI.
+
+**Then pick one:**
+
+| | Command | Notes |
+|---|---|---|
+| Phone (recommended) | `npx expo start --go` | Install **Expo Go**, put the phone on the same Wi-Fi, scan the QR code. Works for iPhone too — the only way to see iOS from a Windows machine. |
+| Browser | `npm run web` | Fastest loop. Renders through react-native-web; location and notifications behave differently from a real device. |
+| Android emulator | `npm run android` | Needs Android Studio and a running AVD. |
+
+`--go` matters: `expo-dev-client` is a dependency, so a bare `npm start` targets a custom dev build
+rather than Expo Go. Push notifications are the one thing Expo Go cannot fully exercise on Android
+(SDK 53+) — everything else in the app works.
+
+**If the QR code cannot connect,** it is almost always Windows Firewall blocking Node on the local
+network, or the phone being on a different SSID (a 5 GHz/2.4 GHz split counts). `npx expo start
+--go --tunnel` routes around both at the cost of some latency.
+
+**Checks before pushing** (the same gate CI runs):
+
+```bash
+npm run verify        # lint + typecheck + tests
+python -m pytest pipeline -q
+```
+
 ## 📚 Documentation
 
 Docs follow the Helix studio taxonomy. Start with the index: **[docs/README.md](docs/README.md)**.
