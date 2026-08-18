@@ -674,7 +674,7 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     T-102 (households) lands; the current `user_id` shape covers v1.
 
 ## F4.2 — Almanac
-- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (async wiring done; species+presence loaded T-184; **content seed applied — gate cleared**; repo injection + secondary filters pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
+- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (**Supabase repo injected**; secondary filters pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ Data-access seam `lib/speciesRepository.ts` (7 tests): `SpeciesRepository` (`listSpecies` +
     `getContent`) with a `HardcodedSpeciesRepository` (the bundled set the app runs on today) and a
     `SupabaseSpeciesRepository` (reads the seeded `species`/`species_content` tables via a fakeable
@@ -683,8 +683,17 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     on mount → `AlmanacScreen` gets `species` + `loading`), not the bundled module directly. Defaults
     to `HardcodedSpeciesRepository` (no behaviour change); the source swaps to Supabase once the DB is
     seeded. App integration test asserts the loaded total (fails if the async load regresses).
-  - Remaining: inject the Supabase-backed repo + apply the content seed (needs the seeded DB,
-    T-055/T-145 load), and add season/habitat secondary filters (habitat needs E3).
+  - ✅ **Injected (2026-08-18).** `createSpeciesRepository()` returns Supabase when configured and
+    the bundled data otherwise; `App.tsx` no longer constructs `HardcodedSpeciesRepository` directly.
+  - ✅ **Wrapped in `FallbackSpeciesRepository`.** The swap is not a straight substitution: bundled
+    data is always available and the network is not, so one failed request would empty the almanac —
+    worse than 54 species, and a regression against the offline-first behaviour T-165 established
+    for the collection. The fallback triggers on **failure only, never on an empty result**: an
+    empty result is an answer, and falling back there would show bundled content for a species the
+    database has no row for — or, in `getContentInLocale`, surface a language the user never chose,
+    which is the precise thing that method exists to prevent. Failures are logged rather than
+    swallowed, because a silent fallback makes a persistent outage look like a small catalogue.
+  - Remaining: season/habitat secondary filters (habitat needs E3).
   - 🚦→✅ **The seed gate is CLEARED (2026-08-18).** The gate read: do not inject the Supabase repo
     until all 38 locales are seeded, because `SupabaseSpeciesRepository.getContentInLocale` has no
     English fallback by design — switching over with only en/sv/so live would have silently blanked

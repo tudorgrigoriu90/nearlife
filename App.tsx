@@ -45,7 +45,7 @@ import { gradeFromScore } from './lib/minigame/grade';
 import { seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator, type Locale } from './lib/i18n';
-import { HardcodedSpeciesRepository } from './lib/speciesRepository';
+import { createSpeciesRepository } from './lib/speciesRepositoryFactory';
 import type { HelpKind } from './lib/collection';
 import type { SpeciesContent } from './lib/species/content';
 import type { Species } from './lib/species/types';
@@ -60,7 +60,8 @@ const INITIAL_FREE_CATCH: FreeCatchState = {
 // directly, so the source can swap to the seeded Supabase tables without touching the shell. The
 // default is the bundled Kronoberg set the app runs on today; the source swaps to a Supabase-backed
 // repo once the DB is seeded (T-055 content seed). Module-level so its identity is stable.
-const SPECIES_REPO = new HardcodedSpeciesRepository();
+// Supabase when configured, bundled data otherwise, with a fallback on failure (T-057).
+const SPECIES_REPO = createSpeciesRepository();
 
 // Device-local consent persistence (T-088) — granular opt-ins survive restarts. Module-level so
 // its identity is stable across renders.
