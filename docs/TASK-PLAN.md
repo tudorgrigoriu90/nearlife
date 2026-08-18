@@ -511,9 +511,26 @@ key before loading into Supabase.**
     mammals") — a curation pass vs. an authoritative Swedish checklist (Artdatabanken/Dyntaxa) is
     a follow-up before user-facing use (**new T-136**). (3) 22 MB of JSON committed as the interim
     home; canonical home is Supabase (T-134).
-- **T-136 · Curate GBIF lists against an authoritative Swedish checklist** — *Claude + Director · M · `TODO` · deps: T-042*
-  - Filter out zoo/escapee/vagrant/domestic and misID noise (e.g. via Dyntaxa/Artdatabanken or
-    an established/native flag) so the app shows species users can genuinely encounter.
+- **T-136 · Curate GBIF lists against authoritative national checklists** — *Claude + Director · M · `IN-PROGRESS` (filter built + validated; checklist ingest pending) · deps: T-042, T-167*
+  - Filter out zoo/escapee/vagrant/domestic and misID noise so the app shows species users can
+    genuinely encounter. Now Nordic-wide (T-167), so "the Swedish checklist" is five checklists —
+    see the authority table in DATA-SOURCING-LICENSING.md.
+  - ✅ `gbif/noise.py` + 12 tests. Checklist status is authoritative in **both** directions when
+    known; the statistics only cover species the checklist has not spoken about.
+  - 🔑 **Rarity is not noise, and the test encodes that.** The osprey carries 372,495 records across
+    all 21 Swedish counties while the app tags it `rare` — that tag is an encounter-frequency
+    *flavour*, not scarcity. A plain "drop the uncommon" threshold would discard real species and
+    keep well-recorded escapees, so the rule is breadth **or** local abundance, never one number.
+  - ✅ **Validated against the hand-curated set:** applied Sweden-wide it takes 11,908 → 6,824
+    (42.7% removed) while retaining **53 of the 54** curated species. The single drop is
+    `Taraxacum officinale`, which is the T-163 data gap surfacing (no GBIF presence under the
+    binomial), not a filter misjudgement. Pinned as a regression test — if a policy change starts
+    eating curated species, the build fails.
+  - Thresholds live in a `Policy` dataclass rather than as literals, and every verdict carries a
+    reason: at Nordic scale these lists are far too large to re-derive by eye, and a species
+    dropped silently cannot be argued with later.
+  - ⏳ Remaining: ingest the five national checklists and pass them in as `statuses` — at which
+    point the heuristics become the fallback rather than the primary rule.
 - **T-134 · Load presence dataset into Supabase (reference schema + writer)** — *Claude + Director · M · `IN-PROGRESS` (schema + loader + bounded seed done; full bulk load needs the service key) · deps: T-042, T-003 · [TSD §3](TSD.md)*
   - ✅ **Schema** `…000003_regions_and_presence.sql`: `regions` (21 counties), `species` taxonomy
     columns (`gbif_key`, `taxon_group`, `vertebrate`; `category` now nullable for amphibians/
