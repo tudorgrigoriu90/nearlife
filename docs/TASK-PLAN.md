@@ -1585,8 +1585,14 @@ only.**
   - ✅ **Country filter derived from the GADM id** (`gbif/client.py`), replacing a hardcoded
     `country=SE`. Asking for a Norwegian region while filtering on Sweden returns zero rather than
     an error, so the two must never be able to disagree. Adds `GbifClient.subdivisions()`.
-  - ⏳ **Next, in order:** (1) run the ingest for NOR/DNK/FIN/ISL — needs CI, since `api.gbif.org`
-    is refused by the sandbox egress policy; (2) T-136 noise filtering, now per-country
+  - ✅ **The ingest is now runnable.** `build_presence.py` takes `--country <ISO3>` (Sweden keeps
+    its checked-in regions and its existing filenames; other countries fetch subdivisions and write
+    `presence_<taxon>_<ISO3>.json`), and the `Data pipeline` workflow gained a `countries` input, so
+    it is a workflow_dispatch away rather than a code change. Previously `build_presence.py` was
+    hardcoded to Sweden **and in no workflow at all** — the existing Swedish data had been generated
+    off-repo.
+  - ⏳ **Next, in order:** (1) dispatch `Data pipeline` with `countries: NOR DNK FIN ISL` — hours per
+    country, which is why it belongs in Actions rather than a laptop or a chat session; (2) T-136 noise filtering, now per-country
     (Artdatabanken/Dyntaxa SE, Artsdatabanken NO, Allearter DK, FinBIF/laji.fi FI,
     Náttúrufræðistofnun IS); (3) content generation at scale; (4) T-166 becomes mandatory —
     bundling dies at this size.

@@ -14,8 +14,12 @@ name: Data pipeline
 on:
   workflow_dispatch:
     inputs:
+      countries:
+        description: "Presence ingest: space-separated ISO3 codes (SWE NOR DNK FIN ISL), or empty to skip the ingest"
+        required: false
+        default: ""
       content_scope:
-        description: "Content generation scope: 'all' (~12k species, ~hours) or a single presence file name (e.g. presence_mammals.json)"
+        description: "Content generation scope: 'all' (~12k species, ~hours), a single presence file name, or 'skip'"
         required: false
         default: "all"
 
@@ -44,7 +48,20 @@ jobs:
       - name: Install pipeline deps
         run: pip install -r pipeline/requirements.txt
 
+      # GBIF ingest. Hours per country (regions x 12 months x taxa, politely paced), which is why
+      # it lives here rather than on a laptop or in a chat session: Actions can run for six hours
+      # unattended and the output is committed as an artifact either way.
+      - name: Ingest presence from GBIF
+        if: ${{ inputs.countries != '' }}
+        run: |
+          for c in ${{ inputs.countries }}; do
+            echo "::group::presence ingest $c"
+            python pipeline/build_presence.py --all --country "$c"
+            echo "::endgroup::"
+          done
+
       - name: Generate species content (grounded facts + safe templates, T-135)
+        if: ${{ inputs.content_scope != 'skip' }}
         run: |
           if [ "${{ inputs.content_scope }}" = "all" ]; then
             python pipeline/build_content.py --all
