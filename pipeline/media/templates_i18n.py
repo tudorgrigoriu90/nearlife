@@ -781,6 +781,227 @@ AM_MONTHS = ("ጃንዋሪ", "ፌብሩዋሪ", "ማርች", "ኤፕሪል", "�
              "ጁላይ", "ኦገስት", "ሴፕቴምበር", "ኦክቶበር", "ኖቬምበር", "ዲሴምበር")
 
 
+TI_TEMPLATES = {
+    "bird": {
+        "give": "ንዓይነታት ከባቢኻ ዝሰማማዕ ናይ ጎጆ ሳጹን ስቐል፣ ብሓጋይ ጽሩይ ማይ ኣቕርብ፣ ብግዜ ምጉጃል ከኣ ደሙ ኣብ ገዛ ኣጽንሕ።",
+        "protect": "ጎጆታትን ቦታታት ምጉጃልን ኣይትረብሽ፣ ኣብ መሬት ኣብ ዝጎጅላ ኣዕዋፍ ጥቓ ከልቢ ብገመድ ሓዝ፣ ናይ ለይቲ መብራህትን ምስ መስኮት ምግጫውን ከኣ ኣጉድል።",
+        "habitat": "ኣብቲ ዝምገበሉን ዝጎጅለሉን ጫካ፣ ረግረግን ኣታኽልትን",
+    },
+    "mammal": {
+        "give": "በረኻዊ ኩርናዓትን ሓጹር ቁጥቋጦን ግደፍ፣ ንናእሽቱ እንስሳ ዝሓልፍሉ ኣብ ሓጹር ነዃል ግደፍ፣ ንመዕቆቢ ከኣ ዘይተተንከፈ ኩምራ ዕንጨይትን ቆጽልን ግደፍ።",
+        "protect": "ብወጋሕታን ብምሸትን ብጥንቃቐ ዘውር፣ ኣብ ናይ በረኻ እንስሳታት ቦታ ከልቢ ተቖጻጸር፣ ንበረኻዊ ኣጥባዊታት ከኣ ፈጺምካ ኣይትምገቦም ኣይትቕረቦም።",
+        "habitat": "ኣብ ዳር ጫካ፣ ሽኻን ጸጥ ዝበለ መጸግዒን",
+    },
+    "insect": {
+        "give": "ገለ ክፋል ሳዕሪ ክዓቢ ግደፍ፣ ንመንቀሳቐስቲ ዘርኢ ዝኸውን እተፈላለየ ዕምባባ ትከል፣ ንኽረምቲ መሕለፊ ከኣ ቆጽልን ዝሞተ ዕንጨይትን ግደፍ።",
+        "protect": "ጸረ-ባልዕ መድሃኒት ኣወግድ፣ ገለ መሬት በረኻን ዘይተተንከፈን ኮይኑ ግደፍ፣ ዘየድሊ ናይ ደገ መብራህቲ ከኣ ኣጉድል።",
+        "habitat": "ኣብ ከባቢ ሽኻ፣ ዕምባባን ዝሞተ ዕንጨይትን",
+    },
+    "arachnid": {
+        "give": "ዝሃድናሉን ዝዕቆቡሉን ዘይተተንከፈ ኩርናዓት፣ ዝወደቐ ቆጽልን ዝሞተ ዕንጨይትን ግደፍ።",
+        "protect": "ጸረ-ባልዕ መድሃኒት ኣወግድ፣ ኣብ ገዛ ዝረኸብካዮም ከኣ ካብ ምጉዳእ ኣውጽኦም።",
+        "habitat": "ኣብ ዘይተተንከፈ ተኽሊ፣ ዝወደቐ ቆጽልን ዝሞተ ዕንጨይትን",
+    },
+    "fish": {
+        "give": "መስመራት ማይ ጽሩይን ብጫፍ ተኽሊ ጽላል ዘለዎን ኮይኑ ንኽጸንሕ ሓግዝ፣ ዓሳ ንኽስደድ ዕንቅፋታት ንኽለዓሉ ከኣ ደግፍ።",
+        "protect": "መስመራት ማይ ኣይተርክስ ጓሓፍ ከኣ ኣይትደርቢ፣ ሕግታት መጻወድያ ዓሳን ሒዝካ-ምልቓቕን ተኸተል፣ ቦታታት ምፍራይ ከኣ ኣይትረብሽ።",
+        "habitat": "ኣብቲ ዝነብረሉ ቀላያት፣ ወሓይዝን ሩባታትን",
+    },
+    "amphibian": {
+        "give": "ቀላይ ወይ ርሑስን ዝተጸለለን ኩርናዕ ሓዝ፣ ኩምራ ግንድን እምንን ግደፍ፣ ኣብ መንጎ ማይን መሬትን ከኣ ውሑስ መተሓላለፊ ሓሉ።",
+        "protect": "ብጽድያ መገዲ ክሰግሩ ከለዉ ተጠንቀቕ፣ ኣይተግዕዞም ብኢድካ ከኣ ኣይትሓዞም፣ ማይ ከኣ ካብ ብከላን ጓሓፍን ሓሉ።",
+        "habitat": "ጥቓ ቀላያት፣ ቦዮታትን ርሑስ መሬትን",
+    },
+    "reptile": {
+        "give": "ንምውዓይ ዝኸውን ጸሓያዊ ኩምራ እምንን ግንድን፣ ንመዕቆቢ ከኣ ሓርፋፍን ዘይተተንከፈን መሬት ግደፍ።",
+        "protect": "እንስሳታት ብኢድካ ኣይትሓዞም ኣይተግዕዞም፣ ኣብ ናይ ለመምታ ቦታ ከልቢ ኣብ መገዲ ሓዝ፣ ቦታታት ምውዓይ ጸሓይ ከኣ ኣይትረብሽ።",
+        "habitat": "ኣብ ጸሓያዊ ኣቐማምጣ፣ ቁጥቋጦን ኩምራ እምንን",
+    },
+    "mollusc": {
+        "give": "ከም ኩምራ ግንዲ ዝኣመሰሉ ርሑሳትን ጽላል ዘለዎምን መዕቆቢታት ሓሉ፣ ገለ ዝወደቐ ቆጽሊ ከኣ ግደፍ።",
+        "protect": "ጸረ-ቀርኒ ዘውጽእን ጸረ-ባልዕን መድሃኒት ኣወግድ፣ ንዓይነታት ጽሩይ ማይ ከኣ መስመራት ማይ ጽሩይ ግበር።",
+        "habitat": "ኣብ ርሑሳትን ጽላል ዘለዎምን ቦታታትን ጽሩይ ማይን",
+    },
+    "plant": {
+        "give": "ናይ ዓዲ ተኽልታት ክዓብዩ ግደፍ፣ ኣብ ዓመት ውሑድ ግዜን ዘሓለፈ ግዜን ዓጺድ፣ ርእሲ ዘርኢ ከኣ ንኽረምቲ ደው ኢሉ ይጽናሕ።",
+        "protect": "በረኻዊ ተኽልታት ኣይትቐንጥብ ኣይትምሓው፣ ኣብ ተነካእቲ ቦታታት ኣብ መገዲ ተጓዓዝ፣ ናይ ወጻኢ ተኽሊ ከኣ ፈጺምካ ኣይተእቱ።",
+        "habitat": "ኣብቲ ዝበቅለሉ ሽኻ፣ ጫካን ዳር መገድን",
+    },
+    "fungus": {
+        "give": "ቅንጥሻ ኣብ ዝፈርየሉ ቦታ ዝሞተ ዕንጨይትን ዝወደቐ ቆጽልን ግደፍ፣ ኣብ ጫካ ከኣ ብህድኣት ተጓዓዝ።",
+        "protect": "ናይ ከባቢ ሕጊ ዝፈቕዶ ጥራይ ውሰድ፣ ፍረታቱ ኣይትረግጽ፣ ቅንጥሻ ዝብላዕ ምዃኑ ንምውሳን ከኣ ፈጺምካ ኣብ መተግበሪ ኣይትተኣማመን።",
+        "habitat": "ኣብ መሬት ጫካ፣ ዝሞተ ዕንጨይትን ዝወደቐ ቆጽልን",
+    },
+}
+TI_MONTHS = ("ጥሪ", "ለካቲት", "መጋቢት", "ሚያዝያ", "ግንቦት", "ሰነ",
+             "ሓምለ", "ነሓሰ", "መስከረም", "ጥቅምቲ", "ሕዳር", "ታሕሳስ")
+
+CKB_TEMPLATES = {
+    "bird": {
+        "give": "سندوقێکی هێلانە کە لەگەڵ جۆرەکانی ناوچەکەت بگونجێت هەڵبواسە، لە هاویندا ئاوی پاک دابین بکە، لە وەرزی هێلانەکردنیشدا پشیلەکان لە ماڵەوە ڕابگرە.",
+        "protect": "هێلانە و شوێنی هێلانەکردن مەشێوێنە، لە نزیک ئەو باڵندانەی لەسەر زەوی هێلانە دەکەن سەگ بە گوریس ڕابگرە، ڕووناکی شەوانە و لێدان بە پەنجەرەکانەوە کەم بکەرەوە.",
+        "habitat": "لەو دارستان و زێڵاو و باخانەی تیایدا خۆراک دەدۆزێتەوە و هێلانە دەکات",
+    },
+    "mammal": {
+        "give": "گۆشە کێوییەکان و پەرژینە دارەکان بەجێبهێڵە، کەلێنێک لە پەرژیندا بۆ تێپەڕبوونی ئاژەڵە بچووکەکان، هەروەها کۆمەڵە دار و گەڵای دەستنەخراو بۆ پەناگە.",
+        "protect": "لە بەرەبەیان و ئێواراندا بە وریاییەوە لێبخوڕە، لە ناوچەی ژیانی کێوی سەگ کۆنتڕۆڵ بکە، هەرگیز خۆراک بە شیردەرە کێوییەکان مەدە و لێیان نزیک مەبەوە.",
+        "habitat": "لە قەراغی دارستان، مەرگزار و پەناگە هێمنەکان",
+    },
+    "insect": {
+        "give": "بەشێک لە سەوزەڵانەکە بەجێبهێڵە با گەشە بکات، گوڵی جۆراوجۆر بۆ تۆزهەڵگرەکان بچێنە، گەڵا و داری مردوویش بۆ زستانگوزەرانی بەجێبهێڵە.",
+        "protect": "لە دژە مێروو خۆتان بەدوور بگرن، بەشێک زەوی کێوی و دەستنەخراو بەجێبهێڵە، ڕووناکی دەرەوەی نەویستیش کەم بکەرەوە.",
+        "habitat": "لە دەوروبەری مەرگزار، گوڵ و داری مردوو",
+    },
+    "arachnid": {
+        "give": "ئەو گۆشە دەستنەخراوانە، گەڵای وەریو و داری مردوو بەجێبهێڵە کە تیایدا ڕاو دەکەن و پەنا دەگرن.",
+        "protect": "لە دژە مێروو خۆت بەدوور بگرە، ئەوانەش کە لە ماڵەوە دەیاندۆزیتەوە لە جیاتی ئازاردان بیانگوازەوە.",
+        "habitat": "لە ڕووەکی دەستنەخراو، گەڵای وەریو و داری مردوو",
+    },
+    "fish": {
+        "give": "یارمەتیدەربە بۆ ئەوەی ڕووبارەکان پاک و بە ڕووەکی کەنار سێبەردار بمێننەوە، پشتگیری لابردنی بەربەستەکانیش بکە بۆ ئەوەی ماسی بتوانێت کۆچ بکات.",
+        "protect": "ڕووبارەکان پیس مەکە و خۆڵ و خاشاکیان تێمەدە، یاساکانی ماسیگرتن و بگرە-و-بەریدە پەیڕەو بکە، شوێنی تۆوکردنیش مەشێوێنە.",
+        "habitat": "لەو دەریاچە و ڕووبار و جۆگەلانەی تیایدا دەژی",
+    },
+    "amphibian": {
+        "give": "گۆمێک یان گۆشەیەکی شێدار و پەناگیر ڕابگرە، کۆمەڵە قەد و بەرد بەجێبهێڵە، ڕێڕەوی سەلامەتیش لە نێوان ئاو و وشکانیدا بپارێزە.",
+        "protect": "لە بەهاردا ئاگاداری تێپەڕبوونیان بە ڕێگاکاندا بە، مەیانگوازەوە و بە دەست مەیانگرە، ئاوەکەش لە پیسبوون و خۆڵ و خاشاک بپارێزە.",
+        "habitat": "لە نزیک گۆم، جۆگە و زەوی شێدار",
+    },
+    "reptile": {
+        "give": "کۆمەڵە بەرد و قەدی خۆردار بەجێبهێڵە بۆ خۆگەرمکردنەوە، هەروەها زەوی ناھەموار و دەستنەخراو بۆ پەناگە.",
+        "protect": "ئاژەڵەکان بە دەست مەگرە و مەیانگوازەوە، لە ناوچەی خشۆکەکاندا سەگ لەسەر ڕێڕەو ڕابگرە، شوێنی خۆگەرمکردنەوەشیان مەشێوێنە.",
+        "habitat": "لەسەر بنارە خۆردارەکان، دەشتوداوێن و کۆمەڵە بەرد",
+    },
+    "mollusc": {
+        "give": "پەناگە شێدار و سێبەردارەکان وەک کۆمەڵە قەد بپارێزە، بەشێک گەڵای وەریویش بەجێبهێڵە.",
+        "protect": "لە دژە مەرو و دژە مێروو خۆت بەدوور بگرە، بۆ جۆرەکانی ئاوی سازگاریش ڕووبارەکان پاک ڕابگرە.",
+        "habitat": "لە شوێنە شێدار و سێبەردارەکان و ئاوی سازگاری پاک",
+    },
+    "plant": {
+        "give": "ڕێگا بە ڕووەکە خۆماڵییەکان بدە گەشە بکەن، کەمتر و درەنگتر لە ساڵدا بیانبڕە، سەری تۆویش بە درێژایی زستان بەپێوە بەجێبهێڵە.",
+        "protect": "ڕووەکە کێوییەکان مەچنە و هەڵیانمەکێشە، لە ناوچە هەستیارەکاندا لەسەر ڕێڕەو بمێنەوە، هەرگیزیش ڕووەکی بێگانە مەھێنە.",
+        "habitat": "لەو مەرگزار و دارستان و قەراغە ڕێگایانەی تیایدا گەشە دەکات",
+    },
+    "fungus": {
+        "give": "لەو شوێنەی کەڕووەکان بەرهەم دەھێنن داری مردوو و گەڵای وەریو بەجێبهێڵە، بە هێمنیش بەناو دارستاندا بڕۆ.",
+        "protect": "تەنها ئەوەندە ببە کە یاسای ناوچەکە ڕێگای پێدەدات، بەرهەمەکانیان مەپەستە، هەرگیزیش پشت بە ئەپێک مەبەستە بۆ بڕیاردان لەسەر ئەوەی کەڕوو خواردنە یان نا.",
+        "habitat": "لەسەر زەوی دارستان، داری مردوو و گەڵای وەریو",
+    },
+}
+CKB_MONTHS = ("کانوونی دووەم", "شوبات", "ئازار", "نیسان", "ئایار", "حوزەیران",
+              "تەمووز", "ئاب", "ئەیلوول", "تشرینی یەکەم", "تشرینی دووەم", "کانوونی یەکەم")
+
+KMR_TEMPLATES = {
+    "bird": {
+        "give": "Qutîkeke hêlînê ya li gorî cureyên herêmê bi dar ve bike, di havînê de ava paqij peyda bike, di demsala hêlînkirinê de jî pisîkan li malê bihêle.",
+        "protect": "Hêlîn û cihên hêlînkirinê aciz neke, li nêzîkî çûkên ku li erdê hêlîn dikin kûçik bi bendikê bigire, ronahiya şevê û lêdana li camên pencereyan kêm bike.",
+        "habitat": "li daristan, zeviyên avî û baxçeyên ku tê de dixwe û hêlîn dike",
+    },
+    "mammal": {
+        "give": "Quncikên çolî û çeperên darî bihêle, di çeperê de kelekek ji bo derbasbûna ajalên biçûk, û komên dar û pelên nelivandî ji bo stargehê.",
+        "protect": "Di berbangê û êvarê de bi baldarî ajotinê bike, li deverên jiyana çolê kûçik kontrol bike, û tu carî xwarinê nede memikdarên çolê û nêzîkî wan nebe.",
+        "habitat": "li perên daristanan, mêrgan û stargehên bêdeng",
+    },
+    "insect": {
+        "give": "Bihêle beşek ji çîmenê mezin bibe, kulîlkên cûrbecûr ji bo tozvekiran biçîne, û pel û darê mirî ji bo derbasbûna zivistanê bihêle.",
+        "protect": "Ji dermanên kêzikan dûr bisekine, hin erdê çolî û nelivandî bihêle, û ronahiya derve ya ne pêwîst kêm bike.",
+        "habitat": "li dora mêrgan, kulîlkan û darê mirî",
+    },
+    "arachnid": {
+        "give": "Quncikên nelivandî, pelên weşiyayî û darê mirî yê ku tê de nêçîrê dikin û star digirin bihêle.",
+        "protect": "Ji dermanên kêzikan dûr bisekine, û yên ku li malê dibînî li şûna ku zirarê bidî wan bigihîne derve.",
+        "habitat": "di nebatiya nelivandî, pelên weşiyayî û darê mirî de",
+    },
+    "fish": {
+        "give": "Alîkar be ku ro paqij bimînin û bi nebatiya kelekê siyê bigirin, û piştgiriya rakirina asteng bike da ku masî bikaribin koç bikin.",
+        "protect": "Royan qirêj neke û gemarê neavêje, qaîdeyên masîgirtinê û bigire-û-berde bişopîne, û cihên hêkkirinê aciz neke.",
+        "habitat": "di gol, çem û çemikên ku tê de dijî",
+    },
+    "amphibian": {
+        "give": "Golekê an quncikeke şil û bi stargeh bihêle, kom dar û keviran bihêle, û rêyên ewle di navbera av û bejahiyê de biparêze.",
+        "protect": "Di biharê de bala xwe bide derbasbûna wan a li ser rêyan, wan nelivîne û bi dest negire, û avê ji qirêjî û gemarê biparêze.",
+        "habitat": "li nêzîkî golan, kendalan û erdê şil",
+    },
+    "reptile": {
+        "give": "Komên kevir û darên tavî ji bo germbûnê û erdê nehevseng û nelivandî ji bo stargehê bihêle.",
+        "protect": "Ajalan bi dest negire û nelivîne, li deverên xişokan kûçik li ser rêçikê bigire, û cihên tavgirtinê aciz neke.",
+        "habitat": "li ser çiyayên tavî, deştên gijgijî û komên keviran",
+    },
+    "mollusc": {
+        "give": "Stargehên şil û siyedar ên wek komên daran biparêze, û hin pelên weşiyayî bihêle.",
+        "protect": "Ji dermanên dijî şeytanok û kêzikan dûr bisekine, û ji bo cureyên ava şîrîn royan paqij bihêle.",
+        "habitat": "li cihên şil û siyedar û ava şîrîn a paqij",
+    },
+    "plant": {
+        "give": "Bihêle nebatên xwecihî mezin bibin, kêmtir û dereng di salê de bibirre, û serê tovan bi seranserê zivistanê rawestayî bihêle.",
+        "protect": "Nebatên çolî neçinî û ranekişîne, li deverên hesas li ser rêçikê bimîne, û tu carî nebatên biyanî neîne.",
+        "habitat": "li mêrg, daristan û perên rêyan ên ku tê de şîn dibe",
+    },
+    "fungus": {
+        "give": "Li cihê ku kivark ber didin darê mirî û pelên weşiyayî bihêle, û bi nermî di daristanê de bimeşe.",
+        "protect": "Tenê wekî ku qaîdeyên herêmê destûr didin bigire, li ser berên wan nede, û tu carî ji bo biryardana ku kivarkek tê xwarin an na pişta xwe bi sepanekê girê nede.",
+        "habitat": "li ser erdê daristanê, darê mirî û pelên weşiyayî",
+    },
+}
+KMR_MONTHS = ("Rêbendan", "Reşemî", "Adar", "Avrêl", "Gulan", "Pûşper",
+              "Tîrmeh", "Tebax", "Îlon", "Cotmeh", "Mijdar", "Berfanbar")
+
+PS_TEMPLATES = {
+    "bird": {
+        "give": "د سیمې د ډولونو سره سم د ځالې بکس ځوړند کړئ، په اوړي کې پاک اوبه برابر کړئ، او د ځاله جوړولو په موسم کې پیشوګانې په کور کې وساتئ.",
+        "protect": "ځالې او د ځالې ځایونه مه ګډوډوئ، هغو مرغانو ته نږدې چې پر ځمکه ځاله جوړوي سپی په پړي وساتئ، او د شپې رڼا او له کړکیو سره ټکر کم کړئ.",
+        "habitat": "په هغو ځنګلونو، لندبېړو او باغونو کې چې خواړه پکې پیدا کوي او ځاله جوړوي",
+    },
+    "mammal": {
+        "give": "ځنګلي ګوټونه او د بوټو پولې پرېږدئ، په پولې کې یوه سوړه چې کوچني څاروي ترې تېر شي، او د پناه لپاره نه لمس شوي د لرګیو او پاڼو ډېرۍ.",
+        "protect": "په سهار او ماښام کې په احتیاط سره موټر چلوئ، د ځنګلي ژوند په سیمو کې سپی تر کنټرول لاندې وساتئ، او هېڅکله ځنګلي تی لرونکو ته خواړه مه ورکوئ او مه ورنږدې کېږئ.",
+        "habitat": "د ځنګلونو په څنډو، شنو ډګرونو او آرامو پناهځایونو کې",
+    },
+    "insect": {
+        "give": "پرېږدئ د واښو یوه برخه وغځېږي، د ګرد لېږدوونکو لپاره بېلابېل ګلونه وکرئ، او د ژمي تېرولو لپاره پاڼې او مړ لرګی پرېږدئ.",
+        "protect": "د حشراتو له وژونکو دوا څخه ډډه وکړئ، یوه برخه ځمکه ځنګلي او نه لمس شوې پرېږدئ، او د بهر غیر ضروري رڼا کمه کړئ.",
+        "habitat": "د شنو ډګرونو، ګلونو او مړ لرګي شاوخوا",
+    },
+    "arachnid": {
+        "give": "هغه نه لمس شوي ګوټونه، لوېدلې پاڼې او مړ لرګی پرېږدئ چې پکې ښکار کوي او پناه اخلي.",
+        "protect": "د حشراتو له وژونکو دوا څخه ډډه وکړئ، او هغه چې په کور کې یې مومئ د زیان رسولو پر ځای یې لېږدوئ.",
+        "habitat": "په نه لمس شوو بوټو، لوېدلو پاڼو او مړ لرګي کې",
+    },
+    "fish": {
+        "give": "مرسته وکړئ چې اوبه پاکې او د غاړې بوټو له امله سیوري لرونکې پاتې شي، او د خنډونو د لرې کولو ملاتړ وکړئ ترڅو کبان کډه وکړي.",
+        "protect": "اوبه مه ککړوئ او خځلې پکې مه غورځوئ، د کب نیولو قواعد او ونیسه-او-پرېږده تعقیب کړئ، او د هګۍ اچولو ځایونه مه ګډوډوئ.",
+        "habitat": "په هغو جهيلونو، سیندونو او ویالو کې چې پکې ژوند کوي",
+    },
+    "amphibian": {
+        "give": "یوه ډنډ یا لندې، پناه لرونکې ګوټ وساتئ، د لرګیو او تیږو ډېرۍ پرېږدئ، او د اوبو او وچې ترمنځ خوندي لارې وساتئ.",
+        "protect": "په پسرلي کې د سړکونو له تېرېدو یې خبردار اوسئ، مه یې لېږدوئ او په لاس یې مه نیسئ، او اوبه له ککړتیا او خځلو وساتئ.",
+        "habitat": "د ډنډونو، ویالو او لندې ځمکې ته نږدې",
+    },
+    "reptile": {
+        "give": "د تودوخې لپاره لمرینې د تیږو او لرګیو ډېرۍ او د پناه لپاره ناهواره، نه لمس شوې ځمکه پرېږدئ.",
+        "protect": "څاروي په لاس مه نیسئ او مه یې لېږدوئ، د خزندګانو په سیمو کې سپی پر لار وساتئ، او د لمر وهلو ځایونه مه ګډوډوئ.",
+        "habitat": "پر لمرینو غونډیو، بوټو ډګرونو او د تیږو ډېرۍ",
+    },
+    "mollusc": {
+        "give": "لندې، سیوري لرونکې پناهځایونه لکه د لرګیو ډېرۍ وساتئ، او یوه برخه لوېدلې پاڼې پرېږدئ.",
+        "protect": "د چینجیو له وژونکو دانو او دواګانو ډډه وکړئ، او د تازه اوبو ډولونو لپاره اوبه پاکې وساتئ.",
+        "habitat": "په لندو، سیوري لرونکو ځایونو او پاکو تازه اوبو کې",
+    },
+    "plant": {
+        "give": "پرېږدئ سیمه ییز بوټي وغځېږي، په کال کې لږ او ناوخته یې وریبئ، او د تخم سرونه د ژمي په اوږدو کې ولاړ پرېږدئ.",
+        "protect": "ځنګلي بوټي مه شلوئ او له ریښې مه باسئ، په حساسو سیمو کې پر لار پاتې شئ، او هېڅکله بهرني بوټي مه راوړئ.",
+        "habitat": "په هغو شنو ډګرونو، ځنګلونو او د لارو څنډو کې چې پکې زرغونېږي",
+    },
+    "fungus": {
+        "give": "هلته چې خځندې مېوه کوي مړ لرګی او لوېدلې پاڼې پرېږدئ، او په ځنګل کې په نرمۍ سره ګرځئ.",
+        "protect": "یوازې هغومره واخلئ چې سیمه ییز قواعد یې اجازه ورکوي، پر مېوو یې پښه مه ږدئ، او هېڅکله د دې پرېکړې لپاره چې آیا یوه خځنده د خوړلو وړ ده پر یوې اپلیکیشن باور مه کوئ.",
+        "habitat": "د ځنګل پر ځمکه، مړ لرګي او لوېدلو پاڼو",
+    },
+}
+PS_MONTHS = ("جنوري", "فبروري", "مارچ", "اپریل", "مۍ", "جون",
+             "جولای", "اګست", "سپټمبر", "اکتوبر", "نومبر", "دسمبر")
+
+
 LOCALES: dict[str, LocaleStrings] = {
     "en": LocaleStrings(
         months=EN_MONTHS,
@@ -949,6 +1170,55 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="በዓመቱ ውስጥ በተለያዩ ጊዜያት",
         sentence="በአካባቢዎ {when} ንቁ ነው። {hint} ይፈልጉት።",
         templates=AM_TEMPLATES,
+    ),
+    "ti": LocaleStrings(
+        months=TI_MONTHS,
+        months_from=TI_MONTHS,
+        months_to=TI_MONTHS,
+        year_round="ምሉእ ዓመት",
+        range_pattern="ካብ {first} ክሳብ {last}",
+        list_pattern="ብ{months}",
+        list_separator="፣ ",
+        unknown="ኣብ ዝተፈላለየ ግዜ ዓመት",
+        sentence="ኣብ ከባቢኻ {when} ንጡፍ እዩ። {hint} ድለዮ።",
+        templates=TI_TEMPLATES,
+    ),
+    "ckb": LocaleStrings(
+        months=CKB_MONTHS,
+        months_from=CKB_MONTHS,
+        months_to=CKB_MONTHS,
+        year_round="بە درێژایی ساڵ",
+        range_pattern="لە {first}ەوە تا {last}",
+        list_pattern="لە {months}",
+        list_separator="، ",
+        unknown="لە کاتە جیاوازەکانی ساڵدا",
+        sentence="لە ناوچەکەت {when} چالاکە. {hint} بەدوایدا بگەڕێ.",
+        templates=CKB_TEMPLATES,
+    ),
+    "kmr": LocaleStrings(
+        months=KMR_MONTHS,
+        months_from=KMR_MONTHS,
+        months_to=KMR_MONTHS,
+        year_round="bi tevahiya salê",
+        range_pattern="ji {first} heta {last}",
+        list_pattern="di {months} de",
+        list_separator=", ",
+        unknown="di demên cuda yên salê de",
+        # No preposition before {hint}: every habitat string already carries its own ("li ...").
+        sentence="Li herêma te {when} çalak e. {hint} lê bigere.",
+        templates=KMR_TEMPLATES,
+    ),
+    "ps": LocaleStrings(
+        months=PS_MONTHS,
+        months_from=PS_MONTHS,
+        months_to=PS_MONTHS,
+        year_round="د کال په اوږدو کې",
+        range_pattern="له {first} څخه تر {last} پورې",
+        list_pattern="په {months} کې",
+        list_separator="، ",
+        unknown="د کال په مختلفو وختونو کې",
+        sentence="ستاسو په سیمه کې {when} فعال دی. {hint} یې ولټوئ.",
+        templates=PS_TEMPLATES,
     ),
 }
 

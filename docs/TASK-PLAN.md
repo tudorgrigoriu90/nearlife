@@ -1747,7 +1747,7 @@ only.**
     Lsjbot-generated stubs ("*X är en art i familjen Y som beskrevs av Z 1857*") — accurate,
     correctly licensed, and duller than the English equivalents. Better to know this now than to
     discover it in the app.
-- **T-180 · Localised give/protect/habitat templates + season phrasing** — *Claude · M · `IN-PROGRESS` (14 locales; 4 remain) · deps: T-178, T-179*
+- **T-180 · Localised give/protect/habitat templates + season phrasing** — *Claude · M · `DONE` (all 18 locales) · deps: T-178, T-179*
   - `give`, `protect` and the habitat half of `whenAndHow` are **taxon templates, not per-species
     text** — so ~46 strings translate all three fields for every one of the 6,824 shipped species.
     With facts sourced per language (T-179), `media/templates_i18n.py` **is** the translation job.
@@ -1794,8 +1794,20 @@ only.**
     passed the differs-from-English check while telling a reader nothing new. Thai and Amharic do
     not inflect months; Serbian follows the Slavic pattern (locative in the list, genitive in both
     range slots).
-  - ⏳ Remaining 4: ti, ckb, kmr, ps. RTL needs no special handling here — these are data strings;
-    mixed-direction *rendering* is T-157.
+  - ✅ **ti, ckb, kmr, ps** complete the roster — **18 locales**, ~46 strings each, covering
+    `give`, `protect` and `whenAndHow` for all 6,824 shipped species. RTL needs no special handling
+    here — these are data strings; mixed-direction *rendering* is T-157.
+  - 🐛 **Kurmanji shipped a doubled preposition for one commit**: the pattern prefixed `Li` while
+    every habitat string already begins with `li`, giving "Li li perên daristanan". Every
+    conformance check passed, because each string is correct in isolation — only the *composition*
+    was wrong. A test now walks the composed sentence for every locale × taxon × season shape and
+    rejects adjacent repeated words. The lesson generalises: per-field checks cannot see a
+    composition bug.
+  - ⚠️ **Confidence is not uniform across the roster.** ar, so, ru, uk, fa, tr, bs, sr, sq, vi, th
+    are written with high confidence; **ti, ckb, kmr, ps, am** are plausible and grammatical but
+    warrant a native pass before they are held up as polished. They are conservation instructions
+    rather than nomenclature, so nothing here can invent a species name — the failure mode is
+    stiffness, not falsehood. T-155 is the (non-blocking) home for that pass.
 - **T-181 · `build_content` emits one row per (species, locale)** — *Claude · M · `DONE` · deps: T-179, T-180*
   - The step that actually uses T-179 and T-180. Before it, the pipeline emitted English-only rows
     and the free immigrant roster (T-178) had nothing to load.

@@ -126,3 +126,22 @@ def test_no_locale_contains_a_meaningless_invisible_character():
         for text in blobs:
             for ch, name in banned.items():
                 assert ch not in text, f"{loc}: {name} in {text[:40]!r}"
+
+
+def test_no_locale_composes_a_doubled_word():
+    """Catches a sentence pattern that repeats a preposition the habitat string already carries.
+
+    Kurmanji shipped for exactly one commit as "Li herêma te ... Li li perên daristanan" — the
+    pattern prefixed "Li" while every habitat already begins with "li". The conformance checks all
+    passed, because each string is fine on its own; only the composed sentence is wrong. So the
+    composition is what gets checked.
+    """
+    for loc in LOCALES:
+        for taxon in strings_for(loc).templates:
+            for months in ([5, 6, 7], list(range(1, 13)), [3, 10], []):
+                words = when_and_how(taxon, months, loc).lower().split()
+                for a, b in zip(words, words[1:]):
+                    stripped = a.strip(".,;:!?()")
+                    assert stripped != b.strip(".,;:!?()") or not stripped, (
+                        f"{loc}/{taxon}: doubled word {a!r} in composed sentence"
+                    )
