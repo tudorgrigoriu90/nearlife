@@ -169,3 +169,14 @@ def test_an_empty_existing_map_is_a_no_op():
     species = [{"id": "gbif:1", "gbif_key": 1, "scientific_name": "A"}]
     sp, _ = adopt_existing_ids(species, [], {})
     assert sp[0]["id"] == "gbif:1"
+
+
+# T-187: `common_name` was set to the scientific name, so the app rendered "Lutra lutra" as if it
+# were what people call the animal. A null is honest and lets the UI style the binomial as a
+# binomial; a copy is a quiet lie in the single most visible string on the card.
+
+
+def test_common_name_is_null_when_unknown_rather_than_the_binomial():
+    rows, _ = build_rows([("birds", [_rec("SWE.9_1", 1, "Pica pica", [5], 10)])])
+    assert rows[0]["common_name"] is None
+    assert rows[0]["scientific_name"] == "Pica pica"

@@ -62,6 +62,10 @@ class GbifClient:
         """GADM level-1 areas for a country, so region ids are fetched rather than guessed (T-167)."""
         return self._get(f"/geocode/gadm/{iso3}/subdivisions", [])
 
+    def vernacular_names(self, species_key: int) -> dict:
+        """Every vernacular name GBIF holds for a species, in every language, in one call (T-187)."""
+        return self._get(f"/species/{species_key}/vernacularNames", {"limit": 1000})
+
     def species_facet(
         self, gadm_gid: str, taxon_key: int, month: int, facet_limit: int = 300
     ) -> tuple[list[tuple[int, int]], bool]:

@@ -1917,6 +1917,26 @@ only.**
   - 📌 **Context: no notification is sent today at all.** `cron.job` is empty and the T-064 Edge
     Function does not exist; only `delete-account` is deployed. Doing this now means T-064 is built
     against a spread population from the start, rather than retrofitted after a launch-day spike.
+- **T-187 · Vernacular names: stop showing the binomial as a common name** — *Claude · M · `IN-PROGRESS` (parser + honest null done; ingest step pending) · deps: T-184*
+  - `db_rows.py` set `common_name = scientific_name`, so all 11,936 loaded species render
+    **"*Lutra lutra*" as though that were what people call an otter**. The card title is the most
+    visible string in the app, and this is the last big gap in v1.
+  - ✅ **`common_name` is now null when unknown**, never a copy of the binomial. A null is honest
+    and lets the UI render the scientific name *as* a scientific name (italic, secondary); a copy is
+    a quiet lie in the one string every user reads first.
+  - ✅ `gbif/vernacular.py` + `GbifClient.vernacular_names()`. GBIF's
+    `/species/{key}/vernacularNames` returns **every language in one call**, so this is 6,824 calls
+    for all 18 locales rather than 18 passes. Accepts ISO 639-3 and 639-1 (GBIF uses both), prefers
+    a `preferred`-flagged name, and **drops anything unmapped rather than guessing** — a name shown
+    to the wrong reader is worse than no name. 10 tests.
+  - ⚠️ **Coverage will be very uneven, by nature of the source.** Swedish is excellent (Dyntaxa
+    feeds GBIF); the immigrant-language roster is near-empty for most species. That is not a
+    failure: the card falls back to the scientific name, which is what a field guide in those
+    languages prints anyway. Do **not** machine-translate species names to fill the gap — a
+    fabricated vernacular name is exactly the failure T-159 refused for Irish and Maltese.
+  - ⏳ Remaining: the ingest step that walks the 6,824 shipped species, calls the endpoint and
+    writes `species_content.common_name` per locale, plus a coverage report per locale so the gaps
+    are visible rather than assumed.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.

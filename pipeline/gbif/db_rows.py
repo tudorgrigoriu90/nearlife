@@ -57,7 +57,10 @@ def build_rows(datasets: Iterable[tuple[str, Iterable[dict]]]) -> tuple[list[dic
                     "id": sid,
                     "gbif_key": r["speciesKey"],
                     "scientific_name": r["scientificName"],
-                    "common_name": r["scientificName"],  # until localized names are authored
+                    # Null, never a copy of the binomial: the app then knows it has no common
+                    # name and can render the scientific one *as* a scientific name, instead of
+                    # presenting "Lutra lutra" as what people call an otter (T-187).
+                    "common_name": None,
                     "category": category,
                     "rarity": "common",  # rarity_flavor derived from presence.occurrences (TSD §4)
                     "taxon_group": group,
