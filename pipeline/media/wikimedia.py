@@ -24,6 +24,11 @@ COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 # already attribute. That is better prose than machine translation and costs nothing per species.
 _LANG = re.compile(r"^[a-z]{2,3}$")
 
+# MediaWiki accepts up to 50 titles per query for unauthenticated clients. Batching is what makes a
+# multi-locale content build feasible at all (T-182): 6,824 species x 18 locales is ~123k single
+# requests, and ~2.5k batched ones.
+EXTRACT_BATCH = 50
+
 
 def wiki_api_for(lang: str) -> str:
     """API endpoint for a language edition. Raises on anything that is not a language code.
@@ -42,6 +47,38 @@ def wiki_api_for(lang: str) -> str:
 # Full resolution is never re-hosted — the card links out to the Commons file page instead, which
 # costs no storage and gives the reader the licence and author alongside the image.
 THUMB_WIDTH = 400
+
+
+def chunked(items: list, size: int):
+    """Yield consecutive slices of `size`, preserving order."""
+    for i in range(0, len(items), size):
+        yield items[i : i + size]
+
+
+def map_extracts(payload: dict, requested: list[str]) -> dict[str, str | None]:
+    """Map a batched extracts response back onto the names that were asked for.
+
+    MediaWiki keys pages by page id and reports title normalisation and redirects in separate
+    arrays, so looking a page up by the requested title silently loses every species whose article
+    sits behind a synonym — and taxonomy is full of synonyms. Both hops are followed, and chained
+    (normalisation *then* redirect) because the API applies them in that order.
+
+    Every requested name appears in the result, mapping to None when there is no article, so the
+    caller can tell "no article" from "never asked".
+    """
+    query = payload.get("query", {}) or {}
+    hop = {r["from"]: r["to"] for r in query.get("normalized", []) or []}
+    redirect = {r["from"]: r["to"] for r in query.get("redirects", []) or []}
+    by_title = {
+        page.get("title"): (page.get("extract") or "").strip() or None
+        for page in (query.get("pages", {}) or {}).values()
+    }
+    out: dict[str, str | None] = {}
+    for name in requested:
+        title = hop.get(name, name)
+        title = redirect.get(title, title)
+        out[name] = by_title.get(title)
+    return out
 
 
 @dataclass(frozen=True)
@@ -158,6 +195,27 @@ class WikimediaClient:
         page = next(iter(pages.values()), {})
         extract = (page.get("extract") or "").strip()
         return extract or None
+
+    def fetch_extracts(self, scientific_names: list[str], lang: str = "en") -> dict[str, str | None]:
+        """Batched `fetch_extract` — same contract, ~50x fewer requests (T-182)."""
+        api = wiki_api_for(lang)
+        out: dict[str, str | None] = {}
+        for batch in chunked(list(scientific_names), EXTRACT_BATCH):
+            data = self._get(
+                api,
+                {
+                    "action": "query",
+                    "format": "json",
+                    "prop": "extracts",
+                    "exintro": 1,
+                    "explaintext": 1,
+                    "exsentences": 2,
+                    "titles": "|".join(batch),
+                    "redirects": 1,
+                },
+            )
+            out.update(map_extracts(data, batch))
+        return out
 
     def fetch_image(self, scientific_name: str) -> dict | None:
         """Return {imageUrl, license, licenseUrl, author, sourceUrl, wikiTitle} or None."""

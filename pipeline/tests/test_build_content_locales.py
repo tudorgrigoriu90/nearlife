@@ -27,17 +27,35 @@ class FakeWiki:
     def __init__(self):
         self.asked = []
 
-    def fetch_extract(self, name, lang="en"):
-        self.asked.append((name, lang))
-        if name == "Pica pica" and lang in ("en", "sv"):
-            return f"[{lang}] The magpie is a bird."
-        return None
+    def fetch_extracts(self, names, lang="en"):
+        for name in names:
+            self.asked.append((name, lang))
+        return {
+            n: (f"[{lang}] The magpie is a bird." if n == "Pica pica" and lang in ("en", "sv") else None)
+            for n in names
+        }
 
 
 def test_emits_a_row_per_species_per_locale():
     wiki = FakeWiki()
     rows = build_localized(SPECIES, "bird", wiki, ["en", "sv", "so"])
     assert len(rows) == len(SPECIES) * 3
+
+
+def test_facts_are_fetched_in_one_batch_per_locale_not_one_per_species():
+    # T-182: the whole point is ~50x fewer requests; a regression to per-species would still pass
+    # every other test here while making a full run take 20 hours.
+    wiki = FakeWiki()
+    wiki.batches = 0
+    inner = wiki.fetch_extracts
+
+    def counted(names, lang="en"):
+        wiki.batches += 1
+        return inner(names, lang)
+
+    wiki.fetch_extracts = counted
+    build_localized(SPECIES, "bird", wiki, ["en", "sv", "so"])
+    assert wiki.batches == 3
 
 
 def test_each_locale_is_fetched_from_its_own_wikipedia():

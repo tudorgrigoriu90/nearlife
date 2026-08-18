@@ -54,21 +54,28 @@ def distinct_species(presence: dict) -> list[dict]:
 def build_localized(species: list[dict], taxon: str, client, locales: list[str]) -> list[dict]:
     """One content row per (species, locale).
 
-    The fact is fetched from each locale's own Wikipedia edition rather than translated (T-179), so
+    Facts are fetched in batches of 50 per locale (T-182) from that locale's own Wikipedia edition
+    rather than translated (T-179), so
     a missing article means a null fact in *that* language only. It deliberately does not fall back
     to English: unlabelled English prose inside a Somali card is worse than no fact, and the card
     already handles an absent one (T-146). give/protect/whenAndHow come from the locale's templates
     and are always present, so a language gap never gates the mission (invariant #2).
     """
+    names = [sp["scientificName"] for sp in species]
     rows = []
-    for sp in species:
-        for locale in locales:
-            tpl = strings_for(locale).templates[taxon]
-            fact = None
-            try:
-                fact = client.fetch_extract(sp["scientificName"], locale)
-            except Exception as exc:
-                print(f"  ! {sp['scientificName']} [{locale}]: {exc}", flush=True)
+    for locale in locales:
+        # One batched pass per locale rather than a request per species (T-182). A failure here
+        # costs the whole locale's facts, not the run: templates still ship, so the rows remain
+        # valid and the facts can be backfilled by re-running.
+        try:
+            facts = client.fetch_extracts(names, locale)
+        except Exception as exc:
+            print(f"  ! [{locale}] extract batch failed: {exc}", flush=True)
+            facts = {}
+        print(f"  [{locale}] {sum(1 for n in names if facts.get(n))}/{len(names)} with a fact", flush=True)
+        tpl = strings_for(locale).templates[taxon]
+        for sp in species:
+            fact = facts.get(sp["scientificName"])
             rows.append(
                 {
                     "speciesKey": sp["speciesKey"],
