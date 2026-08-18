@@ -1585,7 +1585,8 @@ only.**
   - ✅ **Country filter derived from the GADM id** (`gbif/client.py`), replacing a hardcoded
     `country=SE`. Asking for a Norwegian region while filtering on Sweden returns zero rather than
     an error, so the two must never be able to disagree. Adds `GbifClient.subdivisions()`.
-  - ✅ **The ingest is now runnable.** `build_presence.py` takes `--country <ISO3>` (Sweden keeps
+  - ⚠️ **"The ingest is now runnable" was wrong when written** (corrected by T-173: the first
+    real dispatch died instantly on a signature mismatch). `build_presence.py` takes `--country <ISO3>` (Sweden keeps
     its checked-in regions and its existing filenames; other countries fetch subdivisions and write
     `presence_<taxon>_<ISO3>.json`), and the `Data pipeline` workflow gained a `countries` input, so
     it is a workflow_dispatch away rather than a code change. Previously `build_presence.py` was
@@ -1627,6 +1628,23 @@ only.**
     (names only, never values) and echoes the chosen inputs, in seconds. The load steps skip
     silently when their secret is missing, and until now that only became visible at the end of a
     multi-hour ingest that then had nowhere to write.
+- **T-173 · `build_for_taxon` signature mismatch killed every ingest** — *Claude · S · `DONE` · deps: T-167*
+  - The first real dispatch of the Nordic ingest (run 32116035308, `NOR`) failed in **one second**:
+    all nine taxa raised `build_for_taxon() takes 2 positional arguments but 3 were given`.
+  - T-167 threaded the region list through the function body and both call sites but never changed
+    the signature. Sweden was broken by this too — the bug was not Nordic-specific, and the
+    checked-in Swedish data predates it, so nothing showed.
+  - **Why nothing caught it:** `build_presence.py` is almost entirely network I/O and had *no test
+    file at all*. T-167's nine tests covered `counties.py` and the parser, which is what made the
+    module look tested. `pipeline/tests/test_build_presence.py` now drives `build_for_taxon` with
+    a fake client: it cannot check GBIF's answers, but it does check the function is callable as
+    called and walks the regions it was handed.
+  - Also removed three `regions or SWEDISH_COUNTIES` fallbacks. A country resolving to an empty
+    region list would have silently ingested Sweden and written it under that country's filename —
+    exactly the well-formed-wrong-data failure T-167 exists to prevent. Empty regions now produce
+    an empty result, loudly.
+  - ✅ **Confirmed working from the same run:** `[presence] country=NOR regions=19` — the GADM
+    subdivisions endpoint resolves and Norway's 19 counties come back fetched, not guessed.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.

@@ -39,7 +39,7 @@ from gbif.taxa import TARGET_TAXA
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
 
-def build_for_taxon(client: GbifClient, taxon: dict) -> dict:
+def build_for_taxon(client: GbifClient, taxon: dict, regions: list) -> dict:
     key = taxon["key"]
     names = taxon["names"]
     facet_limit = taxon.get("facetLimit", 300)
@@ -60,7 +60,7 @@ def build_for_taxon(client: GbifClient, taxon: dict) -> dict:
 
     rows = []
     truncations = 0
-    for county in regions or SWEDISH_COUNTIES:
+    for county in regions:
         for month in range(1, 13):
             for taxon_key in taxon_keys:
                 pairs, truncated = client.species_facet(county["gid"], taxon_key, month, facet_limit)
@@ -79,7 +79,7 @@ def build_for_taxon(client: GbifClient, taxon: dict) -> dict:
     species_names = {k: client.scientific_name(k) for k in species_keys}
     # Name map from the regions actually in play, so non-Swedish regions get real names
     # instead of falling back to their gid (T-167).
-    name_by_gid = {c["gid"]: c["name"] for c in (regions or SWEDISH_COUNTIES)}
+    name_by_gid = {c["gid"]: c["name"] for c in regions}
     records = list(presence_records(presence, name_by_gid, species_names))
 
     if truncations:
@@ -95,7 +95,7 @@ def build_for_taxon(client: GbifClient, taxon: dict) -> dict:
             "taxonKeys": taxon_keys,
             "source": "GBIF.org occurrence API",
             "licenses": ALLOWED_LICENSES,
-            "counties": len(regions or SWEDISH_COUNTIES),
+            "counties": len(regions),
             "facetLimit": facet_limit,
             "minOccurrences": min_occ,
             "distinctSpecies": len(species_keys),
