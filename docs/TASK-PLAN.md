@@ -1747,7 +1747,7 @@ only.**
     Lsjbot-generated stubs ("*X är en art i familjen Y som beskrevs av Z 1857*") — accurate,
     correctly licensed, and duller than the English equivalents. Better to know this now than to
     discover it in the app.
-- **T-180 · Localised give/protect/habitat templates + season phrasing** — *Claude · M · `IN-PROGRESS` (en, sv, ar, so; 14 immigrant locales remain) · deps: T-178, T-179*
+- **T-180 · Localised give/protect/habitat templates + season phrasing** — *Claude · M · `IN-PROGRESS` (en, sv, ar, so, ru, uk; 12 remain) · deps: T-178, T-179*
   - `give`, `protect` and the habitat half of `whenAndHow` are **taxon templates, not per-species
     text** — so ~46 strings translate all three fields for every one of the 6,824 shipped species.
     With facts sourced per language (T-179), `media/templates_i18n.py` **is** the translation job.
@@ -1768,7 +1768,12 @@ only.**
     the two that most need this feature. These are conservation and access instructions, i.e.
     general prose; species *nomenclature* remains a sourcing problem (T-159), and nothing here
     invents a name.
-  - ⏳ Remaining 14: fa, ti, ckb, kmr, tr, bs, sr, sq, ru, uk, ps, th, vi, am. RTL needs no special
+  - ✅ **ru** and **uk** written next on purpose: they are the locales that exercise the
+    three-form month model, so the design is proven by real inflection rather than by assertion.
+    Output verified by hand — `с мая по сентябрь` / `в марте, октябре`, `з травня до вересня` /
+    `у березні, жовтні`. Ukrainian takes the genitive in *both* range slots (з/до), Russian does
+    not (с + genitive, по + accusative) — which is exactly why the two slots are separate fields.
+  - ⏳ Remaining 12: fa, ti, ckb, kmr, tr, bs, sr, sq, ps, th, vi, am. RTL needs no special
     handling here — these are data strings; mixed-direction *rendering* is T-157.
 - **T-181 · `build_content` emits one row per (species, locale)** — *Claude · M · `DONE` · deps: T-179, T-180*
   - The step that actually uses T-179 and T-180. Before it, the pipeline emitted English-only rows
