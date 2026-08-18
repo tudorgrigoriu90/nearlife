@@ -526,6 +526,19 @@ key before loading into Supabase.**
     `Taraxacum officinale`, which is the T-163 data gap surfacing (no GBIF presence under the
     binomial), not a filter misjudgement. Pinned as a regression test — if a policy change starts
     eating curated species, the build fails.
+  - 📊 **42.7% dropped sounds severe; it is 0.37% of observations.** 5,084 species carry 463,790 of
+    126.5M records. Median dropped species: 50 records. Median kept: 975. It is the long tail, not
+    a bite out of the middle.
+  - 🔬 **Inspected what it drops, by name, and it is the target.** Birds: *Zenaida macroura*
+    (N. American mourning dove), *Petrochelidon pyrrhonota* (cliff swallow), *Bartramia longicauda*
+    (upland sandpiper), *Numenius minutus* (Siberian little curlew), *Gavia pacifica* (Pacific
+    loon) — all vagrants, whose high counts in 1–2 counties are twitcher pile-ups on a single bird,
+    which is exactly what the breadth rule is for. Reptiles: *Mauremys reevesii*,
+    *Graptemys pseudogeographica*, *Chrysemys picta* — released pet terrapins — plus two vagrant sea
+    turtles. Mammals: musk ox, introduced Pallas's squirrel, golden jackal, two whales.
+  - Per-taxon drop rates vary as biology predicts: birds 23% (well-recorded, well-known), molluscs
+    63% and fish 56% (long tails of obscure or marine species). Amphibians keep 12 of 16, which
+    matches Sweden's real amphibian fauna.
   - Thresholds live in a `Policy` dataclass rather than as literals, and every verdict carries a
     reason: at Nordic scale these lists are far too large to re-derive by eye, and a species
     dropped silently cannot be argued with later.
