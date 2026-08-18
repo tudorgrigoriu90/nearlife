@@ -13,6 +13,9 @@ name: Database migrate
 # Supabase MCP tool, which stamped its own timestamps, so several files' contents are already in
 # place under versions that do not match their filenames. Run `plan` first and read the list: any
 # version there whose changes are already live wants `repair`, not `apply`.
+#
+# Both writing modes take an optional version list, because those two groups are usually mixed:
+# leaving it empty acts on EVERY pending migration, which is rarely what you want here.
 
 on:
   workflow_dispatch:
@@ -23,6 +26,11 @@ on:
         default: "plan"
         type: choice
         options: [plan, apply, repair]
+      versions:
+        description: "Space-separated versions to act on (e.g. 20260810000001). Empty = every pending one."
+        required: false
+        default: ""
+        type: string
 
 concurrency:
   group: db-migrate
@@ -52,6 +60,11 @@ jobs:
 
       - run: pip install -r pipeline/requirements.txt
 
+      # `versions` is free text, so it goes through the environment rather than being
+      # interpolated into the command line — ${{ }} expansion happens before the shell sees it,
+      # which would make the input executable. `mode` is a choice input, constrained to the enum.
       - name: ${{ inputs.mode }}
         working-directory: pipeline
-        run: python -m db.migrate ${{ inputs.mode }}
+        env:
+          VERSIONS: ${{ inputs.versions }}
+        run: python -m db.migrate ${{ inputs.mode }} $VERSIONS

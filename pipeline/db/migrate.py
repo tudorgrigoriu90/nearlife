@@ -6,14 +6,21 @@ runs the same job from Actions with $SUPABASE_DB_URL.
 
 Modes:
   plan    list what would be applied and stop (the default — never writes)
-  apply   run each pending migration, each in its own transaction, then record it
-  repair  record versions as applied WITHOUT running them, for DDL already applied by other means
+  apply   run each selected migration, each in its own transaction, then record it
+  repair  record selected versions as applied WITHOUT running them, for DDL already in place
+
+Both writing modes take an optional space-separated version list. That is not a nicety: on this
+project six pending migrations are already live under MCP-stamped versions and want `repair`,
+while exactly one has never run and wants `apply`. A mode applied to everything pending would do
+the wrong thing to six of them.
 
 `repair` exists because the live project's history was written by the MCP tool, which stamped its
 own timestamps: six files' contents are applied under versions that do not match their filenames.
 Without repair, `apply` would re-run them.
 
-    SUPABASE_DB_URL=postgres://...pooler.supabase.com:5432/postgres python -m db.migrate plan
+    SUPABASE_DB_URL=... python -m db.migrate plan
+    SUPABASE_DB_URL=... python -m db.migrate repair 20260707000001 20260707000002
+    SUPABASE_DB_URL=... python -m db.migrate apply 20260810000001
 """
 
 import os
@@ -49,6 +56,27 @@ def pending_versions(
     return sorted((v, n) for v, n in local if v not in applied)
 
 
+def select_versions(
+    pending: list[tuple[str, str]], requested: list[str]
+) -> list[tuple[str, str]]:
+    """Narrow `pending` to the versions asked for, oldest first; empty request means all.
+
+    An unknown version raises rather than being skipped. Silently ignoring a typo would report
+    success having done nothing, which is the worst outcome for a command whose entire value is
+    knowing exactly what ran.
+    """
+    if not requested:
+        return pending
+    known = {v for v, _ in pending}
+    unknown = [v for v in requested if v not in known]
+    if unknown:
+        raise ValueError(
+            f"not pending (already applied, or no such migration): {', '.join(sorted(unknown))}"
+        )
+    wanted = set(requested)
+    return [(v, n) for v, n in pending if v in wanted]
+
+
 def _applied(cur) -> set[str]:
     cur.execute(f"select version from {HISTORY_TABLE}")
     return {row[0] for row in cur.fetchall()}
@@ -67,6 +95,7 @@ def main(argv: list[str]) -> int:
     if mode not in {"plan", "apply", "repair"}:
         print(__doc__)
         return 2
+    requested = argv[1:]
 
     dsn = os.environ.get("SUPABASE_DB_URL")
     if not dsn:
@@ -97,6 +126,12 @@ def main(argv: list[str]) -> int:
         if mode == "plan":
             print("\nplan only — nothing was written. Re-run with 'apply' or 'repair'.")
             return 0
+
+        try:
+            todo = select_versions(todo, requested)
+        except ValueError as err:
+            raise SystemExit(str(err)) from err
+        print(f"\n{mode}: {len(todo)} selected")
 
         if mode == "repair":
             # Stamp without executing: the DDL is already in place by other means.

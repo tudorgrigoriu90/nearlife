@@ -1677,7 +1677,18 @@ only.**
   - One transaction per migration rather than one for the batch: a failure then leaves that
     migration entirely unapplied *and* unrecorded, instead of half-done under a stamp claiming it
     succeeded.
-  - ⏳ **Director:** run it `plan` first and read the pending list — see the T-160 gate below.
+  - ✅ **Validated against the live project** (run 32117992455, `plan`, wrote nothing). It reports
+    **7 pending**, which confirms the diagnosis exactly: six are already live under MCP stamps and
+    want `repair`; `20260810000001_seed_species_content_all_locales` has genuinely never run and
+    wants `apply`.
+  - That run also exposed a gap in the first cut: a mode alone applies to *everything* pending, so
+    `repair` would have stamped the content seed as done without ever running it, and `apply` would
+    have re-run six migrations of live DDL. Both modes now take an optional version list, and a
+    version that is not pending **raises** rather than being skipped — silently ignoring a typo
+    would report success having done nothing.
+  - The `versions` input is free text, so it is passed through the environment rather than
+    interpolated into the run command; `${{ }}` expands before the shell sees it, which would make
+    a dispatch input executable. `mode` is a `choice` input and constrained to its enum.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
