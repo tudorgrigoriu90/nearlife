@@ -128,6 +128,13 @@ jobs:
         working-directory: pipeline
         run: python -m gbif.supabase_load
 
+      # Runs after the species load: species_content.species_id references public.species, so
+      # the rows it writes have nothing to point at until that has landed (T-193).
+      - name: Load species content into Supabase (T-145)
+        if: ${{ !cancelled() && env.SUPABASE_DB_URL != '' }}
+        working-directory: pipeline
+        run: python -m gbif.supabase_load_content
+
       - name: Upload curated photos to Supabase Storage (T-119)
         if: ${{ !cancelled() && env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_KEY != '' }}
         run: python pipeline/media/supabase_upload.py

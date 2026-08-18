@@ -2019,6 +2019,18 @@ only.**
   - ⚖️ **What replaces the human is T-192, not nothing.** Removing the gate removes the person who
     would have noticed a broken ingest before it overwrote good data — so the loader now refuses a
     load carrying far less data than the database already holds. Unattended does not mean unchecked.
+- **T-193 · Wire the content loader into the pipeline** — *Claude · S · `DONE` · deps: T-181, T-188*
+  - `gbif/supabase_load_content.py` existed since T-145 and was **in no workflow at all** — the same
+    gap `build_presence.py` had (T-167) and the reason generated content could never reach the
+    database however well it was generated. A script nobody runs is indistinguishable from one that
+    does not exist.
+  - Added after the species load, deliberately: `species_content.species_id` references
+    `public.species`, so its rows have nothing to point at until that has landed.
+  - **An empty content set is a no-op, not a failure.** It means `build_content.py` did not run this
+    cycle (`content_scope: skip`, which is the common case), and failing there would redden a
+    pipeline whose real work succeeded. A *failed* load still raises — the distinction is between
+    "nothing to load" and "loading went wrong", which the unattended schedule (T-172) makes worth
+    being precise about.
 - **T-192 · Refuse a load that looks like a broken ingest** — *Claude · S · `DONE` · deps: T-172*
   - From the loader's point of view a partial ingest and a genuine decline are **identical**: both
     arrive as fewer rows. With a human in the loop that ambiguity was survivable; with T-172's

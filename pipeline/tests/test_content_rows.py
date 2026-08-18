@@ -146,3 +146,14 @@ def test_a_blank_common_name_is_normalised_to_null():
     item["commonName"] = "   "
     rows, _ = build_content_rows([[item]])
     assert rows[0]["common_name"] is None
+
+
+# T-193: the content loader is about to run in CI unattended, so "nothing to load" has to be
+# distinguishable from "loaded nothing". An empty content set means build_content did not run —
+# a no-op, not a reason to fail a pipeline whose other steps succeeded.
+
+
+def test_no_content_files_yields_no_rows_and_says_so():
+    rows, summary = build_content_rows([])
+    assert rows == []
+    assert summary["total"] == 0

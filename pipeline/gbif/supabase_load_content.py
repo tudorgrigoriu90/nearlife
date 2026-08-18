@@ -61,6 +61,12 @@ def main() -> None:
     from gbif.connect import connection_hint
 
     rows, summary = build_content_rows(load_content_files())
+    if not rows:
+        # Nothing to load is a no-op, not a failure: it means build_content.py did not run this
+        # cycle (content_scope=skip), and failing here would redden a pipeline whose real work
+        # succeeded. Distinguished from a *failed* load, which raises below.
+        print("no content_*.json found — nothing to load (did build_content.py run?)")
+        return
 
     try:
         conn_ctx = psycopg.connect(dsn)
