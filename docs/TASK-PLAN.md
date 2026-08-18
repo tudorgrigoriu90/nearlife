@@ -2003,11 +2003,36 @@ only.**
     is resumable — that makes this a second field in an existing loop rather than a second ingest.
   - Each locale then needs an **aquatic** variant of its habitat hint (18 more strings), selected by
     the flag. Terrestrial species keep the current wording, so the change is additive.
-- **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
-  - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
-    season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
-  - Open until the Nordic ingest has run once by hand and we know its real cost per country. A
-    schedule is also a standing external-API commitment, so it wants an explicit decision.
+- **T-172 · Presence refresh: annual, 5 February, fully unattended** — *Director + Claude · S · `DONE` · deps: T-167*
+  - 🔭 **Director decision (2026-08-18):** annual, and **no manual step** — "I might not be available
+    every February." This overrides the manual-load gate originally proposed; a pipeline that needs
+    someone present is a pipeline that stops the first year nobody is.
+  - **Annual is the right cadence for a reason, not a compromise.** `build_presence.py` passes no
+    year filter, so every run aggregates GBIF's entire historical record — decades. One more year
+    adds a few percent to a huge base and will essentially never move a common species' month
+    window. What *does* change on a yearly scale: range shifts (species crossing the occurrence
+    threshold), GBIF backbone revisions (splits, lumps, re-keying), and retroactive bulk dataset
+    publications. February catches all three, after the backbone release and year-end publications.
+  - `cron: "0 3 5 2 *"`. Scheduled runs carry no inputs, so the ingest defaults to `SWE` and the
+    vernacular pass is enabled by `github.event_name == 'schedule'`; the input is passed through the
+    environment rather than interpolated into the shell.
+  - ⚖️ **What replaces the human is T-192, not nothing.** Removing the gate removes the person who
+    would have noticed a broken ingest before it overwrote good data — so the loader now refuses a
+    load carrying far less data than the database already holds. Unattended does not mean unchecked.
+- **T-192 · Refuse a load that looks like a broken ingest** — *Claude · S · `DONE` · deps: T-172*
+  - From the loader's point of view a partial ingest and a genuine decline are **identical**: both
+    arrive as fewer rows. With a human in the loop that ambiguity was survivable; with T-172's
+    unattended schedule it is not.
+  - `check_load_sanity` refuses a load below **75%** of the current count, on species *and*
+    presence separately — a taxon failing mid-ingest can leave the species list broadly intact while
+    gutting presence, so one threshold would not have caught it. 75% tolerates ordinary churn, since
+    GBIF lumps species at every backbone release.
+  - **An empty incoming dataset never passes**, even against an empty database: it is the most
+    dangerous case, recording success while loading nothing and leaving the next run to compare
+    against a hollow baseline. An empty *database* passes anything — that is a new project, not
+    evidence of a failure.
+  - The refusal message names both numbers, so the Actions log is actionable without a re-run.
+    8 tests.
 - **T-170 · A partial ingest must not discard the whole run** — *Claude · S · `DONE` · deps: T-167*
   - `build_presence.py --all` returns 1 when *any* single taxon fails, and it deliberately keeps
     going so one failure does not lose the rest. But a non-zero step in Actions skips every step

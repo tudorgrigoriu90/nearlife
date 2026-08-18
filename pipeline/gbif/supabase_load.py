@@ -19,6 +19,7 @@ import json
 import os
 from pathlib import Path
 
+from gbif.load_guard import check_load_sanity
 from gbif.db_rows import (
     adopt_existing_ids,
     build_rows,
@@ -94,6 +95,20 @@ def main() -> None:
         existing = {int(k): i for k, i in cur.fetchall()}
         species_rows, presence_rows = adopt_existing_ids(species_rows, presence_rows, existing)
         print(f"adopted {sum(1 for r in species_rows if not r['id'].startswith('gbif:'))} curated ids")
+
+        # The annual refresh runs unattended (T-172), so the sanity check that a person would
+        # have applied has to be automatic. Refuse a load that arrives with far less data than the
+        # database already holds: a partial ingest and a real decline look identical from here.
+        cur.execute("select count(*) from public.species")
+        have_species = cur.fetchone()[0]
+        cur.execute("select count(*) from public.species_presence")
+        have_presence = cur.fetchone()[0]
+        verdict = check_load_sanity(
+            {"species": have_species, "presence": have_presence},
+            {"species": len(species_rows), "presence": len(presence_rows)},
+        )
+        if not verdict.ok:
+            raise SystemExit(verdict.reason)
 
         cur.executemany(REGION_SQL, regions)
         for chunk in _chunks(species_rows, 1000):

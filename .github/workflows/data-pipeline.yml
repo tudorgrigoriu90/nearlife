@@ -12,6 +12,21 @@ name: Data pipeline
 #   SUPABASE_SERVICE_KEY  a secret key (`sb_secret_…`)             → photo upload auth (T-119)
 
 on:
+  # Annual refresh (T-172, Director): fully unattended. GBIF data drifts through range shifts,
+  # backbone revisions and retroactive bulk publications — none of which need more than a yearly
+  # pass, because the ingest has no year filter and already aggregates decades, so one more year
+  # barely moves a month window.
+  #
+  # February: after GBIF's annual backbone release and after year-end dataset publications, so a
+  # single run catches all three sources of change.
+  #
+  # There is no human gate by design. What replaces it is `gbif/load_guard.py`, which refuses a
+  # load arriving with far less data than the database already holds (T-192) — a partial ingest and
+  # a real decline are indistinguishable from the loader's point of view, so the benefit of the
+  # doubt goes to the data already in production.
+  schedule:
+    - cron: "0 3 5 2 *" # 03:00 UTC, 5 February, yearly
+
   workflow_dispatch:
     inputs:
       vernacular:
@@ -66,9 +81,11 @@ jobs:
       # it lives here rather than on a laptop or in a chat session: Actions can run for six hours
       # unattended and the output is committed as an artifact either way.
       - name: Ingest presence from GBIF
-        if: ${{ inputs.countries != '' }}
+        env:
+          COUNTRIES: ${{ inputs.countries }}
+        if: ${{ inputs.countries != '' || github.event_name == 'schedule' }}
         run: |
-          for c in ${{ inputs.countries }}; do
+          for c in ${COUNTRIES:-SWE}; do
             echo "::group::presence ingest $c"
             python pipeline/build_presence.py --all --country "$c"
             echo "::endgroup::"
@@ -78,7 +95,7 @@ jobs:
       # timeout or a failed species costs minutes rather than the whole pass. Runs before content
       # generation, which reads data/vernacular.json to fill each row's common_name.
       - name: Fetch vernacular names (T-188)
-        if: ${{ !cancelled() && inputs.vernacular != '' }}
+        if: ${{ !cancelled() && (inputs.vernacular != '' || github.event_name == 'schedule') }}
         run: python pipeline/build_vernacular.py
 
       - name: Generate species content (grounded facts + safe templates, T-135)
