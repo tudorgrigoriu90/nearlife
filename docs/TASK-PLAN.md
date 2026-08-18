@@ -2090,6 +2090,17 @@ only.**
     notifications are functional consents the app asks for openly.
   - Returns the **same object** when it refuses, so a blocked change costs no write to the consent
     store. `App.tsx` checks identity and returns early.
+- **T-198 · `vernacular.json` does not survive between runs** — *Claude · S · `TODO` · deps: T-188*
+  - `build_vernacular.py` is resumable **within** a run — it writes every 100 species and skips what
+    is recorded — but the file lives only in the run artifact. A fresh run checks out a clean repo,
+    finds nothing recorded, and re-fetches all 6,824 species (~52 min, doubled by T-191's profile
+    call).
+  - Not urgent, and deliberately not fixed by committing the file: the **database is the durable
+    store**. Once `build_content.py` has consumed the names and the content loader has written
+    `species_content.common_name`, the JSON is a cache. The chain only has to complete once per
+    refresh, and the refresh is annual.
+  - If it does become worth fixing, downloading the previous run's artifact at job start is the
+    right shape — resumability across runs, without committing a derived 2 MB file.
 - **T-192 · Refuse a load that looks like a broken ingest** — *Claude · S · `DONE` · deps: T-172*
   - From the loader's point of view a partial ingest and a genuine decline are **identical**: both
     arrive as fewer rows. With a human in the loop that ambiguity was survivable; with T-172's
