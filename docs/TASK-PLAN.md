@@ -1989,14 +1989,28 @@ only.**
     GBIF already publishes it: `/species/{key}/speciesProfiles` returns `marine`, `freshwater` and
     `terrestrial` flags. That would let an otter get a water hint and a badger a woodland one from
     real data instead of a taxon average — filed as **T-191**.
-- **T-191 · Per-species habitat from GBIF species profiles** — *Claude · M · `TODO` · deps: T-188, T-190*
-  - T-190 widened the taxon hints so they stop being false, but a hint that names every habitat a
-    taxon might occupy is vague by construction. `/species/{key}/speciesProfiles` returns `marine`,
-    `freshwater`, `terrestrial` and a free-text `habitat` per species.
-  - Fetch it in the same pass as vernacular names (T-188), which already walks all 6,824 species and
-    is resumable — that makes this a second field in an existing loop rather than a second ingest.
-  - Each locale then needs an **aquatic** variant of its habitat hint (18 more strings), selected by
-    the flag. Terrestrial species keep the current wording, so the change is additive.
+- **T-191 · Per-species habitat from GBIF species profiles** — *Claude · M · `DONE` · deps: T-188, T-190*
+  - T-190 stopped the mammal hint being *false*, but a hint naming every habitat a taxon might
+    occupy is vague by construction — it is the average of a badger and a seal. GBIF publishes the
+    real answer per species: `/species/{key}/speciesProfiles` carries `marine`, `freshwater` and
+    `terrestrial` flags.
+  - **Profiles are OR-ed, not voted on.** They come from several checklist datasets that disagree,
+    and the costs are asymmetric: a false "aquatic" is a slightly odd hint, a false "terrestrial" is
+    telling someone to look for an otter in a meadow — the exact bug this exists to fix.
+  - Water wins when a species is both. An otter *is* terrestrial too, but the water hint is the one
+    that sends a reader to the right place. **Absent profile data is never aquatic** — it falls back
+    to the taxon hint rather than asserting a habitat nobody published.
+  - One `habitat_aquatic` string per **locale**, not per taxon: an otter, a dragonfly and a water
+    beetle all want the same sentence. 18 written, with the same conformance checks as the rest
+    (non-empty, differs from English, no doubled words in the composed sentence).
+  - Rides along in the T-188 pass rather than adding a second ingest — that loop already walks every
+    shipped species and is already resumable, so this is a second call inside it.
+  - 🐛 **Caught while wiring it: a resumable job whose record shape changed under it.** Entries
+    written by the pre-T-191 version have names but no `_realms`, and `pending_keys` would have
+    treated them as done — leaving every species fetched earlier permanently without habitat data,
+    *invisibly*, because the file looks complete. `pending_keys` now keys on `_realms` rather than
+    mere presence. Two older tests encoded the previous contract and were updated rather than
+    deleted, since their intent (resume works; an empty answer is still an answer) still holds.
 - **T-172 · Presence refresh: annual, 5 February, fully unattended** — *Director + Claude · S · `DONE` · deps: T-167*
   - 🔭 **Director decision (2026-08-18):** annual, and **no manual step** — "I might not be available
     every February." This overrides the manual-load gate originally proposed; a pipeline that needs

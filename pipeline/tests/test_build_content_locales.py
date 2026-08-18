@@ -128,3 +128,32 @@ def test_no_vernacular_data_at_all_is_not_an_error():
     wiki = FakeWiki()
     rows = build_localized(SPECIES, "bird", wiki, ["sv"])
     assert all(r["commonName"] is None for r in rows)
+
+
+def test_an_aquatic_species_gets_the_water_habitat_hint():
+    # T-191: the otter-in-a-meadow fix, driven by GBIF's realm flags rather than a taxon average.
+    wiki = FakeWiki()
+    vern = {"1": {"en": "Otter", "_realms": {"freshwater": True, "terrestrial": True}}}
+    rows = build_localized(SPECIES, "mammal", wiki, ["en"], vern)
+    assert "lakes" in rows[0]["whenAndHow"]
+
+
+def test_a_terrestrial_species_keeps_the_taxon_hint():
+    wiki = FakeWiki()
+    vern = {"1": {"en": "Badger", "_realms": {"terrestrial": True}}}
+    rows = build_localized(SPECIES, "mammal", wiki, ["en"], vern)
+    assert "woodland edges" in rows[0]["whenAndHow"]
+
+
+def test_a_species_with_no_profile_keeps_the_taxon_hint():
+    wiki = FakeWiki()
+    rows = build_localized(SPECIES, "mammal", wiki, ["en"], {"1": {"en": "Unknown"}})
+    assert "woodland edges" in rows[0]["whenAndHow"]
+
+
+def test_the_realms_key_is_not_mistaken_for_a_locale_name():
+    # "_realms" lives alongside locale keys in the same map; it must never surface as a common name.
+    wiki = FakeWiki()
+    vern = {"1": {"sv": "Utter", "_realms": {"freshwater": True}}}
+    rows = build_localized(SPECIES, "mammal", wiki, ["sv"], vern)
+    assert rows[0]["commonName"] == "Utter"

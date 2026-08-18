@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from gbif.client import GbifClient  # noqa: E402
 from gbif.noise import SpeciesSignals, classify  # noqa: E402
+from gbif.species_profile import parse_species_profile  # noqa: E402
 from gbif.vernacular import parse_vernacular_names  # noqa: E402
 from media.templates_i18n import LOCALES  # noqa: E402
 
@@ -30,8 +31,14 @@ SAVE_EVERY = 100
 
 
 def pending_keys(all_keys: list[int], existing: dict) -> list[int]:
-    """Species not yet fetched. A recorded empty result counts as fetched."""
-    return [k for k in all_keys if str(k) not in existing]
+    """Species not yet fetched. A recorded empty result counts as fetched.
+
+    An entry lacking `_realms` is treated as pending even though it has names: it was written
+    before T-191 added habitat to this pass, and skipping it would leave every species fetched
+    earlier permanently without habitat data — invisibly, because the file looks complete. That is
+    the characteristic failure of a resumable job whose record shape changes under it.
+    """
+    return [k for k in all_keys if "_realms" not in (existing.get(str(k)) or {})]
 
 
 def merge_existing(existing: dict, fresh: dict) -> dict:
@@ -104,7 +111,11 @@ def main(argv: list[str]) -> int:
     fresh: dict[int, dict] = {}
     for i, key in enumerate(todo, 1):
         try:
-            fresh[key] = parse_vernacular_names(client.vernacular_names(key))
+            # Two calls per species rather than a second full pass (T-191): this loop already walks
+            # every shipped species and is already resumable, so habitat rides along.
+            names = parse_vernacular_names(client.vernacular_names(key))
+            realms = parse_species_profile(client.species_profile(key))
+            fresh[key] = {**names, "_realms": realms}
         except Exception as exc:  # one bad species must not end a 40-minute run
             print(f"  ! {key}: {exc}", flush=True)
             continue

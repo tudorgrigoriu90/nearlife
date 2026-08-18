@@ -162,3 +162,31 @@ def test_the_mammal_habitat_does_not_exclude_the_ones_that_live_in_water():
     """
     hint = strings_for("en").templates["mammal"]["habitat"]
     assert "wetland" in hint, hint
+
+
+def test_every_locale_has_an_aquatic_habitat_hint():
+    # T-191: without it a locale silently keeps sending otter-watchers to meadows.
+    for loc in LOCALES:
+        assert strings_for(loc).habitat_aquatic.strip(), loc
+
+
+def test_the_aquatic_hint_overrides_the_taxon_habitat():
+    dry = when_and_how("mammal", [5], "en")
+    wet = when_and_how("mammal", [5], "en", aquatic=True)
+    assert dry != wet
+    assert "lakes" in wet
+
+
+def test_the_aquatic_hint_differs_from_english_in_every_locale():
+    for loc in LOCALES:
+        if loc == "en":
+            continue
+        assert strings_for(loc).habitat_aquatic != strings_for("en").habitat_aquatic, loc
+
+
+def test_aquatic_composition_has_no_doubled_words_either():
+    for loc in LOCALES:
+        words = when_and_how("mammal", [5, 6], loc, aquatic=True).lower().split()
+        for a, b in zip(words, words[1:]):
+            stripped = a.strip(".,;:!?()")
+            assert stripped != b.strip(".,;:!?()") or not stripped, (loc, a)

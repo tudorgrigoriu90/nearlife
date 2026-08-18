@@ -26,6 +26,7 @@ except (AttributeError, ValueError):
 
 sys.path.insert(0, str(Path(__file__).parent))
 from media.content_templates import TAXON_FROM_FILE  # noqa: E402
+from gbif.species_profile import is_aquatic  # noqa: E402
 from media.templates_i18n import LOCALES, strings_for, when_and_how  # noqa: E402
 from media.wikimedia import WikimediaClient  # noqa: E402
 
@@ -96,7 +97,14 @@ def build_localized(
                     "fact": fact,  # None when that edition has no article — never fabricated
                     "factSource": "Wikipedia" if fact else None,
                     "factLicense": "CC BY-SA" if fact else None,
-                    "whenAndHow": when_and_how(taxon, sp["months"], locale),
+                    "whenAndHow": when_and_how(
+                        taxon,
+                        sp["months"],
+                        locale,
+                        aquatic=is_aquatic(
+                            vernacular.get(str(sp["speciesKey"]), {}).get("_realms", {})
+                        ),
+                    ),
                     "give": tpl["give"],
                     "protect": tpl["protect"],
                     "status": "machine",

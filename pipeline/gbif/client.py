@@ -66,6 +66,10 @@ class GbifClient:
         """Every vernacular name GBIF holds for a species, in every language, in one call (T-187)."""
         return self._get(f"/species/{species_key}/vernacularNames", {"limit": 1000})
 
+    def species_profile(self, species_key: int) -> dict:
+        """GBIF's habitat realm flags for a species (marine / freshwater / terrestrial), T-191."""
+        return self._get(f"/species/{species_key}/speciesProfiles", {"limit": 100})
+
     def species_facet(
         self, gadm_gid: str, taxon_key: int, month: int, facet_limit: int = 300
     ) -> tuple[list[tuple[int, int]], bool]:

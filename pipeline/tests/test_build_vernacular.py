@@ -14,13 +14,16 @@ from build_vernacular import coverage_report, merge_existing, pending_keys  # no
 
 
 def test_pending_skips_species_already_fetched():
-    # Resumability: a re-run must pick up where the last one stopped.
-    assert pending_keys([1, 2, 3], {"2": {"sv": "Talgoxe"}}) == [1, 3]
+    # Resumability: a re-run must pick up where the last one stopped. A fetched entry carries
+    # `_realms` (T-191) — that is what marks it as fully answered, names and habitat both.
+    fetched = {"2": {"sv": "Talgoxe", "_realms": {"freshwater": False}}}
+    assert pending_keys([1, 2, 3], fetched) == [1, 3]
 
 
 def test_pending_treats_a_recorded_empty_result_as_done():
-    # "GBIF has no vernacular name for this species" is an answer, not a gap to retry forever.
-    assert pending_keys([1, 2], {"1": {}}) == [2]
+    # "GBIF has no vernacular name for this species" is an answer, not a gap to retry forever —
+    # provided we did ask, which `_realms` records.
+    assert pending_keys([1, 2], {"1": {"_realms": {}}}) == [2]
 
 
 def test_pending_is_everything_on_a_first_run():
@@ -52,3 +55,22 @@ def test_coverage_reports_zero_rather_than_omitting_an_empty_locale():
 
 def test_coverage_of_nothing_does_not_divide_by_zero():
     assert coverage_report({}, ["sv"]) == {"sv": {"named": 0, "total": 0, "pct": 0.0}}
+
+
+def test_an_entry_from_before_habitat_existed_is_re_fetched():
+    """T-191 added `_realms` to each entry. Entries written by the previous version have names but
+    no realms, and `pending_keys` would otherwise treat them as done — leaving every species
+    fetched before today permanently without habitat data, invisibly.
+
+    This is the specific failure mode of a resumable job whose record shape changes under it.
+    """
+    assert pending_keys([1], {"1": {"sv": "Talgoxe"}}) == [1]
+
+
+def test_an_entry_with_realms_is_not_re_fetched():
+    assert pending_keys([1], {"1": {"sv": "Talgoxe", "_realms": {"freshwater": False}}}) == []
+
+
+def test_a_species_with_no_names_but_a_realm_lookup_counts_as_done():
+    # "GBIF holds no name and no profile" is still an answer, as long as we asked for both.
+    assert pending_keys([1], {"1": {"_realms": {}}}) == []

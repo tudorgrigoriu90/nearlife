@@ -36,6 +36,10 @@ class LocaleStrings:
     unknown: str
     sentence: str  # uses {when} and {hint}
     templates: dict[str, dict[str, str]]
+    # Used instead of the taxon habitat when GBIF marks the species marine or freshwater
+    # (T-191). One string per locale rather than one per taxon: an otter, a dragonfly and a
+    # water beetle all want the same sentence here.
+    habitat_aquatic: str = ""
 
 
 SV_TEMPLATES: dict[str, dict[str, str]] = {
@@ -1014,6 +1018,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="at times through the year",
         sentence="Active in your region {when}. Look for it {hint}.",
         templates=EN_TEMPLATES,
+        habitat_aquatic='in and beside the lakes, rivers, and wetlands where it lives',
     ),
     "sv": LocaleStrings(
         months=SV_MONTHS,
@@ -1026,6 +1031,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="vid olika tider under året",
         sentence="Aktiv i din region {when}. Leta efter den {hint}.",
         templates=SV_TEMPLATES,
+        habitat_aquatic='i och vid sjöarna, åarna och våtmarkerna där den lever',
     ),
     "ar": LocaleStrings(
         months=AR_MONTHS,
@@ -1038,6 +1044,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="في أوقات مختلفة من العام",
         sentence="نشِط في منطقتك {when}. ابحث عنه {hint}.",
         templates=AR_TEMPLATES,
+        habitat_aquatic='في البحيرات والأنهار والأراضي الرطبة التي يعيش فيها وعلى ضفافها',
     ),
     "so": LocaleStrings(
         months=SO_MONTHS,
@@ -1050,6 +1057,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="waqtiyo kala duwan oo sanadka ah",
         sentence="Wuxuu ku firfircoon yahay gobolkaaga {when}. Ka raadi {hint}.",
         templates=SO_TEMPLATES,
+        habitat_aquatic='biyaha iyo agagaarka harooyinka, webiyaasha iyo meelaha qoyan ee uu ku noolyahay',
     ),
     "ru": LocaleStrings(
         months=RU_MONTHS_IN,
@@ -1062,6 +1070,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="в разное время года",
         sentence="Активен в вашем регионе {when}. Ищите его {hint}.",
         templates=RU_TEMPLATES,
+        habitat_aquatic='в озёрах, реках и на болотах, где он живёт, и по их берегам',
     ),
     "uk": LocaleStrings(
         months=UK_MONTHS_IN,
@@ -1074,6 +1083,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="у різні пори року",
         sentence="Активний у вашому регіоні {when}. Шукайте його {hint}.",
         templates=UK_TEMPLATES,
+        habitat_aquatic='в озерах, річках і на болотах, де він живе, та вздовж їхніх берегів',
     ),
     "fa": LocaleStrings(
         months=FA_MONTHS,
@@ -1086,6 +1096,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="در زمان‌های گوناگون سال",
         sentence="در منطقهٔ شما {when} فعال است. آن را {hint} بجویید.",
         templates=FA_TEMPLATES,
+        habitat_aquatic='در دریاچه\u200cها، رودها و تالاب\u200cهایی که در آن\u200cها زندگی می\u200cکند و در کناره\u200cهای آن\u200cها',
     ),
     "tr": LocaleStrings(
         months=TR_MONTHS_LOC,
@@ -1098,6 +1109,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="yılın farklı zamanlarında",
         sentence="Bölgenizde {when} etkindir. Onu {hint} arayın.",
         templates=TR_TEMPLATES,
+        habitat_aquatic='yaşadığı göllerde, nehirlerde ve sulak alanlarda ve bunların kıyılarında',
     ),
     "bs": LocaleStrings(
         months=BS_MONTHS,  # locative, after "u"
@@ -1110,6 +1122,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="u različito doba godine",
         sentence="Aktivan je u vašoj regiji {when}. Tražite ga {hint}.",
         templates=BS_TEMPLATES,
+        habitat_aquatic='u jezerima, rijekama i močvarama u kojima živi i uz njihove obale',
     ),
     "sq": LocaleStrings(
         months=SQ_MONTHS,
@@ -1122,6 +1135,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="në kohë të ndryshme të vitit",
         sentence="Është aktiv në rajonin tuaj {when}. Kërkojeni {hint}.",
         templates=SQ_TEMPLATES,
+        habitat_aquatic='në liqene, lumenj dhe ligatina ku jeton dhe përgjatë brigjeve të tyre',
     ),
     "vi": LocaleStrings(
         months=VI_MONTHS,
@@ -1134,6 +1148,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="vào những thời điểm khác nhau trong năm",
         sentence="Hoạt động ở khu vực của bạn {when}. Hãy tìm nó {hint}.",
         templates=VI_TEMPLATES,
+        habitat_aquatic='ở hồ, sông và vùng đất ngập nước nơi nó sinh sống và dọc theo bờ',
     ),
     "sr": LocaleStrings(
         months=SR_MONTHS,  # locative, after "у"
@@ -1146,6 +1161,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="у различито доба године",
         sentence="Активан је у вашем региону {when}. Тражите га {hint}.",
         templates=SR_TEMPLATES,
+        habitat_aquatic='у језерима, рекама и мочварама у којима живи и уз њихове обале',
     ),
     "th": LocaleStrings(
         months=TH_MONTHS,
@@ -1158,6 +1174,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="ในช่วงเวลาต่าง ๆ ของปี",
         sentence="พบได้ในภูมิภาคของคุณ{when} มองหามัน{hint}",
         templates=TH_TEMPLATES,
+        habitat_aquatic='ในและริมทะเลสาบ แม่น้ำ และพื้นที่ชุ่มน้ำที่มันอาศัยอยู่',
     ),
     "am": LocaleStrings(
         months=AM_MONTHS,
@@ -1170,6 +1187,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="በዓመቱ ውስጥ በተለያዩ ጊዜያት",
         sentence="በአካባቢዎ {when} ንቁ ነው። {hint} ይፈልጉት።",
         templates=AM_TEMPLATES,
+        habitat_aquatic='በሚኖርባቸው ሐይቆች፣ ወንዞችና ረግረጋማ ቦታዎች ውስጥና በዳርቻዎቻቸው',
     ),
     "ti": LocaleStrings(
         months=TI_MONTHS,
@@ -1182,6 +1200,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="ኣብ ዝተፈላለየ ግዜ ዓመት",
         sentence="ኣብ ከባቢኻ {when} ንጡፍ እዩ። {hint} ድለዮ።",
         templates=TI_TEMPLATES,
+        habitat_aquatic='ኣብቲ ዝነብረሉ ቀላያት፣ ወሓይዝን ረግረግን ከምኡውን ኣብ ገምገሞም',
     ),
     "ckb": LocaleStrings(
         months=CKB_MONTHS,
@@ -1194,6 +1213,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="لە کاتە جیاوازەکانی ساڵدا",
         sentence="لە ناوچەکەت {when} چالاکە. {hint} بەدوایدا بگەڕێ.",
         templates=CKB_TEMPLATES,
+        habitat_aquatic='لەو دەریاچە و ڕووبار و زێڵاوانەی تیایدا دەژی و لە کەنارەکانیان',
     ),
     "kmr": LocaleStrings(
         months=KMR_MONTHS,
@@ -1207,6 +1227,7 @@ LOCALES: dict[str, LocaleStrings] = {
         # No preposition before {hint}: every habitat string already carries its own ("li ...").
         sentence="Li herêma te {when} çalak e. {hint} lê bigere.",
         templates=KMR_TEMPLATES,
+        habitat_aquatic='di gol, çem û zeviyên avî yên ku tê de dijî û li kelekên wan',
     ),
     "ps": LocaleStrings(
         months=PS_MONTHS,
@@ -1219,6 +1240,7 @@ LOCALES: dict[str, LocaleStrings] = {
         unknown="د کال په مختلفو وختونو کې",
         sentence="ستاسو په سیمه کې {when} فعال دی. {hint} یې ولټوئ.",
         templates=PS_TEMPLATES,
+        habitat_aquatic='په هغو جهيلونو، سیندونو او لندبېړو کې چې پکې ژوند کوي او د هغوی په غاړو',
     ),
 }
 
@@ -1244,7 +1266,20 @@ def months_phrase(active_months: list[int], locale: str = "en") -> str:
     return st.list_pattern.format(months=st.list_separator.join(st.months[i - 1] for i in m))
 
 
-def when_and_how(taxon: str, active_months: list[int], locale: str = "en") -> str:
+def when_and_how(
+    taxon: str,
+    active_months: list[int],
+    locale: str = "en",
+    aquatic: bool = False,
+) -> str:
+    """`aquatic` overrides the taxon habitat with the locale's water hint (T-191).
+
+    Set from GBIF's per-species realm flags, so an otter is sent to the water while a badger keeps
+    the mammal default. Absent profile data means False — the taxon hint, never an invented habitat.
+    """
     st = strings_for(locale)
-    hint = st.templates.get(taxon, {}).get("habitat", st.templates["mammal"]["habitat"])
+    if aquatic and st.habitat_aquatic:
+        hint = st.habitat_aquatic
+    else:
+        hint = st.templates.get(taxon, {}).get("habitat", st.templates["mammal"]["habitat"])
     return st.sentence.format(when=months_phrase(active_months, locale), hint=hint)
