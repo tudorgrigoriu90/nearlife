@@ -674,7 +674,7 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     T-102 (households) lands; the current `user_id` shape covers v1.
 
 ## F4.2 — Almanac
-- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (async wiring done; DB seed + secondary filters pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
+- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (async wiring done; **species+presence now loaded** T-184; content seed + secondary filters pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ Data-access seam `lib/speciesRepository.ts` (7 tests): `SpeciesRepository` (`listSpecies` +
     `getContent`) with a `HardcodedSpeciesRepository` (the bundled set the app runs on today) and a
     `SupabaseSpeciesRepository` (reads the seeded `species`/`species_content` tables via a fakeable
@@ -1850,8 +1850,17 @@ only.**
     minting a second identity for a species that already had one.
   - ✅ Unrelated but confirmed by the same run: the photo upload succeeded again (54/54,
     `bucket already exists`), so T-119/T-168 are genuinely idempotent.
-  - ⏳ The Norway ingest itself also failed after 1h48m; cause not yet diagnosed. Its partial data
-    survived as artifact 9320514029 (19 files, 2.8 MB) thanks to T-170.
+  - ✅ **Verified in production** (run 32129456489, ingest skipped, load only):
+    `adopted 53 curated ids` / `loaded 21 regions, 11936 species, 78530 presence rows`. **Sweden is
+    in the database** — the first successful load this project has had.
+  - 🔎 **53, not 54, is the right number** and corroborates T-163 independently: `common-dandelion`
+    is the one curated species with no GBIF presence row, because GBIF splits *Taraxacum officinale*
+    into microspecies. The adoption count agreeing with a gap found months earlier is good evidence
+    the mapping is doing what it claims.
+  - ⏳ The Norway ingest itself also failed after 1h48m; cause not diagnosed — the error is ~1h48m
+    back in a log the API's tail cannot reach. The artifact (9320514029) held **19 files against
+    Sweden's 12 committed**, so **7 of 9 Norwegian taxa succeeded** and 2 failed. Norway is v2 under
+    T-177, so this is not a v1 blocker.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
