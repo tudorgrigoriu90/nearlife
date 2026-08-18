@@ -4,8 +4,8 @@ Bulk-upserts regions, species (taxonomy), and per-region presence from pipeline/
 into the public schema. This is the correct home for the ~12k species / ~78k presence rows — far
 too large for ad-hoc SQL through a console.
 
-Runs in CI (or locally) with a **service-role** Postgres connection string in $SUPABASE_DB_URL
-(never the anon/publishable key). Idempotent (upserts), so re-running after a pipeline refresh is
+Runs in CI (or locally) with a **privileged** Postgres connection string in $SUPABASE_DB_URL
+(the `postgres` role, which bypasses RLS — never an API key of any kind). Idempotent (upserts), so re-running after a pipeline refresh is
 safe:
 
     SUPABASE_DB_URL=postgres://...pooler.supabase.com:6543/postgres  python -m gbif.supabase_load
@@ -58,7 +58,7 @@ PRESENCE_SQL = (
 def main() -> None:
     dsn = os.environ.get("SUPABASE_DB_URL")
     if not dsn:
-        raise SystemExit("SUPABASE_DB_URL not set (service-role Postgres connection string).")
+        raise SystemExit("SUPABASE_DB_URL not set (privileged Postgres connection string).")
 
     import psycopg  # imported lazily so the module imports without the DB driver (tests/CLI help)
 

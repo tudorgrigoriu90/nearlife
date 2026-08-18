@@ -8,8 +8,8 @@ species (invariant #2); a fact is never fabricated (invariant #1). English (stat
 only — Swedish arrives after the review-gated translation (T-127/T-135).
 
 Run order: the species/presence loader (gbif.supabase_load) must run first — species_content.species_id
-FK-references public.species. Runs in CI (or locally) with a **service-role** Postgres connection
-string in $SUPABASE_DB_URL (never the anon/publishable key). Idempotent (upsert):
+FK-references public.species. Runs in CI (or locally) with a **privileged** Postgres connection
+string in $SUPABASE_DB_URL (the `postgres` role — never an API key of any kind). Idempotent (upsert):
 
     SUPABASE_DB_URL=postgres://...pooler.supabase.com:6543/postgres  python -m gbif.supabase_load_content
 """
@@ -50,7 +50,7 @@ CONTENT_SQL = (
 def main() -> None:
     dsn = os.environ.get("SUPABASE_DB_URL")
     if not dsn:
-        raise SystemExit("SUPABASE_DB_URL not set (service-role Postgres connection string).")
+        raise SystemExit("SUPABASE_DB_URL not set (privileged Postgres connection string).")
 
     import psycopg  # imported lazily so the module imports without the DB driver (tests/CLI help)
 

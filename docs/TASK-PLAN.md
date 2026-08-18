@@ -578,13 +578,13 @@ key before loading into Supabase.**
     manifest, and uploads the generated JSON as an artifact. The **Supabase load** (`gbif.supabase_load`,
     T-134) and **photo upload** (`media/supabase_upload.py`, T-119) steps run only when the repo
     secrets are set — so the whole E3 load runs from GitHub with secrets, not Python on a laptop.
-  - ⏳ **Director:** add repo secrets `SUPABASE_DB_URL` (service-role Postgres string),
+  - ⏳ **Director:** add repo secrets `SUPABASE_DB_URL` (privileged Postgres string),
     `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, then run the workflow. The `species_content` loader
     (content JSON → table) is now built + tested (**T-145**) — running it just needs those secrets.
 - **T-145 · Load generated content into `species_content` (loader + tests)** — *Claude · S · `DONE` (code + 5 pytest; bulk run needs the service key) · deps: T-135, T-055 · [TSD §3](TSD.md)*
   - ✅ Pure row-builder `pipeline/gbif/content_rows.py` (`build_content_rows` → species_content upsert
     dicts with `gbif:<key>` ids matching the species loader) + thin loader
-    `pipeline/gbif/supabase_load_content.py` (idempotent upsert via service-role `$SUPABASE_DB_URL`),
+    `pipeline/gbif/supabase_load_content.py` (idempotent upsert via privileged `$SUPABASE_DB_URL`),
     mirroring the presence loader (T-045). 5 pytest; full pipeline suite green (31).
   - ✅ **Honest coverage:** only species with a grounded Wikipedia fact become rows (`species_content.fact`
     is NOT NULL and the app treats `fact` as required); fact-less species are counted + reported,
@@ -1612,6 +1612,22 @@ only.**
     (157 species) shows the gap — its facts are Wikipedia lead sentences, and its give/protect are
     taxon templates rather than per-species advice. Meeting this bar across ~25k species is the
     single largest piece of work in the project and needs its own plan before it is attempted.
+- **T-169 · Server-side key naming follows Supabase's new API keys** — *Claude · S · `DONE` · deps: —*
+  - Supabase replaced the legacy `anon` / `service_role` JWTs with **publishable** and named
+    **secret** (`sb_secret_…`) keys; the legacy pair now sits behind a "Legacy" tab and is marked
+    deprecated. The client already used the new scheme (`EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+    T-096) — only the server-side docs still told the Director to fetch a `service_role` key.
+  - `$SUPABASE_SERVICE_KEY` keeps its name (renaming it would silently unset a configured CI
+    secret) but now documents itself as taking a secret key. Nothing decodes the key — it is passed
+    through in the `apikey` / `Authorization` headers — so the non-JWT format needs no code change,
+    and legacy keys keep working for as long as Supabase honours them.
+  - **Why a named secret key is the better one to issue:** it can be revoked on its own. The legacy
+    `service_role` JWT can only be rolled project-wide, which is why the key exposed in an earlier
+    chat session could not be cheaply replaced. Issue one key per consumer (`github-actions`) and a
+    leak costs exactly that consumer.
+  - Also corrected: `$SUPABASE_DB_URL` was described as "service-role", conflating a Postgres
+    connection string with an API key. It is neither — it is the `postgres` role, which bypasses
+    RLS for a different reason.
 - **T-168 · Thumbnail tier: ship ~40 KB, link out for full size** — *Claude · M · `IN-PROGRESS` (pipeline + card done; bulk upload is Director) · deps: T-118, T-119, T-126, T-167*
   - 💾 **Storage forced the design.** At ~6,800 kept Swedish species a full-size photo each would
     fill the 1 GB Supabase free tier before Norway, Denmark, Finland and Iceland are ingested. A
@@ -1744,7 +1760,7 @@ attribution. Photos are language-independent (one set serves all locales). Licen
     (`species-media/<id>.<ext>`). `media.test.ts` guards licenses, full attribution, species mapping,
     and 100% coverage. **Chosen approach: re-host, not hotlink** — Wikimedia discourages app-scale
     hotlinking; re-hosting gives reliability/perf/privacy and snapshots attribution.
-  - ⏳ **Director:** run `pipeline/media/supabase_upload.py` with `SUPABASE_URL` + the **service-role**
+  - ⏳ **Director:** run `pipeline/media/supabase_upload.py` with `SUPABASE_URL` + a **secret key**
     key to create the public `species-media` bucket and upload the 54 originals (unmodified;
     resize on delivery). Until then the app shows the emoji fallback for spotted species (no breakage).
     Spot-check licensing. National-scale sourcing (the ~12k set) reuses the same pipeline (E3, gated

@@ -7,9 +7,9 @@ name: Data pipeline
 # it never fires automatically.
 #
 # Repo secrets (Settings → Secrets and variables → Actions), all optional:
-#   SUPABASE_DB_URL       service-role Postgres connection string → load species/presence (T-134)
+#   SUPABASE_DB_URL       privileged Postgres connection string   → load species/presence (T-134)
 #   SUPABASE_URL          https://<ref>.supabase.co               → photo upload target (T-119)
-#   SUPABASE_SERVICE_KEY  service-role key                        → photo upload auth (T-119)
+#   SUPABASE_SERVICE_KEY  a secret key (`sb_secret_…`)             → photo upload auth (T-119)
 
 on:
   workflow_dispatch:

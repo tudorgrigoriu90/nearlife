@@ -8,7 +8,12 @@ via Supabase image transforms, not by editing the stored file.
 
 Requires (server-side secrets — never in the client):
     SUPABASE_URL            e.g. https://<ref>.supabase.co
-    SUPABASE_SERVICE_KEY    the service-role key (NOT the publishable key)
+    SUPABASE_SERVICE_KEY    a Supabase **secret key** (`sb_secret_…`), NOT the publishable one
+
+The name is historical: Supabase replaced the legacy `service_role` JWT with named secret keys,
+which are what this should be given now. Both are still accepted in the `apikey` / `Authorization`
+headers below and both bypass RLS, but secret keys can be rotated individually — the legacy pair
+can only be rolled project-wide. Nothing here decodes the key, so the non-JWT format is fine.
 
 Run:  SUPABASE_URL=... SUPABASE_SERVICE_KEY=... python pipeline/media/supabase_upload.py
 """
@@ -60,7 +65,7 @@ def main() -> int:
     base = os.environ.get("SUPABASE_URL", "").rstrip("/")
     key = os.environ.get("SUPABASE_SERVICE_KEY", "")
     if not base or not key:
-        print("set SUPABASE_URL and SUPABASE_SERVICE_KEY (service-role) in the environment")
+        print("set SUPABASE_URL and SUPABASE_SERVICE_KEY (a sb_secret_… key) in the environment")
         return 2
     payload = json.loads(MEDIA_JSON.read_text(encoding="utf-8"))
     entries = [m for m in payload["media"] if m.get("imageUrl")]
