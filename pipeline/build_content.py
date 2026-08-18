@@ -51,7 +51,13 @@ def distinct_species(presence: dict) -> list[dict]:
             for s in agg.values()]
 
 
-def build_localized(species: list[dict], taxon: str, client, locales: list[str]) -> list[dict]:
+def build_localized(
+    species: list[dict],
+    taxon: str,
+    client,
+    locales: list[str],
+    vernacular: dict | None = None,
+) -> list[dict]:
     """One content row per (species, locale).
 
     Facts are fetched in batches of 50 per locale (T-182) from that locale's own Wikipedia edition
@@ -61,6 +67,7 @@ def build_localized(species: list[dict], taxon: str, client, locales: list[str])
     already handles an absent one (T-146). give/protect/whenAndHow come from the locale's templates
     and are always present, so a language gap never gates the mission (invariant #2).
     """
+    vernacular = vernacular or {}
     names = [sp["scientificName"] for sp in species]
     rows = []
     for locale in locales:
@@ -82,6 +89,10 @@ def build_localized(species: list[dict], taxon: str, client, locales: list[str])
                     "scientificName": sp["scientificName"],
                     "taxonGroup": taxon,
                     "locale": locale,
+                    # Null when this locale has no sourced name — never the binomial (T-187), so
+                    # the app can render a scientific name as one instead of passing it off as a
+                    # common name.
+                    "commonName": vernacular.get(str(sp["speciesKey"]), {}).get(locale),
                     "fact": fact,  # None when that edition has no article — never fabricated
                     "factSource": "Wikipedia" if fact else None,
                     "factLicense": "CC BY-SA" if fact else None,
@@ -96,13 +107,21 @@ def build_localized(species: list[dict], taxon: str, client, locales: list[str])
     return rows
 
 
+def load_vernacular() -> dict:
+    """Names from build_vernacular.py, if it has run. Absent is fine — every card still renders."""
+    path = DATA / "vernacular.json"
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8")).get("names", {})
+
+
 def build(presence_path: Path, client: WikimediaClient, locales: list[str] | None = None) -> dict:
     taxon = taxon_of(presence_path)
     locales = locales or list(LOCALES)
     species = distinct_species(json.loads(presence_path.read_text(encoding="utf-8")))
     print(f"  {len(species)} species x {len(locales)} locales", flush=True)
 
-    content = build_localized(species, taxon, client, locales)
+    content = build_localized(species, taxon, client, locales, load_vernacular())
     with_fact = sum(1 for r in content if r["fact"])
 
     return {

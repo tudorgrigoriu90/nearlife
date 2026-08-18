@@ -103,3 +103,28 @@ def test_a_species_with_no_months_never_claims_a_season():
     rows = build_localized(SPECIES, "bird", wiki, ["en"])
     quiet = next(r for r in rows if r["speciesKey"] == 2)
     assert "year-round" not in quiet["whenAndHow"]
+
+
+# T-188: vernacular names reach the card through the content rows, per locale.
+
+
+def test_common_name_comes_from_the_vernacular_map_for_that_locale():
+    wiki = FakeWiki()
+    vern = {"1": {"sv": "Skata", "en": "Magpie"}}
+    rows = build_localized(SPECIES, "bird", wiki, ["en", "sv"], vern)
+    by = {r["locale"]: r for r in rows if r["speciesKey"] == 1}
+    assert by["sv"]["commonName"] == "Skata"
+    assert by["en"]["commonName"] == "Magpie"
+
+
+def test_a_locale_with_no_vernacular_name_gets_null_not_the_binomial():
+    # The whole point of T-187: a null lets the app render the binomial *as* a binomial.
+    wiki = FakeWiki()
+    rows = build_localized(SPECIES, "bird", wiki, ["ti"], {"1": {"sv": "Skata"}})
+    assert rows[0]["commonName"] is None
+
+
+def test_no_vernacular_data_at_all_is_not_an_error():
+    wiki = FakeWiki()
+    rows = build_localized(SPECIES, "bird", wiki, ["sv"])
+    assert all(r["commonName"] is None for r in rows)

@@ -61,7 +61,9 @@ def build_content_rows(payloads: Iterable, locale: str = "en") -> tuple[list[dic
                 {
                     "species_id": species_id,
                     "locale": row_locale,
-                    "common_name": None,  # localized names come from names.sv / review, not here
+                    # Sourced from GBIF per locale (T-188). Blank normalises to None: an empty
+                    # string renders as a blank title, which is worse than the binomial.
+                    "common_name": (item.get("commonName") or "").strip() or None,
                     "fact": fact,  # None when there's no article — never fabricated (invariant #1)
                     "when_how": item["whenAndHow"],
                     "give": item["give"],

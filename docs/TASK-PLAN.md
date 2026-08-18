@@ -1917,7 +1917,7 @@ only.**
   - 📌 **Context: no notification is sent today at all.** `cron.job` is empty and the T-064 Edge
     Function does not exist; only `delete-account` is deployed. Doing this now means T-064 is built
     against a spread population from the start, rather than retrofitted after a launch-day spike.
-- **T-187 · Vernacular names: stop showing the binomial as a common name** — *Claude · M · `IN-PROGRESS` (parser + honest null done; ingest step pending) · deps: T-184*
+- **T-187 · Vernacular names: stop showing the binomial as a common name** — *Claude · M · `DONE` (ingest is T-188) · deps: T-184*
   - `db_rows.py` set `common_name = scientific_name`, so all 11,936 loaded species render
     **"*Lutra lutra*" as though that were what people call an otter**. The card title is the most
     visible string in the app, and this is the last big gap in v1.
@@ -1934,9 +1934,27 @@ only.**
     failure: the card falls back to the scientific name, which is what a field guide in those
     languages prints anyway. Do **not** machine-translate species names to fill the gap — a
     fabricated vernacular name is exactly the failure T-159 refused for Irish and Maltese.
-  - ⏳ Remaining: the ingest step that walks the 6,824 shipped species, calls the endpoint and
-    writes `species_content.common_name` per locale, plus a coverage report per locale so the gaps
-    are visible rather than assumed.
+  - ✅ The ingest that uses this is **T-188**.
+- **T-188 · Vernacular-name ingest, end to end** — *Claude · M · `DONE` · deps: T-187*
+  - `build_vernacular.py` walks the **6,824 noise-filtered species** (the v1 catalogue per T-177),
+    calls GBIF once per species, and writes `data/vernacular.json`. One call returns every language,
+    so a single pass covers all 18 locales.
+  - **Resumable by design.** ~6,824 polite calls is roughly 40 minutes; a failure at species 6,000
+    must not discard the first 5,999. Results are written every 100 species and a re-run skips what
+    is already recorded — *including* species recorded as having no name, because "GBIF holds
+    nothing here" is an answer, not a gap to retry forever. One failing species is logged and
+    skipped rather than ending the run.
+  - **Coverage is reported per locale, and empty locales are printed as `0.0%` rather than
+    omitted.** An absent line reads as "not checked"; an explicit zero reads as "checked, and there
+    is nothing" — which for most of the immigrant roster is the true answer. Assumed coverage is
+    how a gap becomes a surprise at launch.
+  - Threaded end to end: `build_content.py` reads the file and fills each row's `commonName` for its
+    own locale; `content_rows.py` carries it into `species_content.common_name`, normalising blank
+    to NULL (an empty string renders as a blank card title, which is worse than the binomial).
+    Absent vernacular data is not an error — every card still renders.
+  - `Data pipeline` gained a **`vernacular`** input, ordered before content generation since the
+    content step consumes its output.
+  - 14 new tests (8 ingest + 3 content + 3 loader), all network-free.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.

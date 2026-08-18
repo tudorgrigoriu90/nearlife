@@ -123,3 +123,26 @@ def test_items_without_a_locale_fall_back_to_the_argument():
     legacy = {k: v for k, v in _loc_item("en").items() if k != "locale"}
     rows, _ = build_content_rows([[legacy]], locale="en")
     assert rows[0]["locale"] == "en"
+
+
+# T-188: the loader must carry the sourced common name through to species_content, per locale.
+
+
+def test_common_name_reaches_the_row():
+    item = _loc_item("sv")
+    item["commonName"] = "Skata"
+    rows, _ = build_content_rows([[item]])
+    assert rows[0]["common_name"] == "Skata"
+
+
+def test_a_missing_common_name_stays_null():
+    rows, _ = build_content_rows([[_loc_item("ti")]])
+    assert rows[0]["common_name"] is None
+
+
+def test_a_blank_common_name_is_normalised_to_null():
+    # An empty string would render as a blank card title — worse than falling back to the binomial.
+    item = _loc_item("sv")
+    item["commonName"] = "   "
+    rows, _ = build_content_rows([[item]])
+    assert rows[0]["common_name"] is None

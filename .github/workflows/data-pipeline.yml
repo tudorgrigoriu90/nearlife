@@ -14,6 +14,10 @@ name: Data pipeline
 on:
   workflow_dispatch:
     inputs:
+      vernacular:
+        description: "Fetch vernacular names for the shipped species (resumable, ~40 min): 'yes' or empty to skip"
+        required: false
+        default: ""
       countries:
         description: "Presence ingest: space-separated ISO3 codes (SWE NOR DNK FIN ISL), or empty to skip the ingest"
         required: false
@@ -69,6 +73,13 @@ jobs:
             python pipeline/build_presence.py --all --country "$c"
             echo "::endgroup::"
           done
+
+      # Resumable and incremental (T-188): a re-run picks up where the last stopped, so a
+      # timeout or a failed species costs minutes rather than the whole pass. Runs before content
+      # generation, which reads data/vernacular.json to fill each row's common_name.
+      - name: Fetch vernacular names (T-188)
+        if: ${{ !cancelled() && inputs.vernacular != '' }}
+        run: python pipeline/build_vernacular.py
 
       - name: Generate species content (grounded facts + safe templates, T-135)
         if: ${{ inputs.content_scope != 'skip' }}
