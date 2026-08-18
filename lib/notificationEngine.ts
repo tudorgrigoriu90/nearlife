@@ -8,6 +8,7 @@ import {
 } from './cadence';
 import type { Rng } from './notification';
 import { selectFromPresence } from './presenceNotification';
+import { isAtOrAfterSlot } from './sendSlot';
 import { DEFAULT_TUNING, type NotificationTuning } from './tuning';
 import type { Month } from './species/types';
 import type { RegionPresence } from './speciesRepository';
@@ -39,6 +40,12 @@ export interface DueUser {
   /** Current month [1–12] (season gate). */
   month: Month;
   nowMs: number;
+  /**
+   * Stable user id, used to derive this user's send hour (T-186). Optional: without it the user is
+   * eligible in any waking hour, which is the pre-T-186 behaviour and keeps the engine usable in
+   * tests and prototypes that have no id.
+   */
+  userId?: string;
 }
 
 /** Why a cycle produced no send. `notifications-off`/`no-candidate` sit alongside cadence blocks. */
@@ -56,7 +63,8 @@ export interface EngineOptions {
 
 /**
  * Decide whether — and what — to send this cycle. Order mirrors TSD §4: master opt-in → cadence
- * (quiet hours → daily cap → frequency cap, from `canSendNow`) → season-gated weighted selection.
+ * (quiet hours → daily cap → frequency cap, from `canSendNow`) → per-user send slot (T-186) →
+ * season-gated weighted selection.
  * The cadence gate runs before selection so a blocked user costs no candidate work.
  */
 export function decideNotification(user: DueUser, opts: EngineOptions = {}): EngineDecision {
@@ -64,6 +72,16 @@ export function decideNotification(user: DueUser, opts: EngineOptions = {}): Eng
 
   const cadence = canSendNow(user.nowMs, user.localHour, user.history, opts.cadence ?? DEFAULT_CADENCE);
   if (!cadence.allowed) return { send: false, reason: cadence.reason! };
+
+  // Per-user send slot: spreads the population across the waking window so one cron cycle does not
+  // notify everyone at the same instant. Checked after quiet hours so the more specific reason
+  // ('quiet-hours') still wins when both apply.
+  if (
+    user.userId !== undefined &&
+    !isAtOrAfterSlot(user.localHour, user.userId, opts.cadence ?? DEFAULT_CADENCE)
+  ) {
+    return { send: false, reason: 'before-slot' };
+  }
 
   const picked = selectFromPresence(
     user.presence,

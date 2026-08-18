@@ -31,7 +31,10 @@ export interface SendHistory {
   sentTodayCount: number;
 }
 
-export type BlockReason = 'quiet-hours' | 'daily-cap' | 'frequency-cap';
+// `before-slot` is raised by the engine, not here: the per-user slot (T-186) lives in
+// sendSlot.ts, which imports isQuietHour from this module, so checking it here would make the
+// two files circular. The reason is declared here because it is a cadence block like the others.
+export type BlockReason = 'quiet-hours' | 'daily-cap' | 'frequency-cap' | 'before-slot';
 
 export interface CadenceDecision {
   allowed: boolean;

@@ -1875,6 +1875,30 @@ only.**
   - Notes that `adb reverse` does not survive an unplug — a stale mapping is the usual cause of
     "Metro is not running" when everything else looks correct.
   - iOS from Windows is stated as impossible rather than left to be discovered: it needs Xcode.
+- **T-186 · Per-user send slot — one cron cycle must not notify everyone at once** — *Claude · M · `DONE` · deps: T-063, T-131*
+  - `canSendNow` only asked whether the hour was outside quiet hours, so **there was no jitter at
+    all**: a cron firing at 09:00 would have notified every user in Sweden in the same instant.
+    That is a load spike, and worse for this product it is a *predictable* one — a daily
+    notification that always lands at 09:00 is a schedule, not the small surprise the app is for.
+  - `lib/sendSlot.ts` derives each user's hour **from their user id**, not from an RNG. A random
+    slot would move every cycle, so no test could pin it and a user's timing would wander day to
+    day; a hashed one is stable per user, spreads the population uniformly across the 13 waking
+    hours, and keeps the engine clock-free and deterministic. 11 + 5 tests.
+  - **FNV-1a rather than a character sum.** Supabase user ids are UUIDs that differ only in their
+    later characters, and an additive hash buckets those together — which would quietly undo the
+    spreading the whole task exists for. Pinned by a test using ids sharing a 35-character prefix.
+  - **At-or-after the slot, not exactly at it.** A cycle that is missed, delayed or fails
+    self-heals later the same day instead of costing the user their notification; `maxPerDay` still
+    holds it to one. Ordering is by position in the window, not clock number, so a window wrapping
+    past midnight (22→02) correctly places hour 0 after hour 23.
+  - `userId` is **optional** on `DueUser`: without it the user is eligible in any waking hour,
+    which is the pre-T-186 behaviour and keeps the engine usable where no id exists.
+  - The check lives in the engine rather than in `canSendNow`, because `sendSlot.ts` imports
+    `isQuietHour` from `cadence.ts` and checking it there would make the two circular. `before-slot`
+    is still declared in `BlockReason` — it is a cadence block like the others.
+  - 📌 **Context: no notification is sent today at all.** `cron.job` is empty and the T-064 Edge
+    Function does not exist; only `delete-account` is deployed. Doing this now means T-064 is built
+    against a spread population from the start, rather than retrofitted after a launch-day spike.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.

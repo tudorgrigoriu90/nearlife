@@ -1,7 +1,9 @@
 import { InMemoryTracker } from './analytics';
 import { DEFAULT_CADENCE } from './cadence';
+import { allowedHours, preferredHour } from './sendSlot';
 import {
   decideNotification,
+  DEFAULT_PREFS,
   recordDelivery,
   type DueUser,
   type EngineDecision,
@@ -68,5 +70,51 @@ describe('recordDelivery', () => {
     const skip: EngineDecision = { send: false, reason: 'quiet-hours' };
     recordDelivery(tracker, skip);
     expect(tracker.events).toEqual([]);
+  });
+});
+
+// T-186: the engine now respects a per-user send slot, so a single cron cycle no longer notifies
+// every user at once.
+describe('per-user send slot', () => {
+  const base: DueUser = {
+    presence: [{ speciesId: 'great-tit', activeMonths: [1], occurrences: 1000 }],
+    collectedIds: new Set<string>(),
+    history: { lastSentMs: null, sentTodayCount: 0 },
+    prefs: DEFAULT_PREFS,
+    localHour: 12,
+    month: 1,
+    nowMs: 0,
+    userId: 'user-a',
+  };
+
+  it('does not send before the user reaches their slot', () => {
+    const slot = preferredHour('user-a');
+    const before = allowedHours().filter((h) => h < slot);
+    if (before.length === 0) return; // this id drew the first slot; nothing earlier to test
+    const d = decideNotification({ ...base, localHour: before[0] });
+    expect(d).toEqual({ send: false, reason: 'before-slot' });
+  });
+
+  it('sends once the slot has arrived', () => {
+    const d = decideNotification({ ...base, localHour: preferredHour('user-a') }, { rng: () => 0 });
+    expect(d.send).toBe(true);
+  });
+
+  it('two users with different slots are not notified in the same hour', () => {
+    // The whole point: one cron cycle must not fan out to everyone at once.
+    const ids = Array.from({ length: 200 }, (_, i) => `u${i}`);
+    const hours = new Set(ids.map((id) => preferredHour(id)));
+    expect(hours.size).toBeGreaterThan(1);
+  });
+
+  it('still honours quiet hours ahead of the slot', () => {
+    const d = decideNotification({ ...base, localHour: 23 });
+    expect(d).toEqual({ send: false, reason: 'quiet-hours' });
+  });
+
+  it('a user with no id is not slot-gated, so the engine stays usable without one', () => {
+    const { userId: _omitted, ...noId } = base;
+    const d = decideNotification({ ...noId, localHour: 9 } as DueUser, { rng: () => 0 });
+    expect(d.send).toBe(true);
   });
 });
