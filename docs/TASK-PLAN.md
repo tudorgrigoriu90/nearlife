@@ -1747,7 +1747,7 @@ only.**
     Lsjbot-generated stubs ("*X är en art i familjen Y som beskrevs av Z 1857*") — accurate,
     correctly licensed, and duller than the English equivalents. Better to know this now than to
     discover it in the app.
-- **T-180 · Localised give/protect/habitat templates + season phrasing** — *Claude · M · `IN-PROGRESS` (11 locales: en, sv, ar, so, ru, uk, fa, tr, bs, sq, vi; 7 remain) · deps: T-178, T-179*
+- **T-180 · Localised give/protect/habitat templates + season phrasing** — *Claude · M · `IN-PROGRESS` (14 locales; 4 remain) · deps: T-178, T-179*
   - `give`, `protect` and the habitat half of `whenAndHow` are **taxon templates, not per-species
     text** — so ~46 strings translate all three fields for every one of the 6,824 shipped species.
     With facts sourced per language (T-179), `media/templates_i18n.py` **is** the translation job.
@@ -1788,8 +1788,14 @@ only.**
     orthography (`زمان‌های`). The test now bans only the meaningless ones (soft hyphen, ZWSP, BOM,
     word joiner) and explicitly permits ZWNJ/ZWJ, with the reason recorded in its docstring so the
     blanket strip is not attempted again.
-  - ⏳ Remaining 7: ti, ckb, kmr, sr, ps, th, am. RTL needs no special handling here — these are
-    data strings; mixed-direction *rendering* is T-157.
+  - ✅ **sr**, **th**, **am**. Serbian is written in **Cyrillic**, not Latin: it is the official
+    script, and a Latin Serbian table would have been near-identical to the Bosnian one — two
+    locales that differ only in a handful of words look like a copy-paste placeholder and would have
+    passed the differs-from-English check while telling a reader nothing new. Thai and Amharic do
+    not inflect months; Serbian follows the Slavic pattern (locative in the list, genitive in both
+    range slots).
+  - ⏳ Remaining 4: ti, ckb, kmr, ps. RTL needs no special handling here — these are data strings;
+    mixed-direction *rendering* is T-157.
 - **T-181 · `build_content` emits one row per (species, locale)** — *Claude · M · `DONE` · deps: T-179, T-180*
   - The step that actually uses T-179 and T-180. Before it, the pipeline emitted English-only rows
     and the free immigrant roster (T-178) had nothing to load.
