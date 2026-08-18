@@ -511,39 +511,33 @@ key before loading into Supabase.**
     mammals") — a curation pass vs. an authoritative Swedish checklist (Artdatabanken/Dyntaxa) is
     a follow-up before user-facing use (**new T-136**). (3) 22 MB of JSON committed as the interim
     home; canonical home is Supabase (T-134).
-- **T-136 · Curate GBIF lists against authoritative national checklists** — *Claude + Director · M · `IN-PROGRESS` (filter built + validated; checklist ingest pending) · deps: T-042, T-167*
-  - Filter out zoo/escapee/vagrant/domestic and misID noise so the app shows species users can
-    genuinely encounter. Now Nordic-wide (T-167), so "the Swedish checklist" is five checklists —
-    see the authority table in DATA-SOURCING-LICENSING.md.
-  - ✅ `gbif/noise.py` + 12 tests. Checklist status is authoritative in **both** directions when
-    known; the statistics only cover species the checklist has not spoken about.
-  - 🔑 **Rarity is not noise, and the test encodes that.** The osprey carries 372,495 records across
-    all 21 Swedish counties while the app tags it `rare` — that tag is an encounter-frequency
-    *flavour*, not scarcity. A plain "drop the uncommon" threshold would discard real species and
-    keep well-recorded escapees, so the rule is breadth **or** local abundance, never one number.
-  - ✅ **Validated against the hand-curated set:** applied Sweden-wide it takes 11,908 → 6,824
-    (42.7% removed) while retaining **53 of the 54** curated species. The single drop is
-    `Taraxacum officinale`, which is the T-163 data gap surfacing (no GBIF presence under the
-    binomial), not a filter misjudgement. Pinned as a regression test — if a policy change starts
-    eating curated species, the build fails.
-  - 📊 **42.7% dropped sounds severe; it is 0.37% of observations.** 5,084 species carry 463,790 of
-    126.5M records. Median dropped species: 50 records. Median kept: 975. It is the long tail, not
-    a bite out of the middle.
-  - 🔬 **Inspected what it drops, by name, and it is the target.** Birds: *Zenaida macroura*
-    (N. American mourning dove), *Petrochelidon pyrrhonota* (cliff swallow), *Bartramia longicauda*
-    (upland sandpiper), *Numenius minutus* (Siberian little curlew), *Gavia pacifica* (Pacific
-    loon) — all vagrants, whose high counts in 1–2 counties are twitcher pile-ups on a single bird,
-    which is exactly what the breadth rule is for. Reptiles: *Mauremys reevesii*,
-    *Graptemys pseudogeographica*, *Chrysemys picta* — released pet terrapins — plus two vagrant sea
-    turtles. Mammals: musk ox, introduced Pallas's squirrel, golden jackal, two whales.
-  - Per-taxon drop rates vary as biology predicts: birds 23% (well-recorded, well-known), molluscs
-    63% and fish 56% (long tails of obscure or marine species). Amphibians keep 12 of 16, which
-    matches Sweden's real amphibian fauna.
-  - Thresholds live in a `Policy` dataclass rather than as literals, and every verdict carries a
-    reason: at Nordic scale these lists are far too large to re-derive by eye, and a species
-    dropped silently cannot be argued with later.
-  - ⏳ Remaining: ingest the five national checklists and pass them in as `statuses` — at which
-    point the heuristics become the fallback rather than the primary rule.
+- **T-136 · The noise filter, and the catalogue it produces** — *Claude · M · `DONE` · deps: T-042, T-177*
+  - ✅ `gbif/noise.py` (12 tests) plus `gbif/catalogue.py` + `build_catalogue.py` (7 tests), which
+    **write the verdict down**. Until now the filter was run ad hoc to answer "how many species
+    ship?" — making the catalogue something recomputed on demand rather than an artefact nothing
+    could read, diff, or argue with.
+  - **Live figures** (`data/catalogue.json`, 3.7 MB): **6,824 species ship, carrying 99.63% of all
+    observations**; 5,084 filtered out carrying 0.37%.
+  - **Exclusions are recorded with their reasons**, not just the survivors. A species dropped
+    silently cannot be argued with later, and the excluded list is where a mis-tuned threshold
+    becomes visible — if something obviously common appears there, the policy is wrong.
+  - 🔎 **What the excluded list actually revealed.** Of 5,084 exclusions, **4,479 are `min_counties`
+    — locally restricted, not scarce.** The most-excluded species are things like *Lunaria rediviva*
+    (934 records in 2 counties): genuinely common **where they grow**, and invisible nationally. The
+    checklist ingest this task originally called for is moot under T-177 (the filter *is* the
+    quality bar), but this finding is not — see **T-194**.
+- **T-194 · `min_counties` hides species that are common in one place** — *Claude + Director · M · `TODO` · deps: T-136*
+  - The filter drops a species recorded in fewer than 3 counties. That is right for a *national*
+    catalogue and wrong for the app being built, which is **regional by design** — presence is
+    per-county and the copy is "active in your region this season".
+  - Concretely: someone standing in the one county where *Lunaria rediviva* grows is told it does
+    not exist, while a species thinly spread over 20 counties is offered to them. **4,479 species**
+    sit in this category — two-thirds of everything the filter removes.
+  - The fix is likely per-region rather than global evaluation: a species qualifies for the counties
+    where it clears the occurrence bar, instead of qualifying everywhere or nowhere. That changes
+    `species_presence` semantics rather than just a threshold, which is why it is its own task.
+  - Not urgent for v1 (the shipped set already carries 99.63% of observations) but it is the
+    difference between a national list and a local one, which is what the product claims to be.
 - **T-134 · Load presence dataset into Supabase (reference schema + writer)** — *Claude + Director · M · `IN-PROGRESS` (schema + loader + bounded seed done; full bulk load needs the service key) · deps: T-042, T-003 · [TSD §3](TSD.md)*
   - ✅ **Schema** `…000003_regions_and_presence.sql`: `regions` (21 counties), `species` taxonomy
     columns (`gbif_key`, `taxon_group`, `vertebrate`; `category` now nullable for amphibians/

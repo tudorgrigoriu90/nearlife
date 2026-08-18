@@ -107,6 +107,12 @@ jobs:
             python pipeline/build_content.py "pipeline/data/${{ inputs.content_scope }}"
           fi
 
+      # Cheap and offline — reads the presence files the ingest just wrote. Always runs, so the
+      # catalogue in the artifact always matches the data beside it (T-136).
+      - name: Build the shipping catalogue (T-136)
+        if: ${{ !cancelled() }}
+        run: python pipeline/build_catalogue.py
+
       - name: Refresh curated photo manifest (T-119)
         if: ${{ !cancelled() }}
         run: python pipeline/build_kronoberg_media.py
