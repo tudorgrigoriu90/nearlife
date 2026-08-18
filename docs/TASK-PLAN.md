@@ -1747,25 +1747,29 @@ only.**
     Lsjbot-generated stubs ("*X är en art i familjen Y som beskrevs av Z 1857*") — accurate,
     correctly licensed, and duller than the English equivalents. Better to know this now than to
     discover it in the app.
-- **T-180 · Localised give/protect/habitat templates + season phrasing** — *Claude · M · `IN-PROGRESS` (infrastructure + en + sv; 16 immigrant locales remain) · deps: T-178, T-179*
+- **T-180 · Localised give/protect/habitat templates + season phrasing** — *Claude · M · `IN-PROGRESS` (en, sv, ar, so; 14 immigrant locales remain) · deps: T-178, T-179*
   - `give`, `protect` and the habitat half of `whenAndHow` are **taxon templates, not per-species
     text** — so ~46 strings translate all three fields for every one of the 6,824 shipped species.
     With facts sourced per language (T-179), `media/templates_i18n.py` **is** the translation job.
     Adding a language is one entry in `LOCALES` and nothing else.
   - **The season phrase is deliberately not a translated string.** English composes it — "from May
     to September" — and that breaks wherever a month inflects after a preposition. Each locale
-    supplies two month lists: `months` for the bare list form and `months_range` for the form used
-    inside the range pattern. Identical in English and Swedish, *not* identical in Russian,
-    Ukrainian, Serbian or Bosnian, which are all in the roster.
+    supplies **three** month lists, one per slot: Russian is the proof — "в мае" (list), "с мая"
+    (from), "по сентябрь" (to) are three different forms of one month. A two-list model looked
+    sufficient right up until a Slavic language was actually written out, which is the argument for
+    doing the hard locales early rather than last.
   - **An unregistered locale raises rather than falling back to English.** Silently serving English
     to a Somali reader looks like success and is the failure the whole feature exists to prevent.
   - 11 tests, run over **every** registered locale — full taxon coverage, 12 months in both forms,
     no empty strings, both `{when}` and `{hint}` slots preserved, and content that differs from the
     English table (which catches a locale registered by copying English in as a placeholder).
   - ✅ `en` output is pinned to the original wording so the refactor cannot drift it.
-  - ⏳ Remaining: the 16 immigrant locales (ar, so, fa, ti, ckb, kmr, tr, bs, sr, sq, ru, uk, ps,
-    th, vi, am), one per push. RTL scripts need no special handling here — these are data strings;
-    mixed-direction *rendering* is T-157.
+  - ✅ **ar** and **so** written — the two largest immigrant-language communities in Sweden, and
+    the two that most need this feature. These are conservation and access instructions, i.e.
+    general prose; species *nomenclature* remains a sourcing problem (T-159), and nothing here
+    invents a name.
+  - ⏳ Remaining 14: fa, ti, ckb, kmr, tr, bs, sr, sq, ru, uk, ps, th, vi, am. RTL needs no special
+    handling here — these are data strings; mixed-direction *rendering* is T-157.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.

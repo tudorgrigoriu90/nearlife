@@ -53,11 +53,13 @@ def test_every_locale_covers_every_taxon():
         assert set(strings_for(loc).templates) == TAXA, loc
 
 
-def test_every_locale_has_twelve_months_in_both_forms():
+def test_every_locale_has_twelve_months_in_all_three_forms():
+    # Three, not two: Russian needs "в мае" (list), "с мая" (from) and "по сентябрь" (to).
     for loc in LOCALES:
         st = strings_for(loc)
         assert len(st.months) == 12, loc
-        assert len(st.months_range) == 12, loc
+        assert len(st.months_from) == 12, loc
+        assert len(st.months_to) == 12, loc
 
 
 def test_no_locale_ships_an_empty_string():
