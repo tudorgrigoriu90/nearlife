@@ -1,9 +1,10 @@
 # Way of Working — Nearby (nearlife)
 
-> **v1 scope:** the five Nordic countries — Sweden, Norway, Denmark, Finland, Iceland — showing as
-> many genuinely encounterable species as the data supports, fauna and flora, with observation
-> noise filtered (**T-167**). The 54-species Kronoberg set is the *validation prototype* and the
-> content-quality benchmark, not the shipping catalogue.
+> **v1 scope (Director, 2026-08-18 — T-177):** **Sweden only.** Every species that clears the
+> T-136 noise filter ships — **6,824 species**, fauna and flora, carrying **99.63%** of all
+> recorded observations. There is **no per-species human verification gate**: the noise filter
+> is the quality bar. The other four Nordic countries are v2. The 54-species Kronoberg set
+> remains the content-voice benchmark, not the catalogue.
 
 Operating rules for Claude on this repository. These are binding defaults, not suggestions.
 When a rule here conflicts with a one-off user instruction in the moment, the in-the-moment

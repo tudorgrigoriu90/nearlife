@@ -1259,7 +1259,7 @@ locale-keyed content model go in now. Full design: [INTERNATIONALIZATION.md](INT
     `isLiveForUsers`/`liveLocales` (reviewed-only gate), `translationProgress`; 5 tests. en
     reviewed; sv in progress (not live until T-127 + native review). Per-species/field
     granularity can extend this when content translation lands.
-- **T-125 · Per-locale review gating + translation ops** — *Director + Claude · M · deps: T-124 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+- **T-125 · Per-locale review gating + translation ops** — *Director + Claude · M · `SUPERSEDED as a release blocker` (T-177) · deps: T-124 · [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
   - Translation workflow (MT seed → **native review**, never raw MT for give/protect); a locale
     ships for a country only when reviewed. Per-market rollout order. **Director-gated.**
 
@@ -1689,6 +1689,41 @@ only.**
   - The `versions` input is free text, so it is passed through the environment rather than
     interpolated into the run command; `${{ }}` expands before the shell sees it, which would make
     a dispatch input executable. `mode` is a `choice` input and constrained to its enum.
+- **T-177 · Director decision: v1 is Sweden, noise filter is the only quality gate** — *Director · — · `DONE` · deps: T-136, T-167*
+  - 🔭 **Director, 2026-08-18, final:** v1 ships **Sweden only**, and **every species that passes
+    the T-136 noise filter ships** — no per-species human verification, no review tier, no review
+    queue. Content is treated as shipping-quality as generated. This supersedes the review gates in
+    T-125 and T-155 as *release blockers*; they remain available as later quality work.
+  - **The numbers that support it.** Of Sweden's 11,908 species the filter keeps **6,824 (57.3%)**
+    and drops 5,084 — and the kept set carries **99.63% of all observations**. Everything dropped
+    accounts for 0.37%. A human-verified tier was proposed and rejected: it would have bought
+    encounter coverage the filter already delivers to within a third of a percent.
+  - ❌ **Rejected on the way here:** a flat "≥10,000 observations = verified" tier. Testing it
+    against the human-curated 54 showed it drops the **western honey bee**, the badger and the red
+    wood ant, and verifies **zero arachnids** while verifying 39% of birds — observation count
+    measures recording culture, not encounterability. Rank-within-taxon fixed that bias but the
+    whole tier was then made moot by this decision. Recorded because the bias is real and will
+    resurface anywhere occurrence counts are used as a proxy for "common".
+  - **Scope effect:** ~25,000 species across 5 countries → **6,824 in 1 country**. Presence data is
+    already ingested and loaded. NOR/DNK/FIN/ISL become v2.
+  - ⚠️ **Still open, not decided here:** whether dual-language display is free or a €2 unlock. See
+    T-178.
+- **T-178 · Decide: is the dual-language second locale free or paid?** — *Director · S · `TODO` · deps: T-154*
+  - Director floated a **€2 one-time unlock** for the second content language as a monetization
+    lever. Not yet decided either way.
+  - **Recorded objection (Claude):** the dual-display roster is deliberately *Sweden's immigrant
+    languages* (Arabic, Somali, Persian/Dari, Pashto, Kurdish ×2, Tigrinya, Bosnian, Albanian,
+    Ukrainian…), per [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md). Pricing it means a
+    Swedish reader gets the whole app for free while a resident who cannot read Swedish pays to
+    understand any of it — charging for comprehension rather than for depth. It also sits against
+    **invariant #2** ("mission never gated"): give/protect behind a language wall is gated for that
+    user, whatever the flag says. And it adds a second axis to a deliberately one-axis model
+    (Free → Full Game $9.99, [ECONOMY.md](ECONOMY.md)).
+  - There is also **no enforceable distinction** between a Somali speaker who needs Arabic and a
+    Swede who wants Spanish for fun — both just pick a second language in Settings. So the only
+    implementable lines are free-for-all or paid-for-all.
+  - **Suggested alternative:** keep dual display free; monetize *breadth* through the v2 region
+    packs ("Norwegian species, in your language"), which is already the ECONOMY.md plan.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
@@ -1773,7 +1808,7 @@ only.**
     script, unlike a character-range check), expected script where non-Latin, its own honesty
     phrases declared (T-153), honesty clean, names complete, and status `machine` + offerable.
 
-- **T-155 · (optional, non-blocking) Native review pass for dual-display languages** — *Director · L (ongoing) · `TODO` · deps: T-154*
+- **T-155 · (optional, non-blocking) Native review pass for dual-display languages** — *Director · L (ongoing) · `WONTFIX for v1` (T-177) · deps: T-154*
   - Downgraded from a blocker to a future quality upgrade per T-152's resolution — dual display
     ships on `machine` status. If/when native review happens for a language (e.g. to eventually
     retire its "machine-translated" tag), prioritize by actual Sweden immigrant-population share

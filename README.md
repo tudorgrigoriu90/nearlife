@@ -128,16 +128,14 @@ Docs follow the Helix studio taxonomy. Start with the index: **[docs/README.md](
 
 ## Scope (v1)
 
-**v1 covers the five Nordic countries — Sweden, Norway, Denmark, Finland and Iceland — showing as
-many genuinely encounterable species as possible, fauna and flora, with observation noise
-filtered out.** Director decision, 2026-08-11; tracked as **T-167** in
-[docs/TASK-PLAN.md](docs/TASK-PLAN.md).
+**Sweden.** Every species that clears the GBIF noise filter ships — **6,824 species**, fauna and
+flora, spanning all 21 counties. That set carries **99.63%** of all observations recorded in
+Sweden; the ~5,000 species filtered out are vagrants, escapees and single-record noise worth 0.37%.
 
-The 54-species Kronoberg set is the **validation prototype** (T-019), not the shipping catalogue.
-It did its job — it answered "does passive collecting feel rewarding or hollow?" — and it remains
-the quality benchmark for what a card should read like. It was never the ceiling: Kronoberg alone
-has 3,018 recorded species, 1,295 of them with more than 100 observations. Birds alone are 357
-recorded against 17 in the prototype.
+There is no per-species human review gate: the noise filter is the quality bar (Director decision,
+T-177). Norway, Denmark, Finland and Iceland are v2 — their ingest already works, it is scope that
+was cut, not capability.
+
 
 ## Status
 
