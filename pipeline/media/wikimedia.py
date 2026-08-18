@@ -6,6 +6,7 @@ media/licenses.py). Returns None when there is no page image or the license is n
 the caller records the species with a null image and the app falls back to the category emoji.
 """
 
+import re
 import time
 import urllib.parse
 from dataclasses import dataclass
@@ -17,6 +18,24 @@ from media.text import strip_html
 
 WIKI_API = "https://en.wikipedia.org/w/api.php"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+
+# Facts are *sourced* per language rather than translated (T-179): every Wikipedia edition holds
+# the same species under the same scientific name, written natively and under the same CC BY-SA we
+# already attribute. That is better prose than machine translation and costs nothing per species.
+_LANG = re.compile(r"^[a-z]{2,3}$")
+
+
+def wiki_api_for(lang: str) -> str:
+    """API endpoint for a language edition. Raises on anything that is not a language code.
+
+    The code is interpolated into a URL, so an unvalidated value is a request to an arbitrary
+    host. Locale forms are accepted and reduced to their language: Wikipedia is keyed by language,
+    and there is no pt-BR.wikipedia.org.
+    """
+    code = re.split(r"[-_]", (lang or "").strip())[0].lower()
+    if not _LANG.match(code):
+        raise ValueError(f"not a Wikipedia language code: {lang!r}")
+    return f"https://{code}.wikipedia.org/w/api.php"
 
 
 # Width of the thumbnail the app ships. ~40 KB at this size; see docs/DATA-SOURCING-LICENSING.md.
@@ -113,14 +132,17 @@ class WikimediaClient:
         infos = page.get("imageinfo")
         return infos[0] if infos else None
 
-    def fetch_extract(self, scientific_name: str) -> str | None:
+    def fetch_extract(self, scientific_name: str, lang: str = "en") -> str | None:
         """A grounded 1–2 sentence intro from Wikipedia (CC BY-SA — attribute at the card).
 
-        Used to seed the species 'fact' at national scale (T-135). Returns None when there is no
-        article, so the caller can leave the fact blank rather than fabricate one.
+        Used to seed the species 'fact' at national scale (T-135). `lang` selects the Wikipedia
+        edition, so a Somali reader gets a fact written in Somali rather than a translation of the
+        English one (T-179). Returns None when that edition has no article, so the caller can leave
+        the fact blank rather than fabricate one — `species_content.fact` is nullable for exactly
+        this case (T-146), and give/protect stay present regardless (invariant #2).
         """
         data = self._get(
-            WIKI_API,
+            wiki_api_for(lang),
             {
                 "action": "query",
                 "format": "json",

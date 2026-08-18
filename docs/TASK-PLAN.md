@@ -1727,6 +1727,26 @@ only.**
     ("Norwegian species, in your language") — charging for *breadth*, never for comprehension.
   - **Consequence for the build:** the immigrant-language roster is now v1 scope, not a nice-to-have.
     Translating all shipped content into all 16 is required work — see T-179/T-180.
+- **T-179 · Source facts per language instead of translating them** — *Claude · S · `DONE` · deps: T-178*
+  - With the immigrant roster in v1 scope and free (T-178), every shipped species needs a `fact` in
+    ~18 languages. Machine-translating 6,824 English facts per language is ~120k translations, and
+    it produces *worse* prose than the alternative: **every Wikipedia edition already holds these
+    species under the same scientific name**, written natively, under the same CC BY-SA we already
+    attribute.
+  - `fetch_extract(name, lang)` now selects the edition, so the per-species half of the translation
+    job costs **nothing per species** — it is a fetch, not a generation. Only the templates
+    (T-180) are actually translated.
+  - `wiki_api_for()` validates the code rather than interpolating it: the language goes into a URL,
+    so an unchecked value is a request to an arbitrary host. Locale forms reduce to their language
+    (`pt-BR` → `pt`) because Wikipedia is keyed by language and `pt-BR.wikipedia.org` does not
+    exist. 6 tests.
+  - Returns None when an edition lacks the article rather than falling back silently.
+    `species_content.fact` is nullable for exactly this (T-146) and give/protect are template-based,
+    so a missing fact never gates the mission (invariant #2).
+  - ⚠️ **Known quality caveat, not a blocker:** Swedish Wikipedia's species articles are largely
+    Lsjbot-generated stubs ("*X är en art i familjen Y som beskrevs av Z 1857*") — accurate,
+    correctly licensed, and duller than the English equivalents. Better to know this now than to
+    discover it in the app.
 - **T-172 · Decide the presence-refresh cadence** — *Claude + Director · S · `TODO` · deps: T-167*
   - GBIF occurrence data keeps accumulating, so presence drifts and "active in your region this
     season" (invariant #1) goes stale. The deleted `pipeline.yml` assumed monthly.
