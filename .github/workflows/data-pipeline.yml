@@ -70,9 +70,15 @@ jobs:
           fi
 
       - name: Refresh curated photo manifest (T-119)
+        if: ${{ !cancelled() }}
         run: python pipeline/build_kronoberg_media.py
 
+      # Everything below runs even when a step above failed. build_presence.py exits 1 if any
+      # single taxon failed, but the taxa that succeeded are already written to disk — discarding
+      # a five-hour run because insects timed out is the wrong trade. `!cancelled()` rather than
+      # `always()`, so an explicit cancel still stops the DB writes.
       - name: Upload generated data as an artifact
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: pipeline-data
@@ -80,10 +86,10 @@ jobs:
           retention-days: 14
 
       - name: Load species + presence into Supabase (T-134)
-        if: ${{ env.SUPABASE_DB_URL != '' }}
+        if: ${{ !cancelled() && env.SUPABASE_DB_URL != '' }}
         working-directory: pipeline
         run: python -m gbif.supabase_load
 
       - name: Upload curated photos to Supabase Storage (T-119)
-        if: ${{ env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_KEY != '' }}
+        if: ${{ !cancelled() && env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_KEY != '' }}
         run: python pipeline/media/supabase_upload.py

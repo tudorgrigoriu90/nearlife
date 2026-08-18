@@ -1612,6 +1612,17 @@ only.**
     (157 species) shows the gap — its facts are Wikipedia lead sentences, and its give/protect are
     taxon templates rather than per-species advice. Meeting this bar across ~25k species is the
     single largest piece of work in the project and needs its own plan before it is attempted.
+- **T-170 · A partial ingest must not discard the whole run** — *Claude · S · `DONE` · deps: T-167*
+  - `build_presence.py --all` returns 1 when *any* single taxon fails, and it deliberately keeps
+    going so one failure does not lose the rest. But a non-zero step in Actions skips every step
+    after it — so one timed-out taxon threw away the artifact upload, the Supabase load and the
+    photo upload for a run that had already spent five hours succeeding at the other eight.
+  - The four steps after the ingest now run under `!cancelled()`. Not `always()`: an explicit
+    cancel should still stop the DB writes, since that is usually someone stopping a run they know
+    is wrong.
+  - The taxa that succeeded are already written to disk when the step exits, so loading them is
+    strictly better than loading nothing. The load is an upsert, so the failed taxon simply arrives
+    on the next run.
 - **T-169 · Server-side key naming follows Supabase's new API keys** — *Claude · S · `DONE` · deps: —*
   - Supabase replaced the legacy `anon` / `service_role` JWTs with **publishable** and named
     **secret** (`sb_secret_…`) keys; the legacy pair now sits behind a "Legacy" tab and is marked
