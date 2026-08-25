@@ -2160,6 +2160,23 @@ only.**
   - Cost check before running: 6,824 images at ~40–160 KB is roughly **0.4 GB** in Storage, against
     Supabase's 1 GB free tier. That is close enough to matter, so measure before uploading — and it
     may argue for hotlinking thumbnails or a smaller width for the long tail.
+- **T-203 · Keep the Supabase project from pausing** — *Claude · S · `DONE` (Director request) · deps: T-174*
+  - Supabase pauses a free project after **7 consecutive days** without activity, and a paused
+    project takes the app down with it. `supabase-keepalive.yml` queries the database on a schedule.
+  - **Twice weekly (Mon + Thu), not weekly.** The pause threshold *is* 7 days, so a 7-day cron has
+    zero margin — one delayed or skipped run and the project pauses. GitHub does not guarantee
+    scheduled runs fire on time; under load they are delayed and occasionally dropped. Mon/Thu puts
+    the worst-case gap at 4 days.
+  - **It checks the counts, not just that it ran.** A project that is awake and empty is a worse
+    state than a paused one, because nothing looks wrong from the outside — the app simply returns
+    nothing. An empty or missing table fails the run, which is what makes this a notification rather
+    than a log line. It is currently the project's **only continuous monitoring**.
+  - Deliberately *not* a week-over-week comparison: growth and churn are T-192's judgement, made
+    against a load. The only question here is whether the project is awake and still has data.
+  - ⚠️ **GitHub disables scheduled workflows in a repo with no commit activity for 60 days —
+    including this one.** A keep-alive that switches itself off during a quiet month is worse than
+    having none, because it is silently trusted. Recorded in the workflow header; re-enable from the
+    Actions tab, or push anything.
 - **T-192 · Refuse a load that looks like a broken ingest** — *Claude · S · `DONE` · deps: T-172*
   - From the loader's point of view a partial ingest and a genuine decline are **identical**: both
     arrive as fewer rows. With a human in the loop that ambiguity was survivable; with T-172's

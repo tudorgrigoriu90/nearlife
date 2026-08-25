@@ -1,0 +1,55 @@
+name: Supabase keep-alive
+
+# Supabase pauses a free project after 7 consecutive days without activity, and a paused project
+# takes the app down with it. This queries the database on a schedule so that never happens.
+#
+# TWICE a week, not weekly, and that is deliberate. The pause threshold IS 7 days, so a 7-day cron
+# has zero margin: one delayed or skipped run and the project pauses. GitHub does not guarantee
+# scheduled runs fire on time — under load they are delayed, and occasionally dropped entirely.
+# Monday and Thursday puts the worst-case gap at 4 days.
+#
+# It also checks the row counts rather than just proving it ran. A project that is awake and empty
+# is a worse state than a paused one, because nothing looks wrong from the outside. An empty table
+# fails the run, which is what turns this into a notification.
+#
+# ⚠️ GitHub disables scheduled workflows in a repository with no commit activity for 60 days —
+# including this one. A keep-alive that switches itself off in a quiet month is worse than none,
+# because it is silently trusted. If the repo goes quiet, re-enable it from the Actions tab, or
+# push anything.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1,4" # 06:00 UTC, Mondays and Thursdays
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    name: Query the database
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preflight
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "SUPABASE_DB_URL is not set — this job cannot keep anything awake."; exit 1
+          fi
+          echo "SUPABASE_DB_URL: set"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r pipeline/requirements.txt
+
+      - name: Query and report
+        working-directory: pipeline
+        run: python -m db.keepalive
