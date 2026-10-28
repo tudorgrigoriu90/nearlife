@@ -257,4 +257,27 @@ describe('App', () => {
     },
     FLOW_TIMEOUT,
   );
+
+  it(
+    'only records notification consent from Settings when Android grants the permission (T-213)',
+    async () => {
+      // Onboarding with the OS saying no: consent stays off.
+      (requestNotificationPermission as jest.Mock).mockResolvedValueOnce('denied');
+      await completeOnboarding();
+      const stored = async () =>
+        JSON.parse((await AsyncStorage.getItem(CONSENT_STORAGE_KEY)) ?? '{}').notifications;
+      await press(tr('nav.settings'), { exact: false });
+      const notificationsSwitch = () => screen.getAllByRole('switch')[1];
+
+      // Switch on, OS still says no → nothing recorded, so no device gets registered.
+      (requestNotificationPermission as jest.Mock).mockResolvedValueOnce('denied');
+      await act(async () => fireEvent(notificationsSwitch(), 'valueChange', true));
+      expect(await stored()).not.toBe(true);
+
+      // Switch on, OS grants → consent recorded.
+      await act(async () => fireEvent(notificationsSwitch(), 'valueChange', true));
+      expect(await stored()).toBe(true);
+    },
+    FLOW_TIMEOUT,
+  );
 });

@@ -2338,6 +2338,16 @@ only.**
     first render until the stored language is read, so a Swedish user never sees an English frame,
     and push registration waits for it too, so the device row is not written in the wrong language
     first. Test: choose Svenska → restart → Swedish UI.
+- **T-213 · Turning notifications on in Settings never asked Android** — *Claude · S · `DONE` · deps: T-201*
+  - Found while debugging T-205: the Settings switch recorded notification consent without the OS
+    permission, so the device registered for pushes the phone then silently dropped — the user
+    thinks they opted in and nothing ever arrives.
+  - ✅ Switching notifications **on** now requests the permission first and records consent only
+    if it is granted (already granted → no dialog). The handler reads consent from a ref, since the
+    dialog resolves after the render that started it. Onboarding's grant path records directly (it
+    already holds the permission). Test: OS says no → nothing stored; OS grants → stored.
+  - Location has the same shape but no current effect — the hometown is derived once at onboarding
+    and locked (T-090) — so it is left as is.
 - **T-204 · The keep-alive did not keep the project alive** — *Claude · S · `DONE` · deps: T-203*
   - The T-203 job succeeded on Aug 27, Aug 31 and Sep 3 — and the project was **paused anyway** by
     Sep 7 (`status: INACTIVE`). Every run after that failed with `tenant/user … not found`, the

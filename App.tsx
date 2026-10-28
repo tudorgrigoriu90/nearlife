@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AlmanacScreen from './components/AlmanacScreen';
@@ -19,7 +19,11 @@ import { useCollection } from './components/useCollection';
 import { usePushRegistration } from './components/usePushRegistration';
 import { useThisWeek } from './components/useThisWeek';
 import { useAlmanacCatalogue } from './components/useAlmanacCatalogue';
-import { onNotificationTap, showNotificationsInForeground } from './lib/permissions';
+import {
+  onNotificationTap,
+  requestNotificationPermission,
+  showNotificationsInForeground,
+} from './lib/permissions';
 import { useTracker } from './components/useTracker';
 import {
   applyConsentChange,
@@ -204,16 +208,37 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboarded, tappedSpeciesId]);
 
-  const toggleConsent = (kind: ConsentKind, value: boolean) => {
+  // Latest consent for handlers that resume after an OS dialog — the closure's copy may be stale.
+  const consentRef = useRef(consent);
+  useEffect(() => {
+    consentRef.current = consent;
+  }, [consent]);
+
+  const applyConsent = (kind: ConsentKind, value: boolean) => {
     // The age gate lives in `applyConsentChange` (T-197) rather than here: it is a T-089 safety
     // rule, and a rule that exists only inside a component handler is one refactor away from
     // vanishing without a test going red. It returns the same object when it refuses, so a
     // blocked change costs no write.
-    const next = applyConsentChange(consent, kind, value, analyticsLocked);
-    if (next === consent) return;
+    const current = consentRef.current;
+    const next = applyConsentChange(current, kind, value, analyticsLocked);
+    if (next === current) return;
+    consentRef.current = next;
     // Persist every change so the choice survives a restart (GDPR consent record, T-088).
     setConsentState(next);
     void CONSENT_STORE.save(next);
+  };
+
+  const toggleConsent = (kind: ConsentKind, value: boolean) => {
+    // Turning notifications on must also get the OS permission (T-213). Recording consent without
+    // it registers the device for pushes the phone then silently drops — the user believes they
+    // opted in and nothing ever arrives. Already granted returns at once, with no dialog.
+    if (kind === 'notifications' && value) {
+      void requestNotificationPermission().then((outcome) => {
+        if (outcome === 'granted') applyConsent(kind, true);
+      });
+      return;
+    }
+    applyConsent(kind, value);
   };
 
   // Validation-funnel instrumentation (T-035): session start, and This Week opened whenever the
@@ -416,7 +441,7 @@ export default function App() {
           void ONBOARDING_STORE.save({ agePath });
           setAnalyticsLocked(agePath === 'restricted');
           // "Turn on nudges" + an OS grant is the notification opt-in (T-201).
-          if (notificationOutcome === 'granted') toggleConsent('notifications', true);
+          if (notificationOutcome === 'granted') applyConsent('notifications', true);
           setOnboarded(true);
         }}
       />
