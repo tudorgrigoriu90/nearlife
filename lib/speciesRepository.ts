@@ -41,6 +41,12 @@ export interface SpeciesRepository {
    * line. For lists drawn from presence, where loading the whole catalogue would be wasteful (T-207).
    */
   describeSpecies(ids: string[], locale: Locale): Promise<SpeciesSummary[]>;
+  /**
+   * Every species recorded in a county, most-observed first, named in `locale` where a name exists
+   * (T-208). The Almanac's catalogue: the user's own county rather than an arbitrary slice of the
+   * national 12k.
+   */
+  regionCatalogue(regionId: string, locale: Locale): Promise<Species[]>;
 }
 
 export interface SpeciesSummary {
@@ -69,6 +75,11 @@ export class HardcodedSpeciesRepository implements SpeciesRepository {
   // The bundled set is Kronoberg-only; presence is each species' curated active window.
   async regionPresence(_regionId: string): Promise<RegionPresence[]> {
     return this.species.map((s) => ({ speciesId: s.id, activeMonths: s.activeMonths, occurrences: 0 }));
+  }
+
+  // The bundled set stands in for every county, as `regionPresence` does above.
+  async regionCatalogue(_regionId: string, _locale: Locale): Promise<Species[]> {
+    return [...this.species];
   }
 
   async describeSpecies(ids: string[], locale: Locale): Promise<SpeciesSummary[]> {
@@ -111,6 +122,18 @@ const MINIGAME_BY_TAXON_GROUP: Record<string, SpeciesCategory> = {
 export function minigameCategory(row: Pick<SpeciesRow, 'category' | 'taxon_group'>): SpeciesCategory {
   if (row.category !== null && row.category !== undefined) return row.category;
   return MINIGAME_BY_TAXON_GROUP[row.taxon_group ?? ''] ?? 'plant';
+}
+
+/** A row of `public.region_catalogue(region, loc)` (migration 20261028000002). */
+export interface CatalogueRow extends SpeciesRow {
+  /** Name in the requested locale, else English, else null. */
+  local_name: string | null;
+  occurrences: number;
+}
+
+export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Species {
+  const species = speciesRowToSpecies(row);
+  return row.local_name ? { ...species, names: { [locale]: row.local_name } } : species;
 }
 
 export interface ContentSummaryRow {
@@ -179,6 +202,7 @@ export interface SpeciesGateway {
   fetchSpeciesByIds(ids: string[]): Promise<SpeciesRow[]>;
   /** Name + "when & how" for these species in `locales` (the requested one and English). */
   fetchContentSummaries(ids: string[], locales: string[]): Promise<ContentSummaryRow[]>;
+  fetchRegionCatalogue(regionId: string, locale: string): Promise<CatalogueRow[]>;
 }
 
 export class SupabaseSpeciesRepository implements SpeciesRepository {
@@ -224,17 +248,27 @@ export class SupabaseSpeciesRepository implements SpeciesRepository {
     return ids.flatMap((id) => {
       const row = rowById.get(id);
       if (row === undefined) return [];
-      const species = speciesRowToSpecies(row);
+      const base = speciesRowToSpecies(row);
       const own = contentFor(id, locale);
       const english = contentFor(id, 'en');
+      const localName = own?.common_name?.trim() || english?.common_name?.trim();
+      // Carry the name on the species too, so a card opened from this row is titled in the
+      // reader's language (commonNameFor reads `names`).
+      const species = localName ? { ...base, names: { [locale]: localName } } : base;
       return [
         {
           species,
-          commonName: own?.common_name?.trim() || english?.common_name?.trim() || species.commonName,
+          commonName: localName || base.commonName,
           detail: (own ?? english)?.when_how ?? null,
         },
       ];
     });
+  }
+
+  async regionCatalogue(regionId: string, locale: Locale): Promise<Species[]> {
+    return (await this.gateway.fetchRegionCatalogue(regionId, locale)).map((row) =>
+      catalogueRowToSpecies(row, locale),
+    );
   }
 }
 
@@ -324,6 +358,14 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
             .range(from, to),
         'species_content',
       ),
+    );
+  }
+
+  async fetchRegionCatalogue(regionId: string, locale: string): Promise<CatalogueRow[]> {
+    // The function orders by (occurrences desc, id) — a total order, so pages never overlap.
+    return readAllPages<CatalogueRow>(
+      (from, to) => this.client.rpc('region_catalogue', { region: regionId, loc: locale }).range(from, to),
+      'region_catalogue',
     );
   }
 }

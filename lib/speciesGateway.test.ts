@@ -24,7 +24,10 @@ function fakeClient(byTable: Record<string, { data: unknown; error: { message: s
     };
     return b;
   };
-  const client = { from: (table: string) => build(table) } as unknown as SupabaseClient;
+  const client = {
+    from: (table: string) => build(table),
+    rpc: (fn: string) => build(fn),
+  } as unknown as SupabaseClient;
   return Object.assign(client, { ranges });
 }
 
@@ -76,6 +79,13 @@ describe('SupabaseSpeciesGateway', () => {
     const gw = new SupabaseSpeciesGateway(client);
     expect(await gw.fetchSpeciesByIds(ids)).toHaveLength(3); // one row per chunk of 150 from the fake
     expect(await gw.fetchContentSummaries(ids.slice(0, 10), ['sv', 'en'])).toHaveLength(1);
+  });
+
+  it('pages the county catalogue function past 1,000 rows', async () => {
+    const rows = Array.from({ length: 1500 }, (_, i) => ({ id: `s${i}` }));
+    const client = fakeClient({ region_catalogue: { data: rows, error: null } });
+    expect(await new SupabaseSpeciesGateway(client).fetchRegionCatalogue('SWE.9_1', 'sv')).toHaveLength(1500);
+    expect(client.ranges.map((r) => r[1])).toEqual([0, 1000]);
   });
 
   it('throws with a helpful message on a query error', async () => {

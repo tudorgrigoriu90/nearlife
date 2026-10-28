@@ -168,9 +168,12 @@ export const NAMES_BY_LOCALE: Partial<Record<ContentLocale, Record<string, strin
   // English names come from species.commonName (the base).
 };
 
-/** Localized common name, falling back to the English name on `species`. */
+/**
+ * Localized common name: the bundled translation, else a name the database supplied for this
+ * locale (T-208), else the base name on `species` (English, or the binomial when none is known).
+ */
 export function commonNameFor(species: Species, locale: ContentLocale): string {
-  return NAMES_BY_LOCALE[locale]?.[species.id] ?? species.commonName;
+  return NAMES_BY_LOCALE[locale]?.[species.id] ?? species.names?.[locale] ?? species.commonName;
 }
 
 /** Localized card content, falling back to the English base; undefined if the species is unknown. */
@@ -197,7 +200,7 @@ export function contentInLocale(
 /** Common name in exactly this locale, or undefined. English resolves to the base name. */
 export function commonNameInLocale(species: Species, locale: ContentLocale): string | undefined {
   if (locale === 'en') return species.commonName;
-  return NAMES_BY_LOCALE[locale]?.[species.id];
+  return NAMES_BY_LOCALE[locale]?.[species.id] ?? species.names?.[locale];
 }
 
 /** Locales with bundled content beyond the English base — the roster tests iterate over this. */

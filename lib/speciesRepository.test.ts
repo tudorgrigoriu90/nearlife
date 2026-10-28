@@ -28,6 +28,10 @@ describe('HardcodedSpeciesRepository', () => {
     expect(await repo.getContent('no-such-species', 'en')).toBeNull();
   });
 
+  it('stands in its bundled set for any county catalogue', async () => {
+    expect((await repo.regionCatalogue('SWE.13_1', 'sv')).length).toBeGreaterThan(50);
+  });
+
   it('describes requested species in order, localized, skipping unknown ids', async () => {
     const out = await repo.describeSpecies(['european-robin', 'ghost', 'mallard'], 'sv');
     expect(out.map((s) => s.species.id)).toEqual(['european-robin', 'mallard']);
@@ -92,6 +96,13 @@ describe('SupabaseSpeciesRepository', () => {
         { species_id: 'pike', locale: 'sv', common_name: 'Gädda', when_how: 'sv hur' },
         { species_id: 'frog', locale: 'en', common_name: 'Common frog', when_how: 'en frog' },
       ].filter((c) => ids.includes(c.species_id) && locales.includes(c.locale)),
+    fetchRegionCatalogue: async (regionId, locale) =>
+      regionId === 'SWE.9_1'
+        ? [
+            { id: 'pike', scientific_name: 'Esox lucius', common_name: 'Northern Pike', local_name: locale === 'sv' ? 'Gädda' : 'Northern Pike', category: 'fish', rarity: 'common', taxon_group: 'fish', active_months: [6, 5], occurrences: 42 },
+            { id: 'frog', scientific_name: 'Rana temporaria', common_name: null, local_name: null, category: null, rarity: 'common', taxon_group: 'amphibian', active_months: [4], occurrences: 3 },
+          ]
+        : [],
   };
   const repo = new SupabaseSpeciesRepository(gateway);
 
@@ -119,6 +130,20 @@ describe('SupabaseSpeciesRepository', () => {
     ]);
     expect(out[0].species.category).toBe('mammal'); // a frog is caught by stealth
     expect(await repo.describeSpecies([], 'sv')).toEqual([]);
+  });
+
+  it('reads a county catalogue with names in the reader\'s language (T-208)', async () => {
+    const [pike, frog] = await repo.regionCatalogue('SWE.9_1', 'sv');
+    expect(pike.names).toEqual({ sv: 'Gädda' });
+    expect(pike.activeMonths).toEqual([5, 6]); // the county's own window, sorted
+    expect(frog.names).toBeUndefined(); // no name anywhere → binomial, shown as one
+    expect(frog.commonName).toBe('Rana temporaria');
+    expect(frog.category).toBe('mammal');
+  });
+
+  it('puts the described name on the species too, so its card is titled in that language', async () => {
+    const [pike] = await repo.describeSpecies(['pike'], 'sv');
+    expect(pike.species.names).toEqual({ sv: 'Gädda' });
   });
 
   it('reads region presence and sorts the active months', async () => {

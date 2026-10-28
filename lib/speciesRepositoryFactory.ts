@@ -3,6 +3,7 @@ import type { Locale } from './i18n';
 import type { ContentLocale } from './i18n/contentLocale';
 
 import type { SpeciesContent } from './species/content';
+import type { Species } from './species/types';
 import {
   HardcodedSpeciesRepository,
   SupabaseSpeciesGateway,
@@ -67,6 +68,10 @@ export class FallbackSpeciesRepository implements SpeciesRepository {
 
   describeSpecies(ids: string[], locale: Locale): Promise<SpeciesSummary[]> {
     return this.attempt((r) => r.describeSpecies(ids, locale), 'describe');
+  }
+
+  regionCatalogue(regionId: string, locale: Locale): Promise<Species[]> {
+    return this.attempt((r) => r.regionCatalogue(regionId, locale), 'catalogue');
   }
 }
 

@@ -20,6 +20,13 @@ describe('commonNameFor', () => {
   it('falls back to the English name for an untranslated locale', () => {
     expect(commonNameFor(swift, anUnseededContentLocale())).toBe('Common Swift');
   });
+
+  it('uses a name the database supplied for a species outside the bundled set (T-208)', () => {
+    const heath = { ...swift, id: 'gbif:5333412', commonName: 'Erica tetralix', names: { sv: 'Klockljung' } };
+    expect(commonNameFor(heath, 'sv')).toBe('Klockljung');
+    expect(commonNameFor(heath, 'en')).toBe('Erica tetralix');
+    expect(commonNameInLocale(heath, 'sv')).toBe('Klockljung');
+  });
 });
 
 describe('SV_NAMES coverage', () => {

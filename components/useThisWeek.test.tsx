@@ -14,6 +14,7 @@ function repo(overrides: Partial<SpeciesRepository> = {}): SpeciesRepository {
     ),
     describeSpecies: async (ids) =>
       ids.map((id) => ({ species: { id } as never, commonName: `name:${id}`, detail: null })),
+    regionCatalogue: async () => [],
     ...overrides,
   };
 }

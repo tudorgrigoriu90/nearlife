@@ -2267,13 +2267,30 @@ only.**
     sampling still gives the long tail its turn.
   - ⚠️ Onboarding's first Spotted card still picks from the bundled 54 — kept deliberately: they are
     widespread across Sweden and carry hand-written Tier-1 content.
-- **T-208 · Almanac reads only the first 1,000 of 11,937 species** — *Claude · M · `TODO` · deps: T-207*
+- **T-208 · Almanac reads only the first 1,000 of 11,937 species** — *Claude · M · `DONE` · deps: T-207*
   - `fetchSpecies` is the one list read T-207 did not page: the Almanac gets an arbitrary 1,000
     species. Paging it naively means ~12k rows on every launch. Better: the Almanac shows the user's
     county (presence ids, like This Week) plus everything they have collected, described on demand.
   - Also: a card opened for a database species titles itself with `commonNameFor`, which only knows
     the bundled 54 — other species show the English/binomial name instead of the localized one
     `species_content.common_name` already holds.
+  - ✅ **`public.region_catalogue(region, loc)`** (migration 20261028000002): presence + species +
+    names in the locale (→ English → null) joined server-side, ordered (occurrences desc, id) — a
+    total order, so the app pages it safely past the 1,000-row cap. ~70 ms for Kronoberg's 3,020.
+    SECURITY INVOKER over public-read tables.
+  - ✅ The Almanac lists **the user's county** plus every collected species the county list lacks
+    (`lib/almanacCatalogue.ts`; the onboarding starter, or one dropped by a refresh) — a collection
+    never holds species the Almanac cannot show. Preview mode lists the bundled set with no network
+    read. `components/useAlmanacCatalogue.ts` reads the county once per county + language; a new
+    catch only looks up the few extras. A failed read shows an empty Almanac, not a spinner.
+  - ✅ **Card titles localize for database species**: `Species.names` carries the names the
+    database supplied, and `commonNameFor` / `commonNameInLocale` read them after the bundled ones.
+  - `listSpecies` is no longer used by the app; kept on the interface for now.
+- **T-212 · Badges were designed for 54 species** — *Director + Claude · S · `TODO` · deps: T-208*
+  - Badges count over the Almanac's list, which is now the whole county (~3,000; ~300 birds in
+    Kronoberg). "All birds spotted" went from a goal to practically unreachable. Decide the shape —
+    e.g. tiered thresholds (10 / 50 / 100 birds) or "the county's 20 most-observed birds" — then
+    Claude rebuilds `lib/badges.ts` to it. Deliberately not changed silently in T-208.
 - **T-209 · Onboarding runs again on every launch** — *Claude · S · `DONE` · deps: T-090*
   - `App.tsx` holds `onboarded` in plain `useState(false)`: nothing persists it, so every cold start
     replays welcome → age gate → location → notifications. Found while building T-031: a notification

@@ -29,4 +29,10 @@ export interface Species {
    * Kronoberg prototype; derived from GBIF per-cell/per-month probability later (TSD §4).
    */
   activeMonths: Month[];
+  /**
+   * Localized names from the database, by locale (T-208). The bundled 54 carry theirs in
+   * `localized.ts`; database species carry the ones they were loaded with, so `commonNameFor` can
+   * title a card in the reader's language instead of falling back to English.
+   */
+  names?: Partial<Record<string, string>>;
 }

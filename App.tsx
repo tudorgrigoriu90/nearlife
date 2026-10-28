@@ -18,6 +18,7 @@ import ImpactScreen from './components/ImpactScreen';
 import { useCollection } from './components/useCollection';
 import { usePushRegistration } from './components/usePushRegistration';
 import { useThisWeek } from './components/useThisWeek';
+import { useAlmanacCatalogue } from './components/useAlmanacCatalogue';
 import { onNotificationTap, showNotificationsInForeground } from './lib/permissions';
 import { useTracker } from './components/useTracker';
 import {
@@ -108,8 +109,6 @@ export default function App() {
   const collection = useCollection();
   // Almanac catalogue, loaded async through the repository seam (T-057). Defaults to the bundled
   // set (no behaviour change) until a DB-backed repo is injected. Names re-localize in the grid.
-  const [almanacSpecies, setAlmanacSpecies] = useState<Species[]>([]);
-  const [speciesLoading, setSpeciesLoading] = useState(true);
   // Selected species' card content, loaded through the repository (T-059). Keyed by species id so a
   // stale result from a previously-open card is never shown against the newly-selected species.
   const [cardContent, setCardContent] = useState<{ speciesId: string; content: SpeciesContent | null } | null>(
@@ -145,6 +144,14 @@ export default function App() {
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
   const track = useTracker(consent);
+  // The Almanac lists the user's county + anything collected outside it (T-208); Badges count over
+  // the same list so the two never disagree.
+  const { species: almanacSpecies, loading: speciesLoading } = useAlmanacCatalogue(
+    SPECIES_REPO,
+    hometown?.id ?? null,
+    locale,
+    new Set(collection.records.map((r) => r.speciesId)),
+  );
   // This Week over the user's own county (T-207); null in preview mode → bundled list.
   const thisWeekLive = useThisWeek(
     SPECIES_REPO,
@@ -280,28 +287,6 @@ export default function App() {
       track('this_week_opened', {});
     }
   }, [onboarded, tab, showSettings, exportJson, track]);
-
-  // Load the Almanac catalogue via the repository (T-057). One-shot on mount / repo change; the
-  // grid localizes names itself, so this doesn't need to re-run on a locale switch.
-  useEffect(() => {
-    let cancelled = false;
-    SPECIES_REPO.listSpecies(locale)
-      .then((list) => {
-        if (!cancelled) {
-          setAlmanacSpecies(list.map((entry) => entry.species));
-          setSpeciesLoading(false);
-        }
-      })
-      .catch(() => {
-        // A failed load clears loading rather than crashing the shell; the DB-backed repo
-        // surfaces its own errors (SupabaseSpeciesGateway throws with context).
-        if (!cancelled) setSpeciesLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot load; grid re-localizes names
-  }, []);
 
   // Load the selected species' Tier-1 content through the repository (T-059). Fires when a card
   // opens or the locale changes; the id-keyed result guards against showing a stale species' card.

@@ -40,6 +40,10 @@ class Stub implements SpeciesRepository {
     this.guard();
     return [{ species: { id: this.label } as never, commonName: this.label, detail: null }];
   }
+  async regionCatalogue(_r: string, _l: Locale) {
+    this.guard();
+    return [{ id: this.label } as never];
+  }
 }
 
 describe('FallbackSpeciesRepository', () => {
@@ -62,6 +66,7 @@ describe('FallbackSpeciesRepository', () => {
     expect(await repo.getContentInLocale('x', 'sv')).toEqual({ speciesId: 'bundled' });
     expect((await repo.regionPresence('SWE.9_1'))[0]?.speciesId).toBe('bundled');
     expect((await repo.describeSpecies(['x'], 'en'))[0]?.commonName).toBe('bundled');
+    expect((await repo.regionCatalogue('SWE.9_1', 'en'))[0]?.id).toBe('bundled');
   });
 
   it('does not fall back when the primary legitimately returns nothing', async () => {
@@ -74,6 +79,7 @@ describe('FallbackSpeciesRepository', () => {
       getContentInLocale: async () => null,
       regionPresence: async () => [],
       describeSpecies: async () => [],
+      regionCatalogue: async () => [],
     };
     const backup = new Stub('bundled');
     const repo = new FallbackSpeciesRepository(empty, backup);
