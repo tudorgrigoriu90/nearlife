@@ -42,6 +42,7 @@ import { getSupabase } from './lib/supabase';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import type { Region } from './lib/hometown';
 import { AsyncStorageHometownStore } from './lib/hometownStore';
+import { AsyncStorageOnboardingStore } from './lib/onboardingStore';
 import { spottedIds, tierStateFor } from './lib/collection';
 import {
   canCatch,
@@ -75,6 +76,9 @@ const SPECIES_REPO = createSpeciesRepository();
 // Device-local consent persistence (T-088) — granular opt-ins survive restarts. Module-level so
 // its identity is stable across renders.
 const CONSENT_STORE = new AsyncStorageConsentStore();
+
+// Onboarding completion + age path (T-209) — so a relaunch goes straight to the app.
+const ONBOARDING_STORE = new AsyncStorageOnboardingStore();
 
 // Locked home county (T-090) — set once from an on-device location lookup, survives restarts.
 const HOMETOWN_STORE = new AsyncStorageHometownStore();
@@ -115,6 +119,9 @@ export default function App() {
     content: SpeciesContent | null;
   } | null>(null);
   const [onboarded, setOnboarded] = useState(false);
+  // Nothing renders until the stored onboarding record is read: a returning user must not see the
+  // welcome screen flash up first (T-209).
+  const [onboardingLoaded, setOnboardingLoaded] = useState(false);
   // No home county (location denied, no fix, outside Sweden) is preview mode (T-023 / T-090).
   const [hometown, setHometown] = useState<Region | null>(null);
   const previewMode = hometown === null;
@@ -202,6 +209,22 @@ export default function App() {
   useEffect(() => {
     track('session_start', {});
   }, [track]);
+
+  // Rehydrate onboarding (T-209). The store never rejects; a missing record means first run.
+  useEffect(() => {
+    let cancelled = false;
+    void ONBOARDING_STORE.load().then((record) => {
+      if (cancelled) return;
+      if (record !== null) {
+        setAnalyticsLocked(record.agePath === 'restricted');
+        setOnboarded(true);
+      }
+      setOnboardingLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Rehydrate the locked hometown on launch (T-090). A failed read leaves preview mode.
   useEffect(() => {
@@ -351,6 +374,10 @@ export default function App() {
     setConsentState(DEFAULT_CONSENT);
     void CONSENT_STORE.save(DEFAULT_CONSENT);
     setOnboarded(false); // back to first-run — the account is gone
+    // Erasure covers what the device holds too: the next person to open the app starts fresh.
+    setHometown(null);
+    void ONBOARDING_STORE.clear();
+    void HOMETOWN_STORE.clear();
     return true;
   };
 
@@ -369,6 +396,8 @@ export default function App() {
     }
   };
 
+  if (!onboardingLoaded) return null;
+
   if (!onboarded) {
     return (
       <OnboardingFlow
@@ -380,6 +409,7 @@ export default function App() {
         onComplete={({ agePath, notificationOutcome, hometown: home }) => {
           // A locked hometown from an earlier session stands even if location is denied this time.
           if (home !== null) setHometown(home);
+          void ONBOARDING_STORE.save({ agePath });
           setAnalyticsLocked(agePath === 'restricted');
           // "Turn on nudges" + an OS grant is the notification opt-in (T-201).
           if (notificationOutcome === 'granted') toggleConsent('notifications', true);

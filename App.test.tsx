@@ -3,6 +3,8 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import App from './App';
 import { requestNotificationPermission } from './lib/permissions';
 import { CONSENT_STORAGE_KEY } from './lib/consentStore';
+import { HOMETOWN_STORAGE_KEY } from './lib/hometownStore';
+import { ONBOARDING_STORAGE_KEY } from './lib/onboardingStore';
 import { createTranslator } from './lib/i18n';
 import { KRONOBERG_SPECIES } from './lib/species/kronoberg';
 import { commonNameFor } from './lib/species/localized';
@@ -35,6 +37,16 @@ jest.mock('./lib/permissions', () => ({
   }),
 }));
 let tapListener: ((speciesId: string) => void) | null = null;
+
+// Account deletion talks to Supabase; stub the network half so the app-side reset can be tested.
+jest.mock('./lib/supabase', () => ({
+  getSupabase: () => ({}),
+  ensureAnonymousSession: jest.fn(async () => 'user-1'),
+}));
+jest.mock('./lib/accountDeletion', () => ({
+  ...jest.requireActual('./lib/accountDeletion'),
+  deleteAccount: jest.fn(async () => ({ ok: true })),
+}));
 
 // The catch minigame's timers/gestures are covered by its own tests; here we stub it so App's
 // catch-resolution branch (success → Caught + protect tip) is exercised deterministically.
@@ -98,7 +110,7 @@ async function completeOnboarding(
 describe('App', () => {
   it('boots into the compliance-shaped onboarding flow', async () => {
     await render(<App />);
-    expect(screen.getByText(tr('onboarding.welcome.title'))).toBeTruthy();
+    expect(await screen.findByText(tr('onboarding.welcome.title'))).toBeTruthy();
   });
 
   it(
@@ -188,6 +200,46 @@ describe('App', () => {
       await completeOnboarding({ rendered: true, firstCardOpen: true });
       expect(await screen.findByText(commonNameFor(KRONOBERG_SPECIES.find((s) => s.id === 'moose')!, 'en'))).toBeTruthy();
       expect(screen.getByText(tr('card.give'))).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'remembers onboarding across a restart and goes straight to the app (T-209)',
+    async () => {
+      await completeOnboarding();
+      await screen.unmount();
+      await render(<App />);
+      expect(await screen.findByText(tr('thisWeek.honesty'))).toBeTruthy();
+      expect(screen.queryByText(tr('onboarding.welcome.title'))).toBeNull();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'keeps an under-13 account on the minimal-data path after a restart',
+    async () => {
+      await completeOnboarding(MINOR_BIRTH_YEAR);
+      await screen.unmount();
+      await render(<App />);
+      await press(tr('nav.settings'), { exact: false });
+      expect(screen.queryByText(tr('consent.analytics'))).toBeNull();
+      expect(screen.getByText(tr('consent.analyticsLocked'))).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'erases onboarding and the hometown with the account, back to first run',
+    async () => {
+      await completeOnboarding();
+      expect(await AsyncStorage.getItem(HOMETOWN_STORAGE_KEY)).not.toBeNull();
+      await press(tr('nav.settings'), { exact: false });
+      await press(tr('settings.deleteAccount'));
+      await press(tr('delete.confirm'));
+      expect(await screen.findByText(tr('onboarding.welcome.title'))).toBeTruthy();
+      expect(await AsyncStorage.getItem(ONBOARDING_STORAGE_KEY)).toBeNull();
+      expect(await AsyncStorage.getItem(HOMETOWN_STORAGE_KEY)).toBeNull();
     },
     FLOW_TIMEOUT,
   );

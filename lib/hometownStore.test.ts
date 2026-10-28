@@ -52,6 +52,14 @@ describe.each([
     await expect(store.lockIn(KRONOBERG)).resolves.toEqual(SKANE);
     await expect(store.load()).resolves.toEqual(SKANE);
   });
+
+  it('forgets the hometown on clear (account deletion), so the next one can be set', async () => {
+    const store = make();
+    await store.lockIn(SKANE);
+    await store.clear();
+    await expect(store.load()).resolves.toBeNull();
+    await expect(store.lockIn(KRONOBERG)).resolves.toEqual(KRONOBERG);
+  });
 });
 
 describe('AsyncStorageHometownStore', () => {
@@ -64,6 +72,11 @@ describe('AsyncStorageHometownStore', () => {
   it('degrades to "no hometown" when storage fails', async () => {
     jest.spyOn(AsyncStorage, 'getItem').mockRejectedValueOnce(new Error('disk'));
     await expect(new AsyncStorageHometownStore().load()).resolves.toBeNull();
+  });
+
+  it('swallows a failed erase', async () => {
+    jest.spyOn(AsyncStorage, 'removeItem').mockRejectedValueOnce(new Error('disk'));
+    await expect(new AsyncStorageHometownStore().clear()).resolves.toBeUndefined();
   });
 
   it('still returns the region for this session when the write fails', async () => {

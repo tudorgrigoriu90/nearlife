@@ -2266,12 +2266,21 @@ only.**
   - Also: a card opened for a database species titles itself with `commonNameFor`, which only knows
     the bundled 54 — other species show the English/binomial name instead of the localized one
     `species_content.common_name` already holds.
-- **T-209 · Onboarding runs again on every launch** — *Claude · S · `TODO` · deps: T-090*
+- **T-209 · Onboarding runs again on every launch** — *Claude · S · `DONE` · deps: T-090*
   - `App.tsx` holds `onboarded` in plain `useState(false)`: nothing persists it, so every cold start
     replays welcome → age gate → location → notifications. Found while building T-031: a notification
     tap now queues behind a full re-onboarding before its card opens.
   - Persist completion (+ the age path, which gates analytics) device-locally like consent (T-088);
     the hometown is already persisted (T-090). Re-asking OS permissions must not be part of a relaunch.
+  - ✅ `lib/onboardingStore.ts`: stores `{agePath}` only (never the birth year). A record without a
+    valid age path counts as **not onboarded** — re-running onboarding is safe, silently treating a
+    child as an adult is not. Storage failures degrade the same way.
+  - ✅ App renders nothing until the record is read, so a returning user never sees the welcome
+    screen flash; a stored `restricted` path re-locks analytics on every launch.
+  - ✅ **Account deletion now clears the device too**: onboarding record + locked hometown
+    (`HometownStore.clear`, reserved for erasure — the lock stops a *user* moving county, not the
+    erasure of the account). Tests: relaunch skips onboarding; under-13 stays locked after restart;
+    delete → welcome screen with both keys gone.
 - **T-204 · The keep-alive did not keep the project alive** — *Claude · S · `DONE` · deps: T-203*
   - The T-203 job succeeded on Aug 27, Aug 31 and Sep 3 — and the project was **paused anyway** by
     Sep 7 (`status: INACTIVE`). Every run after that failed with `tenant/user … not found`, the

@@ -29,6 +29,11 @@ export interface HometownStore {
   load(): Promise<Region | null>;
   /** Store `region` unless a hometown is already set; returns the hometown now in force. */
   lockIn(region: Region): Promise<Region>;
+  /**
+   * Account deletion only (T-209). The lock exists to stop a *user* moving their hometown; erasing
+   * the account erases everything the device holds about them, the hometown included.
+   */
+  clear(): Promise<void>;
 }
 
 export class InMemoryHometownStore implements HometownStore {
@@ -41,6 +46,10 @@ export class InMemoryHometownStore implements HometownStore {
   async lockIn(region: Region) {
     this.region ??= region;
     return this.region;
+  }
+
+  async clear() {
+    this.region = null;
   }
 }
 
@@ -62,6 +71,14 @@ export class AsyncStorageHometownStore implements HometownStore {
       // Best-effort: the region still holds in memory for this session and is re-derived next time.
     }
     return region;
+  }
+
+  async clear(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(HOMETOWN_STORAGE_KEY);
+    } catch {
+      // A failed erase leaves the county on this device; there is nothing more to do from here.
+    }
   }
 }
 
