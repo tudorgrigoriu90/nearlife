@@ -8,6 +8,10 @@ name: Supabase keep-alive
 # scheduled runs fire on time — under load they are delayed, and occasionally dropped entirely.
 # Monday and Thursday puts the worst-case gap at 4 days.
 #
+# It makes a REST API request as well as a database query (T-204): the DB-only version ran
+# successfully on Aug 31 and Sep 3 and the project paused anyway by Sep 7, so a pooler query
+# alone does not count as activity. The REST API is the path the app itself uses.
+#
 # It also checks the row counts rather than just proving it ran. A project that is awake and empty
 # is a worse state than a paused one, because nothing looks wrong from the outside. An empty table
 # fails the run, which is what turns this into a notification.
@@ -33,6 +37,8 @@ jobs:
     timeout-minutes: 10
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
     steps:
       - uses: actions/checkout@v4
 

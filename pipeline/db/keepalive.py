@@ -40,7 +40,36 @@ def summarise(counts: dict[str, int]) -> Verdict:
     return Verdict(True, line)
 
 
+def rest_ping_request(base_url: str, key: str) -> tuple[str, dict[str, str]]:
+    """The REST request that registers as project activity (T-204).
+
+    A direct Postgres query through the pooler did NOT keep the project awake: it succeeded on
+    Aug 31 and Sep 3 and the project was paused by Sep 7. The REST API is the path the app uses,
+    so it is the traffic Supabase is most plausibly watching. A tiny `limit=1` read keeps it cheap.
+    """
+    if not base_url or not key:
+        raise ValueError("SUPABASE_URL and SUPABASE_SERVICE_KEY are both required for the REST ping")
+    url = f"{base_url.rstrip('/')}/rest/v1/species?select=id&limit=1"
+    return url, {"apikey": key, "Authorization": f"Bearer {key}"}
+
+
+def rest_ping() -> None:
+    import requests
+
+    url, headers = rest_ping_request(
+        os.environ.get("SUPABASE_URL", ""), os.environ.get("SUPABASE_SERVICE_KEY", "")
+    )
+    resp = requests.get(url, headers=headers, timeout=30)
+    if resp.status_code != 200:
+        raise SystemExit(f"REST ping failed: HTTP {resp.status_code} {resp.text[:200]}")
+    print("supabase REST ping: ok")
+
+
 def main() -> int:
+    # REST first: it is the request that keeps the project awake. The DB query after it is the
+    # health check — whether the data is still there.
+    rest_ping()
+
     dsn = os.environ.get("SUPABASE_DB_URL")
     if not dsn:
         raise SystemExit("SUPABASE_DB_URL not set (privileged Postgres connection string).")

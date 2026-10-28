@@ -2160,6 +2160,22 @@ only.**
   - Cost check before running: 6,824 images at ~40–160 KB is roughly **0.4 GB** in Storage, against
     Supabase's 1 GB free tier. That is close enough to matter, so measure before uploading — and it
     may argue for hotlinking thumbnails or a smaller width for the long tail.
+- **T-204 · The keep-alive did not keep the project alive** — *Claude · S · `DONE` · deps: T-203*
+  - The T-203 job succeeded on Aug 27, Aug 31 and Sep 3 — and the project was **paused anyway** by
+    Sep 7 (`status: INACTIVE`). Every run after that failed with `tenant/user … not found`, the
+    pooler's answer for a paused project: **seven weeks of red runs that nobody saw.**
+  - So a direct Postgres query through the pooler does **not** count as activity for Supabase's
+    pause logic. The exact rule is not published and cannot be confirmed from here; the job now also
+    makes a REST API request (`/rest/v1/species?select=id&limit=1`), the path the app itself uses
+    and therefore the traffic Supabase is most plausibly watching. This is a corrected hypothesis,
+    not a verified fix — the next few scheduled runs are the test.
+  - The DB query stays, as the health check: REST proves the project is awake, the counts prove it
+    still has data.
+  - Project restored 2026-10-28 via the Supabase connector, ~53 days into its 90-day restore window.
+  - ⚠️ **The real failure was the alert, not the query.** The design assumed a red scheduled run
+    would be noticed; it was not, for seven weeks. A monitor whose failures land in an inbox nobody
+    reads is not monitoring. Worth checking GitHub's Actions notification settings, so a failed
+    scheduled run actually reaches someone.
 - **T-203 · Keep the Supabase project from pausing** — *Claude · S · `DONE` (Director request) · deps: T-174*
   - Supabase pauses a free project after **7 consecutive days** without activity, and a paused
     project takes the app down with it. `supabase-keepalive.yml` queries the database on a schedule.
