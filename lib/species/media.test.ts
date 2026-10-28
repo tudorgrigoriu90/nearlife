@@ -3,6 +3,7 @@ import {
   attributionFor,
   isCommercialUseAllowed,
   KRONOBERG_MEDIA,
+  photoFor,
   primaryPhoto,
   type SpeciesMedia,
 } from './media';
@@ -93,5 +94,25 @@ describe('KRONOBERG_MEDIA manifest', () => {
     for (const s of KRONOBERG_SPECIES) {
       expect(primaryPhoto(KRONOBERG_MEDIA, s.id)).not.toBeNull();
     }
+  });
+});
+
+// T-215: the curated 54 keep their bundled, hand-checked photo; every other species shows the one
+// the database supplied; with neither, the card falls back to its glyph.
+describe('photoFor', () => {
+  const swift = KRONOBERG_SPECIES.find((s) => s.id === 'common-swift')!;
+
+  it('prefers the bundled photo for a curated species, even if the database sent one', () => {
+    const fromDb = media({ speciesId: 'common-swift', url: 'https://db/other.jpg' });
+    expect(photoFor({ ...swift, photo: fromDb })?.url).toBe(primaryPhoto(KRONOBERG_MEDIA, 'common-swift')?.url);
+  });
+
+  it('uses the database photo for a catalogue species', () => {
+    const heath = { ...swift, id: 'gbif:5333412', photo: media({ speciesId: 'gbif:5333412' }) };
+    expect(photoFor(heath)?.url).toBe('https://example.org/photo.jpg');
+  });
+
+  it('is null with neither, so the card shows its glyph', () => {
+    expect(photoFor({ ...swift, id: 'gbif:1' })).toBeNull();
   });
 });

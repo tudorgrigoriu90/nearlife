@@ -88,6 +88,11 @@ describe('SupabaseSpeciesGateway', () => {
     expect(client.ranges.map((r) => r[1])).toEqual([0, 1000]);
   });
 
+  it('reads catalogue photos by id (T-215)', async () => {
+    const client = fakeClient({ species_media: { data: [{ species_id: 'a', url: 'u' }], error: null } });
+    expect(await new SupabaseSpeciesGateway(client).fetchMediaByIds(['a'])).toHaveLength(1);
+  });
+
   it('throws with a helpful message on a query error', async () => {
     const gw = new SupabaseSpeciesGateway(
       fakeClient({ species: { data: null, error: { message: 'boom' } } }),

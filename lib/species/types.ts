@@ -2,6 +2,8 @@
 // reused by the app, the notification engine, and (later) the data pipeline.
 // Card content (fact / trivia / give / protect) is a separate concern — see T-020.
 
+import type { SpeciesMedia } from './media';
+
 /**
  * Species categories. Bird/insect/plant/mammal are the prototype focus (T-019); fish and
  * fungus round out the set that the per-category catch minigames target (GDD §4).
@@ -35,4 +37,9 @@ export interface Species {
    * title a card in the reader's language instead of falling back to English.
    */
   names?: Partial<Record<string, string>>;
+  /**
+   * The hero photo the database holds for this species (T-215, from `species_media`). The curated
+   * 54 keep their bundled photos (`KRONOBERG_MEDIA`); `photoFor` prefers those.
+   */
+  photo?: SpeciesMedia;
 }

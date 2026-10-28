@@ -1,5 +1,7 @@
 import {
+  catalogueRowToSpecies,
   contentRowToContent,
+  mediaRowToPhoto,
   HardcodedSpeciesRepository,
   minigameCategory,
   speciesRowToSpecies,
@@ -96,11 +98,16 @@ describe('SupabaseSpeciesRepository', () => {
         { species_id: 'pike', locale: 'sv', common_name: 'Gädda', when_how: 'sv hur' },
         { species_id: 'frog', locale: 'en', common_name: 'Common frog', when_how: 'en frog' },
       ].filter((c) => ids.includes(c.species_id) && locales.includes(c.locale)),
+    fetchMediaByIds: async (ids) =>
+      [
+        { species_id: 'frog', url: 'https://host/gbif-frog.jpg', source_url: 'https://commons/frog', author: 'A. P.', license: 'CC-BY' },
+        { species_id: 'pike', url: null, source_url: null, author: null, license: null },
+      ].filter((m) => ids.includes(m.species_id)),
     fetchRegionCatalogue: async (regionId, locale) =>
       regionId === 'SWE.9_1'
         ? [
             { id: 'pike', scientific_name: 'Esox lucius', common_name: 'Northern Pike', local_name: locale === 'sv' ? 'Gädda' : 'Northern Pike', category: 'fish', rarity: 'common', taxon_group: 'fish', active_months: [6, 5], occurrences: 42 },
-            { id: 'frog', scientific_name: 'Rana temporaria', common_name: null, local_name: null, category: null, rarity: 'common', taxon_group: 'amphibian', active_months: [4], occurrences: 3 },
+            { id: 'frog', scientific_name: 'Rana temporaria', common_name: null, local_name: null, category: null, rarity: 'common', taxon_group: 'amphibian', active_months: [4], occurrences: 3, photo_url: 'https://host/gbif-frog.jpg', photo_source_url: 'https://commons/frog', photo_author: 'A. P.', photo_license: 'CC-BY' },
           ]
         : [],
   };
@@ -139,6 +146,17 @@ describe('SupabaseSpeciesRepository', () => {
     expect(frog.names).toBeUndefined(); // no name anywhere → binomial, shown as one
     expect(frog.commonName).toBe('Rana temporaria');
     expect(frog.category).toBe('mammal');
+    expect(frog.photo).toEqual({
+      speciesId: 'frog', url: 'https://host/gbif-frog.jpg', license: 'CC-BY', author: 'A. P.',
+      sourceUrl: 'https://commons/frog', isPrimary: true,
+    });
+    expect(pike.photo).toBeUndefined();
+  });
+
+  it('attaches catalogue photos to described species, and none for a recorded miss (T-215)', async () => {
+    const [frog, pike] = await repo.describeSpecies(['frog', 'pike'], 'en');
+    expect(frog.species.photo?.url).toBe('https://host/gbif-frog.jpg');
+    expect(pike.species.photo).toBeUndefined();
   });
 
   it('puts the described name on the species too, so its card is titled in that language', async () => {
@@ -199,5 +217,31 @@ describe('minigameCategory', () => {
   it('never returns nothing, even for an unknown or missing group', () => {
     expect(minigameCategory({ category: null, taxon_group: null })).toBe('plant');
     expect(minigameCategory({ category: null })).toBe('plant');
+  });
+});
+
+describe('mediaRowToPhoto (T-215)', () => {
+  const row = { species_id: 'x', url: 'u', source_url: 's', author: 'A', license: 'CC-BY-SA' };
+
+  it('maps a stored photo', () => {
+    expect(mediaRowToPhoto(row)).toEqual({ speciesId: 'x', url: 'u', license: 'CC-BY-SA', author: 'A', sourceUrl: 's', isPrimary: true });
+  });
+
+  it('never ships a recorded miss or a licence outside the allowed set', () => {
+    expect(mediaRowToPhoto({ ...row, url: null })).toBeUndefined();
+    expect(mediaRowToPhoto({ ...row, license: 'CC-BY-NC' })).toBeUndefined();
+    expect(mediaRowToPhoto({ ...row, license: null })).toBeUndefined();
+  });
+
+  it('fills a missing author and source rather than rendering blanks', () => {
+    expect(mediaRowToPhoto({ ...row, author: null, source_url: null })).toMatchObject({ author: 'Unknown', sourceUrl: 'u' });
+  });
+
+  it('a catalogue row without photo columns (pre-T-215 function) still maps', () => {
+    const species = catalogueRowToSpecies(
+      { id: 'a', scientific_name: 'A a', common_name: null, local_name: null, category: 'bird', rarity: 'common', active_months: [5], occurrences: 1 },
+      'en',
+    );
+    expect(species.photo).toBeUndefined();
   });
 });

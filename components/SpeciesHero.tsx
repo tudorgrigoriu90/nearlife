@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
-import { attributionFor, KRONOBERG_MEDIA, primaryPhoto } from '../lib/species/media';
+import { attributionFor, photoFor } from '../lib/species/media';
 import type { Species } from '../lib/species/types';
 import { speciesGlyph } from './speciesVisual';
 
@@ -17,7 +17,8 @@ import { speciesGlyph } from './speciesVisual';
 // attribution terms actually ask for.
 export default function SpeciesHero({ species, spotted }: { species: Species; spotted: boolean }) {
   const [failed, setFailed] = useState(false);
-  const photo = spotted ? primaryPhoto(KRONOBERG_MEDIA, species.id) : null;
+  // Bundled photo for the curated 54, the catalogue photo for everyone else (T-215).
+  const photo = spotted ? photoFor(species) : null;
 
   if (photo && !failed) {
     return (

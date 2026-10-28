@@ -4,6 +4,9 @@
 // unmodified. Actual photos are sourced in T-119; until then the UI falls back to the category
 // emoji. This module is the schema + attribution + license guard the sourcing and UI consume.
 
+import { KRONOBERG_MEDIA as KRONOBERG_MEDIA_LIST } from './media.kronoberg';
+import type { Species } from './types';
+
 /** Licenses allowed for commercial use (with attribution). NC and ND are never allowed. */
 export type MediaLicense = 'CC0' | 'CC-BY' | 'CC-BY-SA';
 
@@ -42,6 +45,14 @@ export function attributionFor(media: SpeciesMedia): string {
 export function primaryPhoto(media: SpeciesMedia[], speciesId: string): SpeciesMedia | null {
   const forSpecies = media.filter((m) => m.speciesId === speciesId);
   return forSpecies.find((m) => m.isPrimary) ?? forSpecies[0] ?? null;
+}
+
+/**
+ * The hero photo for a species: the bundled one for the curated 54 (hand-checked, works offline),
+ * else the catalogue photo the database supplied (T-215), else null → category glyph.
+ */
+export function photoFor(species: Species): SpeciesMedia | null {
+  return primaryPhoto(KRONOBERG_MEDIA_LIST, species.id) ?? species.photo ?? null;
 }
 
 /**

@@ -167,6 +167,14 @@ Deno.serve(async (req: Request) => {
     const speciesIds = [...new Set(plan.sends.map((s) => s.speciesId))];
     const species = await readIn(db, 'species', 'id, common_name, scientific_name', 'id', speciesIds);
     const localized = await readIn(db, 'species_content', 'species_id, locale, common_name', 'species_id', speciesIds);
+    // Catalogue photos (T-215): the bundled 54 keep their hand-checked photo; everyone else gets
+    // the one species_media holds, if any. A missing photo just sends a text notification.
+    const media = await readIn(db, 'species_media', 'species_id, url', 'species_id', speciesIds, (q) =>
+      q.not('url', 'is', null),
+    );
+    const photoUrlFor = (speciesId: string) =>
+      primaryPhoto(KRONOBERG_MEDIA, speciesId)?.url ??
+      ((media.find((m) => m.species_id === speciesId)?.url as string | undefined) ?? null);
     const nameFor = (speciesId: string, locale: string) => {
       const own = localized.find((r) => r.species_id === speciesId && r.locale === locale)?.common_name;
       const english = localized.find((r) => r.species_id === speciesId && r.locale === 'en')?.common_name;
@@ -183,7 +191,7 @@ Deno.serve(async (req: Request) => {
     const errors: string[] = [];
     for (const send of plan.sends) {
       let delivered = false;
-      const imageUrl = primaryPhoto(KRONOBERG_MEDIA, send.speciesId)?.url ?? null;
+      const imageUrl = photoUrlFor(send.speciesId);
       for (const device of send.devices) {
         const locale = pushLocale(device.locale);
         const res = await fetch(fcmSendUrl(account.project_id), {

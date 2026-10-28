@@ -4,6 +4,7 @@
 // CC-BY-SA (commercial OK with attribution); CC-BY-NC and ND are excluded; images are kept
 // unmodified. Actual photos are sourced in T-119; until then the UI falls back to the category
 // emoji. This module is the schema + attribution + license guard the sourcing and UI consume.
+import { KRONOBERG_MEDIA as KRONOBERG_MEDIA_LIST } from './media.kronoberg.js';
 export const ALLOWED_LICENSES = ['CC0', 'CC-BY', 'CC-BY-SA'];
 /** True if the license permits commercial use (all of ALLOWED_LICENSES do). */
 export function isCommercialUseAllowed(license) {
@@ -23,6 +24,13 @@ export function attributionFor(media) {
 export function primaryPhoto(media, speciesId) {
     const forSpecies = media.filter((m) => m.speciesId === speciesId);
     return forSpecies.find((m) => m.isPrimary) ?? forSpecies[0] ?? null;
+}
+/**
+ * The hero photo for a species: the bundled one for the curated 54 (hand-checked, works offline),
+ * else the catalogue photo the database supplied (T-215), else null → category glyph.
+ */
+export function photoFor(species) {
+    return primaryPhoto(KRONOBERG_MEDIA_LIST, species.id) ?? species.photo ?? null;
 }
 /**
  * Sourced photos for the Kronoberg set (T-119) — generated into `media.kronoberg.ts` from Wikimedia

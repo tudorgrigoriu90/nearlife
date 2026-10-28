@@ -2265,10 +2265,18 @@ only.**
     then it only picks up species a catalogue refresh adds. The curated 54 are seeded from their
     manifest first and never overwritten (their photos were hand-checked).
   - Budget: ~6,800 × ~40 KB ≈ 270 MB of the 1 GB free Storage tier.
-- **T-215 · The app and the notifications use the catalogue photos** — *Claude · M · `TODO` · deps: T-202*
+- **T-215 · The app and the notifications use the catalogue photos** — *Claude · M · `DONE` (code + migration; photos appear as T-202's runs fill the table) · deps: T-202*
   - `SpeciesHero` and the notification image still read only the bundled 54. Read `species_media`
     (via `region_catalogue` / `describeSpecies` for the app, a join in `send-notifications` for the
     image) once T-202's runs have filled it.
+  - ✅ `Species.photo` + `photoFor(species)`: the bundled hand-checked photo for the curated 54,
+    else the database's, else null → glyph. `SpeciesHero` uses it, attribution included.
+  - ✅ `region_catalogue` returns the photo columns (migration 20261029000003; drop + recreate,
+    since a function's result columns cannot be altered in place) and `describeSpecies` fetches
+    `species_media` for its ids — every card gets its photo in the same call, not one per card.
+    `mediaRowToPhoto` never ships a recorded miss or a licence outside CC0/CC-BY/CC-BY-SA.
+  - ✅ `send-notifications` attaches the catalogue photo to the push (bundled first), so the lock
+    screen shows the animal for every species with a photo, not only the 54.
 - **T-205 · First real push on a real phone** — *Director · S · `DONE` (2026-10-28) · deps: T-201*
   - Everything server-side is verified; what no test can show is the notification on a lock screen.
   - Steps: `google-services.json` in the repo root (never committed) → `npx expo run:android` with

@@ -35,4 +35,22 @@ describe('SpeciesHero', () => {
     await render(<SpeciesHero species={swift} spotted />);
     expect(screen.getByTestId('species-photo').props.accessibilityHint).toBeTruthy();
   });
+
+  it('shows a catalogue photo from the database for a species outside the bundled set (T-215)', async () => {
+    const heath = {
+      ...swift,
+      id: 'gbif:5333412',
+      commonName: 'Erica tetralix',
+      photo: {
+        speciesId: 'gbif:5333412',
+        url: 'https://host/gbif-5333412.jpg',
+        license: 'CC-BY-SA' as const,
+        author: 'H. Botanist',
+        sourceUrl: 'https://commons.wikimedia.org/wiki/File:Erica.jpg',
+        isPrimary: true,
+      },
+    };
+    await render(<SpeciesHero species={heath} spotted />);
+    expect(screen.getByText(/H\. Botanist · CC-BY-SA/)).toBeTruthy();
+  });
 });

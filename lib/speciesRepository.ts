@@ -4,6 +4,7 @@ import type { ContentLocale } from './i18n/contentLocale';
 import { KRONOBERG_SPECIES } from './species/kronoberg';
 import { commonNameFor, contentFor, contentInLocale } from './species/localized';
 import type { SpeciesContent } from './species/content';
+import { isCommercialUseAllowed, type MediaLicense, type SpeciesMedia } from './species/media';
 import type { Month, Rarity, Species, SpeciesCategory } from './species/types';
 
 // Species data-access seam (T-057 / T-059). The screens read the catalogue + localized content
@@ -124,16 +125,53 @@ export function minigameCategory(row: Pick<SpeciesRow, 'category' | 'taxon_group
   return MINIGAME_BY_TAXON_GROUP[row.taxon_group ?? ''] ?? 'plant';
 }
 
-/** A row of `public.region_catalogue(region, loc)` (migration 20261028000002). */
+/** A species' photo as the database stores it (`species_media`, T-202). */
+export interface MediaRow {
+  species_id: string;
+  url: string | null;
+  source_url: string | null;
+  author: string | null;
+  license: string | null;
+}
+
+/** A usable photo, or undefined — a recorded miss or a licence outside the allowed set never ships. */
+export function mediaRowToPhoto(row: MediaRow): SpeciesMedia | undefined {
+  if (!row.url || !row.license || !isCommercialUseAllowed(row.license)) return undefined;
+  return {
+    speciesId: row.species_id,
+    url: row.url,
+    license: row.license as MediaLicense,
+    author: row.author || 'Unknown',
+    sourceUrl: row.source_url || row.url,
+    isPrimary: true,
+  };
+}
+
+/** A row of `public.region_catalogue(region, loc)` (migrations 20261028000002 / 20261029000003). */
 export interface CatalogueRow extends SpeciesRow {
   /** Name in the requested locale, else English, else null. */
   local_name: string | null;
   occurrences: number;
+  photo_url?: string | null;
+  photo_source_url?: string | null;
+  photo_author?: string | null;
+  photo_license?: string | null;
 }
 
 export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Species {
-  const species = speciesRowToSpecies(row);
-  return row.local_name ? { ...species, names: { [locale]: row.local_name } } : species;
+  const base = speciesRowToSpecies(row);
+  const photo = mediaRowToPhoto({
+    species_id: row.id,
+    url: row.photo_url ?? null,
+    source_url: row.photo_source_url ?? null,
+    author: row.photo_author ?? null,
+    license: row.photo_license ?? null,
+  });
+  return {
+    ...base,
+    ...(row.local_name ? { names: { [locale]: row.local_name } } : {}),
+    ...(photo ? { photo } : {}),
+  };
 }
 
 export interface ContentSummaryRow {
@@ -203,6 +241,7 @@ export interface SpeciesGateway {
   /** Name + "when & how" for these species in `locales` (the requested one and English). */
   fetchContentSummaries(ids: string[], locales: string[]): Promise<ContentSummaryRow[]>;
   fetchRegionCatalogue(regionId: string, locale: string): Promise<CatalogueRow[]>;
+  fetchMediaByIds(ids: string[]): Promise<MediaRow[]>;
 }
 
 export class SupabaseSpeciesRepository implements SpeciesRepository {
@@ -238,10 +277,17 @@ export class SupabaseSpeciesRepository implements SpeciesRepository {
   async describeSpecies(ids: string[], locale: Locale): Promise<SpeciesSummary[]> {
     if (ids.length === 0) return [];
     const locales = locale === 'en' ? ['en'] : [locale, 'en'];
-    const [rows, content] = await Promise.all([
+    const [rows, content, media] = await Promise.all([
       this.gateway.fetchSpeciesByIds(ids),
       this.gateway.fetchContentSummaries(ids, locales),
+      this.gateway.fetchMediaByIds(ids),
     ]);
+    const photoById = new Map(
+      media.flatMap((m) => {
+        const photo = mediaRowToPhoto(m);
+        return photo ? [[m.species_id, photo] as const] : [];
+      }),
+    );
     const rowById = new Map(rows.map((r) => [r.id, r]));
     const contentFor = (id: string, loc: string) =>
       content.find((c) => c.species_id === id && c.locale === loc);
@@ -254,7 +300,12 @@ export class SupabaseSpeciesRepository implements SpeciesRepository {
       const localName = own?.common_name?.trim() || english?.common_name?.trim();
       // Carry the name on the species too, so a card opened from this row is titled in the
       // reader's language (commonNameFor reads `names`).
-      const species = localName ? { ...base, names: { [locale]: localName } } : base;
+      const photo = photoById.get(id);
+      const species: Species = {
+        ...base,
+        ...(localName ? { names: { [locale]: localName } } : {}),
+        ...(photo ? { photo } : {}),
+      };
       return [
         {
           species,
@@ -357,6 +408,21 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
             .order('species_id')
             .range(from, to),
         'species_content',
+      ),
+    );
+  }
+
+  async fetchMediaByIds(ids: string[]): Promise<MediaRow[]> {
+    return readInChunks(ids, (chunk) =>
+      readAllPages<MediaRow>(
+        (from, to) =>
+          this.client
+            .from('species_media')
+            .select('species_id,url,source_url,author,license')
+            .in('species_id', chunk)
+            .order('species_id')
+            .range(from, to),
+        'species_media',
       ),
     );
   }
