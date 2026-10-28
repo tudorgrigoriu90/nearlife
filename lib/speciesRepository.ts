@@ -35,6 +35,19 @@ export interface SpeciesRepository {
   getContentInLocale(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null>;
   /** Per-region presence (from `species_presence`); drives This Week + the notification engine. */
   regionPresence(regionId: string): Promise<RegionPresence[]>;
+  /**
+   * Display data for exactly these species, in the given order (unknown ids are skipped): the
+   * species, its name in `locale` (English, then the binomial, as fallbacks) and its "when & how"
+   * line. For lists drawn from presence, where loading the whole catalogue would be wasteful (T-207).
+   */
+  describeSpecies(ids: string[], locale: Locale): Promise<SpeciesSummary[]>;
+}
+
+export interface SpeciesSummary {
+  species: Species;
+  commonName: string;
+  /** "When & how to see it" in the locale, or null when there is no content row. */
+  detail: string | null;
 }
 
 /** The bundled curated data (default source until the app reads from the DB). */
@@ -57,6 +70,15 @@ export class HardcodedSpeciesRepository implements SpeciesRepository {
   async regionPresence(_regionId: string): Promise<RegionPresence[]> {
     return this.species.map((s) => ({ speciesId: s.id, activeMonths: s.activeMonths, occurrences: 0 }));
   }
+
+  async describeSpecies(ids: string[], locale: Locale): Promise<SpeciesSummary[]> {
+    const byId = new Map(this.species.map((s) => [s.id, s]));
+    return ids.flatMap((id) => {
+      const species = byId.get(id);
+      if (species === undefined) return [];
+      return [{ species, commonName: commonNameFor(species, locale), detail: contentFor(id, locale)?.whenAndHow ?? null }];
+    });
+  }
 }
 
 // ── Supabase-backed source ───────────────────────────────────────────────────
@@ -65,9 +87,37 @@ export interface SpeciesRow {
   id: string;
   scientific_name: string;
   common_name: string | null;
-  category: SpeciesCategory;
+  /** Null for GBIF groups with no catch minigame of their own (T-042 migration). */
+  category: SpeciesCategory | null;
   rarity: Rarity;
   active_months: number[];
+  taxon_group?: string | null;
+}
+
+/**
+ * The minigame a species without a curated category plays (T-207). The catalogue keeps
+ * `category` null for amphibians, reptiles, arachnids and molluscs, but every species must be
+ * catchable — the card would otherwise crash on "Find it nearby". Mapped by how the animal moves:
+ * frogs and lizards are approached by stealth, spiders are traced, slow molluscs are spotted and
+ * framed. Anything still unknown falls back to the gentlest mechanic.
+ */
+const MINIGAME_BY_TAXON_GROUP: Record<string, SpeciesCategory> = {
+  amphibian: 'mammal',
+  reptile: 'mammal',
+  arachnid: 'insect',
+  mollusc: 'plant',
+};
+
+export function minigameCategory(row: Pick<SpeciesRow, 'category' | 'taxon_group'>): SpeciesCategory {
+  if (row.category !== null && row.category !== undefined) return row.category;
+  return MINIGAME_BY_TAXON_GROUP[row.taxon_group ?? ''] ?? 'plant';
+}
+
+export interface ContentSummaryRow {
+  species_id: string;
+  locale: string;
+  common_name: string | null;
+  when_how: string;
 }
 
 export interface SpeciesContentRow {
@@ -103,7 +153,7 @@ export function speciesRowToSpecies(row: SpeciesRow): Species {
     // back to the binomial is honest *here* — it is the name we actually have, and the row
     // still records that no common name is known, which is what T-187 was protecting.
     commonName: row.common_name?.trim() || row.scientific_name,
-    category: row.category,
+    category: minigameCategory(row),
     rarity: row.rarity,
     activeMonths: [...row.active_months].sort((a, b) => a - b) as Month[],
   };
@@ -126,6 +176,9 @@ export interface SpeciesGateway {
   fetchSpecies(): Promise<SpeciesRow[]>;
   fetchContent(speciesId: string, locale: string): Promise<SpeciesContentRow | null>;
   fetchPresence(regionId: string): Promise<PresenceRow[]>;
+  fetchSpeciesByIds(ids: string[]): Promise<SpeciesRow[]>;
+  /** Name + "when & how" for these species in `locales` (the requested one and English). */
+  fetchContentSummaries(ids: string[], locales: string[]): Promise<ContentSummaryRow[]>;
 }
 
 export class SupabaseSpeciesRepository implements SpeciesRepository {
@@ -157,6 +210,59 @@ export class SupabaseSpeciesRepository implements SpeciesRepository {
   async regionPresence(regionId: string): Promise<RegionPresence[]> {
     return (await this.gateway.fetchPresence(regionId)).map(presenceRowToPresence);
   }
+
+  async describeSpecies(ids: string[], locale: Locale): Promise<SpeciesSummary[]> {
+    if (ids.length === 0) return [];
+    const locales = locale === 'en' ? ['en'] : [locale, 'en'];
+    const [rows, content] = await Promise.all([
+      this.gateway.fetchSpeciesByIds(ids),
+      this.gateway.fetchContentSummaries(ids, locales),
+    ]);
+    const rowById = new Map(rows.map((r) => [r.id, r]));
+    const contentFor = (id: string, loc: string) =>
+      content.find((c) => c.species_id === id && c.locale === loc);
+    return ids.flatMap((id) => {
+      const row = rowById.get(id);
+      if (row === undefined) return [];
+      const species = speciesRowToSpecies(row);
+      const own = contentFor(id, locale);
+      const english = contentFor(id, 'en');
+      return [
+        {
+          species,
+          commonName: own?.common_name?.trim() || english?.common_name?.trim() || species.commonName,
+          detail: (own ?? english)?.when_how ?? null,
+        },
+      ];
+    });
+  }
+}
+
+/**
+ * PostgREST returns at most 1,000 rows per request (Supabase's default `max_rows`) and says
+ * nothing when it truncates. A county has ~3,700 presence rows, so a single request silently lost
+ * most of them (found in T-207). Every list read pages until a short page.
+ */
+export const PAGE_SIZE = 1000;
+/** Ids per `in.(...)` filter — keeps request URLs well under proxy limits. */
+const IN_CHUNK = 150;
+
+type Page<T> = PromiseLike<{ data: T[] | null; error: { message: string } | null }>;
+
+async function readAllPages<T>(page: (from: number, to: number) => Page<T>, what: string): Promise<T[]> {
+  const rows: T[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await page(from, from + PAGE_SIZE - 1);
+    if (error) throw new Error(`${what} fetch failed: ${error.message}`);
+    rows.push(...(data ?? []));
+    if (!data || data.length < PAGE_SIZE) return rows;
+  }
+}
+
+async function readInChunks<T>(ids: string[], read: (chunk: string[]) => Promise<T[]>): Promise<T[]> {
+  const out: T[] = [];
+  for (let i = 0; i < ids.length; i += IN_CHUNK) out.push(...(await read(ids.slice(i, i + IN_CHUNK))));
+  return out;
 }
 
 /** supabase-js adapter for `SpeciesGateway` (reads are public via RLS). */
@@ -166,7 +272,7 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
   async fetchSpecies(): Promise<SpeciesRow[]> {
     const { data, error } = await this.client
       .from('species')
-      .select('id,scientific_name,common_name,category,rarity,active_months');
+      .select(SPECIES_COLUMNS);
     if (error) throw new Error(`species fetch failed: ${error.message}`);
     return (data ?? []) as SpeciesRow[];
   }
@@ -183,11 +289,43 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
   }
 
   async fetchPresence(regionId: string): Promise<PresenceRow[]> {
-    const { data, error } = await this.client
-      .from('species_presence')
-      .select('species_id,active_months,occurrences')
-      .eq('region_id', regionId);
-    if (error) throw new Error(`species_presence fetch failed: ${error.message}`);
-    return (data ?? []) as PresenceRow[];
+    // Ordered so pages are stable: without an order, PostgREST may repeat or skip rows across pages.
+    return readAllPages<PresenceRow>(
+      (from, to) =>
+        this.client
+          .from('species_presence')
+          .select('species_id,active_months,occurrences')
+          .eq('region_id', regionId)
+          .order('species_id')
+          .range(from, to),
+      'species_presence',
+    );
+  }
+
+  async fetchSpeciesByIds(ids: string[]): Promise<SpeciesRow[]> {
+    return readInChunks(ids, (chunk) =>
+      readAllPages<SpeciesRow>(
+        (from, to) => this.client.from('species').select(SPECIES_COLUMNS).in('id', chunk).order('id').range(from, to),
+        'species',
+      ),
+    );
+  }
+
+  async fetchContentSummaries(ids: string[], locales: string[]): Promise<ContentSummaryRow[]> {
+    return readInChunks(ids, (chunk) =>
+      readAllPages<ContentSummaryRow>(
+        (from, to) =>
+          this.client
+            .from('species_content')
+            .select('species_id,locale,common_name,when_how')
+            .in('species_id', chunk)
+            .in('locale', locales)
+            .order('species_id')
+            .range(from, to),
+        'species_content',
+      ),
+    );
   }
 }
+
+const SPECIES_COLUMNS = 'id,scientific_name,common_name,category,rarity,active_months,taxon_group';

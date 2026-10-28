@@ -14,26 +14,26 @@ describe('thisWeekFromPresence', () => {
     expect(thisWeekFromPresence([offSeason], 6, new Set())).toEqual({ state: 'quiet', entries: [] });
   });
 
-  it('orders new species first, then rarer (fewer occurrences) first', () => {
-    const result = thisWeekFromPresence([common, rare], 6, new Set());
+  it('orders new species first, then the most-observed — the ones you can actually find', () => {
+    const result = thisWeekFromPresence([rare, common], 6, new Set());
     expect(result.state).toBe('active');
-    expect(result.entries.map((e) => e.speciesId)).toEqual(['rare', 'common']);
+    expect(result.entries.map((e) => e.speciesId)).toEqual(['common', 'rare']);
     expect(result.entries.every((e) => e.isNew)).toBe(true);
   });
 
-  it('sinks already-collected species below new ones regardless of rarity', () => {
-    // rare is collected, common is new → common (new) ranks above rare (collected).
-    const result = thisWeekFromPresence([common, rare], 6, new Set(['rare']));
-    expect(result.entries.map((e) => e.speciesId)).toEqual(['common', 'rare']);
+  it('sinks already-collected species below new ones regardless of how often they are seen', () => {
+    // common is collected, rare is new → rare (new) ranks above common (collected).
+    const result = thisWeekFromPresence([common, rare], 6, new Set(['common']));
+    expect(result.entries.map((e) => e.speciesId)).toEqual(['rare', 'common']);
     expect(result.entries.map((e) => e.isNew)).toEqual([true, false]);
   });
 
   it('excludes off-season species from the active list', () => {
     const result = thisWeekFromPresence([common, offSeason, rare], 6, new Set());
-    expect(result.entries.map((e) => e.speciesId)).toEqual(['rare', 'common']);
+    expect(result.entries.map((e) => e.speciesId)).toEqual(['common', 'rare']);
   });
 
-  it('is a stable tie-break when rarity flavour is equal', () => {
+  it('is a stable tie-break when observation counts are equal', () => {
     const a: RegionPresence = { speciesId: 'a', activeMonths: [6], occurrences: 100 };
     const b: RegionPresence = { speciesId: 'b', activeMonths: [6], occurrences: 100 };
     const result = thisWeekFromPresence([a, b], 6, new Set());

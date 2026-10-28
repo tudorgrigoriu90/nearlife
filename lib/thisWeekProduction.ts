@@ -9,9 +9,12 @@ import type { RegionPresence } from './speciesRepository';
 // handle — location off and a quiet week — as first-class result variants so the UI never has to
 // infer them from an empty array.
 //
-// Ordering mirrors T-111: not-yet-collected first (flagged NEW), then rarer-before-common so the
-// list is not "all sparrows". Region presence has no rarity enum, so rarity flavour is the
-// observation count — fewer occurrences ranks earlier (honest: it's surfacing order, not a claim).
+// Ordering: not-yet-collected first (flagged NEW), then MOST-observed first. T-078 originally put
+// rarer first to avoid "all sparrows", which suited a curated 54. Wired to a real county (T-207)
+// it meant the top of a ~2,000-species list was species recorded once or twice — mostly without a
+// common name, and the least likely things a person could go and find. Observation count is the
+// honest proxy for findability, so it leads; the notification engine's weighted sampling is
+// where the long tail gets its turn.
 
 export interface ThisWeekEntry {
   speciesId: string;
@@ -52,7 +55,7 @@ export function thisWeekFromPresence(
 
   active.sort((a, b) => {
     if (a.isNew !== b.isNew) return a.isNew ? -1 : 1; // new first
-    if (a.occurrences !== b.occurrences) return a.occurrences - b.occurrences; // rarer first
+    if (a.occurrences !== b.occurrences) return b.occurrences - a.occurrences; // most-observed first
     return a.index - b.index; // stable tie-break
   });
 

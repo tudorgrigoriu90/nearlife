@@ -17,6 +17,7 @@ import BadgesScreen from './components/BadgesScreen';
 import ImpactScreen from './components/ImpactScreen';
 import { useCollection } from './components/useCollection';
 import { usePushRegistration } from './components/usePushRegistration';
+import { useThisWeek } from './components/useThisWeek';
 import { useTracker } from './components/useTracker';
 import {
   applyConsentChange,
@@ -49,7 +50,7 @@ import {
 } from './lib/freeCatch';
 import { isPrimeCatch } from './lib/primeBonus';
 import { gradeFromScore } from './lib/minigame/grade';
-import { seasonKeyOf } from './lib/season';
+import { monthOf, seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator, type Locale } from './lib/i18n';
 import { createSpeciesRepository } from './lib/speciesRepositoryFactory';
@@ -130,6 +131,14 @@ export default function App() {
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
   const track = useTracker(consent);
+  // This Week over the user's own county (T-207); null in preview mode → bundled list.
+  const thisWeekLive = useThisWeek(
+    SPECIES_REPO,
+    hometown?.id ?? null,
+    monthOf(new Date()),
+    spottedIds(collection.records),
+    locale,
+  );
   // Server-side device registration follows notification consent (T-201).
   usePushRegistration({
     ready: onboarded && consentLoaded,
@@ -535,6 +544,8 @@ export default function App() {
         {tab === 'thisWeek' ? (
           <ThisWeekScreen
             locale={locale}
+            live={thisWeekLive}
+            regionName={hometown?.name}
             spottedIds={spottedIds(collection.records)}
             onSelectSpecies={(species) => {
               // Tapping a This Week entry marks it Spotted and opens its card (same as a

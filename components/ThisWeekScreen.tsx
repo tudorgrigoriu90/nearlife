@@ -6,29 +6,34 @@ import { activeEvents } from '../lib/liveEvents';
 import { commonNameFor, contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import type { Species } from '../lib/species/types';
+import type { LiveThisWeek } from '../lib/thisWeekLive';
 import { CATEGORY_EMOJI } from './speciesVisual';
 import { LIVE_EVENT_META } from './liveEventVisual';
 
-// "Active this week" pull surface (USER-FLOWS §3), driven by real Kronoberg seed data and the
-// tested `thisWeek` logic (T-111). All chrome strings run through i18n (T-121); species names
+// "Active this week" pull surface (USER-FLOWS §3). With a hometown it shows the user's own county
+// from the database (`live`, T-207); without one (preview mode) or before it loads, the bundled
+// Kronoberg seed list via the tested `thisWeek` logic (T-111). All chrome strings run through i18n (T-121); species names
 // and content localize in T-122. NEW markers reflect the user's collection via `spottedIds`
 // (T-028). This surface is fully self-contained — it never depends on notifications, proving the
 // app isn't notification-driven. NOTE: not yet visually verified on a device.
 
+interface RowData {
+  species: Species;
+  name: string;
+  detail: string;
+  isNew: boolean;
+}
+
 function Row({
-  entry,
-  locale,
+  row,
   newLabel,
   onSelect,
 }: {
-  entry: ThisWeekEntry;
-  locale: Locale;
+  row: RowData;
   newLabel: string;
   onSelect?: (species: Species) => void;
 }) {
-  const { species, isNew } = entry;
-  const name = commonNameFor(species, locale);
-  const content = contentFor(species.id, locale);
+  const { species, name, detail, isNew } = row;
   return (
     <Pressable
       style={styles.row}
@@ -42,10 +47,21 @@ function Row({
           <Text style={styles.name}>{name}</Text>
           {isNew ? <Text style={styles.newBadge}>{newLabel}</Text> : null}
         </View>
-        <Text style={styles.detail}>{content?.whenAndHow ?? species.scientificName}</Text>
+        <Text style={styles.detail}>{detail}</Text>
       </View>
     </Pressable>
   );
+}
+
+function bundledRow(entry: ThisWeekEntry, locale: Locale): RowData {
+  const { species, isNew } = entry;
+  const content = contentFor(species.id, locale);
+  return {
+    species,
+    name: commonNameFor(species, locale),
+    detail: content?.whenAndHow ?? species.scientificName,
+    isNew,
+  };
 }
 
 // Live-events strip (T-080): the real seasonal moments genuinely under way this month, rendered
@@ -77,26 +93,41 @@ export default function ThisWeekScreen({
   locale = 'en',
   spottedIds,
   onSelectSpecies,
+  live = null,
+  regionName,
 }: {
   locale?: Locale;
   spottedIds?: ReadonlySet<string>;
   onSelectSpecies?: (species: Species) => void;
+  /** The user's county list (T-207); null → the bundled preview list. */
+  live?: LiveThisWeek | null;
+  regionName?: string;
 }) {
   const tr = createTranslator(locale);
   const month = monthOf(new Date());
-  const entries = thisWeek(KRONOBERG_SPECIES, month, spottedIds ?? new Set());
+  const rows: RowData[] =
+    live !== null
+      ? live.items.map((item) => ({
+          species: item.species,
+          name: item.commonName,
+          detail: item.detail ?? item.species.scientificName,
+          isNew: item.isNew,
+        }))
+      : thisWeek(KRONOBERG_SPECIES, month, spottedIds ?? new Set()).map((e) => bundledRow(e, locale));
+  const count = live !== null ? live.total : rows.length;
+  const region = live !== null && regionName ? regionName : tr('region.kronoberg');
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{tr('thisWeek.title')} 🌿</Text>
       <Text style={styles.subtitle}>
-        {tr('thisWeek.subtitle', { region: tr('region.kronoberg'), count: entries.length })}
+        {tr('thisWeek.subtitle', { region, count })}
       </Text>
       <FlatList
-        data={entries}
-        keyExtractor={(e) => e.species.id}
+        data={rows}
+        keyExtractor={(r) => r.species.id}
         renderItem={({ item }) => (
-          <Row entry={item} locale={locale} newLabel={tr('thisWeek.new')} onSelect={onSelectSpecies} />
+          <Row row={item} newLabel={tr('thisWeek.new')} onSelect={onSelectSpecies} />
         )}
         ListHeaderComponent={<EventsHeader locale={locale} tr={tr} />}
         contentContainerStyle={styles.list}

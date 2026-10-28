@@ -1,6 +1,7 @@
 import {
   contentRowToContent,
   HardcodedSpeciesRepository,
+  minigameCategory,
   speciesRowToSpecies,
   SupabaseSpeciesRepository,
   type SpeciesContentRow,
@@ -25,6 +26,13 @@ describe('HardcodedSpeciesRepository', () => {
     const content = await repo.getContent('european-robin', 'en');
     expect(content?.fact).toMatch(/territorial/i);
     expect(await repo.getContent('no-such-species', 'en')).toBeNull();
+  });
+
+  it('describes requested species in order, localized, skipping unknown ids', async () => {
+    const out = await repo.describeSpecies(['european-robin', 'ghost', 'mallard'], 'sv');
+    expect(out.map((s) => s.species.id)).toEqual(['european-robin', 'mallard']);
+    expect(out[0].commonName).toBe('Rödhake');
+    expect(out[0].detail).toEqual(expect.any(String));
   });
 });
 
@@ -74,6 +82,16 @@ describe('SupabaseSpeciesRepository', () => {
       regionId === 'SWE.9_1'
         ? [{ species_id: 'pike', active_months: [6, 5], occurrences: 42 }]
         : [],
+    fetchSpeciesByIds: async (ids) => [
+      ...speciesRows,
+      { id: 'frog', scientific_name: 'Rana temporaria', common_name: null, category: null, rarity: 'common' as const, active_months: [4], taxon_group: 'amphibian' },
+    ].filter((r) => ids.includes(r.id)),
+    fetchContentSummaries: async (ids, locales) =>
+      [
+        { species_id: 'pike', locale: 'en', common_name: 'Northern Pike', when_how: 'en how' },
+        { species_id: 'pike', locale: 'sv', common_name: 'Gädda', when_how: 'sv hur' },
+        { species_id: 'frog', locale: 'en', common_name: 'Common frog', when_how: 'en frog' },
+      ].filter((c) => ids.includes(c.species_id) && locales.includes(c.locale)),
   };
   const repo = new SupabaseSpeciesRepository(gateway);
 
@@ -91,6 +109,16 @@ describe('SupabaseSpeciesRepository', () => {
 
   it('returns null when neither the locale nor English has content', async () => {
     expect(await repo.getContent('ghost', 'sv')).toBeNull();
+  });
+
+  it('describes species in the locale, falling back to English then the binomial', async () => {
+    const out = await repo.describeSpecies(['frog', 'pike', 'ghost'], 'sv');
+    expect(out).toEqual([
+      expect.objectContaining({ commonName: 'Common frog', detail: 'en frog' }),
+      expect.objectContaining({ commonName: 'Gädda', detail: 'sv hur' }),
+    ]);
+    expect(out[0].species.category).toBe('mammal'); // a frog is caught by stealth
+    expect(await repo.describeSpecies([], 'sv')).toEqual([]);
   });
 
   it('reads region presence and sorts the active months', async () => {
@@ -127,5 +155,24 @@ describe('speciesRowToSpecies with no common name', () => {
     expect(speciesRowToSpecies({ ...row, common_name: '   ' } as never).commonName).toBe(
       'Rana temporaria',
     );
+  });
+});
+
+// T-207: four GBIF groups have no curated category, and every species must still open a minigame.
+describe('minigameCategory', () => {
+  it('keeps a curated category', () => {
+    expect(minigameCategory({ category: 'bird', taxon_group: 'bird' })).toBe('bird');
+  });
+
+  it('maps the groups with no minigame of their own by how the animal moves', () => {
+    expect(minigameCategory({ category: null, taxon_group: 'amphibian' })).toBe('mammal');
+    expect(minigameCategory({ category: null, taxon_group: 'reptile' })).toBe('mammal');
+    expect(minigameCategory({ category: null, taxon_group: 'arachnid' })).toBe('insect');
+    expect(minigameCategory({ category: null, taxon_group: 'mollusc' })).toBe('plant');
+  });
+
+  it('never returns nothing, even for an unknown or missing group', () => {
+    expect(minigameCategory({ category: null, taxon_group: null })).toBe('plant');
+    expect(minigameCategory({ category: null })).toBe('plant');
   });
 });

@@ -10,6 +10,7 @@ import {
   type LocalizedSpecies,
   type RegionPresence,
   type SpeciesRepository,
+  type SpeciesSummary,
 } from './speciesRepository';
 import { getSupabaseConfig, hasSupabaseConfig } from './supabaseConfig';
 
@@ -62,6 +63,10 @@ export class FallbackSpeciesRepository implements SpeciesRepository {
 
   regionPresence(regionId: string): Promise<RegionPresence[]> {
     return this.attempt((r) => r.regionPresence(regionId), 'presence');
+  }
+
+  describeSpecies(ids: string[], locale: Locale): Promise<SpeciesSummary[]> {
+    return this.attempt((r) => r.describeSpecies(ids, locale), 'describe');
   }
 }
 

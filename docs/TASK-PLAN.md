@@ -880,7 +880,7 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
 ([GDD §7](GDD.md)). The pull surface is the priority lever; the rest layer on.
 
 ## F8.1 — This Week (production)
-- **T-078 · "Active this week" (production)** — *Claude · M · `DONE` · deps: T-044, T-057 · [USER-FLOWS §3](USER-FLOWS.md), [TSD §4b](TSD.md)*
+- **T-078 · "Active this week" (production)** — *Claude · M · `DONE` (wired + re-ordered by T-207) · deps: T-044, T-057 · [USER-FLOWS §3](USER-FLOWS.md), [TSD §4b](TSD.md)*
   - Real query on `cell_species_month`; ordered new-first then rarity; works without
     notifications; quiet-week and location-off states.
   - ✅ `lib/thisWeekProduction.ts`: `thisWeekFromPresence(presence, month, collected)` reads live
@@ -2225,13 +2225,37 @@ only.**
     (or by hand), regenerates the shared engine copy and fails if it differs from the commit, then
     `supabase functions deploy send-notifications --no-verify-jwt --use-api`. `delete-account` is
     left out on purpose — deploying it is T-093's decision, not a side effect of this workflow.
-- **T-207 · This Week still shows the bundled Kronoberg list** — *Claude · M · `TODO` · deps: T-090, T-078*
+- **T-207 · This Week still shows the bundled Kronoberg list** — *Claude · M · `DONE` · deps: T-090, T-078*
   - Found while building T-090: `ThisWeekScreen` renders `KRONOBERG_SPECIES` with the subtitle
     hard-wired to "Kronoberg", and onboarding's first Spotted card picks from the same 54. T-078's
     `thisWeekFromPresence` (live `species_presence`) is built and tested but never wired in.
   - So a user in Skåne now gets Skåne notifications (T-201 + T-090) but a Kronoberg This Week.
     Wire the screen to `regionPresence(hometown.id)` + the catalogue, with the county name in the
     subtitle, keeping the bundled list as the offline / preview fallback.
+  - ✅ `components/useThisWeek.ts` + `lib/thisWeekLive.ts`: presence loads once per county; only the
+    top `THIS_WEEK_SHOWN` (50) rows are described (name in the UI locale → English → binomial, plus
+    "when & how"); the subtitle counts every active species. No hometown → bundled preview list.
+  - ✅ New `SpeciesRepository.describeSpecies(ids, locale)` (bundled, Supabase and fallback impls).
+  - 🐞 **Fixed: PostgREST's silent 1,000-row cap.** `fetchPresence` made one request, and a county
+    has ~3,700 presence rows — most were dropped with no error. Every list read now pages (ordered,
+    so pages are stable) and `in.(…)` filters go in chunks of 150.
+  - 🐞 **Fixed: species with no curated category crashed "Find it nearby".** GBIF amphibians,
+    reptiles, arachnids and molluscs have `category = null`; the minigame dispatcher had no game for
+    them. `minigameCategory` maps by how the animal moves (frog/lizard → stealth, spider → trace,
+    snail → spot & frame).
+  - 🔁 **Ordering changed: most-observed first** (was rarer first, T-078). Over a real county the
+    rarer-first list opened with species recorded once or twice — mostly nameless and the least
+    findable. Observation count is the honest findability proxy; the notification engine's weighted
+    sampling still gives the long tail its turn.
+  - ⚠️ Onboarding's first Spotted card still picks from the bundled 54 — kept deliberately: they are
+    widespread across Sweden and carry hand-written Tier-1 content.
+- **T-208 · Almanac reads only the first 1,000 of 11,937 species** — *Claude · M · `TODO` · deps: T-207*
+  - `fetchSpecies` is the one list read T-207 did not page: the Almanac gets an arbitrary 1,000
+    species. Paging it naively means ~12k rows on every launch. Better: the Almanac shows the user's
+    county (presence ids, like This Week) plus everything they have collected, described on demand.
+  - Also: a card opened for a database species titles itself with `commonNameFor`, which only knows
+    the bundled 54 — other species show the English/binomial name instead of the localized one
+    `species_content.common_name` already holds.
 - **T-204 · The keep-alive did not keep the project alive** — *Claude · S · `DONE` · deps: T-203*
   - The T-203 job succeeded on Aug 27, Aug 31 and Sep 3 — and the project was **paused anyway** by
     Sep 7 (`status: INACTIVE`). Every run after that failed with `tenant/user … not found`, the
