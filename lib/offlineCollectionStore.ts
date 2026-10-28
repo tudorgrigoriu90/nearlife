@@ -3,6 +3,7 @@ import {
   applyCaught,
   applyHelped,
   applySpotted,
+  CatchRefusedError,
   type CollectionStore,
 } from './collectionStore';
 import { mergeLists } from './collectionMerge';
@@ -157,7 +158,15 @@ export class OfflineCollectionStore implements CollectionStore {
       const delivered: PendingOp[] = [];
       try {
         for (const op of queue) {
-          await this.deliver(op);
+          try {
+            await this.deliver(op);
+          } catch (error) {
+            // The one permanent rejection (T-200): the server will never accept this catch, so
+            // retrying would block every write queued behind it forever. Drop it and take the
+            // species back to spotted — the device must not keep a catch the server refused.
+            if (!(error instanceof CatchRefusedError)) throw error;
+            this.uncatch(op.speciesId);
+          }
           delivered.push(op);
         }
       } finally {
@@ -182,6 +191,11 @@ export class OfflineCollectionStore implements CollectionStore {
     else if (op.kind === 'caught')
       await remote.markCaught(op.speciesId, op.at, op.primeBonus ?? false);
     else await remote.markHelped(op.speciesId, op.helpedKind ?? 'give', op.at);
+  }
+
+  private uncatch(speciesId: string): void {
+    const record = this.records.get(speciesId);
+    if (record) this.records.set(speciesId, { ...record, caughtAt: null, primeBonus: false });
   }
 
   private async write(record: CollectionRecord, op: PendingOp): Promise<CollectionRecord> {

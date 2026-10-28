@@ -1,5 +1,5 @@
 import type { CollectionRecord } from './collection';
-import { InMemoryCollectionStore, type CollectionStore } from './collectionStore';
+import { CatchRefusedError, InMemoryCollectionStore, type CollectionStore } from './collectionStore';
 import {
   InMemoryOfflineCache,
   OfflineCollectionStore,
@@ -35,8 +35,11 @@ class FlakyRemote implements CollectionStore {
     this.guard();
     return this.inner.markSpotted(id, at);
   }
+  /** Species the "server" refuses to record as caught (T-200's free-catch trigger). */
+  refuse = new Set<string>();
   async markCaught(id: string, at: string, prime: boolean) {
     this.guard();
+    if (this.refuse.has(id)) throw new CatchRefusedError(id);
     return this.inner.markCaught(id, at, prime);
   }
   async markHelped(id: string, kind: 'give' | 'protect', at: string) {
@@ -169,6 +172,35 @@ describe('OfflineCollectionStore', () => {
     await store.hydrate();
     expect(await store.list()).toEqual([]);
     await expect(store.markSpotted('moose', T1)).resolves.toBeDefined();
+  });
+});
+
+// T-200: the database refuses a catch beyond the season's free allowance. That rejection is
+// permanent, so it must neither block the queue nor leave the device believing in a catch the
+// server never recorded.
+describe('OfflineCollectionStore when the server refuses a catch', () => {
+  it('drops the refused catch, keeps the species spotted, and delivers what was queued behind it', async () => {
+    const { store, remote } = setup();
+    await store.markCaught('red-fox', T1, true);
+    await store.markSpotted('moose', T2);
+    remote.refuse.add('red-fox');
+    remote.online = true;
+    await store.sync();
+
+    const fox = await store.get('red-fox');
+    expect(fox?.caughtAt).toBeNull();
+    expect(fox?.primeBonus).toBe(false);
+    expect(fox?.spottedAt).toBe(T1); // seeing it still counts
+    expect(store.pendingCount()).toBe(0);
+    expect((await remote.inner.get('moose'))?.spottedAt).toBe(T2); // the queue kept moving
+  });
+
+  it('still treats an ordinary failure as retryable', async () => {
+    const { store } = setup();
+    await store.markCaught('red-fox', T1, false);
+    await store.sync(); // offline
+    expect(store.pendingCount()).toBe(1);
+    expect((await store.get('red-fox'))?.caughtAt).toBe(T1);
   });
 });
 

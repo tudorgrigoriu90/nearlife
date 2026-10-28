@@ -4,6 +4,8 @@ import {
   applyCaught,
   applyHelped,
   applySpotted,
+  CatchRefusedError,
+  FREE_CATCH_LIMIT_MARKER,
   type CollectionStore,
 } from './collectionStore';
 
@@ -128,6 +130,7 @@ export class SupabaseCollectionGateway implements CollectionGateway {
     const { error } = await this.client
       .from('collection')
       .upsert(row, { onConflict: 'user_id,species_id' });
+    if (error?.message?.includes(FREE_CATCH_LIMIT_MARKER)) throw new CatchRefusedError(row.species_id);
     if (error) throw new Error(`collection upsert failed: ${error.message}`);
   }
 }

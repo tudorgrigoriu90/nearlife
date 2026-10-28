@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { CatchRefusedError } from './collectionStore';
 import {
   COLLECTION_COLUMNS,
   SupabaseCollectionGateway,
@@ -108,5 +109,13 @@ describe('SupabaseCollectionGateway', () => {
     const client = fakeClient({ error: { message: 'row level security' } });
     const gw = new SupabaseCollectionGateway(client as unknown as SupabaseClient);
     await expect(gw.upsertOne(ROW)).rejects.toThrow(/upsert failed: row level security/);
+  });
+
+  it('reports the free-catch trigger as a refusal, not a retryable failure (T-200)', async () => {
+    const client = fakeClient({ error: { message: 'free_catch_limit' } });
+    const gw = new SupabaseCollectionGateway(client as unknown as SupabaseClient);
+    const err = await gw.upsertOne(ROW).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(CatchRefusedError);
+    expect((err as CatchRefusedError).speciesId).toBe(ROW.species_id);
   });
 });

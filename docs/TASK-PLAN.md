@@ -2150,7 +2150,7 @@ only.**
   - ℹ️ **Catch-spot safety (T-049) is not built at all** (no `catchSpot`/`hazard` anywhere). That is
     unbuilt scope rather than an untested rule, and it is E4 — but it should not be listed among
     rules that "get explicit tests" as though it were shipping.
-- **T-200 · Free-catch enforcement is client-side only** — *Claude + Director · M · `TODO` · deps: T-075*
+- **T-200 · Free-catch enforcement is client-side only** — *Claude · M · `IN-PROGRESS` (code pushed; migration apply + live trigger test pending) · deps: T-075*
   - `profiles.free_catches_used` / `free_catch_season` exist, but **nothing on the server enforces
     them**: no RLS policy, no trigger, no Edge Function. All the logic is in `lib/freeCatch.ts`,
     which is well tested — and which runs on the user's device.
@@ -2161,6 +2161,27 @@ only.**
     so **Full Game revenue rests on client-side honesty**. Not urgent before launch, but it should
     be a deliberate decision rather than an accident — either enforce it in a trigger/Edge Function,
     or amend the invariant to say client-side and accept the leakage.
+  - **Decision: enforce** — CLAUDE.md states it as a server-side invariant; the code now matches it.
+    Worse than described above: the app's counter was plain component state, so **every restart
+    reset it to 3** — the limit did not even hold on the device.
+  - ✅ **Database** (migration 20261029000001): trigger `collection_enforce_free_catch` on the only
+    door catches come through (`collection`, written under RLS by the offline outbox). A *new* catch
+    — a row becoming caught, or a species from an earlier season caught again — locks the profile row
+    `FOR UPDATE` (no double-spend from parallel syncs) and counts against the season; the 4th raises
+    `free_catch_limit`. Re-saving an unchanged row is free (PostgREST upserts resend every column).
+    The season comes from the **server clock** in Stockholm time (`public.season_key`, identical to
+    `seasonKeyOf`), never the client's `caught_at`, so backdating cannot spend an old allowance.
+    `profiles.full_game` added (server-only). **Column grants**: users may write only `user_id` /
+    `home_region` on profiles — RLS limited the row, not the columns, so the counter and entitlement
+    were client-writable.
+  - ✅ **App**: the count is derived from the persisted collection (`freeCatchStateFrom`), so a
+    restart cannot reset it. A refusal is a typed `CatchRefusedError`; the outbox drops that write,
+    un-catches the species locally (it stays Spotted) and keeps delivering what was queued behind it
+    — an ordinary failure is still retried. `test_free_catch_limit.py` pins the SQL limit to
+    `FREE_CATCHES_PER_SEASON` and checks no user grant reaches the counter or the entitlement.
+  - ⏳ Pending: apply via db-migrate, then run the rolled-back trigger scenario (3 catches ok, 4th
+    refused, help on a caught species free, self-granting full_game / resetting the counter denied,
+    the app's home_region upsert still allowed).
 - **T-201 · Push notifications: the whole chain is missing, not just the sender** — *Claude + Director · L · `DONE` (server live + verified 2026-10-28; on-device check is T-205) · deps: T-063*
   - The app's premise is a passive notification, and **nothing sent one**: `expo-notifications`
     asked for permission and threw the answer away; no token, no table, no Edge Function, empty

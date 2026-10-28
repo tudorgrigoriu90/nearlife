@@ -280,4 +280,24 @@ describe('App', () => {
     },
     FLOW_TIMEOUT,
   );
+
+  it(
+    'keeps the free-catch allowance across a restart (T-200)',
+    async () => {
+      await completeOnboarding();
+      await press(commonNameFor(topRow, 'en'));
+      expect(await screen.findByText(tr('catch.remaining', { count: 3 }))).toBeTruthy();
+      await press(tr('card.findNearby'), { exact: false });
+      await press('__WIN__');
+      await press(tr('catch.continue'));
+
+      await screen.unmount();
+      await render(<App />);
+      await press(tr('almanac.title'));
+      await press(commonNameFor(topRow, 'en'));
+      // Before T-200 the counter lived in component state and this read 3 again.
+      expect(await screen.findByText(tr('catch.remaining', { count: 2 }))).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
 });

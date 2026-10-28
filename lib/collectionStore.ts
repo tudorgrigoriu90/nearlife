@@ -7,6 +7,21 @@ import type { CollectionRecord, HelpKind } from './collection';
 // without knowing it lives around you (USER-FLOWS §4–6). Those rules live in the pure `apply*`
 // helpers below so both stores share one tested implementation.
 
+/**
+ * The server refused a catch: the season's free catches are used up (T-200, enforced by the
+ * `collection_enforce_free_catch` trigger). Permanent — retrying cannot succeed — so the outbox
+ * drops the write and un-catches the species locally instead of retrying it forever.
+ */
+export class CatchRefusedError extends Error {
+  constructor(readonly speciesId: string) {
+    super(`free catch limit reached; catch of ${speciesId} refused`);
+    this.name = 'CatchRefusedError';
+  }
+}
+
+/** The marker the trigger raises (`raise exception 'free_catch_limit'`). */
+export const FREE_CATCH_LIMIT_MARKER = 'free_catch_limit';
+
 export interface CollectionStore {
   list(): Promise<CollectionRecord[]>;
   get(speciesId: string): Promise<CollectionRecord | null>;

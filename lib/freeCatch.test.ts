@@ -1,5 +1,6 @@
 import {
   canCatch,
+  freeCatchStateFrom,
   FreeCatchState,
   FREE_CATCHES_PER_SEASON,
   registerCatch,
@@ -60,5 +61,39 @@ describe('free-catch accounting (Full Game)', () => {
   it('does not increment the free-catch counter', () => {
     const state = registerCatch(paid, SUMMER);
     expect(state.freeCatchesUsed).toBe(0);
+  });
+});
+
+// T-200: the count is derived from the collection, so it survives a restart and cannot drift.
+describe('freeCatchStateFrom', () => {
+  const season = (iso: string) => (iso.startsWith('2026-1') ? '2026-autumn' : '2026-summer');
+
+  it('counts only this season\'s catches', () => {
+    const records = [
+      { caughtAt: '2026-10-01T10:00:00Z' },
+      { caughtAt: '2026-11-02T10:00:00Z' },
+      { caughtAt: '2026-07-01T10:00:00Z' }, // last season
+      { caughtAt: null }, // spotted only
+    ];
+    expect(freeCatchStateFrom(records, '2026-autumn', false, season)).toEqual({
+      fullGame: false,
+      freeCatchesUsed: 2,
+      freeCatchSeason: '2026-autumn',
+    });
+  });
+
+  it('blocks the 4th catch of a season and frees the allowance when the season rolls over', () => {
+    const three = Array.from({ length: 3 }, () => ({ caughtAt: '2026-10-01T10:00:00Z' }));
+    expect(canCatch(freeCatchStateFrom(three, '2026-autumn', false, season), '2026-autumn')).toBe(false);
+    expect(canCatch(freeCatchStateFrom(three, '2026-winter', false, season), '2026-winter')).toBe(true);
+  });
+
+  it('never limits a Full Game owner', () => {
+    const many = Array.from({ length: 9 }, () => ({ caughtAt: '2026-10-01T10:00:00Z' }));
+    expect(canCatch(freeCatchStateFrom(many, '2026-autumn', true, season), '2026-autumn')).toBe(true);
+  });
+
+  it('reads the season from the real season helper by default', () => {
+    expect(freeCatchStateFrom([{ caughtAt: '2026-10-15T12:00:00Z' }], '2026-autumn').freeCatchesUsed).toBe(1);
   });
 });

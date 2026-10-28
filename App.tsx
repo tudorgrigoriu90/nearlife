@@ -50,12 +50,7 @@ import { AsyncStorageHometownStore } from './lib/hometownStore';
 import { AsyncStorageOnboardingStore } from './lib/onboardingStore';
 import { AsyncStorageLocaleStore } from './lib/localeStore';
 import { spottedIds, tierStateFor } from './lib/collection';
-import {
-  canCatch,
-  registerCatch,
-  remainingFreeCatches,
-  type FreeCatchState,
-} from './lib/freeCatch';
+import { canCatch, freeCatchStateFrom, remainingFreeCatches } from './lib/freeCatch';
 import { isPrimeCatch } from './lib/primeBonus';
 import { gradeFromScore } from './lib/minigame/grade';
 import { monthOf, seasonKeyOf } from './lib/season';
@@ -65,12 +60,6 @@ import { createSpeciesRepository } from './lib/speciesRepositoryFactory';
 import type { HelpKind } from './lib/collection';
 import type { SpeciesContent } from './lib/species/content';
 import type { Species } from './lib/species/types';
-
-const INITIAL_FREE_CATCH: FreeCatchState = {
-  fullGame: false,
-  freeCatchesUsed: 0,
-  freeCatchSeason: null,
-};
 
 // The species catalogue is read through the repository seam (T-057), not the bundled module
 // directly, so the source can swap to the seeded Supabase tables without touching the shell. The
@@ -176,7 +165,6 @@ export default function App() {
   const [caughtTip, setCaughtTip] = useState<Species | null>(null);
   const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
   const [paywall, setPaywall] = useState(false);
-  const [freeCatch, setFreeCatch] = useState<FreeCatchState>(INITIAL_FREE_CATCH);
 
   // Notification taps (T-031): queue the species, then open it once the app can show a card. A
   // cold-start tap arrives before onboarding has finished, so it waits rather than being dropped.
@@ -411,6 +399,10 @@ export default function App() {
   };
 
   const seasonKey = seasonKeyOf(new Date());
+  // Derived from the persisted collection (T-200), so a restart cannot reset it; the database
+  // trigger is the authority and refuses a 4th catch however this is tampered with. Full Game is
+  // false until the purchase flow exists (T-074).
+  const freeCatch = freeCatchStateFrom(collection.records, seasonKey);
   const remaining = remainingFreeCatches(freeCatch, seasonKey);
 
   // Catch entry (T-034): a free user gets 3 catches/season; the 4th attempt shows the gentle
@@ -575,8 +567,7 @@ export default function App() {
           onComplete={({ success, score }) => {
             setCatching(null);
             if (success) {
-              // Counter increments on success only; the attempt was already gated by canCatch.
-              setFreeCatch((prev) => registerCatch(prev, seasonKey));
+              // The count follows from the collection: recording the catch is what spends one.
               // Prime bonus when caught within the species' active window (GDD §6, T-074).
               collection.markCaught(target.id, isPrimeCatch(target, new Date()));
               track('catch_succeeded', {
