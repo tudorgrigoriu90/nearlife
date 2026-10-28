@@ -2313,10 +2313,14 @@ only.**
     Photo download paced 1 s and retried on 429/503 honouring Retry-After. Artifact retention 90
     days. Workflow free-text inputs moved to env — which also fixed the **scheduled** run passing an
     empty `content_scope` straight into `build_content.py "pipeline/data/"` instead of `--all`.
-- **T-211 · The language choice is lost on restart** — *Claude · S · `TODO` · deps: T-123*
+- **T-211 · The language choice is lost on restart** — *Claude · S · `DONE` · deps: T-123*
   - `localeOverride` in `App.tsx` is plain `useState`; a reload falls back to the device language.
     The push device row then re-registers in that language, so notifications switch language too.
     Persist it device-locally like consent (T-088).
+  - ✅ `lib/localeStore.ts` (unsupported or corrupt value → follow the device). The app holds its
+    first render until the stored language is read, so a Swedish user never sees an English frame,
+    and push registration waits for it too, so the device row is not written in the wrong language
+    first. Test: choose Svenska → restart → Swedish UI.
 - **T-204 · The keep-alive did not keep the project alive** — *Claude · S · `DONE` · deps: T-203*
   - The T-203 job succeeded on Aug 27, Aug 31 and Sep 3 — and the project was **paused anyway** by
     Sep 7 (`status: INACTIVE`). Every run after that failed with `tenant/user … not found`, the

@@ -243,4 +243,18 @@ describe('App', () => {
     },
     FLOW_TIMEOUT,
   );
+
+  it(
+    'keeps the language chosen in Settings across a restart (T-211)',
+    async () => {
+      await completeOnboarding();
+      await press(tr('nav.settings'), { exact: false });
+      await press(tr('lang.sv'));
+      await screen.unmount();
+      await render(<App />);
+      const sv = createTranslator('sv');
+      expect(await screen.findByText(sv('thisWeek.honesty'))).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
 });

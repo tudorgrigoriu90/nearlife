@@ -43,6 +43,7 @@ import { buildDataExport, exportToJson } from './lib/dataExport';
 import type { Region } from './lib/hometown';
 import { AsyncStorageHometownStore } from './lib/hometownStore';
 import { AsyncStorageOnboardingStore } from './lib/onboardingStore';
+import { AsyncStorageLocaleStore } from './lib/localeStore';
 import { spottedIds, tierStateFor } from './lib/collection';
 import {
   canCatch,
@@ -77,6 +78,9 @@ const SPECIES_REPO = createSpeciesRepository();
 // its identity is stable across renders.
 const CONSENT_STORE = new AsyncStorageConsentStore();
 
+// Language chosen in Settings (T-211) — survives restarts, and with it the notification language.
+const LOCALE_STORE = new AsyncStorageLocaleStore();
+
 // Onboarding completion + age path (T-209) — so a relaunch goes straight to the app.
 const ONBOARDING_STORE = new AsyncStorageOnboardingStore();
 
@@ -97,6 +101,8 @@ type Tab = 'thisWeek' | 'almanac';
 export default function App() {
   // Device locale by default; a user override from Settings takes precedence (T-123).
   const [localeOverride, setLocaleOverride] = useState<Locale | null>(null);
+  // Held back with onboarding (below) so a Swedish user never sees an English first frame.
+  const [localeLoaded, setLocaleLoaded] = useState(false);
   const locale = localeOverride ?? detectDeviceLocale();
   const tr = createTranslator(locale);
   const collection = useCollection();
@@ -149,7 +155,7 @@ export default function App() {
   );
   // Server-side device registration follows notification consent (T-201).
   usePushRegistration({
-    ready: onboarded && consentLoaded,
+    ready: onboarded && consentLoaded && localeLoaded,
     wanted: consent.notifications,
     locale,
     homeRegion: hometown?.id ?? null,
@@ -209,6 +215,19 @@ export default function App() {
   useEffect(() => {
     track('session_start', {});
   }, [track]);
+
+  // Rehydrate the language choice (T-211). The store never rejects; null means follow the device.
+  useEffect(() => {
+    let cancelled = false;
+    void LOCALE_STORE.load().then((stored) => {
+      if (cancelled) return;
+      if (stored !== null) setLocaleOverride(stored);
+      setLocaleLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Rehydrate onboarding (T-209). The store never rejects; a missing record means first run.
   useEffect(() => {
@@ -396,7 +415,7 @@ export default function App() {
     }
   };
 
-  if (!onboardingLoaded) return null;
+  if (!onboardingLoaded || !localeLoaded) return null;
 
   if (!onboarded) {
     return (
@@ -490,7 +509,10 @@ export default function App() {
           analyticsLocked={analyticsLocked}
           dualLanguage={dualLanguage}
           onToggleConsent={toggleConsent}
-          onSelectLocale={(loc) => setLocaleOverride(loc)}
+          onSelectLocale={(loc) => {
+            setLocaleOverride(loc);
+            void LOCALE_STORE.save(loc);
+          }}
           onToggleDualLanguage={(enabled) =>
             updateDualLanguage(setDualEnabled(dualLanguage, enabled))
           }
