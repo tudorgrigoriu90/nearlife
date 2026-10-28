@@ -26,7 +26,7 @@ EXPECTED: dict[str, str] = {
     "user resets their own catch counter": "permission denied",
     "app-style home_region upsert": "ok",
     "season_key 2026-12-15 (December → next year's winter)": "2027-winter",
-    "season_key 2026-11-30 23:30Z (already 1 Dec in Sweden)": "2026-winter",
+    "season_key 2026-11-30 23:30Z (already 1 Dec in Sweden)": "2027-winter",
     "season_key 2026-02-28": "2026-winter",
     "season_key 2026-07-01": "2026-summer",
 }

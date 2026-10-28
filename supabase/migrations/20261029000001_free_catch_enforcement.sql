@@ -112,5 +112,5 @@ grant update (user_id, home_region) on public.profiles to authenticated;
 
 -- Verify after applying:
 --   select public.season_key('2026-12-15'::timestamptz);   -- 2027-winter
---   select public.season_key('2026-11-30 23:30+00');        -- 2026-winter (00:30 1 Dec in Sweden)
+--   select public.season_key('2026-11-30 23:30+00');        -- 2027-winter (00:30 1 Dec in Sweden)
 --   select tgname from pg_trigger where tgname = 'collection_enforce_free_catch';
