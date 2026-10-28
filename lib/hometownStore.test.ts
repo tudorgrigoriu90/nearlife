@@ -90,20 +90,23 @@ describe('deriveHometown', () => {
 
   it('resolves one fix to its county and locks it in', async () => {
     const store = new InMemoryHometownStore();
-    await expect(deriveHometown(async () => vaxjo, store)).resolves.toEqual(KRONOBERG);
+    await expect(deriveHometown(async () => vaxjo, store)).resolves.toEqual({ region: KRONOBERG });
     await expect(store.load()).resolves.toEqual(KRONOBERG);
   });
 
   it('returns the locked hometown without asking for a fix at all', async () => {
     const getFix = jest.fn(async () => vaxjo);
-    await expect(deriveHometown(getFix, new InMemoryHometownStore(SKANE))).resolves.toEqual(SKANE);
+    await expect(deriveHometown(getFix, new InMemoryHometownStore(SKANE))).resolves.toEqual({ region: SKANE });
     expect(getFix).not.toHaveBeenCalled();
   });
 
-  it('stores nothing when there is no fix or it is outside Sweden', async () => {
+  it('stores nothing, and says why, when there is no fix or it is outside Sweden (T-107)', async () => {
     const store = new InMemoryHometownStore();
-    await expect(deriveHometown(async () => null, store)).resolves.toBeNull();
-    await expect(deriveHometown(async () => ({ latitude: 59.913, longitude: 10.752 }), store)).resolves.toBeNull();
+    await expect(deriveHometown(async () => null, store)).resolves.toEqual({ region: null, reason: 'no-fix' });
+    await expect(deriveHometown(async () => ({ latitude: 59.913, longitude: 10.752 }), store)).resolves.toEqual({
+      region: null,
+      reason: 'outside-sweden',
+    });
     await expect(store.load()).resolves.toBeNull();
   });
 });

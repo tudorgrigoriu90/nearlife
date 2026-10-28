@@ -86,7 +86,11 @@ export const en = {
   'onboarding.hometown.title': 'Your home region',
   'onboarding.hometown.body': 'This is set once from your location and can’t be changed later.',
   'onboarding.hometown.cta': 'Confirm {region}',
-  'preview.banner': 'Preview mode — allow location to set your home region.',
+  'preview.banner': 'Preview — showing a sample region until Nearby knows your home county.',
+  // Outside Sweden (T-107) — v1 is Sweden only; say so plainly instead of a dead end.
+  'onboarding.outside.title': 'Not in your area yet',
+  'onboarding.outside.body': 'Nearby covers Sweden for now. You can still explore a sample region in the preview.',
+  'onboarding.outside.cta': 'Explore the preview',
 
   // Onboarding — notification pre-prompt + first Spotted (T-024)
   'onboarding.notif.title': 'Never miss a season',
@@ -310,7 +314,10 @@ const sv: Catalog = {
   'onboarding.hometown.title': 'Din hemregion',
   'onboarding.hometown.body': 'Den ställs in en gång från din plats och kan inte ändras senare.',
   'onboarding.hometown.cta': 'Bekräfta {region}',
-  'preview.banner': 'Förhandsläge – tillåt plats för att ställa in din hemregion.',
+  'preview.banner': 'Förhandsläge – en exempelregion visas tills Nearby vet ditt hemlän.',
+  'onboarding.outside.title': 'Inte i ditt område än',
+  'onboarding.outside.body': 'Nearby finns bara i Sverige än så länge. Du kan ändå utforska en exempelregion i förhandsläget.',
+  'onboarding.outside.cta': 'Utforska förhandsläget',
 
   // Onboarding — notification pre-prompt + first Spotted (T-024)
   'onboarding.notif.title': 'Missa aldrig en säsong',

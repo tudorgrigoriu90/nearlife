@@ -1153,9 +1153,22 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
 - **T-106 · New-region onboarding pipeline (repeatable)** — *Claude + Director · L · deps: T-042, T-052 · [ECONOMY](ECONOMY.md)*
   - Repeatable process to open a region: run GBIF/OSM pipeline + light content pass (safe-default
     advice + follow-law) + Director editorial review. Modeled as growth spend.
-- **T-107 · Waitlist for unopened home regions** — *Claude · S · deps: T-090 · [review]*
+- **T-107 · Waitlist for unopened home regions** — *Claude · S · `DONE` (graceful path; the waitlist itself is T-214) · deps: T-090 · [review]*
   - Signup from an unopened region → graceful "not in your area yet — join the waitlist" path
     instead of a dead app.
+  - ✅ `deriveHometown` now says *why* there is no hometown: `no-fix` (GPS off, timeout) or
+    `outside-sweden`. Outside Sweden gets its own onboarding screen — "Not in your area yet / Nearby
+    covers Sweden for now…" → **Explore the preview** — instead of a silent preview whose banner
+    told them to "allow location" (which they had). The banner now reads true in every case:
+    "Preview — showing a sample region until Nearby knows your home county." en + sv; the honesty
+    catalog test covers the new strings.
+  - The **waitlist** half is deliberately not built: what to collect (an email? only a country
+    count?) is a product + privacy decision — logged as T-214.
+- **T-214 · What does the out-of-area waitlist collect?** — *Director · S · `TODO` · deps: T-107*
+  - Options: (a) nothing — the T-107 screen is enough until v2; (b) an anonymous count of
+    out-of-area installs (no PII; would need a coarse country, i.e. a reverse lookup the app avoids
+    today); (c) an opt-in email for "tell me when Nearby reaches Norway" — PII, needs a consent line
+    and deletion path. Claude builds whichever is chosen.
 
 ## F12.3 — Social
 - **T-108 · Local social layer** — *Claude · L · deps: T-081 · [GDD §7](GDD.md)*

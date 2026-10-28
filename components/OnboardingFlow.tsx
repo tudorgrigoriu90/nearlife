@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { agePath, type AgePath } from '../lib/ageGate';
 import type { Region } from '../lib/hometown';
-import { AsyncStorageHometownStore, deriveHometown } from '../lib/hometownStore';
+import { AsyncStorageHometownStore, deriveHometown, type HometownLookup } from '../lib/hometownStore';
 import { FIRST_STEP, isComplete, stepAfter, type OnboardingStep } from '../lib/onboarding';
 import {
   getLocationFixOnce,
@@ -53,13 +53,14 @@ export default function OnboardingFlow({
   onFirstSpotted?: (speciesId: string) => void;
   onComplete: (result: OnboardingResult) => void;
   /** Seam for tests; production uses the device location + locked store. */
-  resolveHome?: () => Promise<Region | null>;
+  resolveHome?: () => Promise<HometownLookup>;
 }) {
   const tr = createTranslator(locale);
   const [step, setStep] = useState<OnboardingStep>(FIRST_STEP);
   const [locationOutcome, setLocationOutcome] = useState<PermissionOutcome>('denied');
   const [notificationOutcome, setNotificationOutcome] = useState<PermissionOutcome>('denied');
-  const [hometown, setHometown] = useState<Region | null>(null);
+  const [lookup, setLookup] = useState<HometownLookup | null>(null);
+  const hometown: Region | null = lookup?.region ?? null;
   // Defaults to the full path; the age-gate step sets it before the flow can complete (it sits
   // before every data-collecting step, so `done` is only ever reached with a real value).
   const [userAgePath, setUserAgePath] = useState<AgePath>('full');
@@ -83,10 +84,10 @@ export default function OnboardingFlow({
     void requestLocationPermission()
       .then(async (outcome) => {
         setLocationOutcome(outcome);
-        if (outcome === 'granted') setHometown(await resolveHome());
+        if (outcome === 'granted') setLookup(await resolveHome());
       })
       // No hometown is a supported state (preview mode); a failed lookup must not strand onboarding.
-      .catch(() => setHometown(null))
+      .catch(() => setLookup({ region: null, reason: 'no-fix' }))
       .finally(advance);
   };
 
@@ -136,6 +137,18 @@ export default function OnboardingFlow({
     case 'hometownConfirm': {
       // No county (denied, no fix, outside Sweden) → nothing to confirm; preview mode (T-023).
       // The coordinates were resolved on-device and dropped before this step renders (T-090).
+      // Outside Sweden is told so plainly (T-107) — not dropped into a preview with no explanation.
+      if (lookup?.region === null && lookup.reason === 'outside-sweden') {
+        return (
+          <OnboardingScaffold
+            emoji="🧭"
+            title={tr('onboarding.outside.title')}
+            body={tr('onboarding.outside.body')}
+            ctaLabel={tr('onboarding.outside.cta')}
+            onNext={advance}
+          />
+        );
+      }
       if (locationOutcome === 'denied' || hometown === null) return <OnMount run={advance} />;
       const region = hometown;
       return (

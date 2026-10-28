@@ -82,18 +82,26 @@ export class AsyncStorageHometownStore implements HometownStore {
   }
 }
 
+/** Why there is no hometown — the app says different things for each (T-107). */
+export type NoHometownReason = 'no-fix' | 'outside-sweden';
+
+export type HometownLookup = { region: Region } | { region: null; reason: NoHometownReason };
+
 /**
  * The hometown for this user: the locked one if set, else one fix resolved to a county and locked
- * in. Null when there is no fix or it is outside Sweden — the app then runs in preview mode. The
- * coordinates never outlive this call.
+ * in. Without one, says why: no fix at all (GPS off, timeout), or a fix outside Sweden — v1 is
+ * Sweden only, and that person deserves to be told so rather than shown a generic preview (T-107).
+ * The coordinates never outlive this call.
  */
 export async function deriveHometown(
   getFix: () => Promise<Coordinates | null>,
   store: HometownStore,
-): Promise<Region | null> {
+): Promise<HometownLookup> {
   const locked = await store.load();
-  if (locked !== null) return locked;
+  if (locked !== null) return { region: locked };
   const fix = await getFix();
-  const region = fix === null ? null : resolveHometown(fix);
-  return region === null ? null : store.lockIn(region);
+  if (fix === null) return { region: null, reason: 'no-fix' };
+  const region = resolveHometown(fix);
+  if (region === null) return { region: null, reason: 'outside-sweden' };
+  return { region: await store.lockIn(region) };
 }

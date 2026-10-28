@@ -44,16 +44,18 @@ describe('OnboardingFlow', () => {
 
   it('confirms the county the location resolved to, and reports it', async () => {
     const onComplete = jest.fn<void, [OnboardingResult]>();
-    await render(<OnboardingFlow locale="en" onComplete={onComplete} resolveHome={async () => SKANE} />);
+    await render(<OnboardingFlow locale="en" onComplete={onComplete} resolveHome={async () => ({ region: SKANE })} />);
     await throughLocation();
     await press(tr('onboarding.hometown.cta', { region: 'Skåne' }));
     await finish();
     expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({ hometown: SKANE }));
   });
 
-  it('skips the confirm step when no county resolves (no fix, or outside Sweden)', async () => {
+  it('skips the confirm step when there is no location fix', async () => {
     const onComplete = jest.fn<void, [OnboardingResult]>();
-    await render(<OnboardingFlow locale="en" onComplete={onComplete} resolveHome={async () => null} />);
+    await render(
+      <OnboardingFlow locale="en" onComplete={onComplete} resolveHome={async () => ({ region: null, reason: 'no-fix' })} />,
+    );
     await throughLocation();
     expect(await screen.findByText(tr('onboarding.notif.cta'))).toBeTruthy();
     await finish();
@@ -62,11 +64,27 @@ describe('OnboardingFlow', () => {
 
   it('never asks for a fix when location is denied', async () => {
     (requestLocationPermission as jest.Mock).mockResolvedValueOnce('denied');
-    const resolveHome = jest.fn(async () => SKANE);
+    const resolveHome = jest.fn(async () => ({ region: SKANE }));
     await render(<OnboardingFlow locale="en" onComplete={() => {}} resolveHome={resolveHome} />);
     await throughLocation();
     expect(await screen.findByText(tr('onboarding.notif.cta'))).toBeTruthy();
     expect(resolveHome).not.toHaveBeenCalled();
+  });
+
+  it('tells someone outside Sweden plainly, then continues in preview (T-107)', async () => {
+    const onComplete = jest.fn<void, [OnboardingResult]>();
+    await render(
+      <OnboardingFlow
+        locale="en"
+        onComplete={onComplete}
+        resolveHome={async () => ({ region: null, reason: 'outside-sweden' })}
+      />,
+    );
+    await throughLocation();
+    expect(await screen.findByText(tr('onboarding.outside.title'))).toBeTruthy();
+    await press(tr('onboarding.outside.cta'));
+    await finish();
+    expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({ hometown: null }));
   });
 
   it('does not strand onboarding if the lookup throws', async () => {
