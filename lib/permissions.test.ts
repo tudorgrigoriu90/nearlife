@@ -1,9 +1,38 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import { getDevicePushToken, onPushTokenChange, requestNotificationPermission } from './permissions';
+import * as Location from 'expo-location';
+import {
+  getDevicePushToken,
+  getLocationFixOnce,
+  onPushTokenChange,
+  requestNotificationPermission,
+} from './permissions';
 import { ANDROID_CHANNEL_ID } from './pushDispatch';
 
 const mocked = Notifications as jest.Mocked<typeof Notifications>;
+
+jest.mock('expo-location', () => ({
+  requestForegroundPermissionsAsync: jest.fn(async () => ({ status: 'granted' })),
+  getCurrentPositionAsync: jest.fn(),
+  Accuracy: { Balanced: 3 },
+}));
+const mockedLocation = Location as jest.Mocked<typeof Location>;
+
+describe('getLocationFixOnce', () => {
+  it('returns just the coordinates, at balanced accuracy', async () => {
+    mockedLocation.getCurrentPositionAsync.mockResolvedValueOnce({
+      coords: { latitude: 56.879, longitude: 14.806, altitude: 160, accuracy: 30 },
+      timestamp: 1,
+    } as never);
+    await expect(getLocationFixOnce()).resolves.toEqual({ latitude: 56.879, longitude: 14.806 });
+    expect(mockedLocation.getCurrentPositionAsync).toHaveBeenCalledWith({ accuracy: 3 });
+  });
+
+  it('returns null when no fix can be had (GPS off, timeout)', async () => {
+    mockedLocation.getCurrentPositionAsync.mockRejectedValueOnce(new Error('unavailable'));
+    await expect(getLocationFixOnce()).resolves.toBeNull();
+  });
+});
 
 describe('getDevicePushToken', () => {
   const originalOS = Platform.OS;

@@ -23,6 +23,7 @@ beforeEach(async () => {
 // Onboarding asks the OS for permissions; mock to a deterministic "granted" so the flow is drivable.
 jest.mock('./lib/permissions', () => ({
   requestLocationPermission: jest.fn(async () => 'granted'),
+  getLocationFixOnce: jest.fn(async () => ({ latitude: 56.879, longitude: 14.806 })), // Växjö
   requestNotificationPermission: jest.fn(async () => 'granted'),
   getDevicePushToken: jest.fn(async () => null),
   onPushTokenChange: jest.fn(() => () => {}),

@@ -70,6 +70,14 @@ conservation institutions under licenses written for *research and non-commercia
 - **Action:** source from Wikimedia Commons, record attribution, keep images unmodified.
   Verdict: **OK with per-photo attribution; NC/ND excluded.**
 
+### 6. County outlines — on-device hometown lookup (T-090)
+- **Source:** Natural Earth admin-1, v5.1.2 — **public domain**, no attribution required.
+- **Not GADM.** The region *ids* are GADM's (GBIF slices occurrences by them), but GADM's licence
+  forbids commercial use, so its *geometry* is never shipped. Natural Earth outlines are joined to
+  the GADM ids by county name (`pipeline/geo/county_shapes.py`); the build fails unless all 21
+  join one-to-one.
+- Verdict: **OK.**
+
 ---
 
 ## Decision matrix
@@ -81,6 +89,8 @@ conservation institutions under licenses written for *research and non-commercia
 | IUCN Red List | Only with permission | **Not needed for launch — basic Helped advice is hand-written; API = optional enrichment later** |
 | OSM / Overpass | Yes (ODbL, attribution) | **Use — catch-spot habitat** |
 | Wikimedia Commons photos (CC0/CC-BY/CC-BY-SA) | Yes, with attribution | **Use — primary species photos; exclude NC/ND, keep unmodified** |
+| Natural Earth admin-1 (public domain) | Yes | **Use — bundled county outlines for the hometown lookup** |
+| GADM geometry | No (non-commercial licence) | **Ids only — geometry never shipped** |
 
 **Net:** the MVP can launch on **GBIF (filtered) + OSM**, with hand-curated/region-reviewed
 threat content — **no blocking dependency on eBird or the IUCN API.** That is the go path.

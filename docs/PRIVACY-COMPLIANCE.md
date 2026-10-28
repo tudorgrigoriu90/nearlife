@@ -22,7 +22,9 @@ Three facts about this product make compliance load-bearing, not optional:
 - **Decisions:**
   - **Hometown derivation:** at onboarding, device location is resolved **once** to a
     region/province (`home_region_id`); the coordinates used are discarded immediately —
-    only the region id is stored.
+    only the region id is stored. **Built (T-090):** the lookup runs **on the phone** against
+    bundled county outlines (`lib/hometown.ts`), so the fix never leaves the device — a
+    reverse-geocoding API was rejected because it would send coordinates to a third party.
   - Store location at **cell resolution**, not raw lat/long history.
   - Prefer **on-device → send cell only**; do not retain precise-coordinate trails.
   - Request **"while in use"** permission, never background-always unless a feature truly needs

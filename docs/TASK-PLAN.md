@@ -989,10 +989,27 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     and asserts the analytics opt-in is withheld.
 
 ## F10.2 — Location Minimization & Hometown
-- **T-090 · Hometown GPS-derive-once + discard coordinates** — *Claude · M · deps: T-088 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [ECONOMY](ECONOMY.md), [USER-FLOWS §1](USER-FLOWS.md)*
+- **T-090 · Hometown GPS-derive-once + discard coordinates** — *Claude · M · `DONE` · deps: T-088 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [ECONOMY](ECONOMY.md), [USER-FLOWS §1](USER-FLOWS.md)*
   - Device location resolved once to a region; **coordinates discarded**, only `home_region_id`
     stored; hometown locked (support-only change). No manual picker.
   - Location-denied → preview mode; hometown set on first grant.
+  - ✅ **On-device lookup** (`lib/hometown.ts`): one Balanced-accuracy fix → ray-casting against
+    bundled outlines of all 21 counties (`lib/geo/swedishCounties.ts`, ~128 KB, 8,036 points). The
+    fix never leaves the phone; a reverse-geocoding API was rejected for sending it to a third party.
+  - ✅ **Outlines are Natural Earth (public domain), not GADM** — GADM's licence forbids commercial
+    use. Joined to the GADM ids by name in `pipeline/geo/county_shapes.py`; the build fails unless
+    all 21 join one-to-one ("Orebro" → Örebro is the case that proves the folding).
+  - ✅ **Nearest-county fallback within 15 km** for islands the 1:10m outlines leave out. Measured:
+    10 km lost Landsort and Sandskär; 20 km pulled Kastrup and Dragør (Denmark) into Skåne. Tests
+    pin one real town per county, the outer islands, and Oslo / Copenhagen / Kastrup / Helsinki → null.
+  - ✅ **Locked** (`lib/hometownStore.ts`): the first county stored wins; a later fix only reads it
+    back. Stores id + name only; an unknown or pre-T-090 id (`kronoberg`) is discarded on load.
+  - ✅ Onboarding confirms the real county; denied / no fix / outside Sweden → preview mode. The
+    app rehydrates the locked county on launch and sends it to `profiles.home_region`, so push
+    notifications (T-201) now use the user's own county.
+  - ⚠️ Outside Sweden currently means preview mode, not a "not here yet" path — that is **T-107**.
+  - ⚠️ Tornio (FI) and Helsingør (DK) touch Sweden and resolve to Norrbotten / Skåne at any limit.
+    Accepted: same species, and v1 is not marketed there.
 - **T-091 · Cell-level location storage only** — *Claude · S · `IN-PROGRESS` (H3 adopted; runtime wiring pending) · deps: T-090 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [TSD §3](TSD.md)*
   - ✅ **H3 adopted (Director decision).** `lib/cell.ts` (5 tests) now uses **`h3-js`** — `cellKey`
     returns an H3 index at `DEFAULT_CELL_RESOLUTION = 8` (~0.74 km² hex), so only a coarse area is
@@ -2208,6 +2225,13 @@ only.**
     (or by hand), regenerates the shared engine copy and fails if it differs from the commit, then
     `supabase functions deploy send-notifications --no-verify-jwt --use-api`. `delete-account` is
     left out on purpose — deploying it is T-093's decision, not a side effect of this workflow.
+- **T-207 · This Week still shows the bundled Kronoberg list** — *Claude · M · `TODO` · deps: T-090, T-078*
+  - Found while building T-090: `ThisWeekScreen` renders `KRONOBERG_SPECIES` with the subtitle
+    hard-wired to "Kronoberg", and onboarding's first Spotted card picks from the same 54. T-078's
+    `thisWeekFromPresence` (live `species_presence`) is built and tested but never wired in.
+  - So a user in Skåne now gets Skåne notifications (T-201 + T-090) but a Kronoberg This Week.
+    Wire the screen to `regionPresence(hometown.id)` + the catalogue, with the county name in the
+    subtitle, keeping the bundled list as the offline / preview fallback.
 - **T-204 · The keep-alive did not keep the project alive** — *Claude · S · `DONE` · deps: T-203*
   - The T-203 job succeeded on Aug 27, Aug 31 and Sep 3 — and the project was **paused anyway** by
     Sep 7 (`status: INACTIVE`). Every run after that failed with `tenant/user … not found`, the

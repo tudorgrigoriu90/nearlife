@@ -1,6 +1,7 @@
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import type { Coordinates } from './hometown';
 import { ANDROID_CHANNEL_ID } from './pushDispatch';
 import type { DeviceToken } from './pushRegistration';
 
@@ -15,6 +16,22 @@ export type PermissionOutcome = 'granted' | 'denied';
 export async function requestLocationPermission(): Promise<PermissionOutcome> {
   const { status } = await Location.requestForegroundPermissionsAsync();
   return status === 'granted' ? 'granted' : 'denied';
+}
+
+/**
+ * One location fix for hometown resolution (T-090), or null if none can be had. Balanced accuracy
+ * (~100 m) is plenty for "which county" and far quicker and kinder to the battery than High. The
+ * caller resolves it to a county immediately and drops it (lib/hometownStore.ts `deriveHometown`).
+ */
+export async function getLocationFixOnce(): Promise<Coordinates | null> {
+  try {
+    const { coords } = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+    });
+    return { latitude: coords.latitude, longitude: coords.longitude };
+  } catch {
+    return null;
+  }
 }
 
 /** Fire the OS notification dialog (after our own pre-prompt explainer, T-024). */

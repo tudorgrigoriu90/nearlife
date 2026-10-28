@@ -38,7 +38,8 @@ import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
 import { SupabaseAuthGateway } from './lib/accountLinking';
 import { getSupabase } from './lib/supabase';
 import { buildDataExport, exportToJson } from './lib/dataExport';
-import { KRONOBERG_REGION } from './lib/hometown';
+import type { Region } from './lib/hometown';
+import { AsyncStorageHometownStore } from './lib/hometownStore';
 import { spottedIds, tierStateFor } from './lib/collection';
 import {
   canCatch,
@@ -72,6 +73,9 @@ const SPECIES_REPO = createSpeciesRepository();
 // Device-local consent persistence (T-088) — granular opt-ins survive restarts. Module-level so
 // its identity is stable across renders.
 const CONSENT_STORE = new AsyncStorageConsentStore();
+
+// Locked home county (T-090) — set once from an on-device location lookup, survives restarts.
+const HOMETOWN_STORE = new AsyncStorageHometownStore();
 
 // Mother-tongue dual display preference (T-148) — device-local, off by default, survives restarts.
 const DUAL_LANGUAGE_STORE = new AsyncStorageDualLanguageStore();
@@ -109,7 +113,9 @@ export default function App() {
     content: SpeciesContent | null;
   } | null>(null);
   const [onboarded, setOnboarded] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
+  // No home county (location denied, no fix, outside Sweden) is preview mode (T-023 / T-090).
+  const [hometown, setHometown] = useState<Region | null>(null);
+  const previewMode = hometown === null;
   const [tab, setTab] = useState<Tab>('thisWeek');
   const [showSettings, setShowSettings] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
@@ -129,7 +135,7 @@ export default function App() {
     ready: onboarded && consentLoaded,
     wanted: consent.notifications,
     locale,
-    homeRegion: previewMode ? null : KRONOBERG_REGION.id,
+    homeRegion: hometown?.id ?? null,
   });
   const [selected, setSelected] = useState<Species | null>(null);
   const [catching, setCatching] = useState<Species | null>(null);
@@ -156,6 +162,17 @@ export default function App() {
   useEffect(() => {
     track('session_start', {});
   }, [track]);
+
+  // Rehydrate the locked hometown on launch (T-090). A failed read leaves preview mode.
+  useEffect(() => {
+    let cancelled = false;
+    void HOMETOWN_STORE.load().then((stored) => {
+      if (!cancelled && stored !== null) setHometown(stored);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Rehydrate persisted consent on launch (T-088). Until it resolves, consent stays at the all-off
   // default, so nothing (analytics included) fires without a stored grant.
@@ -272,7 +289,7 @@ export default function App() {
   const exportMyData = () => {
     const bundle = buildDataExport({
       exportedAt: new Date().toISOString(),
-      profile: { homeRegion: previewMode ? null : KRONOBERG_REGION.id },
+      profile: { homeRegion: hometown?.id ?? null },
       consent,
       collection: collection.records,
     });
@@ -320,8 +337,9 @@ export default function App() {
           collection.spot(speciesId);
           track('species_spotted', { speciesId, source: 'onboarding' });
         }}
-        onComplete={({ locationOutcome, agePath, notificationOutcome }) => {
-          setPreviewMode(locationOutcome === 'denied');
+        onComplete={({ agePath, notificationOutcome, hometown: home }) => {
+          // A locked hometown from an earlier session stands even if location is denied this time.
+          if (home !== null) setHometown(home);
           setAnalyticsLocked(agePath === 'restricted');
           // "Turn on nudges" + an OS grant is the notification opt-in (T-201).
           if (notificationOutcome === 'granted') toggleConsent('notifications', true);

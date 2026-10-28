@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { agePath, type AgePath } from '../lib/ageGate';
-import { resolveHometown } from '../lib/hometown';
+import type { Region } from '../lib/hometown';
+import { AsyncStorageHometownStore, deriveHometown } from '../lib/hometownStore';
 import { FIRST_STEP, isComplete, stepAfter, type OnboardingStep } from '../lib/onboarding';
 import {
+  getLocationFixOnce,
   requestLocationPermission,
   requestNotificationPermission,
   type PermissionOutcome,
@@ -32,21 +34,32 @@ export interface OnboardingResult {
    * the opt-in, so the shell records notification consent from it.
    */
   notificationOutcome: PermissionOutcome;
+  /** The home county (T-090), or null — location denied, no fix, or outside Sweden → preview. */
+  hometown: Region | null;
 }
+
+const HOMETOWN_STORE = new AsyncStorageHometownStore();
+
+/** Real device path: the locked hometown, else one fix resolved on-device and locked in. */
+const deriveFromDevice = () => deriveHometown(getLocationFixOnce, HOMETOWN_STORE);
 
 export default function OnboardingFlow({
   locale = 'en',
   onFirstSpotted,
   onComplete,
+  resolveHome = deriveFromDevice,
 }: {
   locale?: Locale;
   onFirstSpotted?: (speciesId: string) => void;
   onComplete: (result: OnboardingResult) => void;
+  /** Seam for tests; production uses the device location + locked store. */
+  resolveHome?: () => Promise<Region | null>;
 }) {
   const tr = createTranslator(locale);
   const [step, setStep] = useState<OnboardingStep>(FIRST_STEP);
   const [locationOutcome, setLocationOutcome] = useState<PermissionOutcome>('denied');
   const [notificationOutcome, setNotificationOutcome] = useState<PermissionOutcome>('denied');
+  const [hometown, setHometown] = useState<Region | null>(null);
   // Defaults to the full path; the age-gate step sets it before the flow can complete (it sits
   // before every data-collecting step, so `done` is only ever reached with a real value).
   const [userAgePath, setUserAgePath] = useState<AgePath>('full');
@@ -61,16 +74,20 @@ export default function OnboardingFlow({
   const advance = () => setStep((s) => stepAfter(s));
 
   useEffect(() => {
-    if (isComplete(step)) onComplete({ locationOutcome, agePath: userAgePath, notificationOutcome });
+    if (isComplete(step)) onComplete({ locationOutcome, agePath: userAgePath, notificationOutcome, hometown });
     // onComplete is a stable callback from the parent; re-firing on identity change is undesired.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
   const askLocation = () => {
-    void requestLocationPermission().then((outcome) => {
-      setLocationOutcome(outcome);
-      advance();
-    });
+    void requestLocationPermission()
+      .then(async (outcome) => {
+        setLocationOutcome(outcome);
+        if (outcome === 'granted') setHometown(await resolveHome());
+      })
+      // No hometown is a supported state (preview mode); a failed lookup must not strand onboarding.
+      .catch(() => setHometown(null))
+      .finally(advance);
   };
 
   const askNotification = () => {
@@ -117,10 +134,10 @@ export default function OnboardingFlow({
         />
       );
     case 'hometownConfirm': {
-      // Location denied → no region to confirm; skip to preview mode (non-blocking, T-023).
-      if (locationOutcome === 'denied') return <OnMount run={advance} />;
-      // Prototype resolves any location to Kronoberg; coordinates are already discarded.
-      const region = resolveHometown();
+      // No county (denied, no fix, outside Sweden) → nothing to confirm; preview mode (T-023).
+      // The coordinates were resolved on-device and dropped before this step renders (T-090).
+      if (locationOutcome === 'denied' || hometown === null) return <OnMount run={advance} />;
+      const region = hometown;
       return (
         <OnboardingScaffold
           emoji="🏡"
