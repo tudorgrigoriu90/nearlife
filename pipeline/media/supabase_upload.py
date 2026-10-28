@@ -22,6 +22,7 @@ import json
 import mimetypes
 import os
 import sys
+import time
 from pathlib import Path
 
 import requests
@@ -30,6 +31,33 @@ BUCKET = "species-media"
 ROOT = Path(__file__).resolve().parent.parent.parent
 MEDIA_JSON = ROOT / "pipeline" / "data" / "media_kronoberg.json"
 UA = "nearby-nearlife-media/0.1 (https://github.com/tudorgrigoriu90/nearlife)"
+
+
+# Wikimedia answers a burst with 429 (T-210: four of 54 photos were lost to it in August 2026, and
+# nothing retried). Pace every download and back off on 429/503, honouring Retry-After.
+PAUSE_BETWEEN_DOWNLOADS_S = 1.0
+RETRY_STATUSES = {429, 503}
+MAX_ATTEMPTS = 5
+
+
+def retry_delay(attempt: int, retry_after: str | None) -> float:
+    """Seconds to wait before attempt `attempt + 1`: the server's Retry-After, else 2, 4, 8, 16."""
+    if retry_after:
+        try:
+            return min(float(retry_after), 120.0)
+        except ValueError:
+            pass  # an HTTP-date Retry-After: fall back to our own backoff
+    return float(2 ** attempt)
+
+
+def fetch_with_retry(session, url: str, sleep=time.sleep, attempts: int = MAX_ATTEMPTS):
+    for attempt in range(1, attempts + 1):
+        resp = session.get(url, timeout=60)
+        if resp.status_code not in RETRY_STATUSES or attempt == attempts:
+            resp.raise_for_status()
+            return resp
+        sleep(retry_delay(attempt, resp.headers.get("Retry-After")))
+    raise AssertionError("unreachable")
 
 
 def ensure_bucket(base: str, key: str) -> None:
@@ -78,8 +106,9 @@ def main() -> int:
     for i, m in enumerate(entries, 1):
         path = f"{m['speciesId']}.{m['ext']}"
         try:
-            img = session.get(m["imageUrl"], timeout=60)
-            img.raise_for_status()
+            if i > 1:
+                time.sleep(PAUSE_BETWEEN_DOWNLOADS_S)
+            img = fetch_with_retry(session, m["imageUrl"])
             ctype = img.headers.get("Content-Type") or mimetypes.guess_type(path)[0] or "image/jpeg"
             upload_one(base, key, path, img.content, ctype)
             ok += 1

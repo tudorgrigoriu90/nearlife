@@ -2289,13 +2289,30 @@ only.**
     (`HometownStore.clear`, reserved for erasure — the lock stops a *user* moving county, not the
     erasure of the account). Tests: relaunch skips onboarding; under-13 stays locked after restart;
     delete → welcome screen with both keys gone.
-- **T-210 · Names and card content exist for 54 of 6,824 species** — *Claude · L · `TODO` · deps: T-177, T-178*
+- **T-210 · Names and card content exist for 54 of 6,824 species** — *Claude · L · `IN-PROGRESS` (fixes pushed; re-run + verification pending) · deps: T-177, T-178*
   - Found during T-205: `species_content` holds 2,052 rows = the curated 54 × 38 locales. None of the
     6,770 GBIF species has card content, and `species.common_name` holds the binomial for at least
     some of them ("Erica tetralix", not klockljung / cross-leaved heath). The August full-chain run
     (vernacular + content, all locales) either failed or never loaded — its outcome was never checked.
   - Investigate the run, fix whatever stopped it, load, and verify counts per locale. This is the
     v1 promise (T-177/T-178: every species, every language, free) and it is not met in the database.
+  - 🔎 **Root causes** (run 32146425679, 2026-08-18 — red for ten weeks, unseen):
+    1. **Content load died on its first curated species.** The species loader adopts the curated id
+       for a GBIF key it already holds (`great-tit` for 9705453, T-184); the content loader did not,
+       so the row for `gbif:9705453` broke the FK and rolled back **every species in every locale**.
+    2. **Names were the binomial** because an early load wrote it into `common_name` and the upsert
+       never updated that column again — 11,883 GBIF rows, all of them.
+    3. **4 of 54 photos lost** to Wikimedia 429s with no retry.
+    4. The generated data had a **14-day** artifact retention, so by the time anyone looked the
+       four hours of generation had to be repeated.
+  - ✅ Fixes: content rows for curated species are **skipped** (their hand-written 38-locale
+    content wins over templates); orphan rows are split off and reported, and the load refuses only
+    if >1% are orphans (mismatched runs). Species `common_name` = GBIF English vernacular for GBIF
+    rows, null when there is none — and when a run skipped the name fetch, names are left alone
+    except for clearing binomial copies (`species_sql(have_names)`); curated names never change.
+    Photo download paced 1 s and retried on 429/503 honouring Retry-After. Artifact retention 90
+    days. Workflow free-text inputs moved to env — which also fixed the **scheduled** run passing an
+    empty `content_scope` straight into `build_content.py "pipeline/data/"` instead of `--all`.
 - **T-211 · The language choice is lost on restart** — *Claude · S · `TODO` · deps: T-123*
   - `localeOverride` in `App.tsx` is plain `useState`; a reload falls back to the device language.
     The push device row then re-registers in that language, so notifications switch language too.

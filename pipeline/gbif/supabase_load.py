@@ -40,6 +40,14 @@ def load_datasets() -> list[tuple[str, list[dict]]]:
     return datasets
 
 
+def load_vernacular() -> dict:
+    """build_vernacular.py's names, if it has run this cycle. Absent is fine — names stay null."""
+    path = DATA_DIR / "vernacular.json"
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8")).get("names", {})
+
+
 def _chunks(seq: list, n: int):
     for i in range(0, len(seq), n):
         yield seq[i : i + n]
@@ -49,14 +57,34 @@ REGION_SQL = (
     "insert into public.regions (id, name) values (%(id)s, %(name)s) "
     "on conflict (id) do update set name = excluded.name"
 )
-SPECIES_SQL = (
+_SPECIES_INSERT = (
     "insert into public.species "
     "(id, gbif_key, scientific_name, common_name, category, rarity, taxon_group, vertebrate, active_months) "
     "values (%(id)s, %(gbif_key)s, %(scientific_name)s, %(common_name)s, %(category)s, %(rarity)s, "
     "%(taxon_group)s, %(vertebrate)s, %(active_months)s) "
     "on conflict (id) do update set gbif_key=excluded.gbif_key, scientific_name=excluded.scientific_name, "
-    "taxon_group=excluded.taxon_group, vertebrate=excluded.vertebrate, active_months=excluded.active_months"
+    "taxon_group=excluded.taxon_group, vertebrate=excluded.vertebrate, active_months=excluded.active_months, "
 )
+
+
+def species_sql(have_names: bool) -> str:
+    """The species upsert, choosing how `common_name` is updated (T-210).
+
+    With fresh vernacular data, a GBIF row's name follows it — null included, which is also what
+    clears the binomial copies an early load wrote into 11,883 rows. Without it (a run that skipped
+    the name fetch; vernacular.json is not committed), names are left as they are apart from
+    clearing those binomial copies — otherwise one partial run would erase every name. Curated rows
+    always keep their hand-written name; GBIF only fills one that is missing.
+    """
+    gbif_name = "excluded.common_name" if have_names else (
+        "nullif(public.species.common_name, public.species.scientific_name)"
+    )
+    return _SPECIES_INSERT + (
+        f"common_name = case when left(public.species.id, 5) = 'gbif:' then {gbif_name} "
+        "else coalesce(public.species.common_name, excluded.common_name) end"
+    )
+
+
 PRESENCE_SQL = (
     "insert into public.species_presence (region_id, species_id, active_months, occurrences) "
     "values (%(region_id)s, %(species_id)s, %(active_months)s, %(occurrences)s) "
@@ -75,7 +103,8 @@ def main() -> None:
     from gbif.connect import connection_hint
 
     datasets = load_datasets()
-    species_rows, presence_rows = build_rows(datasets)
+    vernacular = load_vernacular()
+    species_rows, presence_rows = build_rows(datasets, vernacular)
     # Regions come from the data, not from a country constant: presence rows carry an FK to
     # regions, so a Nordic ingest that inserted only Sweden's counties would fail the whole
     # transaction on the first Norwegian row (T-167).
@@ -112,7 +141,7 @@ def main() -> None:
 
         cur.executemany(REGION_SQL, regions)
         for chunk in _chunks(species_rows, 1000):
-            cur.executemany(SPECIES_SQL, chunk)
+            cur.executemany(species_sql(bool(vernacular)), chunk)
         for chunk in _chunks(presence_rows, 2000):
             cur.executemany(PRESENCE_SQL, chunk)
         conn.commit()

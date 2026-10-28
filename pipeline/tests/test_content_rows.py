@@ -44,7 +44,7 @@ def test_maps_content_item_to_species_content_row():
     assert row["when_how"] == "Active in your region year-round. Look for it in mammal cover."
     assert row["give"] == "give-template" and row["protect"] == "protect-template"
     assert row["always_free"] is True  # invariant #2 — Tier-1 + give/protect always free
-    assert summary == {"total": 1, "with_fact": 1, "without_fact": 0, "skipped_dup": 0}
+    assert summary == {"total": 1, "with_fact": 1, "without_fact": 0, "skipped_dup": 0, "skipped_curated": 0}
 
 
 def test_loads_fact_less_species_with_null_fact_for_the_mission_content():
@@ -61,7 +61,7 @@ def test_loads_fact_less_species_with_null_fact_for_the_mission_content():
     assert by_id[species_id_for(3)]["fact"] == "a real fact"
     # mission content is present regardless of whether a fact exists
     assert by_id[species_id_for(1)]["give"] == "give-template"
-    assert summary == {"total": 3, "with_fact": 1, "without_fact": 2, "skipped_dup": 0}
+    assert summary == {"total": 3, "with_fact": 1, "without_fact": 2, "skipped_dup": 0, "skipped_curated": 0}
 
 
 def test_dedupes_by_species_and_locale_keeping_first():
@@ -157,3 +157,31 @@ def test_no_content_files_yields_no_rows_and_says_so():
     rows, summary = build_content_rows([])
     assert rows == []
     assert summary["total"] == 0
+
+
+# T-210: the August 2026 content load died on its first curated species. The species loader had
+# adopted `great-tit` for GBIF key 9705453, so a content row for `gbif:9705453` pointed at nothing,
+# the FK failed, and the whole load — every species, every locale — rolled back.
+
+from gbif.content_rows import keep_known_species  # noqa: E402
+
+
+def test_curated_species_keep_their_hand_written_content():
+    items = [_item(9705453, "Parus major", "f"), _item(5219173, "Lutra lutra", "f")]
+    rows, summary = build_content_rows([items], curated_id_by_gbif_key={9705453: "great-tit"})
+    assert [r["species_id"] for r in rows] == [species_id_for(5219173)]
+    assert summary["skipped_curated"] == 1
+    assert all(r["species_id"] != "gbif:9705453" for r in rows)
+
+
+def test_no_curated_map_changes_nothing():
+    rows, summary = build_content_rows([[_item(1, "A b", None)]])
+    assert len(rows) == 1
+    assert summary["skipped_curated"] == 0
+
+
+def test_rows_for_unknown_species_are_split_off_instead_of_failing_the_load():
+    rows, _ = build_content_rows([[_item(1, "A b", None), _item(2, "C d", None)]])
+    kept, missing = keep_known_species(rows, {species_id_for(1)})
+    assert [r["species_id"] for r in kept] == [species_id_for(1)]
+    assert missing == {species_id_for(2)}

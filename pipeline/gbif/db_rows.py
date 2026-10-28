@@ -34,8 +34,15 @@ def species_id_for(gbif_key: int) -> str:
     return f"gbif:{gbif_key}"
 
 
-def build_rows(datasets: Iterable[tuple[str, Iterable[dict]]]) -> tuple[list[dict], list[dict]]:
+def build_rows(
+    datasets: Iterable[tuple[str, Iterable[dict]]],
+    vernacular: dict | None = None,
+) -> tuple[list[dict], list[dict]]:
     """datasets: iterable of ``(taxon_key, records)`` (records = a presence file's ``records``).
+
+    ``vernacular`` is build_vernacular.py's ``names`` map (``{str(gbif_key): {locale: name}}``).
+    Its English name becomes ``species.common_name`` — the base name the app falls back to when a
+    locale has none (T-210). Without it the column stays null, never the binomial (T-187).
 
     Returns ``(species_rows, presence_rows)``. A species' ``active_months`` is the union of its
     per-region windows (the honest global "active this season" window); its ``occurrences`` is
@@ -43,6 +50,7 @@ def build_rows(datasets: Iterable[tuple[str, Iterable[dict]]]) -> tuple[list[dic
     """
     species: dict[str, dict] = {}
     presence: list[dict] = []
+    vernacular = vernacular or {}
 
     for taxon_key, records in datasets:
         group, vertebrate, category = TAXON_MAP[taxon_key]
@@ -60,7 +68,7 @@ def build_rows(datasets: Iterable[tuple[str, Iterable[dict]]]) -> tuple[list[dic
                     # Null, never a copy of the binomial: the app then knows it has no common
                     # name and can render the scientific one *as* a scientific name, instead of
                     # presenting "Lutra lutra" as what people call an otter (T-187).
-                    "common_name": None,
+                    "common_name": vernacular.get(str(r["speciesKey"]), {}).get("en"),
                     "category": category,
                     "rarity": "common",  # rarity_flavor derived from presence.occurrences (TSD §4)
                     "taxon_group": group,

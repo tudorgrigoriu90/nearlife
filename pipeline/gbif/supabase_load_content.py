@@ -22,7 +22,7 @@ import json
 import os
 from pathlib import Path
 
-from gbif.content_rows import build_content_rows
+from gbif.content_rows import build_content_rows, keep_known_species
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
@@ -33,6 +33,21 @@ def load_content_files() -> list[dict]:
         json.loads(path.read_text(encoding="utf-8"))
         for path in sorted(DATA_DIR.glob("content_*.json"))
     ]
+
+
+# More orphans than this means the content and species data come from different runs, and loading
+# the remainder would quietly ship a catalogue with holes in it. Below it, report and carry on.
+MAX_ORPHAN_SHARE = 0.01
+
+
+def check_orphans(total_rows: int, missing_species: set[str], orphan_rows: int) -> None:
+    if orphan_rows and orphan_rows > total_rows * MAX_ORPHAN_SHARE:
+        sample = ", ".join(sorted(missing_species)[:5])
+        raise SystemExit(
+            f"{orphan_rows} of {total_rows} content rows reference species that are not in "
+            f"public.species (e.g. {sample}). Content and species data look like they come from "
+            "different runs — refusing to load."
+        )
 
 
 def _chunks(seq: list, n: int):
@@ -60,8 +75,8 @@ def main() -> None:
 
     from gbif.connect import connection_hint
 
-    rows, summary = build_content_rows(load_content_files())
-    if not rows:
+    payloads = load_content_files()
+    if not payloads:
         # Nothing to load is a no-op, not a failure: it means build_content.py did not run this
         # cycle (content_scope=skip), and failing here would redden a pipeline whose real work
         # succeeded. Distinguished from a *failed* load, which raises below.
@@ -75,14 +90,26 @@ def main() -> None:
         raise SystemExit(f"{err}\n\nLikely cause: {hint}" if hint else str(err)) from err
 
     with conn_ctx as conn, conn.cursor() as cur:
-        for chunk in _chunks(rows, 1000):
+        cur.execute(
+            "select gbif_key, id from public.species where gbif_key is not null and left(id, 5) <> 'gbif:'"
+        )
+        curated = {int(k): i for k, i in cur.fetchall()}
+        cur.execute("select id from public.species")
+        known = {r[0] for r in cur.fetchall()}
+
+        rows, summary = build_content_rows(payloads, curated_id_by_gbif_key=curated)
+        kept, missing = keep_known_species(rows, known)
+        check_orphans(len(rows), missing, len(rows) - len(kept))
+
+        for chunk in _chunks(kept, 1000):
             cur.executemany(CONTENT_SQL, chunk)
         conn.commit()
 
     print(
-        f"loaded {len(rows)} content rows of {summary['total']} species "
+        f"loaded {len(kept)} content rows from {summary['total']} generated items "
         f"({summary['with_fact']} with a fact, {summary['without_fact']} mission-only, "
-        f"{summary['skipped_dup']} dup)"
+        f"{summary['skipped_dup']} dup, {summary['skipped_curated']} kept as hand-written curated "
+        f"content, {len(rows) - len(kept)} orphan rows for {len(missing)} unknown species skipped)"
     )
 
 

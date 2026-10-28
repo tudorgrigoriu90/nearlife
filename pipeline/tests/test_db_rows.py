@@ -180,3 +180,15 @@ def test_common_name_is_null_when_unknown_rather_than_the_binomial():
     rows, _ = build_rows([("birds", [_rec("SWE.9_1", 1, "Pica pica", [5], 10)])])
     assert rows[0]["common_name"] is None
     assert rows[0]["scientific_name"] == "Pica pica"
+
+
+def test_english_vernacular_name_becomes_the_base_common_name():
+    vernacular = {"5333412": {"en": "Cross-leaved heath", "sv": "Klockljung", "_realms": {}}}
+    rows, _ = build_rows([("flora", [_rec("SWE.9_1", 5333412, "Erica tetralix", [7], 3)])], vernacular)
+    assert rows[0]["common_name"] == "Cross-leaved heath"
+
+
+def test_no_english_name_stays_null_even_when_other_languages_have_one():
+    vernacular = {"5333412": {"sv": "Klockljung"}}
+    rows, _ = build_rows([("flora", [_rec("SWE.9_1", 5333412, "Erica tetralix", [7], 3)])], vernacular)
+    assert rows[0]["common_name"] is None

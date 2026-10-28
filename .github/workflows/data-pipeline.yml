@@ -61,12 +61,17 @@ jobs:
       # Seconds, and it runs first on purpose: the load steps are silently skipped when their
       # secret is missing, and that only becomes visible hours later, at the end of an ingest that
       # then has nowhere to write. Names only — never the values.
+      # Free-text inputs reach the shell through env, never `${{ }}` interpolation into a script,
+      # so a value containing quotes or `$(...)` is data rather than code.
       - name: Preflight — which destinations are configured
+        env:
+          COUNTRIES: ${{ inputs.countries }}
+          CONTENT_SCOPE: ${{ inputs.content_scope }}
         run: |
           for v in SUPABASE_DB_URL SUPABASE_URL SUPABASE_SERVICE_KEY; do
             if [ -n "${!v}" ]; then echo "$v: set"; else echo "$v: MISSING — its load step will be skipped"; fi
           done
-          echo "countries='${{ inputs.countries }}' content_scope='${{ inputs.content_scope }}'"
+          echo "countries='$COUNTRIES' content_scope='$CONTENT_SCOPE'"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -100,11 +105,13 @@ jobs:
 
       - name: Generate species content (grounded facts + safe templates, T-135)
         if: ${{ inputs.content_scope != 'skip' }}
+        env:
+          CONTENT_SCOPE: ${{ inputs.content_scope }}
         run: |
-          if [ "${{ inputs.content_scope }}" = "all" ]; then
+          if [ "${CONTENT_SCOPE:-all}" = "all" ]; then
             python pipeline/build_content.py --all
           else
-            python pipeline/build_content.py "pipeline/data/${{ inputs.content_scope }}"
+            python pipeline/build_content.py "pipeline/data/$CONTENT_SCOPE"
           fi
 
       # Cheap and offline — reads the presence files the ingest just wrote. Always runs, so the
@@ -127,7 +134,10 @@ jobs:
         with:
           name: pipeline-data
           path: pipeline/data/*.json
-          retention-days: 14
+          # 90, not 14 (T-210): the August 2026 load failed after four hours of generation and
+          # nobody looked for seven weeks — by then the generated data had expired, so the fix
+          # needed the whole run again instead of only the load.
+          retention-days: 90
 
       - name: Load species + presence into Supabase (T-134)
         if: ${{ !cancelled() && env.SUPABASE_DB_URL != '' }}
