@@ -393,9 +393,19 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 - **T-030 · pg_cron + Edge Function picks a species** — *Claude · M · deps: T-017, T-019 · [TSD §4](TSD.md)*
   - Scheduled Edge Function selects one active-season species (simple weighting ok), dedupes
     against the user's collection.
-- **T-031 · Expo push delivery + deep link** — *Claude · M · deps: T-030 · [USER-FLOWS §4](USER-FLOWS.md)*
+- **T-031 · Push delivery + deep link** — *Claude · M · `DONE` (on-device check rides on T-205) · deps: T-030 · [USER-FLOWS §4](USER-FLOWS.md)*
   - Push arrives on device with honest copy; tapping deep-links straight to that species card
     and marks it Spotted.
+  - ✅ Delivery is T-201 (direct FCM, honest copy). The tap: `lib/notificationTap.ts` reads the
+    species id from the FCM `data` map — under `content.data` or, failing that, the raw
+    `trigger.remoteMessage.data` — and only for a plain tap. `onNotificationTap` (lib/permissions.ts)
+    also delivers the tap that **cold-launched** the app (only available as the "last response",
+    before any listener exists) and clears each handled response so a resume cannot reopen it.
+  - ✅ App queues the tapped species and opens it once onboarding is done: marks it Spotted, emits
+    `notification_opened` + `species_spotted {source: 'notification'}` (T-035), opens the card over
+    Settings/Badges/Impact. A species a catalogue refresh removed just opens the app.
+  - ✅ Foreground: a notification handler shows the banner while the app is open — without one a push
+    at the user's slot is silently dropped if they happen to be in the app.
 - **T-032 · Cadence, quiet hours & prefs** — *Claude · S · deps: T-030 · [TSD §4](TSD.md), [USER-FLOWS §9](USER-FLOWS.md)*
   - Frequency cap + quiet hours honored; all tunable via config without redeploy.
 
@@ -424,7 +434,7 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ## F2.5 — Validation Instrumentation & Test
 
 ### S2.5.1 — Analytics & criteria
-- **T-035 · PostHog event instrumentation** — *Claude · S · `IN-PROGRESS` (wired + call sites instrumented; notification events wait on T-031, on-device verify pending) · deps: T-005, T-031 · [TSD §8](TSD.md)*
+- **T-035 · PostHog event instrumentation** — *Claude · S · `IN-PROGRESS` (wired + call sites instrumented; `notification_opened` emitted since T-031; on-device verify pending) · deps: T-005, T-031 · [TSD §8](TSD.md)*
   - Events: notification delivered/opened, species spotted, catch attempted/succeeded, session
     start, This Week opened. Day-1/3/7 retention derivable.
   - ✅ `lib/posthogConfig.ts` reads `EXPO_PUBLIC_POSTHOG_KEY`/`_HOST` (mirrors `supabaseConfig.ts`;
@@ -2256,6 +2266,12 @@ only.**
   - Also: a card opened for a database species titles itself with `commonNameFor`, which only knows
     the bundled 54 — other species show the English/binomial name instead of the localized one
     `species_content.common_name` already holds.
+- **T-209 · Onboarding runs again on every launch** — *Claude · S · `TODO` · deps: T-090*
+  - `App.tsx` holds `onboarded` in plain `useState(false)`: nothing persists it, so every cold start
+    replays welcome → age gate → location → notifications. Found while building T-031: a notification
+    tap now queues behind a full re-onboarding before its card opens.
+  - Persist completion (+ the age path, which gates analytics) device-locally like consent (T-088);
+    the hometown is already persisted (T-090). Re-asking OS permissions must not be part of a relaunch.
 - **T-204 · The keep-alive did not keep the project alive** — *Claude · S · `DONE` · deps: T-203*
   - The T-203 job succeeded on Aug 27, Aug 31 and Sep 3 — and the project was **paused anyway** by
     Sep 7 (`status: INACTIVE`). Every run after that failed with `tenant/user … not found`, the

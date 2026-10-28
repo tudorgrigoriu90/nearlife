@@ -18,6 +18,7 @@ import ImpactScreen from './components/ImpactScreen';
 import { useCollection } from './components/useCollection';
 import { usePushRegistration } from './components/usePushRegistration';
 import { useThisWeek } from './components/useThisWeek';
+import { onNotificationTap, showNotificationsInForeground } from './lib/permissions';
 import { useTracker } from './components/useTracker';
 import {
   applyConsentChange,
@@ -152,6 +153,36 @@ export default function App() {
   const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
   const [paywall, setPaywall] = useState(false);
   const [freeCatch, setFreeCatch] = useState<FreeCatchState>(INITIAL_FREE_CATCH);
+
+  // Notification taps (T-031): queue the species, then open it once the app can show a card. A
+  // cold-start tap arrives before onboarding has finished, so it waits rather than being dropped.
+  const [tappedSpeciesId, setTappedSpeciesId] = useState<string | null>(null);
+  useEffect(() => {
+    showNotificationsInForeground();
+    return onNotificationTap(setTappedSpeciesId);
+  }, []);
+  useEffect(() => {
+    if (!onboarded || tappedSpeciesId === null) return;
+    const speciesId = tappedSpeciesId;
+    track('notification_opened', { speciesId });
+    SPECIES_REPO.describeSpecies([speciesId], locale)
+      .then(([summary]) => {
+        // A species the catalogue no longer has (removed by a refresh) just opens the app.
+        if (summary === undefined) return;
+        // Opening from a notification marks it Spotted, same as a This Week tap (USER-FLOWS §4).
+        collection.spot(speciesId);
+        track('species_spotted', { speciesId, source: 'notification' });
+        setShowSettings(false);
+        setShowBadges(false);
+        setShowImpact(false);
+        setSelected(summary.species);
+      })
+      .catch((e: unknown) => console.warn('notification species lookup failed', e))
+      // Cleared after the lookup, not before: the queue is what holds a tap across onboarding.
+      .finally(() => setTappedSpeciesId(null));
+    // collection/track/locale are read at tap time; re-running on their identity would reopen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboarded, tappedSpeciesId]);
 
   const toggleConsent = (kind: ConsentKind, value: boolean) => {
     // The age gate lives in `applyConsentChange` (T-197) rather than here: it is a T-089 safety

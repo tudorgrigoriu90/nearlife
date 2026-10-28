@@ -4,7 +4,9 @@ import * as Location from 'expo-location';
 import {
   getDevicePushToken,
   getLocationFixOnce,
+  onNotificationTap,
   onPushTokenChange,
+  showNotificationsInForeground,
   requestNotificationPermission,
 } from './permissions';
 import { ANDROID_CHANNEL_ID } from './pushDispatch';
@@ -74,6 +76,53 @@ describe('onPushTokenChange', () => {
     const unsubscribe = onPushTokenChange(() => {});
     unsubscribe();
     expect(remove).toHaveBeenCalled();
+  });
+});
+
+describe('onNotificationTap', () => {
+  const tap = (speciesId: string) => ({
+    actionIdentifier: 'expo.modules.notifications.actions.DEFAULT',
+    notification: { request: { content: { data: { speciesId } }, trigger: { type: 'push' } } },
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('delivers the tap that cold-launched the app, once, and clears it', () => {
+    mocked.getLastNotificationResponse.mockReturnValueOnce(tap('moose') as never);
+    const listener = jest.fn();
+    onNotificationTap(listener)();
+    expect(listener).toHaveBeenCalledWith('moose');
+    expect(mocked.clearLastNotificationResponse).toHaveBeenCalledTimes(1);
+  });
+
+  it('delivers later taps, and ignores responses that are not about a species', () => {
+    let fire: (r: unknown) => void = () => {};
+    const remove = jest.fn();
+    mocked.addNotificationResponseReceivedListener.mockImplementationOnce((cb) => {
+      fire = cb as (r: unknown) => void;
+      return { remove } as never;
+    });
+    const listener = jest.fn();
+    const unsubscribe = onNotificationTap(listener);
+    expect(listener).not.toHaveBeenCalled();
+    fire(tap('red-fox'));
+    fire({ actionIdentifier: 'dismiss' });
+    expect(listener.mock.calls).toEqual([['red-fox']]);
+    unsubscribe();
+    expect(remove).toHaveBeenCalled();
+  });
+});
+
+describe('showNotificationsInForeground', () => {
+  it('shows the banner and keeps sound on (Android hides the banner without it)', async () => {
+    showNotificationsInForeground();
+    const handler = mocked.setNotificationHandler.mock.calls[0][0]!;
+    await expect(handler.handleNotification({} as never)).resolves.toEqual({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    });
   });
 });
 

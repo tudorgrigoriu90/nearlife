@@ -20,4 +20,7 @@ module.exports = {
   setNotificationChannelAsync: jest.fn(async () => null),
   addPushTokenListener: jest.fn(() => ({ remove: jest.fn() })),
   AndroidImportance: { DEFAULT: 3 },
+  // Notification taps (T-031): no cold-start tap by default.
+  getLastNotificationResponse: jest.fn(() => null),
+  clearLastNotificationResponse: jest.fn(),
 };

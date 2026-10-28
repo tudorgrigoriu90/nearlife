@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import App from './App';
 import { requestNotificationPermission } from './lib/permissions';
 import { CONSENT_STORAGE_KEY } from './lib/consentStore';
@@ -27,7 +27,14 @@ jest.mock('./lib/permissions', () => ({
   requestNotificationPermission: jest.fn(async () => 'granted'),
   getDevicePushToken: jest.fn(async () => null),
   onPushTokenChange: jest.fn(() => () => {}),
+  showNotificationsInForeground: jest.fn(),
+  // Captures the app's tap listener so a test can "tap" a notification (T-031).
+  onNotificationTap: jest.fn((listener: (speciesId: string) => void) => {
+    tapListener = listener;
+    return () => {};
+  }),
 }));
+let tapListener: ((speciesId: string) => void) | null = null;
 
 // The catch minigame's timers/gestures are covered by its own tests; here we stub it so App's
 // catch-resolution branch (success → Caught + protect tip) is exercised deterministically.
@@ -64,13 +71,17 @@ async function press(name: string | RegExp, opts?: { exact?: boolean }) {
 const ADULT_BIRTH_YEAR = String(new Date().getFullYear() - 30);
 const MINOR_BIRTH_YEAR = String(new Date().getFullYear() - 5);
 
-async function completeOnboarding(birthYear = ADULT_BIRTH_YEAR) {
-  await render(<App />);
+async function completeOnboarding(
+  birthYear: string | { rendered?: boolean; firstCardOpen?: boolean } = ADULT_BIRTH_YEAR,
+) {
+  const opts = typeof birthYear === 'string' ? {} : birthYear;
+  const year = typeof birthYear === 'string' ? birthYear : ADULT_BIRTH_YEAR;
+  if (!opts.rendered) await render(<App />);
   await press(tr('onboarding.welcome.cta'));
   // Age-gate: enter a birth year, then continue (T-089).
   await fireEvent.changeText(
     await screen.findByPlaceholderText(tr('onboarding.age.placeholder')),
-    birthYear,
+    year,
   );
   await press(tr('onboarding.age.cta'));
   await press(tr('onboarding.location.cta'));
@@ -80,6 +91,7 @@ async function completeOnboarding(birthYear = ADULT_BIRTH_YEAR) {
   // passed in — guards against the card losing its content when the source became a prop).
   expect(await screen.findByText(tr('card.give'))).toBeTruthy();
   await press(tr('onboarding.firstSpotted.cta'));
+  if (opts.firstCardOpen) return; // a queued notification tap opens a card instead of the tabs
   await screen.findByText(tr('thisWeek.honesty')); // landed on the tabs
 }
 
@@ -162,6 +174,20 @@ describe('App', () => {
       (requestNotificationPermission as jest.Mock).mockResolvedValueOnce('denied');
       await completeOnboarding();
       expect(await storedNotificationConsent()).not.toBe(true);
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'opens the tapped species card from a notification that arrived before onboarding finished',
+    async () => {
+      await render(<App />);
+      // Cold start: the tap is delivered while onboarding is still on screen.
+      await act(async () => tapListener?.('moose'));
+      expect(screen.queryByText(tr('card.give'))).toBeNull();
+      await completeOnboarding({ rendered: true, firstCardOpen: true });
+      expect(await screen.findByText(commonNameFor(KRONOBERG_SPECIES.find((s) => s.id === 'moose')!, 'en'))).toBeTruthy();
+      expect(screen.getByText(tr('card.give'))).toBeTruthy();
     },
     FLOW_TIMEOUT,
   );
