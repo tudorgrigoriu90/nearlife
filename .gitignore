@@ -50,3 +50,9 @@ __pycache__/
 # IDE
 .idea/
 .vscode/
+
+# Firebase (T-201) — per-developer config, kept out of the repo. The build reads it from the
+# repo root (app.json android.googleServicesFile). The service-account key never comes near the
+# repo at all: it lives only in the Supabase Edge Function secret FCM_SERVICE_ACCOUNT.
+google-services.json
+GoogleService-Info.plist

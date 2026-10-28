@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import App from './App';
+import { requestNotificationPermission } from './lib/permissions';
+import { CONSENT_STORAGE_KEY } from './lib/consentStore';
 import { createTranslator } from './lib/i18n';
 import { KRONOBERG_SPECIES } from './lib/species/kronoberg';
 import { commonNameFor } from './lib/species/localized';
@@ -22,6 +24,8 @@ beforeEach(async () => {
 jest.mock('./lib/permissions', () => ({
   requestLocationPermission: jest.fn(async () => 'granted'),
   requestNotificationPermission: jest.fn(async () => 'granted'),
+  getDevicePushToken: jest.fn(async () => null),
+  onPushTokenChange: jest.fn(() => () => {}),
 }));
 
 // The catch minigame's timers/gestures are covered by its own tests; here we stub it so App's
@@ -139,6 +143,24 @@ describe('App', () => {
       expect(screen.getByText(tr('consent.analyticsLocked'))).toBeTruthy();
       // The other granular consents remain available.
       expect(screen.getByText(tr('consent.location'))).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'records notification consent from the onboarding opt-in, and only when the OS granted it',
+    async () => {
+      const storedNotificationConsent = async () =>
+        JSON.parse((await AsyncStorage.getItem(CONSENT_STORAGE_KEY)) ?? '{}').notifications;
+
+      await completeOnboarding();
+      expect(await storedNotificationConsent()).toBe(true);
+
+      await screen.unmount();
+      await AsyncStorage.clear();
+      (requestNotificationPermission as jest.Mock).mockResolvedValueOnce('denied');
+      await completeOnboarding();
+      expect(await storedNotificationConsent()).not.toBe(true);
     },
     FLOW_TIMEOUT,
   );

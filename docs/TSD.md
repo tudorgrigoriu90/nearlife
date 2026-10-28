@@ -14,7 +14,7 @@
 | **Spatial index** | **H3** (`h3-js` / `h3-py`) | $0 | Per-cell probability model; free Uber library |
 | **Maps** | **MapLibre GL** + free tiles (Protomaps/MapTiler free) | $0 | Open-source; avoids Google Maps billing |
 | **Data pipeline** | **Python** batch in **GitHub Actions** | $0 | Free CI minutes; Claude expert in Python/pandas; loads into Supabase |
-| **Push** | **Expo Notifications** → FCM/APNs; scheduled via `pg_cron` + Edge Function | $0 | Notification engine runs server-side on schedule |
+| **Push** | **FCM HTTP v1 directly** (device token via `expo-notifications`); scheduled via `pg_cron` + Edge Function | $0 | Notification engine runs server-side on schedule. Direct FCM, not Expo's push service (Director, T-201) — Android-only until iOS gets the Firebase SDK |
 | **IAP** | **RevenueCat** | $0 under $2.5k/mo | Abstracts App Store + Play billing (Family entitlements arrive in v2) |
 | **Analytics** | **PostHog** free tier | $0 | Measures day-7 retention (the core validation metric) |
 | **Auth** | **Supabase Auth** | $0 | Email/social; extends to the household model in v2 |
@@ -42,7 +42,7 @@ needed until real traction.
                                                                         |
                                     precomputed per-cell-per-month species probability
                                                                         |
-             [pg_cron schedule] --> [Edge Function: notification engine] --> [Expo Push -> FCM/APNs]
+             [pg_cron schedule] --> [Edge Function: notification engine] --> [FCM HTTP v1 -> Android]
                                                                         |
 [Expo RN app] <---- Supabase Auth / REST / Realtime ----> reads cards, writes collection state
         |
@@ -119,7 +119,8 @@ Runs server-side on a schedule (`pg_cron` → Edge Function). For each due user:
         frequency, not true rarity — phrase copy honestly; see risks.)
 5. Sample 1 species from the weighted distribution.
 6. Respect cadence: frequency cap + quiet_hours + user notif_prefs.
-7. Send via Expo Push. Log for analytics (delivered / opened / collected).
+7. Send via FCM HTTP v1 (T-201). Log each send to `notification_log`, which the cadence caps
+   are computed from (opened / collected are app-side funnel events).
 ```
 
 **Tuning levers:** cadence (per day), cell resolution (granularity vs. data density),

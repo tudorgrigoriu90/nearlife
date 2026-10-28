@@ -27,6 +27,11 @@ export interface OnboardingResult {
   locationOutcome: PermissionOutcome;
   /** From the age-gate (T-089): `restricted` routes the minimal-data path (no analytics offered). */
   agePath: AgePath;
+  /**
+   * The OS answer to the notification ask (T-201). Pressing "Turn on nudges" and granting it is
+   * the opt-in, so the shell records notification consent from it.
+   */
+  notificationOutcome: PermissionOutcome;
 }
 
 export default function OnboardingFlow({
@@ -41,6 +46,7 @@ export default function OnboardingFlow({
   const tr = createTranslator(locale);
   const [step, setStep] = useState<OnboardingStep>(FIRST_STEP);
   const [locationOutcome, setLocationOutcome] = useState<PermissionOutcome>('denied');
+  const [notificationOutcome, setNotificationOutcome] = useState<PermissionOutcome>('denied');
   // Defaults to the full path; the age-gate step sets it before the flow can complete (it sits
   // before every data-collecting step, so `done` is only ever reached with a real value).
   const [userAgePath, setUserAgePath] = useState<AgePath>('full');
@@ -55,7 +61,7 @@ export default function OnboardingFlow({
   const advance = () => setStep((s) => stepAfter(s));
 
   useEffect(() => {
-    if (isComplete(step)) onComplete({ locationOutcome, agePath: userAgePath });
+    if (isComplete(step)) onComplete({ locationOutcome, agePath: userAgePath, notificationOutcome });
     // onComplete is a stable callback from the parent; re-firing on identity change is undesired.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
@@ -69,7 +75,10 @@ export default function OnboardingFlow({
 
   const askNotification = () => {
     // The outcome doesn't gate onboarding — the pull surface works without notifications.
-    void requestNotificationPermission().then(advance);
+    void requestNotificationPermission().then((outcome) => {
+      setNotificationOutcome(outcome);
+      advance();
+    });
   };
 
   switch (step) {

@@ -756,7 +756,7 @@ per-month probabilities, honest and fully tunable ([TSD §4](TSD.md)).
     more-observed species surface more, but log-compression keeps the long tail in play (not "all
     sparrows"), and the `+1` floor lets active-but-unquantified species still be picked. Flavour is
     observation-frequency (honest copy, inv. #1). Injectable `Rng` for deterministic tests.
-- **T-063 · Cadence, quiet hours, prefs + delivery logging** — *Claude · M · `IN-PROGRESS` (engine core done + tested; Edge Function wiring pending T-030/T-032 live infra) · deps: T-062, T-032 · [TSD §4](TSD.md)*
+- **T-063 · Cadence, quiet hours, prefs + delivery logging** — *Claude · M · `DONE` (wired by T-201) · deps: T-062, T-032 · [TSD §4](TSD.md)*
   - Frequency cap, quiet hours, notif prefs respected; every send logged
     (delivered/opened/collected) for analytics.
   - ✅ `lib/notificationEngine.ts`: `decideNotification(user)` composes the tested parts into one
@@ -764,10 +764,14 @@ per-month probabilities, honest and fully tunable ([TSD §4](TSD.md)).
     (T-062). Cadence runs before selection so a blocked user costs no candidate work. `SkipReason`
     surfaces exactly why a cycle sent nothing. `recordDelivery` emits `notification_delivered` for
     the funnel (consent gating stays the tracker's concern). Pure/clock-free; deterministic `Rng`.
-  - ⏳ Remaining: run this from the scheduled Edge Function (T-064) and persist the delivery log +
-    opened/collected — blocked on the Edge Function runtime (T-030/T-032, live infra).
-- **T-064 · Schedule via pg_cron → Edge Function** — *Claude · S · deps: T-063, T-017 · [TSD §4](TSD.md)*
+  - ✅ Runs in the `send-notifications` Edge Function (T-201); every send is persisted to
+    `notification_log`, which is also what the cadence caps are computed from. Opened/collected
+    events are the app-side funnel (T-031 deep link).
+- **T-064 · Schedule via pg_cron → Edge Function** — *Claude · S · `DONE` (by T-201) · deps: T-063, T-017 · [TSD §4](TSD.md)*
   - Engine runs on schedule server-side; no client dependency; observable/retryable.
+  - ✅ pg_cron job `send-notifications` (`7 * * * *`) → `pg_net` → Edge Function. Observable in
+    `net._http_response` (status + JSON summary per run); retry is built in — send slots are
+    at-or-after, so a failed hour self-heals the next.
 
 ## F5.2 — Honesty & Tuning
 - **T-065 · Config-driven tuning levers** — *Claude · S · `DONE` · deps: T-062 · [TSD §4](TSD.md)*
@@ -2130,26 +2134,53 @@ only.**
     so **Full Game revenue rests on client-side honesty**. Not urgent before launch, but it should
     be a deliberate decision rather than an accident — either enforce it in a trigger/Edge Function,
     or amend the invariant to say client-side and accept the leakage.
-- **T-201 · Push notifications: the whole chain is missing, not just the sender** — *Claude + Director · L · `TODO` · deps: T-063*
-  - The app's premise is a passive notification, and **nothing sends one**. `expo-notifications` is
-    imported in exactly one file (`lib/permissions.ts`) to request permission — and the granted
-    answer is then **thrown away**. There is no `getExpoPushTokenAsync`, no column to store a token,
-    no Edge Function, and `cron.job` is empty.
-  - So four layers are missing, not one. The decision engine (T-063) and per-user send slots (T-186)
-    are built and tested; everything that would carry their output to a phone is absent.
-  - **Claude:** (1) obtain and store an Expo push token per device — a `profiles.push_token` column
-    with RLS, written on permission grant and refreshed on change; (2) an Edge Function that runs
-    `decideNotification` for each due user and posts to Expo's push API; (3) the `pg_cron` schedule
-    that calls it hourly (hourly, because T-186 spreads users across 13 waking hours).
-  - **Director:** credentials only — see the runbook. Android via Firebase is free and needs no
-    Apple account, which makes it the fastest way to see a real notification on a real phone.
-  - 📌 **Rich notifications should carry the thumbnail.** Both platforms support an image
-    attachment and the photos are ~40 KB — well within budget. A lock screen showing the *animal*
-    is a different product from one showing a line of text, and the URL is already in the payload.
-    Decide this while building rather than retrofitting.
-  - ⚠️ **Photos currently cover 54 species, not 6,824** (`SpeciesHero` reads the bundled
-    `KRONOBERG_MEDIA`). The rest fall back to a category glyph, which is a working fallback but
-    means an image attachment would be blank for most species — see T-202.
+- **T-201 · Push notifications: the whole chain is missing, not just the sender** — *Claude + Director · L · `DONE` (server live + verified 2026-10-28; on-device check is T-205) · deps: T-063*
+  - The app's premise is a passive notification, and **nothing sent one**: `expo-notifications`
+    asked for permission and threw the answer away; no token, no table, no Edge Function, empty
+    `cron.job`. Four layers were missing; all four now exist.
+  - **Director decision: FCM HTTP v1 directly, not Expo's push service** — one fewer account and
+    service in the chain. The device registers its raw FCM token (`getDevicePushTokenAsync`), so
+    **only Android is deliverable**; iOS would need the Firebase iOS SDK (out of v1 scope).
+  - ✅ **Storage** (`20261028000001_push_notifications.sql`): `push_devices` (PK `user_id, token`;
+    owner-only RLS for all four verbs) and `notification_log` (owner may read; only the service role
+    writes). Both cascade on account deletion. **A device row *is* the opt-in** — the app deletes
+    the user's rows when notification consent is withdrawn, so there is no second flag to drift.
+  - ✅ **App** — `lib/pushRegistration.ts` (`syncPushRegistration` + `SupabasePushGateway`),
+    `lib/permissions.ts` (`getDevicePushToken` creates the `nearby` Android channel first;
+    `onPushTokenChange`), `components/usePushRegistration.ts` (runs are *chained* so a withdraw can
+    never land before an in-flight register). App gates it on stored consent having loaded — acting
+    on the all-off default would withdraw a consenting user on every launch. Onboarding now reports
+    `notificationOutcome`; "Turn on nudges" + OS grant records notification consent.
+  - ✅ **Sender** — `supabase/functions/send-notifications` is I/O only; who-gets-what is
+    `lib/pushDispatch.ts` (`planSends`: Stockholm wall clock via Intl so DST is right, daily cap on
+    the *local* day, a token shared by two accounts goes to the newest registration only, iOS
+    dropped) and `lib/fcmAuth.ts` (RS256 JWT → OAuth token with WebCrypto, no Google SDK). Dead-token
+    detection deletes rows only on `UNREGISTERED`/404/"registration token" — never on a generic 400,
+    which could be *our* malformed payload and would unsubscribe everyone.
+  - ✅ **One engine, two runtimes** — Deno needs `.js` specifiers, the app uses extensionless ones.
+    `scripts/edgeShared.js` transpiles exactly the modules the function imports (TypeScript's own
+    `transpileModule`, no bundler added) into `supabase/functions/_shared/lib`; a test fails if the
+    committed copy drifts from the source. *Rejected:* duplicating the engine in Deno (two copies of
+    the cadence rules would diverge); Deno sloppy-imports (unsupported by the deploy bundler).
+  - ✅ **Schedule + auth** — pg_cron `send-notifications` at `7 * * * *` (hourly because T-186 spreads
+    users over the waking hours; minute 7 to stay off the top-of-hour rush) posts via `pg_net`. The
+    function runs with `verify_jwt` off (cron has no user JWT) and instead requires `x-cron-secret`,
+    generated inside the migration into **Vault** and checked by a service-role-only SQL function —
+    nobody ever handles the secret.
+  - ✅ **Copy** — `push.title` "{name} is active in your region" / `push.body` "This is its season where
+    you live." (en + sv; other UI locales fall back to English). Seasonal, never real-time — the
+    catalog honesty test covers it. **Photo attached** when the species has one (the 54 of T-202).
+  - ✅ **Verified live 2026-10-28**: function deployed (12 files, byte-identical to the repo); wrong
+    secret → 403; dry run → 200; smoke run with a deliberately fake token → planned an in-season
+    Kronoberg species, Google accepted the `FCM_SERVICE_ACCOUNT` key, FCM rejected the token as
+    invalid, and the row was deleted (`deadTokens: 1`).
+  - Body options for manual runs: `{"dryRun":true}`; `{"testUserId":"<uuid>"}` sends to that user
+    now, ignoring slot and daily cap, and is not logged (it must not eat the real notification).
+  - ⚠️ **Every user's region is Kronoberg** (`KRONOBERG_REGION`, now keyed by its GADM id `SWE.9_1`
+    so the server can read it). Real per-county hometown resolution is **T-090** — until it lands, a
+    user in Skåne is notified about Kronoberg's species.
+  - ⚠️ Tapping a notification opens the app but **not yet the species card** — the id rides in
+    `data.speciesId`; the deep link is **T-031**.
 - **T-202 · Photos exist for 54 of 6,824 species** — *Claude · L · `TODO` · deps: T-119, T-177*
   - `build_kronoberg_media.py` sources photos for the curated 54 only, and `SpeciesHero` reads that
     bundled manifest. Every other species renders its category glyph.
@@ -2160,6 +2191,19 @@ only.**
   - Cost check before running: 6,824 images at ~40–160 KB is roughly **0.4 GB** in Storage, against
     Supabase's 1 GB free tier. That is close enough to matter, so measure before uploading — and it
     may argue for hotlinking thumbnails or a smaller width for the long tail.
+- **T-205 · First real push on a real phone** — *Director · S · `TODO` · deps: T-201*
+  - Everything server-side is verified; what no test can show is the notification on a lock screen.
+  - Steps: `google-services.json` in the repo root (never committed) → `npx expo run:android` with
+    the phone on USB → go through onboarding and tap **Turn on nudges** → allow notifications. Then
+    tell Claude, who triggers a `testUserId` run for your account and confirms the row.
+  - Pass = a notification titled "<species> är aktiv i din region" (or English) arrives, with a photo
+    when the species is one of the 54.
+- **T-206 · Deploy Edge Functions from CI** — *Claude + Director · S · `TODO` · deps: T-201*
+  - T-201 was deployed through the Supabase connector. A change to the engine now needs a manual
+    redeploy, or the server quietly runs old rules. A workflow running `supabase functions deploy` on
+    push to `main` (when `supabase/functions/**` changes) closes that gap.
+  - **Director:** create a Supabase personal access token (Account → Access Tokens) and save it as the
+    GitHub repo secret `SUPABASE_ACCESS_TOKEN`.
 - **T-204 · The keep-alive did not keep the project alive** — *Claude · S · `DONE` · deps: T-203*
   - The T-203 job succeeded on Aug 27, Aug 31 and Sep 3 — and the project was **paused anyway** by
     Sep 7 (`status: INACTIVE`). Every run after that failed with `tenant/user … not found`, the

@@ -16,6 +16,7 @@ import LinkEmail from './components/LinkEmail';
 import BadgesScreen from './components/BadgesScreen';
 import ImpactScreen from './components/ImpactScreen';
 import { useCollection } from './components/useCollection';
+import { usePushRegistration } from './components/usePushRegistration';
 import { useTracker } from './components/useTracker';
 import {
   applyConsentChange,
@@ -117,9 +118,19 @@ export default function App() {
   const [showImpact, setShowImpact] = useState(false);
   const [exportJson, setExportJson] = useState<string | null>(null);
   const [consent, setConsentState] = useState<ConsentState>(DEFAULT_CONSENT);
+  // Push registration must not act on the all-off default before the stored choice loads: that
+  // would withdraw a consenting user's device on every launch (T-201).
+  const [consentLoaded, setConsentLoaded] = useState(false);
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
   const track = useTracker(consent);
+  // Server-side device registration follows notification consent (T-201).
+  usePushRegistration({
+    ready: onboarded && consentLoaded,
+    wanted: consent.notifications,
+    locale,
+    homeRegion: previewMode ? null : KRONOBERG_REGION.id,
+  });
   const [selected, setSelected] = useState<Species | null>(null);
   const [catching, setCatching] = useState<Species | null>(null);
   const [caughtTip, setCaughtTip] = useState<Species | null>(null);
@@ -156,6 +167,9 @@ export default function App() {
       })
       .catch(() => {
         // A load failure keeps the safe all-off default already in state.
+      })
+      .finally(() => {
+        if (!cancelled) setConsentLoaded(true);
       });
     return () => {
       cancelled = true;
@@ -306,9 +320,11 @@ export default function App() {
           collection.spot(speciesId);
           track('species_spotted', { speciesId, source: 'onboarding' });
         }}
-        onComplete={({ locationOutcome, agePath }) => {
+        onComplete={({ locationOutcome, agePath, notificationOutcome }) => {
           setPreviewMode(locationOutcome === 'denied');
           setAnalyticsLocked(agePath === 'restricted');
+          // "Turn on nudges" + an OS grant is the notification opt-in (T-201).
+          if (notificationOutcome === 'granted') toggleConsent('notifications', true);
           setOnboarded(true);
         }}
       />

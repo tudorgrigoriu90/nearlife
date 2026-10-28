@@ -1,0 +1,239 @@
+import { DEFAULT_CADENCE, type CadenceConfig, type SendHistory } from './cadence';
+import { t, type Locale, SUPPORTED_LOCALES, BASE_LOCALE } from './i18n';
+import type { Rng } from './notification';
+import { decideNotification, type SkipReason } from './notificationEngine';
+import { DEFAULT_TUNING, type NotificationTuning } from './tuning';
+import type { Month } from './species/types';
+import type { RegionPresence } from './speciesRepository';
+
+// Server-side push dispatch (T-201). The `send-notifications` Edge Function is I/O only: it loads
+// rows, calls `planSends`, posts each planned message to FCM and logs the result. Everything that
+// decides *who* gets *what* lives here, so it runs under Jest instead of only on a deployed Deno
+// worker where nothing can test it. The Edge Function imports a transpiled copy of this module
+// (scripts/edgeShared.js); a test fails if that copy drifts from the source.
+//
+// Sends go to FCM directly (HTTP v1), not through Expo's push service — a Director decision: one
+// fewer account and service in the chain. The device registers its raw FCM token
+// (`getDevicePushTokenAsync`), so only Android tokens are deliverable today; an iOS APNs token
+// would need the Firebase iOS SDK, which is out of v1 scope.
+
+/** v1 is Sweden only (T-177), so every user shares one clock. Per-user zones arrive with v2. */
+export const PUSH_TIME_ZONE = 'Europe/Stockholm';
+
+/** Android notification channel; the app creates it before registering (lib/permissions.ts). */
+export const ANDROID_CHANNEL_ID = 'nearby';
+
+export interface PushDevice {
+  token: string;
+  platform: string;
+  /** UI locale the device registered with; null/unknown falls back to English. */
+  locale: string | null;
+  updatedAtMs: number;
+}
+
+/** Everything the planner needs about one user with at least one registered device. */
+export interface UserSnapshot {
+  userId: string;
+  homeRegion: string | null;
+  devices: PushDevice[];
+  collectedIds: string[];
+  /** Past sends from `notification_log`, ms since epoch. */
+  sentAtMs: number[];
+}
+
+export interface PlannedSend {
+  userId: string;
+  speciesId: string;
+  devices: PushDevice[];
+}
+
+export type PlanSkipReason = SkipReason | 'no-region' | 'no-device';
+
+export interface DispatchPlan {
+  sends: PlannedSend[];
+  skipped: Partial<Record<PlanSkipReason, number>>;
+}
+
+export interface PlanOptions {
+  timeZone?: string;
+  cadence?: CadenceConfig;
+  tuning?: NotificationTuning;
+  rng?: Rng;
+  /**
+   * Skip the per-user send slot. Only for the Director's on-device smoke test, which must not wait
+   * up to thirteen hours for a slot; scheduled runs never set it.
+   */
+  ignoreSlot?: boolean;
+}
+
+export interface LocalClock {
+  localHour: number;
+  month: Month;
+  /** YYYY-MM-DD in the zone — the key for "today" in the daily cap. */
+  dateKey: string;
+}
+
+/** Wall-clock hour, month and date in `timeZone`. Intl handles DST, which a fixed offset would not. */
+export function localClock(nowMs: number, timeZone: string = PUSH_TIME_ZONE): LocalClock {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date(nowMs));
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+  return {
+    localHour: Number(get('hour')),
+    month: Number(get('month')) as Month,
+    dateKey: `${get('year')}-${get('month')}-${get('day')}`,
+  };
+}
+
+/** Rebuild the cadence history from the send log. "Today" is the local day, not the UTC one. */
+export function historyFromLog(
+  sentAtMs: number[],
+  nowMs: number,
+  timeZone: string = PUSH_TIME_ZONE,
+): SendHistory {
+  const today = localClock(nowMs, timeZone).dateKey;
+  let lastSentMs: number | null = null;
+  let sentTodayCount = 0;
+  for (const ms of sentAtMs) {
+    if (lastSentMs === null || ms > lastSentMs) lastSentMs = ms;
+    if (localClock(ms, timeZone).dateKey === today) sentTodayCount += 1;
+  }
+  return { lastSentMs, sentTodayCount };
+}
+
+/**
+ * Only Android FCM tokens are deliverable (see header). A token registered by two accounts — an
+ * anonymous account replaced after a reinstall — is kept only for the most recent registration,
+ * so one phone never receives two notifications in a cycle.
+ */
+export function deliverableDevices(users: UserSnapshot[]): Map<string, PushDevice[]> {
+  const owner = new Map<string, { userId: string; device: PushDevice }>();
+  for (const user of users) {
+    for (const device of user.devices) {
+      if (device.platform !== 'android') continue;
+      const current = owner.get(device.token);
+      if (current === undefined || device.updatedAtMs > current.device.updatedAtMs) {
+        owner.set(device.token, { userId: user.userId, device });
+      }
+    }
+  }
+  const byUser = new Map<string, PushDevice[]>();
+  for (const { userId, device } of owner.values()) {
+    byUser.set(userId, [...(byUser.get(userId) ?? []), device]);
+  }
+  return byUser;
+}
+
+/** Decide this cycle's sends. Pure: the clock, the rng and every row come from the caller. */
+export function planSends(
+  users: UserSnapshot[],
+  presenceByRegion: ReadonlyMap<string, RegionPresence[]>,
+  nowMs: number,
+  opts: PlanOptions = {},
+): DispatchPlan {
+  const timeZone = opts.timeZone ?? PUSH_TIME_ZONE;
+  const clock = localClock(nowMs, timeZone);
+  const devicesByUser = deliverableDevices(users);
+  const plan: DispatchPlan = { sends: [], skipped: {} };
+  const skip = (reason: PlanSkipReason) => {
+    plan.skipped[reason] = (plan.skipped[reason] ?? 0) + 1;
+  };
+
+  for (const user of users) {
+    const devices = devicesByUser.get(user.userId) ?? [];
+    if (devices.length === 0) {
+      skip('no-device');
+      continue;
+    }
+    if (user.homeRegion === null) {
+      skip('no-region');
+      continue;
+    }
+    const decision = decideNotification(
+      {
+        presence: presenceByRegion.get(user.homeRegion) ?? [],
+        collectedIds: new Set(user.collectedIds),
+        history: historyFromLog(user.sentAtMs, nowMs, timeZone),
+        // A registered device *is* the opt-in: the app deletes its rows when the user withdraws
+        // notification consent (lib/pushRegistration.ts), so there is no second flag to drift.
+        prefs: { enabled: true },
+        localHour: clock.localHour,
+        month: clock.month,
+        nowMs,
+        userId: opts.ignoreSlot ? undefined : user.userId,
+      },
+      {
+        cadence: opts.cadence ?? DEFAULT_CADENCE,
+        tuning: opts.tuning ?? DEFAULT_TUNING,
+        rng: opts.rng,
+      },
+    );
+    if (decision.send) plan.sends.push({ userId: user.userId, speciesId: decision.speciesId, devices });
+    else skip(decision.reason);
+  }
+  return plan;
+}
+
+/** A registered locale string → a UI locale; anything unknown reads English. */
+export function pushLocale(raw: string | null): Locale {
+  return raw !== null && (SUPPORTED_LOCALES as string[]).includes(raw) ? (raw as Locale) : BASE_LOCALE;
+}
+
+export interface PushCopy {
+  title: string;
+  body: string;
+}
+
+/** Notification text. Seasonal, never real-time (invariant #1) — the catalog test enforces it. */
+export function pushCopy(locale: Locale, speciesName: string): PushCopy {
+  return {
+    title: t(locale, 'push.title', { name: speciesName }),
+    body: t(locale, 'push.body'),
+  };
+}
+
+export interface FcmMessageInput {
+  token: string;
+  copy: PushCopy;
+  speciesId: string;
+  imageUrl: string | null;
+}
+
+/** FCM HTTP v1 `messages:send` body. The species id rides in `data` so a tap can open its card. */
+export function buildFcmMessage({ token, copy, speciesId, imageUrl }: FcmMessageInput) {
+  const notification: Record<string, string> = { title: copy.title, body: copy.body };
+  if (imageUrl !== null) notification.image = imageUrl;
+  return {
+    message: {
+      token,
+      notification,
+      data: { speciesId },
+      android: { priority: 'normal', notification: { channel_id: ANDROID_CHANNEL_ID } },
+    },
+  };
+}
+
+/**
+ * Whether an FCM error means the token is gone for good and its row should be deleted. Only the
+ * token-specific codes count: a 400 can also mean *our* payload is malformed, and deleting every
+ * device because of our own bug would silently unsubscribe the whole user base.
+ */
+export function isDeadTokenResponse(status: number, body: string): boolean {
+  if (status === 404) return true;
+  try {
+    const parsed = JSON.parse(body) as {
+      error?: { message?: string; details?: { errorCode?: string }[] };
+    };
+    const codes = (parsed.error?.details ?? []).map((d) => d.errorCode);
+    if (codes.includes('UNREGISTERED')) return true;
+    return status === 400 && /registration token/i.test(parsed.error?.message ?? '');
+  } catch {
+    return false;
+  }
+}

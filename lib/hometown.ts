@@ -14,7 +14,9 @@ export interface Coordinates {
   longitude: number;
 }
 
-export const KRONOBERG_REGION: Region = { id: 'kronoberg', name: 'Kronoberg' };
+// The id is the GADM GID the `regions` / `species_presence` tables key on, because the server
+// reads it from `profiles.home_region` to pick the user's notifications (T-201).
+export const KRONOBERG_REGION: Region = { id: 'SWE.9_1', name: 'Kronoberg' };
 
 /**
  * Resolve a device location to a home region. Coordinates are consumed here and never returned

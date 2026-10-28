@@ -93,6 +93,10 @@ export const en = {
   'onboarding.notif.body':
     'A gentle nudge when a species is active in your region — a few a week, never spam.',
   'onboarding.notif.cta': 'Turn on nudges',
+
+  // Push notification text (T-201) — seasonal, never real-time (invariant #1).
+  'push.title': '{name} is active in your region',
+  'push.body': 'This is its season where you live. Tap to meet it.',
   'onboarding.firstSpotted.badge': 'Your first sighting!',
   'onboarding.firstSpotted.cta': 'Start exploring',
 
@@ -313,6 +317,8 @@ const sv: Catalog = {
   'onboarding.notif.body':
     'En vänlig påminnelse när en art är aktiv i din region – några i veckan, aldrig spam.',
   'onboarding.notif.cta': 'Slå på påminnelser',
+  'push.title': '{name} är aktiv i din region',
+  'push.body': 'Det är dess säsong där du bor. Tryck för att möta den.',
   'onboarding.firstSpotted.badge': 'Din första observation!',
   'onboarding.firstSpotted.cta': 'Börja utforska',
 
