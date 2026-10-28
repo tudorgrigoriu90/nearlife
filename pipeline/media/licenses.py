@@ -20,3 +20,22 @@ def is_allowed_license(short_name: str | None) -> bool:
     if "public domain" in s or s in {"pd", "cc pd"}:
         return True
     return False
+
+
+def app_license(short_name: str | None) -> str | None:
+    """Map a Wikimedia licence short name to the app's MediaLicense (CC0 / CC-BY / CC-BY-SA).
+
+    None for anything not commercial-safe or not recognised — the photo then does not ship.
+    """
+    if not short_name:
+        return None
+    s = short_name.strip().lower()
+    if "nc" in s or "nd" in s:
+        return None
+    if s.startswith("cc0") or "public domain" in s or s in {"pd", "cc pd"}:
+        return "CC0"
+    if s.startswith("cc by-sa"):
+        return "CC-BY-SA"
+    if s.startswith("cc by"):
+        return "CC-BY"
+    return None

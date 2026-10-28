@@ -21,6 +21,7 @@ except (AttributeError, ValueError):
     pass
 
 sys.path.insert(0, str(Path(__file__).parent))
+from media.licenses import app_license  # noqa: E402
 from media.wikimedia import WikimediaClient  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -37,20 +38,6 @@ def curated_species() -> list[dict]:
     text = SPECIES_TS.read_text(encoding="utf-8")
     rows = ROW_RE.findall(text)
     return [{"speciesId": r[0], "scientificName": r[1], "category": r[2]} for r in rows]
-
-
-def app_license(short_name: str) -> str | None:
-    """Map a Wikimedia license short name to the app's MediaLicense enum (CC0/CC-BY/CC-BY-SA)."""
-    s = short_name.strip().lower()
-    if "nc" in s or "nd" in s:
-        return None
-    if s.startswith("cc0") or "public domain" in s or s in {"pd", "cc pd"}:
-        return "CC0"
-    if s.startswith("cc by-sa"):
-        return "CC-BY-SA"
-    if s.startswith("cc by"):
-        return "CC-BY"
-    return None
 
 
 def ext_of(url: str) -> str:

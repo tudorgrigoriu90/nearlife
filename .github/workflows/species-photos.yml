@@ -1,0 +1,48 @@
+name: Species photos
+
+# Gives every catalogue species a licence-clear hero photo, re-hosted in Supabase Storage (T-202).
+# Resumable: each run looks up the species not yet recorded (most-observed first) until its time
+# budget, so the full catalogue (~6 h of polite Wikimedia requests) completes over a few runs.
+# Once every species is recorded a run finds nothing to do and exits in seconds — the weekly
+# schedule then only picks up species a catalogue refresh has added.
+#
+# Secrets: SUPABASE_DB_URL (records), SUPABASE_URL + SUPABASE_SERVICE_KEY (Storage upload).
+
+on:
+  schedule:
+    - cron: "17 2 * * 0" # Sundays 02:17 UTC — off-peak for Wikimedia and for the database
+  workflow_dispatch:
+    inputs:
+      max_minutes:
+        description: "Time budget for this run, in minutes (the job itself is capped at 6 h)"
+        required: false
+        default: "330"
+
+concurrency:
+  group: species-photos
+  cancel-in-progress: false
+
+jobs:
+  photos:
+    name: Source species photos
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r pipeline/requirements.txt
+
+      # The input is free text, so it reaches the shell through env, never `${{ }}` interpolation.
+      - name: Source, re-host and record photos
+        env:
+          MAX_MINUTES: ${{ inputs.max_minutes }}
+        run: python pipeline/build_species_photos.py --max-minutes "${MAX_MINUTES:-330}"

@@ -2245,7 +2245,7 @@ only.**
     user in Skåne is notified about Kronoberg's species.
   - ⚠️ Tapping a notification opens the app but **not yet the species card** — the id rides in
     `data.speciesId`; the deep link is **T-031**.
-- **T-202 · Photos exist for 54 of 6,824 species** — *Claude · L · `TODO` · deps: T-119, T-177*
+- **T-202 · Photos exist for 54 of 6,824 species** — *Claude · L · `IN-PROGRESS` (data side built; first runs pending; app side is T-215) · deps: T-119, T-177*
   - `build_kronoberg_media.py` sources photos for the curated 54 only, and `SpeciesHero` reads that
     bundled manifest. Every other species renders its category glyph.
   - The pipeline already knows how to do this — `wikimedia.py` fetches a licence-clear lead image
@@ -2255,6 +2255,20 @@ only.**
   - Cost check before running: 6,824 images at ~40–160 KB is roughly **0.4 GB** in Storage, against
     Supabase's 1 GB free tier. That is close enough to matter, so measure before uploading — and it
     may argue for hotlinking thumbnails or a smaller width for the long tail.
+  - ✅ **`public.species_media`** (migration 20261029000002): one row per species — Storage URL of a
+    ~400 px thumbnail + author + licence (CC0 / CC-BY / CC-BY-SA only) + Commons source page. A row
+    with `url` null records "looked, no commercial-safe photo" so it is not re-queried every run.
+  - ✅ **`pipeline/build_species_photos.py`** + **`species-photos.yml`**: Wikipedia lead image →
+    licence check (`media/licenses.app_license`, shared with the curated job) → paced download
+    with 429 backoff → Storage `species-media/<id>.jpg` → row. **Most-observed species first**, a
+    time budget per run, commits every 25 — resumable across runs; weekly schedule until done,
+    then it only picks up species a catalogue refresh adds. The curated 54 are seeded from their
+    manifest first and never overwritten (their photos were hand-checked).
+  - Budget: ~6,800 × ~40 KB ≈ 270 MB of the 1 GB free Storage tier.
+- **T-215 · The app and the notifications use the catalogue photos** — *Claude · M · `TODO` · deps: T-202*
+  - `SpeciesHero` and the notification image still read only the bundled 54. Read `species_media`
+    (via `region_catalogue` / `describeSpecies` for the app, a join in `send-notifications` for the
+    image) once T-202's runs have filled it.
 - **T-205 · First real push on a real phone** — *Director · S · `DONE` (2026-10-28) · deps: T-201*
   - Everything server-side is verified; what no test can show is the notification on a lock screen.
   - Steps: `google-services.json` in the repo root (never committed) → `npx expo run:android` with
