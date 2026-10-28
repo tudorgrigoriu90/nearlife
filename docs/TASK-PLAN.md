@@ -2378,7 +2378,7 @@ only.**
     (`HometownStore.clear`, reserved for erasure — the lock stops a *user* moving county, not the
     erasure of the account). Tests: relaunch skips onboarding; under-13 stays locked after restart;
     delete → welcome screen with both keys gone.
-- **T-210 · Names and card content exist for 54 of 6,824 species** — *Claude · L · `IN-PROGRESS` (fixes pushed; re-run + verification pending) · deps: T-177, T-178*
+- **T-210 · Names and card content exist for 54 of 6,824 species** — *Claude · L · `DONE` (loaded + verified live 2026-10-28) · deps: T-177, T-178*
   - Found during T-205: `species_content` holds 2,052 rows = the curated 54 × 38 locales. None of the
     6,770 GBIF species has card content, and `species.common_name` holds the binomial for at least
     some of them ("Erica tetralix", not klockljung / cross-leaved heath). The August full-chain run
@@ -2402,6 +2402,22 @@ only.**
     Photo download paced 1 s and retried on 429/503 honouring Retry-After. Artifact retention 90
     days. Workflow free-text inputs moved to env — which also fixed the **scheduled** run passing an
     empty `content_scope` straight into `build_content.py "pipeline/data/"` instead of `--all`.
+  - ✅ **Verified** (run 40730729091, green, 4h28m):
+    - Step times: vernacular 1h55m, content 2h28m, loads under 3 min. That is 1h30m inside the
+      6 h job cap. A retry no longer pays for the vernacular step (T-198).
+    - Species load: 21 regions, 11,936 species, 78,530 presence rows, 53 curated ids adopted.
+    - Content load: 213,894 rows from 214,848 generated; 954 rows were kept as hand-written curated
+      content. 0 duplicates, 0 orphans.
+    - `species_content` covers **all 11,937 species in each of the 18 v1 locales**. The curated 54
+      also keep their 38-locale set.
+    - Facts with a citation per locale: sv 4,836 · en 4,694 · vi 4,323 · ru 2,888 · uk 2,536 ·
+      tr 1,569 · ar 1,539 · sr 1,252. They are mission-only elsewhere, ~54 in am/ckb/kmr/ps/so/ti.
+      These are Wikipedia's real coverage, never machine-translated (T-179).
+    - Localized names: sv 5,419 · en 4,919 · ru 3,794 · uk 2,400 · tr 1,305 · ar 973 · sr 938.
+      Low-coverage locales fall back to the English, then the scientific name.
+    - `species.common_name` on the 11,883 GBIF rows: **0 binomial copies** (was 11,883). 4,865
+      hold a real English name. 7,018 are null, so the app shows the scientific name.
+    - All 54 curated photos were uploaded (were 50/54).
 - **T-211 · The language choice is lost on restart** — *Claude · S · `DONE` · deps: T-123*
   - `localeOverride` in `App.tsx` is plain `useState`; a reload falls back to the device language.
     The push device row then re-registers in that language, so notifications switch language too.
