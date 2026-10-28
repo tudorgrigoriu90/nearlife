@@ -8,6 +8,8 @@ name: Database migrate
 #   plan    (default) report what would be applied and stop — never writes
 #   apply   run each pending migration in its own transaction, then record it
 #   repair  record pending versions as applied WITHOUT running them
+#   verify  run the live rule checks in pipeline/db/verify.py (one rolled-back transaction — writes
+#           nothing). Use after a migration that adds a trigger or grant, which only Postgres can prove.
 #
 # `repair` is for DDL already applied by other means. The live project's history was written by the
 # Supabase MCP tool, which stamped its own timestamps, so several files' contents are already in
@@ -21,11 +23,11 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "plan (report only) | apply (run pending) | repair (stamp as applied, run nothing)"
+        description: "plan (report only) | apply (run pending) | repair (stamp as applied, run nothing) | verify (live rule checks, writes nothing)"
         required: true
         default: "plan"
         type: choice
-        options: [plan, apply, repair]
+        options: [plan, apply, repair, verify]
       versions:
         description: "Space-separated versions to act on (e.g. 20260810000001). Empty = every pending one."
         required: false
@@ -67,4 +69,10 @@ jobs:
         working-directory: pipeline
         env:
           VERSIONS: ${{ inputs.versions }}
-        run: python -m db.migrate ${{ inputs.mode }} $VERSIONS
+          MODE: ${{ inputs.mode }}
+        run: |
+          if [ "$MODE" = "verify" ]; then
+            python -m db.verify
+          else
+            python -m db.migrate "$MODE" $VERSIONS
+          fi
