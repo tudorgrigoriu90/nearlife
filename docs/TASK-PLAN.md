@@ -2134,7 +2134,7 @@ only.**
     notifications are functional consents the app asks for openly.
   - Returns the **same object** when it refuses, so a blocked change costs no write to the consent
     store. `App.tsx` checks identity and returns early.
-- **T-198 · `vernacular.json` does not survive between runs** — *Claude · S · `TODO` · deps: T-188*
+- **T-198 · `vernacular.json` does not survive between runs** — *Claude · S · `DONE` · deps: T-188*
   - `build_vernacular.py` is resumable **within** a run — it writes every 100 species and skips what
     is recorded — but the file lives only in the run artifact. A fresh run checks out a clean repo,
     finds nothing recorded, and re-fetches all 6,824 species (~52 min, doubled by T-191's profile
@@ -2145,6 +2145,19 @@ only.**
     refresh, and the refresh is annual.
   - If it does become worth fixing, downloading the previous run's artifact at job start is the
     right shape — resumability across runs, without committing a derived 2 MB file.
+  - **Done (2026-10-28):** `pipeline/restore_vernacular.py` runs before the fetch in
+    `data-pipeline.yml` (job permission `actions: read`). It takes the newest unexpired
+    `pipeline-data` artifact from another run and restores only its top-level `vernacular.json`,
+    after a shape check. It never extracts archive paths to disk, and it never fails the job:
+    without a usable artifact it falls back to a full fetch.
+    - **Age cap: 30 days.** Resuming is for retries. A year-old file would make the February
+      refresh skip every species and ship last year's names.
+    - Known limit: each run re-uploads what it restored, so runs repeated more often than every
+      30 days would keep carrying names forward instead of refreshing them. The schedule is
+      annual, so this does not arise today.
+    - It also runs for content-only re-runs, which then get names without a fetch.
+    - Tested in `pipeline/tests/test_restore_vernacular.py`, including the step order in the
+      workflow.
 - **T-199 · Audit: do the four "critical rules" actually have tests?** — *Claude · S · `DONE` · deps: —*
   - CLAUDE.md names four rules that must get explicit tests: free-catch enforcement (T-075),
     catch-spot safety exclusions (T-049), NC-license filtering (T-042), honest copy (T-066).

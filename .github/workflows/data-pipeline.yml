@@ -51,6 +51,10 @@ jobs:
     name: Generate + load national data
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    # actions: read lets the job list and download this repo's earlier artifacts (T-198).
+    permissions:
+      contents: read
+      actions: read
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -99,6 +103,16 @@ jobs:
       # Resumable and incremental (T-188): a re-run picks up where the last stopped, so a
       # timeout or a failed species costs minutes rather than the whole pass. Runs before content
       # generation, which reads data/vernacular.json to fill each row's common_name.
+      # A retry resumes from the previous run's names instead of re-fetching all 6,824 species
+      # (~52 min). Only artifacts under 30 days old, so the yearly refresh still fetches fresh
+      # names. Never fails: a missing or unusable artifact just means a full fetch. Also runs for a
+      # content-only re-run, which then gets names without fetching them.
+      - name: Restore the previous run's vernacular names (T-198)
+        if: ${{ !cancelled() && (inputs.vernacular != '' || inputs.content_scope != 'skip' || github.event_name == 'schedule') }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python pipeline/restore_vernacular.py
+
       - name: Fetch vernacular names (T-188)
         if: ${{ !cancelled() && (inputs.vernacular != '' || github.event_name == 'schedule') }}
         run: python pipeline/build_vernacular.py
