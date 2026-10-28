@@ -2150,7 +2150,7 @@ only.**
   - ℹ️ **Catch-spot safety (T-049) is not built at all** (no `catchSpot`/`hazard` anywhere). That is
     unbuilt scope rather than an untested rule, and it is E4 — but it should not be listed among
     rules that "get explicit tests" as though it were shipping.
-- **T-200 · Free-catch enforcement is client-side only** — *Claude · M · `IN-PROGRESS` (code pushed; migration apply + live trigger test pending) · deps: T-075*
+- **T-200 · Free-catch enforcement is client-side only** — *Claude · M · `DONE` (applied + verified live 2026-10-28) · deps: T-075*
   - `profiles.free_catches_used` / `free_catch_season` exist, but **nothing on the server enforces
     them**: no RLS policy, no trigger, no Edge Function. All the logic is in `lib/freeCatch.ts`,
     which is well tested — and which runs on the user's device.
@@ -2179,9 +2179,12 @@ only.**
     un-catches the species locally (it stays Spotted) and keeps delivering what was queued behind it
     — an ordinary failure is still retried. `test_free_catch_limit.py` pins the SQL limit to
     `FREE_CATCHES_PER_SEASON` and checks no user grant reaches the counter or the entitlement.
-  - ⏳ Pending: apply via db-migrate, then run the rolled-back trigger scenario (3 catches ok, 4th
-    refused, help on a caught species free, self-granting full_game / resetting the counter denied,
-    the app's home_region upsert still allowed).
+  - ✅ **Applied and verified live** (db-migrate run 9 = apply; run 11 = verify). `pipeline/db/verify.py`
+    runs the rule as a throwaway `authenticated` user in one always-rolled-back transaction: catches
+    1–3 ok, the 4th → `free_catch_limit`; pledging help on a caught species free; self-granting
+    `full_game` and resetting the counter → `permission denied`; the app's `home_region` upsert ok;
+    season boundaries in Stockholm time. All 12 hold. Re-run any time with **db-migrate mode=verify**
+    — it writes nothing and, being CI, needs nobody to approve a database write.
 - **T-201 · Push notifications: the whole chain is missing, not just the sender** — *Claude + Director · L · `DONE` (server live + verified 2026-10-28; on-device check is T-205) · deps: T-063*
   - The app's premise is a passive notification, and **nothing sent one**: `expo-notifications`
     asked for permission and threw the answer away; no token, no table, no Edge Function, empty
