@@ -2218,13 +2218,21 @@ only.**
   - Cost check before running: 6,824 images at ~40–160 KB is roughly **0.4 GB** in Storage, against
     Supabase's 1 GB free tier. That is close enough to matter, so measure before uploading — and it
     may argue for hotlinking thumbnails or a smaller width for the long tail.
-- **T-205 · First real push on a real phone** — *Director · S · `TODO` · deps: T-201*
+- **T-205 · First real push on a real phone** — *Director · S · `DONE` (2026-10-28) · deps: T-201*
   - Everything server-side is verified; what no test can show is the notification on a lock screen.
   - Steps: `google-services.json` in the repo root (never committed) → `npx expo run:android` with
     the phone on USB → go through onboarding and tap **Turn on nudges** → allow notifications. Then
     tell Claude, who triggers a `testUserId` run for your account and confirms the row.
   - Pass = a notification titled "<species> är aktiv i din region" (or English) arrives, with a photo
     when the species is one of the 54.
+  - ✅ **Passed 2026-10-28 on a Samsung (Android), dev build.** "Erica tetralix is active in your
+    region" arrived in the shade with the app in the background; tapping it opened the species card
+    (T-031 verified on device). First attempt failed silently with the app *open* on a build from
+    before T-031 — the foreground handler is what fixed that.
+  - Found by the test: (1) the title used the **binomial** — the database has no common name for
+    this species (T-210); (2) it came in **English** although the user had chosen Swedish, because
+    the language override is not persisted and a reload reverted it (T-211). No photo: not one of
+    the 54 (T-202).
 - **T-206 · Deploy Edge Functions from CI** — *Claude + Director · S · `DONE` · deps: T-201*
   - T-201 was deployed through the Supabase connector. A change to the engine now needs a manual
     redeploy, or the server quietly runs old rules. A workflow running `supabase functions deploy` on
@@ -2281,6 +2289,17 @@ only.**
     (`HometownStore.clear`, reserved for erasure — the lock stops a *user* moving county, not the
     erasure of the account). Tests: relaunch skips onboarding; under-13 stays locked after restart;
     delete → welcome screen with both keys gone.
+- **T-210 · Names and card content exist for 54 of 6,824 species** — *Claude · L · `TODO` · deps: T-177, T-178*
+  - Found during T-205: `species_content` holds 2,052 rows = the curated 54 × 38 locales. None of the
+    6,770 GBIF species has card content, and `species.common_name` holds the binomial for at least
+    some of them ("Erica tetralix", not klockljung / cross-leaved heath). The August full-chain run
+    (vernacular + content, all locales) either failed or never loaded — its outcome was never checked.
+  - Investigate the run, fix whatever stopped it, load, and verify counts per locale. This is the
+    v1 promise (T-177/T-178: every species, every language, free) and it is not met in the database.
+- **T-211 · The language choice is lost on restart** — *Claude · S · `TODO` · deps: T-123*
+  - `localeOverride` in `App.tsx` is plain `useState`; a reload falls back to the device language.
+    The push device row then re-registers in that language, so notifications switch language too.
+    Persist it device-locally like consent (T-088).
 - **T-204 · The keep-alive did not keep the project alive** — *Claude · S · `DONE` · deps: T-203*
   - The T-203 job succeeded on Aug 27, Aug 31 and Sep 3 — and the project was **paused anyway** by
     Sep 7 (`status: INACTIVE`). Every run after that failed with `tenant/user … not found`, the
