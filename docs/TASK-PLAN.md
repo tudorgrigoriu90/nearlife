@@ -2198,12 +2198,16 @@ only.**
     tell Claude, who triggers a `testUserId` run for your account and confirms the row.
   - Pass = a notification titled "<species> är aktiv i din region" (or English) arrives, with a photo
     when the species is one of the 54.
-- **T-206 · Deploy Edge Functions from CI** — *Claude + Director · S · `TODO` · deps: T-201*
+- **T-206 · Deploy Edge Functions from CI** — *Claude + Director · S · `DONE` · deps: T-201*
   - T-201 was deployed through the Supabase connector. A change to the engine now needs a manual
     redeploy, or the server quietly runs old rules. A workflow running `supabase functions deploy` on
     push to `main` (when `supabase/functions/**` changes) closes that gap.
   - **Director:** create a Supabase personal access token (Account → Access Tokens) and save it as the
-    GitHub repo secret `SUPABASE_ACCESS_TOKEN`.
+    GitHub repo secret `SUPABASE_ACCESS_TOKEN`. ✅ done 2026-10-28.
+  - ✅ `.github/workflows/deploy-functions.yml`: on push to `main` touching `supabase/functions/**`
+    (or by hand), regenerates the shared engine copy and fails if it differs from the commit, then
+    `supabase functions deploy send-notifications --no-verify-jwt --use-api`. `delete-account` is
+    left out on purpose — deploying it is T-093's decision, not a side effect of this workflow.
 - **T-204 · The keep-alive did not keep the project alive** — *Claude · S · `DONE` · deps: T-203*
   - The T-203 job succeeded on Aug 27, Aug 31 and Sep 3 — and the project was **paused anyway** by
     Sep 7 (`status: INACTIVE`). Every run after that failed with `tenant/user … not found`, the

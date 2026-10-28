@@ -1,0 +1,65 @@
+name: Deploy Edge Functions
+
+# T-206. Redeploys `send-notifications` whenever its code changes on main, so the server never
+# quietly runs older notification rules than the repo. Before this, a change to lib/pushDispatch.ts
+# needed a manual redeploy through the Supabase connector.
+#
+# Needs the repo secret SUPABASE_ACCESS_TOKEN (a Supabase personal access token, `sbp_…`).
+#
+# `delete-account` is deliberately not deployed here: it is still a reference implementation
+# (T-093) and switching it on is its own decision, not a side effect of this workflow.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/**"
+      - ".github/workflows/deploy-functions.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-functions
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy send-notifications
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_REF: subjdoiicfmiimtvlzsg
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the access token is configured
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "::error::Repo secret SUPABASE_ACCESS_TOKEN is missing — create one at https://supabase.com/dashboard/account/tokens"
+            exit 1
+          fi
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Never ship a stale copy of the engine: regenerate it and fail if it differs from what is
+      # committed (the same check CI runs as a test, repeated here because this job does not wait
+      # for CI).
+      - name: Check the shared engine copy is current
+        run: |
+          npm ci
+          node scripts/edgeShared.js
+          git diff --exit-code -- supabase/functions/_shared
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # --no-verify-jwt: pg_cron calls with no user JWT; the function checks x-cron-secret itself.
+      # --use-api bundles server-side, so the runner needs no Docker.
+      - name: Deploy
+        run: |
+          supabase functions deploy send-notifications \
+            --project-ref "$PROJECT_REF" --no-verify-jwt --use-api
