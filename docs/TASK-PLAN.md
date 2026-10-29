@@ -1265,7 +1265,7 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
 > SEK for up to 5 people, each with their own collection. The shared almanac stays v2 (T-104).
 > See ECONOMY.md.
 
-- **T-102 · Households (shared unlock)** — *Claude · M · `TODO` · deps: T-217 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
+- **T-102 · Households (shared unlock)** — *Claude · M · `IN-PROGRESS` (built; apply + live verify pending) · deps: T-217 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
   - `households` (owner, invite code) and `household_members` (≤ 5 including the owner). The owner
     is whoever holds the Family entitlement. A member's Full Game is derived on the server from
     membership, so it can never be granted client-side (same rule as T-200).
@@ -1273,6 +1273,26 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
     member loses the derived entitlement.
   - Live checks in `verify.py`: the 6th join is refused; a stranger cannot read a household; a
     member cannot grant themselves anything.
+  - ✅ **Built (2026-10-29):** migration `20261029000008_households.sql`.
+    - Tables: `households` (owner, unique invite code) and `household_members` (one household per
+      person). Users have no grants and no policies on either; every read and write goes through
+      SECURITY DEFINER functions.
+    - Functions:
+      - `create_household()`: Family required; idempotent.
+      - `join_household(code)`: locks the household row for the last seat. Refuses when the 5
+        people (owner included) are taken, when the code is wrong, or when the owner's Family is
+        no longer active.
+      - `leave_household()` and `remove_household_member(id)`, the latter owner only.
+      - `my_household()`: a member sees the size, never the code; the owner sees the code and the
+        members' opaque ids.
+    - Invite codes are 8 characters from a 32-symbol alphabet without look-alikes (~10¹²). They
+      are drawn from `gen_random_uuid()` bytes, i.e. the server's cryptographic RNG.
+    - **A member's Full Game is derived, not granted.** `refresh_full_game` adds "member of a
+      household whose owner holds Family", and `set_entitlement` refreshes every member when the
+      owner's Family changes. A delete trigger on members refreshes whoever leaves, is removed,
+      or loses the household because its owner deleted their account.
+    - 15 rolled-back live checks in `verify.py`, plus 4 static guards in
+      `test_households_sql.py`.
 - **T-103 · Family SKU + invite flow** — *Claude + Director · M · `TODO` · deps: T-102, T-083 · [ECONOMY](ECONOMY.md)*
   - The `family` product (Director creates it in Play Console at 99 SEK) is the RevenueCat
     entitlement that makes its buyer a household owner. A screen shows the invite code (share

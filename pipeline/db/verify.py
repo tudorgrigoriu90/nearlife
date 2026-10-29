@@ -55,6 +55,22 @@ EXPECTED: dict[str, str] = {
     "user cannot grant themselves an entitlement": "permission denied",
     "user cannot write the entitlements table": "permission denied",
     "user can read their own entitlements": "ok",
+    # T-102 Family households: one Family purchase unlocks the Full Game for up to 5 people.
+    "a household needs a Family purchase": "family_required",
+    "a Family owner creates a household with an 8-character code": "ok",
+    "creating again returns the same code": "ok",
+    "joining with the code grants the member the Full Game": "ok",
+    "codes are not case-sensitive": "ok",
+    "a wrong code is refused": "household_not_found",
+    "joining twice is refused": "already_in_household",
+    "a 6th person is refused": "household_full",
+    "a member sees the household size but not the code": "ok",
+    "members cannot read the household tables": "permission denied",
+    "only the owner can remove a member": "not_owner",
+    "the owner removes a member, who loses the Full Game": "ok",
+    "leaving removes the Full Game": "ok",
+    "a Family refund removes every member's Full Game": "ok",
+    "nobody can join a household whose Family was refunded": "household_inactive",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -81,7 +97,8 @@ def _step(cur, results: dict[str, str], name: str, sql: str, params=()) -> None:
     try:
         cur.execute(sql, params)
         row = cur.fetchone() if cur.description else None
-        results[name] = str(row[0]) if row else "ok"
+        # A void function (join_household, …) returns one row holding an empty value: success.
+        results[name] = str(row[0]) if row and row[0] not in (None, "") else "ok"
         cur.execute("release savepoint step")
     except Exception as exc:  # the refusals are the point of several checks
         cur.execute("rollback to savepoint step")
@@ -285,6 +302,89 @@ def run_entitlement_checks(cur) -> dict[str, str]:
     return results
 
 
+def run_household_checks(cur) -> dict[str, str]:
+    """T-102: Family households, end to end, as real authenticated users (rolled back)."""
+    results: dict[str, str] = {}
+
+    def new_user() -> str:
+        cur.execute(
+            "insert into auth.users (id, instance_id, aud, role, is_anonymous, created_at, updated_at) "
+            "values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', "
+            "'authenticated', true, now(), now()) returning id"
+        )
+        return str(cur.fetchone()[0])
+
+    def as_user(user: str | None) -> None:
+        if user is None:
+            cur.execute("reset role")
+            return
+        cur.execute("set local role authenticated")
+        cur.execute("select set_config('request.jwt.claims', %s, true)",
+                    (json.dumps({"sub": user, "role": "authenticated"}),))
+
+    def owns(user: str) -> bool:
+        cur.execute("select coalesce((select full_game from public.profiles where user_id = %s), false)", (user,))
+        return cur.fetchone()[0]
+
+    owner, m1, m2, m3, m4, m5, stranger = (new_user() for _ in range(7))
+    cur.execute("select public.set_entitlement(%s, 'family', true, now(), 'family', 'evt')", (owner,))
+
+    as_user(stranger)
+    _step(cur, results, "a household needs a Family purchase", "select public.create_household()")
+    as_user(owner)
+    cur.execute("select public.create_household()")
+    code = cur.fetchone()[0]
+    results["a Family owner creates a household with an 8-character code"] = (
+        "ok" if isinstance(code, str) and len(code) == 8 else f"got {code!r}"
+    )
+    cur.execute("select public.create_household()")
+    results["creating again returns the same code"] = "ok" if cur.fetchone()[0] == code else "new code"
+
+    as_user(m1)
+    _step(cur, results, "joining with the code grants the member the Full Game",
+          "select public.join_household(%s)", (code,))
+    as_user(None)
+    if results["joining with the code grants the member the Full Game"] == "ok" and not owns(m1):
+        results["joining with the code grants the member the Full Game"] = "joined, but no Full Game"
+    as_user(m2)
+    _step(cur, results, "codes are not case-sensitive", "select public.join_household(%s)", (code.lower(),))
+    _step(cur, results, "a wrong code is refused", "select public.join_household('ZZZZZZZZ')")
+    _step(cur, results, "joining twice is refused", "select public.join_household(%s)", (code,))
+    for member in (m3, m4):
+        as_user(member)
+        cur.execute("select public.join_household(%s)", (code,))
+    as_user(m5)
+    _step(cur, results, "a 6th person is refused", "select public.join_household(%s)", (code,))
+
+    as_user(m1)
+    _step(cur, results, "a member sees the household size but not the code",
+          "select case when (h->>'people')::int = 5 and h->>'invite_code' is null and h->>'role' = 'member' "
+          "then 'ok' else h::text end from (select public.my_household() as h) x")
+    _step(cur, results, "members cannot read the household tables", "select count(*) from public.households")
+    _step(cur, results, "only the owner can remove a member", "select public.remove_household_member(%s)", (m2,))
+
+    as_user(owner)
+    cur.execute("select public.remove_household_member(%s)", (m3,))
+    as_user(None)
+    results["the owner removes a member, who loses the Full Game"] = "ok" if not owns(m3) else "still unlocked"
+
+    as_user(m4)
+    cur.execute("select public.leave_household()")
+    as_user(None)
+    results["leaving removes the Full Game"] = "ok" if not owns(m4) else "still unlocked"
+
+    cur.execute("select public.set_entitlement(%s, 'family', false, now() + interval '1 second', 'family', 'evt')",
+                (owner,))
+    results["a Family refund removes every member's Full Game"] = (
+        "ok" if not any(owns(u) for u in (owner, m1, m2)) else "a member kept it"
+    )
+    as_user(m5)
+    _step(cur, results, "nobody can join a household whose Family was refunded",
+          "select public.join_household(%s)", (code,))
+    as_user(None)
+    return results
+
+
 def main() -> None:
     dsn = os.environ.get("SUPABASE_DB_URL")
     if not dsn:
@@ -298,6 +398,7 @@ def main() -> None:
                 results.update(run_retention_checks(cur))
                 results.update(run_community_impact_checks(cur))
                 results.update(run_entitlement_checks(cur))
+                results.update(run_household_checks(cur))
         finally:
             conn.rollback()  # always: these checks must never leave a trace
 
