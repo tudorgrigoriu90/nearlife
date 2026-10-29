@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { almanacEntries, categoryCounts, discoveredCount, type AlmanacEntry } from '../lib/almanac';
 import { progressSummary, type CollectionRecord } from '../lib/collection';
 import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
+import { photoFor } from '../lib/species/media';
 import { commonNameFor } from '../lib/species/localized';
 import type { Species, SpeciesCategory } from '../lib/species/types';
 import { CATEGORY_EMOJI, speciesGlyph } from './speciesVisual';
@@ -40,6 +41,28 @@ function TierOverlay({ entry }: { entry: AlmanacEntry }) {
   );
 }
 
+// Spotted cells show the species' photo (T-126); undiscovered ones keep the silhouette, so spotting
+// is still the moment a species is revealed. The photo comes with the catalogue read (T-215), so
+// the grid costs no extra requests, only image loads, which FlatList virtualizes. Attribution is
+// one tap away on the card, which shows author + licence in full. The CC licences allow credit "in
+// any reasonable manner based on the medium", and a 56 px thumbnail cannot carry a readable one.
+function CellVisual({ species, discovered }: { species: Species; discovered: boolean }) {
+  const [failed, setFailed] = useState(false);
+  const photo = discovered ? photoFor(species) : null;
+  if (photo && !failed) {
+    return (
+      <Image
+        testID={`almanac-photo-${species.id}`}
+        source={{ uri: photo.url }}
+        style={styles.cellPhoto}
+        resizeMode="cover"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+  return <Text style={styles.cellEmoji}>{speciesGlyph(species.category, discovered)}</Text>;
+}
+
 function Cell({
   entry,
   locale,
@@ -58,7 +81,7 @@ function Cell({
       accessibilityRole="button"
       accessibilityLabel={discovered ? commonNameFor(species, locale) : undefined}
     >
-      <Text style={styles.cellEmoji}>{speciesGlyph(species.category, discovered)}</Text>
+      <CellVisual species={species} discovered={discovered} />
       <Text style={styles.cellName} numberOfLines={1}>
         {name}
       </Text>
@@ -213,6 +236,8 @@ const styles = StyleSheet.create({
   },
   cellUndiscovered: { backgroundColor: '#eef2ec' },
   cellEmoji: { fontSize: 30 },
+  // About the height of the 30 pt glyph's line, so a cell barely shifts when its photo loads.
+  cellPhoto: { width: 56, height: 40, borderRadius: 8, backgroundColor: '#e2ebe0' },
   cellName: { marginTop: 6, fontSize: 12, fontWeight: '600', color: '#22331f', maxWidth: '90%' },
   tierRow: { flexDirection: 'row', marginTop: 6, gap: 3 },
   tierGlyph: { fontSize: 11, marginHorizontal: 1 },

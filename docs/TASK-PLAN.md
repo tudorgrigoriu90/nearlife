@@ -2696,13 +2696,23 @@ attribution. Photos are language-independent (one set serves all locales). Licen
     resize on delivery). Until then the app shows the emoji fallback for spotted species (no breakage).
     Spot-check licensing. National-scale sourcing (the ~12k set) reuses the same pipeline (E3, gated
     by content T-135 + curation T-136).
-- **T-126 · Species card renders photos** — *Claude · M · `IN-PROGRESS` (card hero done; almanac thumbnails deferred) · deps: T-118, T-119, T-059 · [USER-FLOWS §3,§4](USER-FLOWS.md)*
+- **T-126 · Species card renders photos** — *Claude · M · `DONE` · deps: T-118, T-119, T-059 · [USER-FLOWS §3,§4](USER-FLOWS.md)*
   - ✅ `components/SpeciesHero.tsx` renders the real photo on the species card **once spotted**
     (keeps the pre-spot silhouette so discovery still means something), with a graceful
     category-glyph fallback if there's no photo or the image fails to load (e.g. before the Storage
     upload), and shows per-photo attribution (author + license) — required for CC-BY/CC-BY-SA.
   - ⏳ Almanac grid thumbnails intentionally **kept as silhouettes/emoji** for now (the silhouette
     reveal mechanic + not fetching 54 grid images); revisit whether spotted cells show photos.
+  - ✅ **Revisited (2026-10-29): spotted cells show their photo; undiscovered cells keep the
+    silhouette.** Both reasons for deferring have gone:
+    - The reveal still happens at the moment of spotting.
+    - Photos arrive with the `region_catalogue` read (T-215), so the grid makes no extra requests,
+      only image loads, which `FlatList` virtualizes.
+    - A failed load falls back to the glyph, and so does a species without a photo.
+    - The credit is not on the 56 px thumbnail. The card one tap away carries author + licence in
+      full. The CC licences allow attribution "in any reasonable manner based on the medium", and a
+      thumbnail cannot carry a readable credit.
+    - 4 tests in `AlmanacScreen.test.tsx`.
 
 > **T-021 (prototype imagery)** is superseded/absorbed by E14: the prototype uses the media
 > schema (T-118) with emoji fallback, and real photos come from T-119.

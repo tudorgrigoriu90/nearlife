@@ -59,4 +59,40 @@ describe('AlmanacScreen', () => {
     await render(<AlmanacScreen species={ONE_PER_CATEGORY} records={[]} />);
     expect(screen.queryByText(new RegExp(tr('nav.badges')))).toBeNull();
   });
+
+  describe('grid photos (T-126)', () => {
+    const swift = KRONOBERG_SPECIES.find((x) => x.id === 'common-swift')!;
+    const spotted = {
+      speciesId: swift.id,
+      spottedAt: '2026-06-01T10:00:00Z',
+      caughtAt: null,
+      helpedAt: null,
+      helpedKind: null,
+      primeBonus: false,
+    };
+
+    it('shows the photo on a spotted cell', async () => {
+      await render(<AlmanacScreen species={[swift]} records={[spotted]} />);
+      expect(screen.getByTestId(`almanac-photo-${swift.id}`)).toBeTruthy();
+    });
+
+    it('keeps the silhouette until the species is spotted, so discovery still reveals it', async () => {
+      await render(<AlmanacScreen species={[swift]} records={[]} />);
+      expect(screen.queryByTestId(`almanac-photo-${swift.id}`)).toBeNull();
+    });
+
+    it('falls back to the category glyph when the photo fails to load', async () => {
+      await render(<AlmanacScreen species={[swift]} records={[spotted]} />);
+      await fireEvent(screen.getByTestId(`almanac-photo-${swift.id}`), 'error');
+      expect(screen.queryByTestId(`almanac-photo-${swift.id}`)).toBeNull();
+    });
+
+    it('shows the glyph for a spotted species without a photo', async () => {
+      const bare: Species = { ...swift, id: 'gbif:1', photo: undefined };
+      await render(
+        <AlmanacScreen species={[bare]} records={[{ ...spotted, speciesId: 'gbif:1' }]} />,
+      );
+      expect(screen.queryByTestId('almanac-photo-gbif:1')).toBeNull();
+    });
+  });
 });
