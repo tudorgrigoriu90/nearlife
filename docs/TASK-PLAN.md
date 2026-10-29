@@ -1265,7 +1265,7 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
 > SEK for up to 5 people, each with their own collection. The shared almanac stays v2 (T-104).
 > See ECONOMY.md.
 
-- **T-102 · Households (shared unlock)** — *Claude · M · `IN-PROGRESS` (built; apply + live verify pending) · deps: T-217 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
+- **T-102 · Households (shared unlock)** — *Claude · M · `DONE` (applied + verified live 2026-10-29) · deps: T-217 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
   - `households` (owner, invite code) and `household_members` (≤ 5 including the owner). The owner
     is whoever holds the Family entitlement. A member's Full Game is derived on the server from
     membership, so it can never be granted client-side (same rule as T-200).
@@ -1293,6 +1293,10 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
       or loses the household because its owner deleted their account.
     - 15 rolled-back live checks in `verify.py`, plus 4 static guards in
       `test_households_sql.py`.
+  - ✅ **Applied + verified live:** db-migrate applied `20261029000008`, plus `…07`, the T-094
+    customer guard. The verify run 40877218364 passed all 50 checks, rolled back. That includes:
+    a 6th person is refused; a refund removes every member's Full Game; nobody can join a
+    household whose Family was refunded; members cannot read the tables.
 - **T-103 · Family SKU + invite flow** — *Claude + Director · M · `TODO` · deps: T-102, T-083 · [ECONOMY](ECONOMY.md)*
   - The `family` product (Director creates it in Play Console at 99 SEK) is the RevenueCat
     entitlement that makes its buyer a household owner. A screen shows the invite code (share
