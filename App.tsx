@@ -16,6 +16,7 @@ import LinkEmail from './components/LinkEmail';
 import BadgesScreen from './components/BadgesScreen';
 import ImpactScreen from './components/ImpactScreen';
 import { useCommunityImpact } from './components/useCommunityImpact';
+import { useEntitlements } from './components/useEntitlements';
 import { useCollection } from './components/useCollection';
 import { usePushRegistration } from './components/usePushRegistration';
 import { useThisWeek } from './components/useThisWeek';
@@ -44,9 +45,11 @@ import { AsyncStorageDualLanguageStore } from './lib/dualLanguageStore';
 import type { ContentLocale } from './lib/i18n/contentLocale';
 import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
 import { SupabaseAuthGateway } from './lib/accountLinking';
-import { getSupabase } from './lib/supabase';
+import { ensureAnonymousSession, getSupabase } from './lib/supabase';
 import { hasSupabaseConfig } from './lib/supabaseConfig';
 import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib/communityImpact';
+import { SupabaseEntitlementSource, type EntitlementClient, type EntitlementSource } from './lib/entitlement';
+import { AsyncStorageEntitlementStore } from './lib/entitlementStore';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import type { Region } from './lib/hometown';
 import { AsyncStorageHometownStore } from './lib/hometownStore';
@@ -74,6 +77,19 @@ const SPECIES_REPO = createSpeciesRepository();
 // Community totals source (T-081), built on first use so importing App never creates a client
 // (tests have no Supabase config). null without a backend: the Impact screen keeps its note.
 let communitySource: CommunityImpactSource | null | undefined;
+// What the user owns, read from the server (T-083/T-217) and cached on the device. Built on first
+// use like the community source.
+const ENTITLEMENT_STORE = new AsyncStorageEntitlementStore();
+let entitlementSourceInstance: EntitlementSource | null | undefined;
+function entitlementSource(): EntitlementSource | null {
+  if (entitlementSourceInstance === undefined) {
+    entitlementSourceInstance = hasSupabaseConfig()
+      ? new SupabaseEntitlementSource(getSupabase() as unknown as EntitlementClient, ensureAnonymousSession)
+      : null;
+  }
+  return entitlementSourceInstance;
+}
+
 function communityImpactSource(): CommunityImpactSource | null {
   if (communitySource === undefined) {
     communitySource = hasSupabaseConfig() ? new SupabaseCommunityImpactSource(getSupabase()) : null;
@@ -142,6 +158,7 @@ export default function App() {
   const [showLinkEmail, setShowLinkEmail] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
   const [showImpact, setShowImpact] = useState(false);
+  const { entitlements } = useEntitlements({ source: entitlementSource(), store: ENTITLEMENT_STORE });
   // Read only while the Impact screen is open, so each visit shows a fresh total (T-081).
   const community = useCommunityImpact(showImpact ? communityImpactSource() : null);
   const [exportJson, setExportJson] = useState<string | null>(null);
@@ -410,6 +427,7 @@ export default function App() {
     setHometown(null);
     void ONBOARDING_STORE.clear();
     void HOMETOWN_STORE.clear();
+    void ENTITLEMENT_STORE.clear();
     return true;
   };
 
@@ -417,7 +435,8 @@ export default function App() {
   // Derived from the persisted collection (T-200), so a restart cannot reset it; the database
   // trigger is the authority and refuses a 4th catch however this is tampered with. Full Game is
   // false until the purchase flow exists (T-074).
-  const freeCatch = freeCatchStateFrom(collection.records, seasonKey);
+  // Unlimited catching follows what the server says the user owns (T-083), incl. Family membership.
+  const freeCatch = freeCatchStateFrom(collection.records, seasonKey, entitlements.fullGame);
   const remaining = remainingFreeCatches(freeCatch, seasonKey);
 
   // Catch entry (T-034): a free user gets 3 catches/season; the 4th attempt shows the gentle

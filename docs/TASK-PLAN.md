@@ -985,11 +985,27 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
 subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nudge.
 
 ## F9.1 — RevenueCat & Store
-- **T-083 · RevenueCat SDK + entitlement sync** — *Claude · M · `IN-PROGRESS` (resolution core done; SDK + sync pending, needs T-004) · deps: T-004, T-056 · [ECONOMY](ECONOMY.md), [TSD §1,§3](TSD.md)*
+- **T-083 · RevenueCat SDK + entitlement sync** — *Claude · M · `IN-PROGRESS` (server read + cache done; RevenueCat SDK pending, needs T-004) · deps: T-004, T-056 · [ECONOMY](ECONOMY.md), [TSD §1,§3](TSD.md)*
   - ✅ `lib/entitlement.ts` (3 tests): `FULL_GAME_ENTITLEMENT` + `resolveEntitlements(activeIds)`
     → `{ fullGame }`, the single source of truth the app already consumes (depth tiers T-138,
     free-catch T-113). Remaining (needs the RevenueCat account, T-004): the SDK integration that
     produces the active-entitlement ids and mirrors `full_game` to Supabase.
+  - ✅ **The app reads entitlements from the server (2026-10-29).** Since T-217, the database is
+    the authority, so the app no longer asks the store what is owned. It does not need to
+    "mirror" anything either: the webhook writes, the app reads.
+    - `SupabaseEntitlementSource` reads `profiles.full_game` and the active `entitlements` rows.
+      `full_game` is the only place Family membership shows, because a member bought nothing.
+      `resolveEntitlements` gives `{fullGame, family, allRegions, regions[]}`.
+    - `AsyncStorageEntitlementStore` keeps the last answer, so a paying user is not shown the
+      limit while offline outdoors. A corrupt cache decays to locked, and account deletion
+      clears it. The database trigger enforces the limit regardless (T-200).
+    - `useEntitlements` shows the cache at once, then the server's answer, on launch, on every
+      return to the foreground, and on demand.
+    - App: `freeCatchStateFrom(…, entitlements.fullGame)`. A Full Game owner or Family member
+      now sees unlimited catching instead of a hardcoded `false`.
+    - 14 new tests.
+  - Remaining, needs T-004: the RevenueCat SDK, configured with `appUserID` = the Supabase user
+    id so webhook events name the account, plus the purchase and restore calls (T-084/T-085).
 - **T-217 · Entitlements are granted by the server (RevenueCat webhook)** — *Claude + Director · M · `IN-PROGRESS` (applied + verified live + deployed; webhook secret + RevenueCat = Director, T-004) · deps: T-200 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
   - `profiles.full_game` is server-only since T-200, and the free-catch trigger already honours it.
     Nothing sets it yet.
