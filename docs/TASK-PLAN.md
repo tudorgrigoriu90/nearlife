@@ -1055,7 +1055,7 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - ⏳ **Director:** deploy the function (`supabase functions deploy delete-account`). Until then,
     `functions.invoke` errors and the confirm screen shows the retryable "not deleted" message — by
     design. Executing a real deletion + on-device verify is a Director/device step.
-- **T-094 · Retention policy & auto-expiry** — *Claude · S · `IN-PROGRESS` (job built + tested; apply + live verify pending) · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+- **T-094 · Retention policy & auto-expiry** — *Claude · S · `DONE` (applied + verified live 2026-10-29) · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - ✅ `lib/retention.ts` (3 tests): `DEFAULT_RETENTION` windows (runtime location 30d < inactive
     anonymous 90d < analytics 365d) + `isExpired`/`expiryMs`. Remaining: the pg_cron job that
     applies expiry (deletes stale rows / anonymous users).
@@ -1085,6 +1085,12 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - ❓ **Director, worth a look:** the app is seasonal. Someone who stops opening it from November
     to March (more than 90 days) comes back to an empty collection. The window is one constant
     plus its SQL twin; 400 days would cover a full season cycle.
+  - ✅ **Applied + verified live (2026-10-29):**
+    - db-migrate run 40837678318 applied it; `cron.job` lists `apply-retention 41 3 * * *`.
+    - The verify run 40837721891 passed all 22 checks, rolled back.
+    - Dry run of the activity rule before the first night: of the 3 anonymous accounts, the 2 July
+      test accounts (`e249bbd6`, `5e6763d4`, idle since 5 and 7 July) expire on the first run. The
+      Director's phone account (`0e08dc15`, active 28 Oct) is kept.
 
 ## F10.4 — Legal Artifacts
 - **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · `IN-PROGRESS` (policy drafted; legal review + hosting pending) · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*
