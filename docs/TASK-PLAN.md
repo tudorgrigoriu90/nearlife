@@ -990,6 +990,15 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
     → `{ fullGame }`, the single source of truth the app already consumes (depth tiers T-138,
     free-catch T-113). Remaining (needs the RevenueCat account, T-004): the SDK integration that
     produces the active-entitlement ids and mirrors `full_game` to Supabase.
+- **T-217 · Entitlements are granted by the server (RevenueCat webhook)** — *Claude + Director · M · `TODO` · deps: T-200 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
+  - `profiles.full_game` is server-only since T-200, and the free-catch trigger already honours it.
+    Nothing sets it yet.
+  - An Edge Function receives RevenueCat webhooks (purchase, refund/cancel, transfer),
+    authenticated by a shared secret header, and sets or clears the entitlement on the user's
+    profile. The app's RevenueCat user id is the Supabase user id.
+  - Family (T-102) needs this, because a member's entitlement must come from the buyer's
+    server-side purchase, not from the member's own store account.
+  - Director: set the webhook URL and secret in RevenueCat once T-004 exists.
 - **T-084 · Full Game product + purchase flow** — *Claude · M · deps: T-083 · [ECONOMY](ECONOMY.md)*
   - **$4.99 / 49 SEK** one-time product (price set by the Director 2026-10-29, was $9.99; see
     ECONOMY.md for the trade-off) purchasable on both stores (sandbox verified); unlocks unlimited
@@ -1211,14 +1220,27 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
 conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8](GDD.md)).
 
 ## F12.1 — Family SKU & Households
-- **T-102 · Households + shared collection model** — *Claude · L · deps: T-056 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
-  - `households`/`household_members`; `collection.owner_id` accepts household; shared
-    almanac/Caught/Helped/impact.
-- **T-103 · Family SKU + invites** — *Claude + Director · L · deps: T-102, T-083 · [ECONOMY](ECONOMY.md)*
-  - ~$19.99 Family entitlement via RevenueCat; member invite flow; parental-consent flow for
-    minors ([PRIVACY §3](PRIVACY-COMPLIANCE.md)).
-- **T-104 · Family screens** — *Claude · M · deps: T-102 · [USER-FLOWS §7 (v1 note)](USER-FLOWS.md)*
-  - Household view, member activity feed, family impact counter; personal/family toggle on Home.
+> **Moved into v1 (Director, 2026-10-29)**, scoped to the **shared unlock**. Family is $9.99 / 99
+> SEK for up to 5 people, each with their own collection. The shared almanac stays v2 (T-104).
+> See ECONOMY.md.
+
+- **T-102 · Households (shared unlock)** — *Claude · M · `TODO` · deps: T-217 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
+  - `households` (owner, invite code) and `household_members` (≤ 5 including the owner). The owner
+    is whoever holds the Family entitlement. A member's Full Game is derived on the server from
+    membership, so it can never be granted client-side (same rule as T-200).
+  - Join by code, leave, and owner removes a member. When the Family purchase ends (refund), every
+    member loses the derived entitlement.
+  - Live checks in `verify.py`: the 6th join is refused; a stranger cannot read a household; a
+    member cannot grant themselves anything.
+- **T-103 · Family SKU + invite flow** — *Claude + Director · M · `TODO` · deps: T-102, T-083 · [ECONOMY](ECONOMY.md)*
+  - The `family` product (Director creates it in Play Console at 99 SEK) is the RevenueCat
+    entitlement that makes its buyer a household owner. A screen shows the invite code (share
+    sheet) and the member list, and offers join-with-code to non-buyers.
+  - Minors: joining adds no personal data (anonymous accounts linked by a code), and the age
+    gate rules still apply per member. Confirm with legal review (T-009).
+- **T-104 · Family shared almanac** — *Claude · L · v2 · deps: T-102 · [USER-FLOWS §7 (v1 note)](USER-FLOWS.md)*
+  - Household view, member activity feed, family impact counter, personal/family toggle on Home.
+    Deferred: v1 Family is the shared unlock only.
 
 ## F12.2 — Regions & World Pass
 - **T-105 · Region pack + World Pass products** — *Claude · M · deps: T-083 · [ECONOMY](ECONOMY.md)*

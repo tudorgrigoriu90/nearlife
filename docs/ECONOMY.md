@@ -37,12 +37,13 @@ had is fun. So:
 
 ## The SKU ladder
 
-### MVP (v1) — two SKUs, one decision
+### MVP (v1) — Full Game and Family
 
 | SKU | Price (one-time) | What it gives |
 |-----|------------------|---------------|
 | **Free** | — | **Home region** (hometown GPS-derived at signup — locked; see below) · Spotted · "Active this week" · all core facts + **all help/protect content** · Helped pledges · depth tiers climbable by *playing* · **3 catches per season** |
 | **Full Game** | **$4.99** (49 SEK) | **Unlimited catching** · all depth tiers unlocked immediately · full home region |
+| **Family** | **$9.99** (99 SEK) | The Full Game for **up to 5 people**: the buyer shares an invite code and each member gets the Full Game on their own phone. Everyone keeps their own collection. |
 
 - **Price: $4.99 / 49 SEK (Director, 2026-10-29)**, down from the original $9.99 anchor. The
   reasoning is that 49 SEK is a very common app price point in Sweden and an easier impulse buy for
@@ -51,12 +52,21 @@ had is fun. So:
   lower price pays off only if it **more than doubles** conversion. Prices live in the store
   consoles, not in the app (the app shows the store's localized price), so testing 79 SEK later is a
   console change, not a release. Occasional seasonal promos stay possible.
+- **Family in v1 (Director, 2026-10-29).** It was cut from v1 until single-player conversion was
+  proven; the Director brought it forward because parents are the core audience. It is priced at
+  2× the Full Game, as the original plan had it, and covers up to 5 people.
+  - v1 ships the **shared unlock only**. The buyer gets an invite code; each member joins from
+    their own phone and gets the Full Game.
+  - Google Play does not share one-time in-app purchases with a family group, so the household
+    is ours: membership lives in Supabase, and the server grants the entitlement.
+  - Joining a household adds no personal data. Members are the same anonymous accounts, linked by
+    a code.
 
 ### Post-validation (v2+)
 
 | SKU | Price | Notes |
 |-----|-------|-------|
-| **Family** | ~$19.99 | Full Game for the household + **shared almanac / Caught / Helped / impact** — turns the household into a team. Hypothesis: highest-LTV SKU. **Cut from v1**: it is the most complex build in the spec (households, invites, child accounts, parental consent flows) and tests nothing about the core thesis. Ships once single-player conversion is proven. |
+| **Family, shared almanac** | (included in Family) | The v2 half of Family: a **shared almanac / Caught / Helped / impact** for the household, so it plays as a team. This is the complex part (shared collection model, member activity), which is why v1 ships the shared unlock alone. |
 | **Region pack** | $2.99 | See "Regions are growth spend, not DLC revenue" below. |
 | **World Pass** | $19.99 | All current + future regions. |
 
