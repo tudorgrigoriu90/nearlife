@@ -3,6 +3,7 @@ import type { CollectionRecord } from '../lib/collection';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { communityToShow, type CommunityImpact } from '../lib/communityImpact';
 import { impactSummary } from '../lib/impact';
+import { seasonKeyOf } from '../lib/season';
 
 // Impact screen (T-081 · GDD §7). Shows the help the user has pledged, from the tested pure core
 // (lib/impact.ts), and the community's real totals for the season when there are enough of them
@@ -14,16 +15,19 @@ export default function ImpactScreen({
   locale = 'en',
   records = [],
   community = null,
+  seasonKey = seasonKeyOf(new Date()),
   onDone,
 }: {
   locale?: Locale;
   records?: CollectionRecord[];
   /** This season's community totals, or null while unknown (T-081). */
   community?: CommunityImpact | null;
+  /** The season the personal numbers cover, matching the subtitle (T-216). */
+  seasonKey?: string;
   onDone?: () => void;
 }) {
   const tr = createTranslator(locale);
-  const summary = impactSummary(records);
+  const summary = impactSummary(records, seasonKey);
   const hasPledges = summary.totalPledges > 0;
   const shown = communityToShow(community);
 

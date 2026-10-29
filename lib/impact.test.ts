@@ -47,4 +47,23 @@ describe('impactSummary', () => {
     expect(summary.helpedSpecies).toBe(1); // one distinct species
     expect(summary.give).toBe(2);
   });
+
+  it('counts only pledges made in the given season (T-216)', () => {
+    const records = [
+      rec({ speciesId: 'swift', helpedAt: '2026-06-10T10:00:00Z', helpedKind: 'give' }),
+      rec({ speciesId: 'robin', helpedAt: '2026-10-20T10:00:00Z', helpedKind: 'protect' }),
+    ];
+    expect(impactSummary(records, '2026-autumn')).toEqual({
+      helpedSpecies: 1,
+      totalPledges: 1,
+      give: 0,
+      protect: 1,
+    });
+  });
+
+  it('groups December with the following winter, like the server season', () => {
+    const december = [rec({ speciesId: 'swift', helpedAt: '2026-12-10T10:00:00Z', helpedKind: 'give' })];
+    expect(impactSummary(december, '2027-winter').totalPledges).toBe(1);
+    expect(impactSummary(december, '2026-winter').totalPledges).toBe(0);
+  });
 });

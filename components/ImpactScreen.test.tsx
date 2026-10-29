@@ -19,10 +19,10 @@ describe('ImpactScreen', () => {
 
   it('counts real pledges (species helped, give, protect)', async () => {
     const records = [
-      rec('swift', { helpedAt: 't', helpedKind: 'give' }),
-      rec('robin', { helpedAt: 't', helpedKind: 'protect' }),
+      rec('swift', { helpedAt: '2026-10-20T10:00:00Z', helpedKind: 'give' }),
+      rec('robin', { helpedAt: '2026-10-21T10:00:00Z', helpedKind: 'protect' }),
     ];
-    await render(<ImpactScreen locale="en" records={records} />);
+    await render(<ImpactScreen locale="en" records={records} seasonKey="2026-autumn" />);
     // 2 distinct species helped, 1 give + 1 protect.
     expect(screen.getByText(tr('impact.helpedSpecies'))).toBeTruthy();
     expect(screen.getByText(tr('impact.give'))).toBeTruthy();
@@ -49,5 +49,22 @@ describe('ImpactScreen', () => {
     const community = { season: '2026-autumn', helpers: 1, pledges: 1, give: 1, protect: 0 };
     await render(<ImpactScreen locale="en" records={[]} community={community} />);
     expect(screen.getByText(tr('impact.community'))).toBeTruthy();
+  });
+
+  it('counts only this season\'s pledges, as its subtitle says (T-216)', async () => {
+    const records = [
+      rec('swift', { helpedAt: '2026-06-10T10:00:00Z', helpedKind: 'give' }),
+      rec('robin', { helpedAt: '2026-10-20T10:00:00Z', helpedKind: 'protect' }),
+    ];
+    await render(<ImpactScreen locale="en" records={records} seasonKey="2026-autumn" />);
+    // 1 species helped, 0 give, 1 protect: the summer pledge is last season's.
+    expect(screen.getAllByText('1')).toHaveLength(2);
+    expect(screen.getByText('0')).toBeTruthy();
+  });
+
+  it('shows the empty state when every pledge was in an earlier season', async () => {
+    const records = [rec('swift', { helpedAt: '2026-06-10T10:00:00Z', helpedKind: 'give' })];
+    await render(<ImpactScreen locale="en" records={records} seasonKey="2026-autumn" />);
+    expect(screen.getByText(tr('impact.empty'))).toBeTruthy();
   });
 });

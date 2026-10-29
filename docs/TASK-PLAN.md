@@ -2495,12 +2495,18 @@ only.**
     first render until the stored language is read, so a Swedish user never sees an English frame,
     and push registration waits for it too, so the device row is not written in the wrong language
     first. Test: choose Svenska → restart → Swedish UI.
-- **T-216 · The Impact screen says "this season" but counts all time** — *Claude · S · `TODO` · deps: T-081*
+- **T-216 · The Impact screen says "this season" but counts all time** — *Claude · S · `DONE` · deps: T-081*
   - The subtitle reads "The help you've pledged this season", but `impactSummary` counts every
     Helped record ever. The community totals are season-scoped (T-081), so the two numbers
     disagree after the first season change. Either filter the personal summary to
     `season_key(helped_at)` or reword the subtitle. Filtering is the honest fix, since the
     community line is seasonal.
+  - ✅ Filtered. `impactSummary(records, season?)` counts only pledges whose `helpedAt` falls in
+    the season, with the same key as free catches (December joins the next winter). The Impact
+    screen passes the current season, so its numbers match its subtitle and the community line.
+    Without a season argument the function still counts everything, for any other caller.
+    - 4 tests: season filtering, December grouping, the screen counting only this season, and
+      the empty state when every pledge is from an earlier season.
 - **T-213 · Turning notifications on in Settings never asked Android** — *Claude · S · `DONE` · deps: T-201*
   - Found while debugging T-205: the Settings switch recorded notification consent without the OS
     permission, so the device registered for pushes the phone then silently dropped — the user
