@@ -548,7 +548,7 @@ key before loading into Supabase.**
     `species_presence` semantics rather than just a threshold, which is why it is its own task.
   - Not urgent for v1 (the shipped set already carries 99.63% of observations) but it is the
     difference between a national list and a local one, which is what the product claims to be.
-- **T-134 · Load presence dataset into Supabase (reference schema + writer)** — *Claude + Director · M · `IN-PROGRESS` (schema + loader + bounded seed done; full bulk load needs the service key) · deps: T-042, T-003 · [TSD §3](TSD.md)*
+- **T-134 · Load presence dataset into Supabase (reference schema + writer)** — *Claude + Director · M · `DONE` (bulk load verified live 2026-10-28) · deps: T-042, T-003 · [TSD §3](TSD.md)*
   - ✅ **Schema** `…000003_regions_and_presence.sql`: `regions` (21 counties), `species` taxonomy
     columns (`gbif_key`, `taxon_group`, `vertebrate`; `category` now nullable for amphibians/
     reptiles/arachnids/molluscs), and `species_presence(region_id, species_id, active_months,
@@ -563,6 +563,10 @@ key before loading into Supabase.**
     (`gbif_key`/`taxon_group`/`vertebrate` + `species_presence` rows) — applyable via the connector now.
   - ⏳ **Remaining:** apply the migrations + run the bulk loader with the service key (CI job); then
     switch the app to read presence from the DB (T-057/T-059).
+  - ✅ **Done (verified 2026-10-28):** data-pipeline run 40730729091 loaded 21 regions,
+    **11,936 species** and **78,530 presence rows**, adopting 53 curated ids (T-184). The app reads
+    presence from the database: This Week via `species_presence` (T-207), and the Almanac via
+    `region_catalogue` (T-208).
 - **T-135 · Curate + author content at national scale** — *Claude + Director · XL · `IN-PROGRESS` (pipeline built + validated on mammals; full 12k run + review pending) · deps: T-042 · [GDD §5](GDD.md), [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
   - ✅ Pipeline `pipeline/build_content.py` (+ `media/content_templates.py`, 8 pytest) generates, for
     every species in a presence file: a **grounded fact** from Wikipedia (CC BY-SA, attributed —
