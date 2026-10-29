@@ -29,7 +29,21 @@ EXPECTED: dict[str, str] = {
     "season_key 2026-11-30 23:30Z (already 1 Dec in Sweden)": "2027-winter",
     "season_key 2026-02-28": "2026-winter",
     "season_key 2026-07-01": "2026-summer",
+    # T-094 retention job. Throwaway accounts, all inactive by sign-in date for 200 days.
+    "setup: session refreshed today": "ok",
+    "setup: collection write today": "ok",
+    "setup: notification log": "ok",
+    "retention job runs": "ok",
+    "anonymous, no activity for 200 days": "deleted",
+    "anonymous, old sign-in but a session refreshed today": "kept",
+    "anonymous, old sign-in but a collection write today": "kept",
+    "email-linked, no activity for 200 days": "kept",
+    "notification sent 40 days ago": "deleted",
+    "notification sent yesterday": "kept",
 }
+
+# Outcomes compared exactly, not as substrings of an error.
+EXACT = {"ok", "kept", "deleted"}
 
 
 def evaluate(results: dict[str, str]) -> list[str]:
@@ -39,7 +53,7 @@ def evaluate(results: dict[str, str]) -> list[str]:
         got = results.get(step)
         if got is None:
             failures.append(f"{step}: did not run")
-        elif expected == "ok" or "-" in expected:
+        elif expected in EXACT or "-" in expected:
             if got != expected:
                 failures.append(f"{step}: expected {expected!r}, got {got!r}")
         elif expected not in got:
@@ -110,6 +124,55 @@ def run_free_catch_checks(cur) -> dict[str, str]:
     return results
 
 
+def run_retention_checks(cur) -> dict[str, str]:
+    """T-094: the daily job deletes exactly what the policy says, and nothing a live user owns."""
+    results: dict[str, str] = {}
+    old = "now() - interval '200 days'"
+
+    def user(anonymous: bool) -> str:
+        cur.execute(
+            "insert into auth.users (id, instance_id, aud, role, is_anonymous, created_at, updated_at, "
+            f"last_sign_in_at) values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', "
+            f"'authenticated', 'authenticated', %s, {old}, {old}, {old}) returning id",
+            (anonymous,),
+        )
+        return str(cur.fetchone()[0])
+
+    stale = user(True)
+    refreshed = user(True)
+    collecting = user(True)
+    linked = user(False)
+    # Session refreshed today: last_sign_in_at does not move on a refresh, which is the trap.
+    _step(cur, results, "setup: session refreshed today",
+          "insert into auth.sessions (id, user_id, created_at, updated_at, refreshed_at) "
+          f"values (gen_random_uuid(), %s, {old}, {old}, now() at time zone 'UTC')", (refreshed,))
+    _step(cur, results, "setup: collection write today",
+          "insert into public.collection (user_id, species_id, spotted_at) values (%s, 'zz-verify-r', now())",
+          (collecting,))
+    _step(cur, results, "setup: notification log",
+          "insert into public.notification_log (user_id, species_id, sent_at) values "
+          "(%s, 'zz-verify-old', now() - interval '40 days'), (%s, 'zz-verify-new', now() - interval '1 day')",
+          (linked, linked))
+
+    _step(cur, results, "retention job runs", "select public.apply_retention() is not null")
+    if results["retention job runs"] == "True":
+        results["retention job runs"] = "ok"
+
+    def exists(sql: str, params) -> str:
+        cur.execute(f"select exists({sql})", params)
+        return "kept" if cur.fetchone()[0] else "deleted"
+
+    users = "select 1 from auth.users where id = %s"
+    results["anonymous, no activity for 200 days"] = exists(users, (stale,))
+    results["anonymous, old sign-in but a session refreshed today"] = exists(users, (refreshed,))
+    results["anonymous, old sign-in but a collection write today"] = exists(users, (collecting,))
+    results["email-linked, no activity for 200 days"] = exists(users, (linked,))
+    logs = "select 1 from public.notification_log where user_id = %s and species_id = %s"
+    results["notification sent 40 days ago"] = exists(logs, (linked, "zz-verify-old"))
+    results["notification sent yesterday"] = exists(logs, (linked, "zz-verify-new"))
+    return results
+
+
 def main() -> None:
     dsn = os.environ.get("SUPABASE_DB_URL")
     if not dsn:
@@ -120,6 +183,7 @@ def main() -> None:
         try:
             with conn.cursor() as cur:
                 results = run_free_catch_checks(cur)
+                results.update(run_retention_checks(cur))
         finally:
             conn.rollback()  # always: these checks must never leave a trace
 

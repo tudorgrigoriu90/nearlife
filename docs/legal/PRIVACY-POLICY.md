@@ -55,8 +55,14 @@ We put a Data Processing Agreement in place with each processor and verify EU da
 appropriate safeguards (Standard Contractual Clauses) for any transfer outside the EU/EEA.
 
 ## How long we keep it
-- **Runtime location signals:** ~30 days.
-- **Anonymous accounts with no activity:** ~90 days, then eligible for deletion.
+- **Runtime location signals:** not stored on our servers. At most ~30 days, as a coarse grid
+  cell, if a future feature needs one.
+- **Anonymous accounts with no activity:** deleted automatically after ~90 days without use,
+  together with everything linked to them (collection, home region, notification settings).
+  "Use" means opening the app, so a single launch in that time keeps the account. Accounts with a
+  linked email are never expired. Only you can delete those, from Settings.
+- **Notification history** (which species we sent you, used to limit how often we notify):
+  ~30 days.
 - **Analytics:** ~365 days.
 - **Your collection:** until you delete your account or the account expires as above.
 

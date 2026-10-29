@@ -1055,10 +1055,36 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - ⏳ **Director:** deploy the function (`supabase functions deploy delete-account`). Until then,
     `functions.invoke` errors and the confirm screen shows the retryable "not deleted" message — by
     design. Executing a real deletion + on-device verify is a Director/device step.
-- **T-094 · Retention policy & auto-expiry** — *Claude · S · `IN-PROGRESS` (policy + expiry logic done; scheduled job pending) · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+- **T-094 · Retention policy & auto-expiry** — *Claude · S · `IN-PROGRESS` (job built + tested; apply + live verify pending) · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - ✅ `lib/retention.ts` (3 tests): `DEFAULT_RETENTION` windows (runtime location 30d < inactive
     anonymous 90d < analytics 365d) + `isExpired`/`expiryMs`. Remaining: the pg_cron job that
     applies expiry (deletes stale rows / anonymous users).
+  - ✅ **The job** (migration `20261029000004_retention.sql`): `public.apply_retention()`, run daily
+    at 03:41 UTC by pg_cron. SECURITY DEFINER; users cannot execute it. It deletes:
+    - `notification_log` rows older than **30 days** (new window, `notificationLogDays`). The
+      sender's caps read 48 h.
+    - **anonymous** accounts with no activity for **90 days**, with everything that cascades from
+      `auth.users`. All 14 FKs onto it cascade or set null, checked live. Email-linked accounts
+      are never expired.
+  - ⚠️ **Activity is the latest of every signal**: sign-in, user update, session refresh,
+    refresh-token rotation, collection write, push-device re-registration. `last_sign_in_at` alone
+    does not move on a token refresh, so a user who opens the app daily would have been deleted.
+    When in doubt, the job keeps the account.
+  - Not handled here, by design: runtime location is never stored server-side (T-091), and
+    analytics retention is the PostHog project setting (Director, with T-035).
+  - Tests:
+    - `pipeline/tests/test_retention_job.py` pins the SQL windows to `lib/retention.ts`, which
+      the privacy policy quotes.
+    - `pipeline/db/verify.py` gained 10 rolled-back live checks, with throwaway accounts: an idle
+      anonymous account is deleted; one with a session refreshed today, one with a collection
+      write today, and an idle email-linked one are kept; a 40-day-old log row is deleted and
+      yesterday's kept.
+  - The privacy policy draft now says "deleted automatically", not "eligible for deletion". It
+    lists notification history, and says runtime location is not stored server-side (legal
+    review is still T-095).
+  - ❓ **Director, worth a look:** the app is seasonal. Someone who stops opening it from November
+    to March (more than 90 days) comes back to an empty collection. The window is one constant
+    plus its SQL twin; 400 days would cover a full season cycle.
 
 ## F10.4 — Legal Artifacts
 - **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · `IN-PROGRESS` (policy drafted; legal review + hosting pending) · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*
