@@ -929,7 +929,7 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
     Kronoberg set with E3 (T-079/T-044).
 
 ## F8.3 — Impact & Badges
-- **T-081 · Collective impact counters** — *Claude · M · `IN-PROGRESS` (community totals built + tested; apply + live verify pending) · deps: T-077 · [GDD §7](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
+- **T-081 · Collective impact counters** — *Claude · M · `DONE` (community totals applied + verified live 2026-10-29) · deps: T-077 · [GDD §7](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
   - ✅ `components/ImpactScreen.tsx` (2 tests) shows the help the user has pledged this season —
     species helped / give / protect counts from the tested `lib/impact.ts` `impactSummary`. Honest by
     construction (invariant #1): counts only real pledges, and shows a plain "community totals coming"
@@ -955,6 +955,9 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
       read the totals, anon still reads no collection rows); a verdict test for a leak.
   - Not built: the per-species line "You + N others helped swifts this spring" (USER-FLOWS §4).
     It would be the same aggregate filtered to one species.
+  - ✅ **Applied + verified live:** db-migrate run 40838848358 applied it. The verify run
+    40838913042 passed all 25 checks, rolled back. Live today: `2026-autumn`, 0 pledges, so the
+    screen correctly shows the note until 3 people are helping.
 - **T-082 · Badges & completion** — *Claude · M · `DONE` (category + spotted/helped milestones; season/habitat need E3) · deps: T-057 · [GDD §8](GDD.md)*
   - ✅ `components/BadgesScreen.tsx` (3 tests) renders the full badge set — earned ones lit, the rest
     as locked goals with a "{earned} of {total} earned" line — over the tested earn rules in
