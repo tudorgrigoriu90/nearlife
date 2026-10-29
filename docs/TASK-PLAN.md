@@ -1051,10 +1051,23 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
       call and check separate statements.
     - Until the secret exists the webhook answers 403 to everyone, by design. The task stays
       IN-PROGRESS until a real sandbox purchase flows through, which needs T-004.
-- **T-084 · Full Game product + purchase flow** — *Claude · M · deps: T-083 · [ECONOMY](ECONOMY.md)*
+- **T-084 · Full Game product + purchase flow** — *Claude + Director · M · `IN-PROGRESS` (purchase layer built; sandbox purchase pending Play Console setup, see docs/launch/PAYMENTS-SETUP.md) · deps: T-083 · [ECONOMY](ECONOMY.md)*
   - **$4.99 / 49 SEK** one-time product (price set by the Director 2026-10-29, was $9.99; see
     ECONOMY.md for the trade-off) purchasable on both stores (sandbox verified); unlocks unlimited
     catching + all depth tiers + full home region.
+  - ✅ **Purchase layer (2026-10-29):**
+    - `react-native-purchases` is pinned at **10.14.0**: two weeks old, on the stable 10.x line,
+      rather than the 11.0.0 major released the day before.
+    - `lib/purchases.ts`, `RevenueCatPurchaseGateway` (8 tests):
+      - configures once, with `appUserID` = the Supabase user id, so webhook events name the
+        account;
+      - lists `full_game` + `family` with the **store's own localized price string**;
+      - buy, where a user backing out is `cancelled`, not an error; restore.
+    - The native module only exists in builds made after this dependency. `loadRevenueCat()`
+      requires it lazily and probes `NativeModules.RNPurchases`, so older dev builds and Jest keep
+      working, with purchases simply unavailable.
+    - Key: `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` (public `goog_` key) in `.env.local`, and as an
+      EAS env var for cloud builds.
 - **T-085 · Store screen (single SKU, no dark patterns)** — *Claude · S · deps: T-084 · [USER-FLOWS §8](USER-FLOWS.md)*
   - One Full Game card; "you've felt the catch — this makes it unlimited"; "✓ mission always
     free" and "✓ No ads. Ever." reassurance; **no** timers/urgency.
