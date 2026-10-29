@@ -230,19 +230,26 @@ def run_entitlement_checks(cur) -> dict[str, str]:
         "'authenticated', true, now(), now()) returning id"
     )
     buyer = str(cur.fetchone()[0])
-    full_game = "(select full_game from public.profiles where user_id = %s)"
 
-    def grant(name: str, entitlement: str, active: bool, at: str, expect: str, check: str = "") -> None:
-        _step(
-            cur, results, name,
-            "select case when public.set_entitlement(%s, %s, %s, " + at + ", 'p', 'evt') = %s "
-            + (f"and {check} " if check else "") + "then 'ok' else 'wrong' end",
-            (buyer, entitlement, active, expect, *([buyer] if check else [])),
-        )
+    def grant(name: str, entitlement: str, active: bool, at: str, expect: str, owns: bool) -> None:
+        # Call and check are separate statements on purpose. A statement reads one snapshot taken
+        # when it starts, so a full_game check inside the same statement as set_entitlement would
+        # see the value from before the function wrote it.
+        cur.execute("savepoint step")
+        try:
+            cur.execute(f"select public.set_entitlement(%s, %s, %s, {at}, 'p', 'evt')", (buyer, entitlement, active))
+            outcome = cur.fetchone()[0]
+            cur.execute("select full_game from public.profiles where user_id = %s", (buyer,))
+            now_owns = cur.fetchone()[0]
+            results[name] = "ok" if (outcome, now_owns) == (expect, owns) else f"{outcome}, full_game={now_owns}"
+            cur.execute("release savepoint step")
+        except Exception as exc:
+            cur.execute("rollback to savepoint step")
+            results[name] = str(exc).splitlines()[0]
 
-    grant("purchase grants the Full Game", "full_game", True, "now()", "applied", f"{full_game} = true")
+    grant("purchase grants the Full Game", "full_game", True, "now()", "applied", True)
     grant("an older event arriving late changes nothing", "full_game", False,
-          "now() - interval '1 hour'", "stale", f"{full_game} = true")
+          "now() - interval '1 hour'", "stale", True)
     for i in range(1, 4):
         cur.execute(
             "insert into public.collection (user_id, species_id, spotted_at, caught_at) values (%s, %s, now(), now())",
@@ -252,9 +259,9 @@ def run_entitlement_checks(cur) -> dict[str, str]:
           "insert into public.collection (user_id, species_id, spotted_at, caught_at) "
           "values (%s, 'zz-verify-paid-4', now(), now())", (buyer,))
     grant("refund revokes the Full Game", "full_game", False,
-          "now() + interval '1 second'", "applied", f"{full_game} = false")
+          "now() + interval '1 second'", "applied", False)
     grant("Family also grants the Full Game", "family", True,
-          "now() + interval '2 seconds'", "applied", f"{full_game} = true")
+          "now() + interval '2 seconds'", "applied", True)
     _step(cur, results, "a purchase for a deleted account is skipped",
           "select case when public.set_entitlement(gen_random_uuid(), 'full_game', true, now(), 'p', 'evt') "
           "= 'unknown_user' then 'ok' else 'wrong' end")
