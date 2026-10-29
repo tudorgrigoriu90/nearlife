@@ -2733,7 +2733,7 @@ attribution. Photos are language-independent (one set serves all locales). Licen
   - ✅ `lib/species/media.ts`: `SpeciesMedia` type; `isCommercialUseAllowed`/`assertAllowedLicense`
     (only CC0/CC-BY/CC-BY-SA — NC/ND rejected), `attributionFor`, `primaryPhoto`; empty
     `KRONOBERG_MEDIA` manifest (emoji fallback until T-119); 7 tests.
-- **T-119 · Source Wikimedia Commons photos (Kronoberg set)** — *Claude + Director · L · `IN-PROGRESS` (sourced + manifest at 100%; Supabase Storage upload = Director) · deps: T-118 · [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
+- **T-119 · Source Wikimedia Commons photos (Kronoberg set)** — *Claude + Director · L · `DONE` (54/54 uploaded 2026-10-28) · deps: T-118 · [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
   - ✅ Sourcing: `pipeline/build_kronoberg_media.py` reads the curated 54 from `kronoberg.ts`, queries
     Wikipedia + Commons (reusing the tested `media/wikimedia.py`/`licenses.py`), and writes
     `pipeline/data/media_kronoberg.json` — **54/54 (100%) with a commercial-safe photo**
@@ -2748,6 +2748,10 @@ attribution. Photos are language-independent (one set serves all locales). Licen
     resize on delivery). Until then the app shows the emoji fallback for spotted species (no breakage).
     Spot-check licensing. National-scale sourcing (the ~12k set) reuses the same pipeline (E3, gated
     by content T-135 + curation T-136).
+  - ✅ **Done (verified 2026-10-28):** the data pipeline's Storage step now runs the upload with the
+    repo secret, so no one runs it by hand. Run 40730729091 uploaded **54/54** curated photos to
+    `species-media` (before the T-210 pacing and retry, 4 had been lost to 429s). The cards show
+    them. The national-scale sourcing this task anticipated is T-202, done: 4,797 photos.
 - **T-126 · Species card renders photos** — *Claude · M · `DONE` · deps: T-118, T-119, T-059 · [USER-FLOWS §3,§4](USER-FLOWS.md)*
   - ✅ `components/SpeciesHero.tsx` renders the real photo on the species card **once spotted**
     (keeps the pre-spot silhouette so discovery still means something), with a graceful
