@@ -990,7 +990,7 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
     → `{ fullGame }`, the single source of truth the app already consumes (depth tiers T-138,
     free-catch T-113). Remaining (needs the RevenueCat account, T-004): the SDK integration that
     produces the active-entitlement ids and mirrors `full_game` to Supabase.
-- **T-217 · Entitlements are granted by the server (RevenueCat webhook)** — *Claude + Director · M · `IN-PROGRESS` (built + tested; apply, live verify, deploy pending; webhook secret = Director) · deps: T-200 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
+- **T-217 · Entitlements are granted by the server (RevenueCat webhook)** — *Claude + Director · M · `IN-PROGRESS` (applied + verified live + deployed; webhook secret + RevenueCat = Director, T-004) · deps: T-200 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
   - `profiles.full_game` is server-only since T-200, and the free-catch trigger already honours it.
     Nothing sets it yet.
   - An Edge Function receives RevenueCat webhooks (purchase, refund/cancel, transfer),
@@ -1026,6 +1026,15 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
       `https://subjdoiicfmiimtvlzsg.supabase.co/functions/v1/revenuecat-webhook` and the
       Authorization header `Bearer <that secret>`;
     - create the entitlements `full_game`, `family`, `all_regions` and `region_SWE_<n>_1`.
+  - ✅ **Live (2026-10-29):**
+    - db-migrate run 40871726380 applied it, and `revenuecat-webhook` is deployed (run
+      40871717403).
+    - The verify run 40875336294 passed all 34 checks, rolled back.
+    - The first verify run failed 3 checks, all from a test bug: each one read `full_game` in the
+      same statement as the write, so it saw the snapshot from before the write. Fixed by making
+      call and check separate statements.
+    - Until the secret exists the webhook answers 403 to everyone, by design. The task stays
+      IN-PROGRESS until a real sandbox purchase flows through, which needs T-004.
 - **T-084 · Full Game product + purchase flow** — *Claude · M · deps: T-083 · [ECONOMY](ECONOMY.md)*
   - **$4.99 / 49 SEK** one-time product (price set by the Director 2026-10-29, was $9.99; see
     ECONOMY.md for the trade-off) purchasable on both stores (sandbox verified); unlocks unlimited
