@@ -38,6 +38,7 @@ EXPECTED: dict[str, str] = {
     "anonymous, old sign-in but a session refreshed today": "kept",
     "anonymous, old sign-in but a collection write today": "kept",
     "email-linked, no activity for 200 days": "kept",
+    "anonymous, idle for 200 days but owns a purchase": "kept",
     "notification sent 40 days ago": "deleted",
     "notification sent yesterday": "kept",
     # T-081 community totals: everyone may read the counts, nobody may read the rows behind them.
@@ -156,6 +157,9 @@ def run_retention_checks(cur) -> dict[str, str]:
     refreshed = user(True)
     collecting = user(True)
     linked = user(False)
+    customer = user(True)
+    cur.execute("select public.set_entitlement(%s, 'full_game', true, now() - interval '200 days', 'p', 'evt')",
+                (customer,))
     # Session refreshed today: last_sign_in_at does not move on a refresh, which is the trap.
     _step(cur, results, "setup: session refreshed today",
           "insert into auth.sessions (id, user_id, created_at, updated_at, refreshed_at) "
@@ -181,6 +185,7 @@ def run_retention_checks(cur) -> dict[str, str]:
     results["anonymous, old sign-in but a session refreshed today"] = exists(users, (refreshed,))
     results["anonymous, old sign-in but a collection write today"] = exists(users, (collecting,))
     results["email-linked, no activity for 200 days"] = exists(users, (linked,))
+    results["anonymous, idle for 200 days but owns a purchase"] = exists(users, (customer,))
     logs = "select 1 from public.notification_log where user_id = %s and species_id = %s"
     results["notification sent 40 days ago"] = exists(logs, (linked, "zz-verify-old"))
     results["notification sent yesterday"] = exists(logs, (linked, "zz-verify-new"))

@@ -1177,6 +1177,11 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     - Dry run of the activity rule before the first night: of the 3 anonymous accounts, the 2 July
       test accounts (`e249bbd6`, `5e6763d4`, idle since 5 and 7 July) expire on the first run. The
       Director's phone account (`0e08dc15`, active 28 Oct) is kept.
+  - ✅ **Customers are never expired (2026-10-29, with T-217).** Since purchases became
+    server-side entitlements, an anonymous account can hold one. Deleting it after 90 idle days
+    would have dropped a paid unlock, and for a Family owner every member's unlock too. Migration
+    `20261029000007` adds the condition "no active entitlement" to the job, and a new live check
+    covers "anonymous, idle for 200 days but owns a purchase: kept".
 
 ## F10.4 — Legal Artifacts
 - **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · `IN-PROGRESS` (policy drafted; legal review + hosting pending) · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*

@@ -10,7 +10,8 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-MIGRATION = ROOT / "supabase" / "migrations" / "20261029000004_retention.sql"
+# The latest definition of apply_retention (20261029000004 first, replaced by 20261029000007).
+MIGRATION = ROOT / "supabase" / "migrations" / "20261029000007_retention_keeps_customers.sql"
 APP = ROOT / "lib" / "retention.ts"
 
 
@@ -51,3 +52,8 @@ def test_every_activity_signal_is_considered():
 def test_the_job_is_not_callable_by_users():
     sql = MIGRATION.read_text(encoding="utf-8")
     assert "revoke all on function public.apply_retention(timestamptz) from public, anon, authenticated;" in sql
+
+
+def test_a_paying_customer_is_never_expired():
+    sql = MIGRATION.read_text(encoding="utf-8")
+    assert "from public.entitlements e where e.user_id = u.id and e.active" in sql
