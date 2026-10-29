@@ -991,7 +991,8 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
     free-catch T-113). Remaining (needs the RevenueCat account, T-004): the SDK integration that
     produces the active-entitlement ids and mirrors `full_game` to Supabase.
 - **T-084 · Full Game product + purchase flow** — *Claude · M · deps: T-083 · [ECONOMY](ECONOMY.md)*
-  - $9.99 one-time product purchasable on both stores (sandbox verified); unlocks unlimited
+  - **$4.99 / 49 SEK** one-time product (price set by the Director 2026-10-29, was $9.99; see
+    ECONOMY.md for the trade-off) purchasable on both stores (sandbox verified); unlocks unlimited
     catching + all depth tiers + full home region.
 - **T-085 · Store screen (single SKU, no dark patterns)** — *Claude · S · deps: T-084 · [USER-FLOWS §8](USER-FLOWS.md)*
   - One Full Game card; "you've felt the catch — this makes it unlimited"; "✓ mission always

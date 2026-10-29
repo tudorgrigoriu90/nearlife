@@ -28,7 +28,7 @@ had is fun. So:
 - **Free users get 3 catches per season.** Enough to feel the full loop — travel to the
   habitat, play the category minigame, earn the reward, get the contextual protect tip —
   not enough to satisfy a collector.
-- The purchase pitch becomes *"you loved catching — get unlimited,"* instead of *"pay $9.99
+- The purchase pitch becomes *"you loved catching — get unlimited,"* instead of *"pay $4.99
   to find out if the game part is any good."*
 - Side benefit: the validation prototype can test all three tiers with free users, not just
   the passive one.
@@ -42,11 +42,15 @@ had is fun. So:
 | SKU | Price (one-time) | What it gives |
 |-----|------------------|---------------|
 | **Free** | — | **Home region** (hometown GPS-derived at signup — locked; see below) · Spotted · "Active this week" · all core facts + **all help/protect content** · Helped pledges · depth tiers climbable by *playing* · **3 catches per season** |
-| **Full Game** | **$9.99** | **Unlimited catching** · all depth tiers unlocked immediately · full home region |
+| **Full Game** | **$4.99** (49 SEK) | **Unlimited catching** · all depth tiers unlocked immediately · full home region |
 
-- **Anchor $9.99** (signals a real, crafted app; still an impulse buy). Drop to
-  **$6.99–$7.99** for volume; don't exceed ~$12.99 for a one-time base. Occasional **$6.99**
-  promos tied to seasonal events.
+- **Price: $4.99 / 49 SEK (Director, 2026-10-29)**, down from the original $9.99 anchor. The
+  reasoning is that 49 SEK is a very common app price point in Sweden and an easier impulse buy for
+  this audience. The trade-off is recorded so it can be judged with data: at the same conversion,
+  revenue halves (at 50k installs × 3%: ~$6.3k instead of ~$12.7k after the store's 15%), so the
+  lower price pays off only if it **more than doubles** conversion. Prices live in the store
+  consoles, not in the app (the app shows the store's localized price), so testing 79 SEK later is a
+  console change, not a release. Occasional seasonal promos stay possible.
 
 ### Post-validation (v2+)
 
@@ -126,7 +130,7 @@ Not from squeezing per-user ARPU (this audience won't tolerate it) but from:
   app gets featured/covered in ways a game never does. Keeps install cost low.
 - **Loyalty** — the mission (and, in v2, the family angle) keeps people for years.
 
-Cheap installs × a clean $9.99 decision × region packs as travel revenue = a healthy,
+Cheap installs × a clean $4.99 decision × region packs as travel revenue = a healthy,
 durable business. It will never mint money like a combat game with whales — and that's fine;
 it's a more resilient, defensible thing.
 

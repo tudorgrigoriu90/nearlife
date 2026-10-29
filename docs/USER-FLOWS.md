@@ -267,7 +267,7 @@ sacred. Feeds `impact_counters`.
 ┌────────────────────────────┐
 │ ‹ back        Unlock Nearby │
 │ ┌────────────────────────┐  │
-│ │ Full Game      $9.99    │  │  unlimited catching · all depth
+│ │ Full Game      49 kr    │  │  unlimited catching · all depth
 │ │ [ Unlock ]              │  │  tiers · full home region
 │ └────────────────────────┘  │
 │  You've felt the catch —    │
