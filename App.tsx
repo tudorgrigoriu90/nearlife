@@ -15,6 +15,7 @@ import DeleteAccountConfirm from './components/DeleteAccountConfirm';
 import LinkEmail from './components/LinkEmail';
 import BadgesScreen from './components/BadgesScreen';
 import ImpactScreen from './components/ImpactScreen';
+import FamilyScreen from './components/FamilyScreen';
 import { useCommunityImpact } from './components/useCommunityImpact';
 import { useEntitlements } from './components/useEntitlements';
 import { useCollection } from './components/useCollection';
@@ -50,6 +51,7 @@ import { hasSupabaseConfig } from './lib/supabaseConfig';
 import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib/communityImpact';
 import { SupabaseEntitlementSource, type EntitlementClient, type EntitlementSource } from './lib/entitlement';
 import { AsyncStorageEntitlementStore } from './lib/entitlementStore';
+import { SupabaseFamilyGateway } from './lib/family';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import type { Region } from './lib/hometown';
 import { AsyncStorageHometownStore } from './lib/hometownStore';
@@ -158,7 +160,11 @@ export default function App() {
   const [showLinkEmail, setShowLinkEmail] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
   const [showImpact, setShowImpact] = useState(false);
-  const { entitlements } = useEntitlements({ source: entitlementSource(), store: ENTITLEMENT_STORE });
+  const { entitlements, refresh: refreshEntitlements } = useEntitlements({
+    source: entitlementSource(),
+    store: ENTITLEMENT_STORE,
+  });
+  const [showFamily, setShowFamily] = useState(false);
   // Read only while the Impact screen is open, so each visit shows a fresh total (T-081).
   const community = useCommunityImpact(showImpact ? communityImpactSource() : null);
   const [exportJson, setExportJson] = useState<string | null>(null);
@@ -496,6 +502,21 @@ export default function App() {
     );
   }
 
+  if (showFamily) {
+    return (
+      <>
+        <FamilyScreen
+          locale={locale}
+          gateway={new SupabaseFamilyGateway(getSupabase())}
+          ownsFamily={entitlements.family}
+          onChanged={refreshEntitlements}
+          onDone={() => setShowFamily(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (showLinkEmail) {
     return (
       <>
@@ -558,6 +579,8 @@ export default function App() {
           }
           onExportData={exportMyData}
           onLinkEmail={() => setShowLinkEmail(true)}
+          // Family needs the backend: households live in Supabase (T-102).
+          onOpenFamily={hasSupabaseConfig() ? () => setShowFamily(true) : undefined}
           onDeleteAccount={() => setShowDelete(true)}
           onDone={() => setShowSettings(false)}
         />

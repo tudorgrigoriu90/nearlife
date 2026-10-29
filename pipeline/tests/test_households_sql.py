@@ -25,3 +25,12 @@ def test_the_last_seat_is_locked_while_joining():
 def test_set_entitlement_stays_service_role_only_after_being_replaced():
     assert "grant execute on function public.set_entitlement(uuid, text, boolean, timestamptz, text, text)\n  to service_role;" in SQL
     assert "revoke all on function public.set_entitlement" in SQL
+
+
+def test_the_app_constant_matches_the_database_cap():
+    import re
+
+    app = (Path(__file__).resolve().parents[2] / "lib" / "family.ts").read_text(encoding="utf-8")
+    m = re.search(r"FAMILY_MAX_PEOPLE = (\d+);", app)
+    assert m, "FAMILY_MAX_PEOPLE not found in lib/family.ts"
+    assert f"if people >= {m.group(1)} then raise exception 'household_full'" in SQL

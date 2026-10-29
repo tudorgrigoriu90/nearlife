@@ -34,6 +34,7 @@ export default function SettingsScreen({
   onSelectSecondaryLocale,
   onExportData,
   onLinkEmail,
+  onOpenFamily,
   onDeleteAccount,
   onDone,
 }: {
@@ -50,6 +51,8 @@ export default function SettingsScreen({
   onExportData: () => void;
   /** Open the link-email flow (T-133 · make the account durable across reinstall/devices). */
   onLinkEmail?: () => void;
+  /** Open the Family screen (T-103): join with a code, or manage your family. */
+  onOpenFamily?: () => void;
   /** Open the account/data deletion flow (T-093 · GDPR erasure, reachable from Settings). */
   onDeleteAccount?: () => void;
   onDone: () => void;
@@ -152,6 +155,18 @@ export default function SettingsScreen({
             <Text style={styles.infoText}>{tr('dual.hint')}</Text>
           </View>
         )}
+
+        {onOpenFamily ? (
+          <>
+            <Text style={styles.sectionLabel}>{tr('family.title')}</Text>
+            <View style={styles.card}>
+              <Pressable onPress={onOpenFamily} accessibilityRole="button" style={styles.row}>
+                <Text style={styles.rowLabel}>{tr('settings.family')}</Text>
+                <Text style={styles.chevron}>›</Text>
+              </Pressable>
+            </View>
+          </>
+        ) : null}
 
         <Text style={styles.sectionLabel}>{tr('settings.yourData')}</Text>
         <View style={styles.card}>

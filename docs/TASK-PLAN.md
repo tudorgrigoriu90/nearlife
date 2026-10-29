@@ -1313,12 +1313,27 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
     customer guard. The verify run 40877218364 passed all 50 checks, rolled back. That includes:
     a 6th person is refused; a refund removes every member's Full Game; nobody can join a
     household whose Family was refunded; members cannot read the tables.
-- **T-103 · Family SKU + invite flow** — *Claude + Director · M · `TODO` · deps: T-102, T-083 · [ECONOMY](ECONOMY.md)*
+- **T-103 · Family SKU + invite flow** — *Claude + Director · M · `IN-PROGRESS` (invite flow done; buying Family waits on the Store, T-085) · deps: T-102, T-083 · [ECONOMY](ECONOMY.md)*
   - The `family` product (Director creates it in Play Console at 99 SEK) is the RevenueCat
     entitlement that makes its buyer a household owner. A screen shows the invite code (share
     sheet) and the member list, and offers join-with-code to non-buyers.
   - Minors: joining adds no personal data (anonymous accounts linked by a code), and the age
     gate rules still apply per member. Confirm with legal review (T-009).
+  - ✅ **Invite flow (2026-10-29):**
+    - `lib/family.ts` calls the T-102 functions: `parseHousehold`, `normalizeInviteCode` (accepts
+      spaces, dashes and lower case, and refuses impossible codes before asking the server), and
+      `familyErrorKey`, which maps each refusal to its own message.
+    - `FAMILY_MAX_PEOPLE` is pinned to the SQL cap.
+    - `components/FamilyScreen.tsx`, reached from Settings → Family:
+      - in no family: join with a code (a Family buyer can also start one);
+      - owner: the code grouped as "ABCD 2345", a Share button, seats taken, and Remove;
+      - member: status and Leave;
+      - a refunded family is explained plainly.
+    - After any change the app re-reads entitlements, so the Full Game appears or disappears at
+      once. The screen never sells.
+    - en + sv. 18 tests. The honest-copy test caught "right now" in a draft error message, now
+      reworded.
+  - Remaining: the Family product card in the Store (T-085), which needs T-004 + the SDK.
 - **T-104 · Family shared almanac** — *Claude · L · v2 · deps: T-102 · [USER-FLOWS §7 (v1 note)](USER-FLOWS.md)*
   - Household view, member activity feed, family impact counter, personal/family toggle on Home.
     Deferred: v1 Family is the shared unlock only.
