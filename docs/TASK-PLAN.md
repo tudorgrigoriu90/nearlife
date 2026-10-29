@@ -2258,7 +2258,7 @@ only.**
     user in Skåne is notified about Kronoberg's species.
   - ⚠️ Tapping a notification opens the app but **not yet the species card** — the id rides in
     `data.speciesId`; the deep link is **T-031**.
-- **T-202 · Photos exist for 54 of 6,824 species** — *Claude · L · `IN-PROGRESS` (data side built; first runs pending; app side is T-215) · deps: T-119, T-177*
+- **T-202 · Photos exist for 54 of 6,824 species** — *Claude · L · `DONE` (whole catalogue sourced + verified live 2026-10-29) · deps: T-119, T-177*
   - `build_kronoberg_media.py` sources photos for the curated 54 only, and `SpeciesHero` reads that
     bundled manifest. Every other species renders its category glyph.
   - The pipeline already knows how to do this — `wikimedia.py` fetches a licence-clear lead image
@@ -2278,6 +2278,15 @@ only.**
     then it only picks up species a catalogue refresh adds. The curated 54 are seeded from their
     manifest first and never overwritten (their photos were hand-checked).
   - Budget: ~6,800 × ~40 KB ≈ 270 MB of the 1 GB free Storage tier.
+  - ✅ **Verified** (run 40773817420, green, 3h08m, one run — no resume needed):
+    - `species_media` records **all 6,824** catalogue species: **4,797 with a photo (70%)**, 2,027
+      recorded as having no commercial-safe photo. Those keep the category glyph and are not
+      re-queried weekly.
+    - Licences: CC-BY-SA 3,199 · CC-BY 1,029 · CC0 569. Nothing else ships (invariant #8).
+    - Storage measured: **4,797 objects, 330 MB** of the 1 GB free tier (invariant #7 holds).
+    - The app sees them: Kronoberg's `region_catalogue` has a photo for 2,362 of 3,020 species
+      (78%), and for **all of the 50 most-observed**. The misses sit in the long tail, as expected
+      from most-observed-first ordering and Wikipedia's coverage.
 - **T-215 · The app and the notifications use the catalogue photos** — *Claude · M · `DONE` (code + migration; photos appear as T-202's runs fill the table) · deps: T-202*
   - `SpeciesHero` and the notification image still read only the bundled 54. Read `species_media`
     (via `region_catalogue` / `describeSpecies` for the app, a join in `send-notifications` for the
