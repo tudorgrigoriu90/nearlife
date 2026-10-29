@@ -16,6 +16,7 @@ import LinkEmail from './components/LinkEmail';
 import BadgesScreen from './components/BadgesScreen';
 import ImpactScreen from './components/ImpactScreen';
 import FamilyScreen from './components/FamilyScreen';
+import StoreScreen from './components/StoreScreen';
 import { useCommunityImpact } from './components/useCommunityImpact';
 import { useEntitlements } from './components/useEntitlements';
 import { useCollection } from './components/useCollection';
@@ -52,6 +53,7 @@ import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib
 import { SupabaseEntitlementSource, type EntitlementClient, type EntitlementSource } from './lib/entitlement';
 import { AsyncStorageEntitlementStore } from './lib/entitlementStore';
 import { SupabaseFamilyGateway } from './lib/family';
+import { RevenueCatPurchaseGateway, loadRevenueCat, revenueCatKey, type PurchaseGateway } from './lib/purchases';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import type { Region } from './lib/hometown';
 import { AsyncStorageHometownStore } from './lib/hometownStore';
@@ -91,6 +93,18 @@ function entitlementSource(): EntitlementSource | null {
   }
   return entitlementSourceInstance;
 }
+
+// Store purchases (T-084), built on first use: the native module exists only in builds made after
+// react-native-purchases was added, and without it the Store just hides its buy buttons.
+let purchaseGatewayInstance: PurchaseGateway | undefined;
+function purchaseGateway(): PurchaseGateway {
+  purchaseGatewayInstance ??= new RevenueCatPurchaseGateway(loadRevenueCat(), revenueCatKey(), ensureAnonymousSession);
+  return purchaseGatewayInstance;
+}
+
+// After a purchase the server learns of it from RevenueCat's webhook, usually within seconds but
+// not instantly, so the app re-reads a few times rather than once.
+const AFTER_PURCHASE_REREAD_MS = [0, 2_000, 6_000, 15_000];
 
 function communityImpactSource(): CommunityImpactSource | null {
   if (communitySource === undefined) {
@@ -165,6 +179,7 @@ export default function App() {
     store: ENTITLEMENT_STORE,
   });
   const [showFamily, setShowFamily] = useState(false);
+  const [showStore, setShowStore] = useState(false);
   // Read only while the Impact screen is open, so each visit shows a fresh total (T-081).
   const community = useCommunityImpact(showImpact ? communityImpactSource() : null);
   const [exportJson, setExportJson] = useState<string | null>(null);
@@ -502,6 +517,23 @@ export default function App() {
     );
   }
 
+  if (showStore) {
+    return (
+      <>
+        <StoreScreen
+          locale={locale}
+          gateway={purchaseGateway()}
+          entitlements={entitlements}
+          onPurchased={() => {
+            for (const ms of AFTER_PURCHASE_REREAD_MS) setTimeout(refreshEntitlements, ms);
+          }}
+          onDone={() => setShowStore(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (showFamily) {
     return (
       <>
@@ -581,6 +613,7 @@ export default function App() {
           onLinkEmail={() => setShowLinkEmail(true)}
           // Family needs the backend: households live in Supabase (T-102).
           onOpenFamily={hasSupabaseConfig() ? () => setShowFamily(true) : undefined}
+          onOpenStore={hasSupabaseConfig() ? () => setShowStore(true) : undefined}
           onDeleteAccount={() => setShowDelete(true)}
           onDone={() => setShowSettings(false)}
         />
@@ -669,7 +702,18 @@ export default function App() {
           }}
           nearbyNote={freeCatch.fullGame ? undefined : tr('catch.remaining', { count: remaining })}
         />
-        {paywall ? <FreeCatchSheet locale={locale} onClose={() => setPaywall(false)} /> : null}
+        {paywall ? <FreeCatchSheet
+            locale={locale}
+            onClose={() => setPaywall(false)}
+            onOpenStore={
+              hasSupabaseConfig()
+                ? () => {
+                    setPaywall(false);
+                    setShowStore(true);
+                  }
+                : undefined
+            }
+          /> : null}
         <StatusBar style="auto" />
       </View>
     );

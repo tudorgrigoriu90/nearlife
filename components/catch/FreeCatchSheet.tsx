@@ -4,15 +4,17 @@ import { createTranslator, type Locale } from '../../lib/i18n';
 // The gentle out-of-free-catches sheet (T-034 · ECONOMY). Shown only when a free user attempts a
 // 4th catch in a season — the single conversion nudge, never on a delight moment (invariant #4).
 // No dark patterns: no countdowns or urgency, and it reassures that the mission is always free
-// and there are no ads. The prototype has no real purchase (RevenueCat lands in E9); the CTA is
-// a placeholder.
+// and there are no ads. The CTA opens the Store (T-085), where the purchase happens.
 
 export default function FreeCatchSheet({
   locale = 'en',
   onClose,
+  onOpenStore,
 }: {
   locale?: Locale;
   onClose: () => void;
+  /** Open the Store; without one (no purchases in this build) the sheet only informs. */
+  onOpenStore?: () => void;
 }) {
   const tr = createTranslator(locale);
   return (
@@ -22,10 +24,13 @@ export default function FreeCatchSheet({
         <Text style={styles.body}>{tr('paywall.body')}</Text>
         <Text style={styles.reassure}>{tr('paywall.freeMission')}</Text>
         <Text style={styles.reassure}>{tr('paywall.noAds')}</Text>
-        <Pressable style={styles.cta} accessibilityRole="button" onPress={onClose}>
-          <Text style={styles.ctaText}>{tr('paywall.cta')}</Text>
-        </Pressable>
-        <Text style={styles.soon}>{tr('paywall.soon')}</Text>
+        {onOpenStore ? (
+          <Pressable style={styles.cta} accessibilityRole="button" onPress={onOpenStore}>
+            <Text style={styles.ctaText}>{tr('paywall.cta')}</Text>
+          </Pressable>
+        ) : (
+          <Text style={styles.soon}>{tr('paywall.soon')}</Text>
+        )}
         <Pressable style={styles.later} accessibilityRole="button" onPress={onClose}>
           <Text style={styles.laterText}>{tr('paywall.later')}</Text>
         </Pressable>

@@ -1068,9 +1068,20 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
       working, with purchases simply unavailable.
     - Key: `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` (public `goog_` key) in `.env.local`, and as an
       EAS env var for cloud builds.
-- **T-085 · Store screen (single SKU, no dark patterns)** — *Claude · S · deps: T-084 · [USER-FLOWS §8](USER-FLOWS.md)*
+- **T-085 · Store screen (Full Game + Family, no dark patterns)** — *Claude · S · `DONE` (sandbox check rides on T-084) · deps: T-084 · [USER-FLOWS §8](USER-FLOWS.md)*
   - One Full Game card; "you've felt the catch — this makes it unlimited"; "✓ mission always
     free" and "✓ No ads. Ever." reassurance; **no** timers/urgency.
+  - ✅ **Built (2026-10-29):** `components/StoreScreen.tsx` (6 tests).
+    - Two cards, Full Game and Family, with the **store's localized price**. An owned product shows
+      "✓ Unlocked" and no buy button; ownership comes from the server, not the SDK.
+    - Restore purchases. The mission-is-free and no-ads reassurances always show.
+    - Backing out of the store dialog shows nothing. A real failure says "If you were charged,
+      tap Restore purchases", never "you haven't been charged", which cannot be promised.
+    - A build without the native module says purchases aren't available yet.
+    - Reached from the **out-of-free-catches sheet**, whose CTA now opens the Store (the one sales
+      signal), and from **Settings → Full Game & Family**. Never from a delight moment.
+    - After a purchase or restore the app re-reads entitlements at 0, 2, 6 and 15 s, because the
+      webhook usually lands within seconds but not instantly.
 - **T-086 · Restore purchases** — *Claude · XS · deps: T-083 · [USER-FLOWS §8](USER-FLOWS.md)*
   - Restore works across reinstall/devices tied to the account.
 
