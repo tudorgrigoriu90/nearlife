@@ -567,7 +567,7 @@ key before loading into Supabase.**
     **11,936 species** and **78,530 presence rows**, adopting 53 curated ids (T-184). The app reads
     presence from the database: This Week via `species_presence` (T-207), and the Almanac via
     `region_catalogue` (T-208).
-- **T-135 · Curate + author content at national scale** — *Claude + Director · XL · `IN-PROGRESS` (pipeline built + validated on mammals; full 12k run + review pending) · deps: T-042 · [GDD §5](GDD.md), [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
+- **T-135 · Curate + author content at national scale** — *Claude + Director · XL · `DONE` (all taxa loaded 2026-10-28) · deps: T-042 · [GDD §5](GDD.md), [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)*
   - ✅ Pipeline `pipeline/build_content.py` (+ `media/content_templates.py`, 8 pytest) generates, for
     every species in a presence file: a **grounded fact** from Wikipedia (CC BY-SA, attributed —
     never fabricated; `null` when there's no article), an **honest season+habitat "when & how"**
@@ -580,6 +580,14 @@ key before loading into Supabase.**
   - ⏳ Remaining: run all taxa; **native review** (T-125) + **GBIF-noise curation** (T-136) before it
     ships; load into `species_content` (**T-145** loader — done) and switch the app to DB reads
     (T-057/T-059) so the 12k actually render; sv translation via the review gate.
+  - ✅ **Done (verified 2026-10-28):**
+    - **All taxa** generated and loaded in run 40730729091: 213,894 `species_content` rows, every
+      species in all 18 v1 locales. Per-locale counts are in T-210.
+    - The **review gate is superseded** by the Director's v1 scope (T-177): the T-136 noise filter
+      is the quality bar, and there is no per-species human verification.
+    - Names come from GBIF vernaculars, never machine translation (T-188/T-187), so no sv
+      translation step remains.
+    - The safety line held: give/protect are still category templates only.
 - **T-144 · CI workflow for the national data pipeline** — *Claude · S · `DONE` (workflow; needs Director secrets to load) · deps: T-134, T-135 · [TSD §6](TSD.md)*
   - ✅ `.github/workflows/data-pipeline.yml` (manual `workflow_dispatch`): installs the pipeline deps,
     generates national content (`build_content.py --all` or a chosen taxon) + the curated photo
