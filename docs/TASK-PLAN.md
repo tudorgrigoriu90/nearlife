@@ -100,9 +100,18 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
   - ⚠️ **Action for Director:** the `sb_secret_...` key was exposed in chat — **rotate it** in
     the dashboard. Not needed by the app (publishable key only); server jobs get a fresh secret
     via a CI secret later.
-- **T-004 · Create RevenueCat account & link store keys** — *Director · S · deps: T-001, T-002 · [ECONOMY](ECONOMY.md), [TSD §1](TSD.md)*
+- **T-004 · Create RevenueCat account & link store keys** — *Director · S · `IN-PROGRESS` (account + public key done 2026-10-29; Play linking, products, webhook pending) · deps: T-001, T-002 · [ECONOMY](ECONOMY.md), [TSD §1](TSD.md)*
   - RevenueCat project created; App Store + Play billing keys linked.
   - Verified free tier covers projected volume (<$2.5k/mo).
+  - ✅ The RevenueCat project "Nearlife" exists. The public SDK key for the Play Store app is
+    `goog_WEPDbQTnKelAXFdMfHOKSnfqkGi`; public by design, it ships in the app.
+  - 📋 **Step-by-step guide: [docs/launch/PAYMENTS-SETUP.md](launch/PAYMENTS-SETUP.md)**, in
+    this order: Play developer account → payments profile → app → EAS build uploaded to internal
+    testing → `full_game` (49 SEK) + `family` (99 SEK) products → service account → RevenueCat
+    products/entitlements → webhook + Supabase secret → license-tester purchase.
+  - Cloud builds need `google-services.json`, which is gitignored. `app.config.js` now reads it
+    from the EAS secret-file variable `GOOGLE_SERVICES_JSON` when set, and from the local file
+    otherwise.
 - **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · `DONE` · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - EU-hosted instance; IP anonymization enabled; project API key issued.
   - ✅ EU Cloud project created (Director-confirmed region); project API key (`phc_…`, a public
