@@ -5,7 +5,8 @@ import { progressSummary, type CollectionRecord } from '../lib/collection';
 import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
 import { photoFor } from '../lib/species/media';
 import { commonNameFor } from '../lib/species/localized';
-import type { Species, SpeciesCategory } from '../lib/species/types';
+import { monthOf } from '../lib/season';
+import type { Month, Species, SpeciesCategory } from '../lib/species/types';
 import { CATEGORY_EMOJI, speciesGlyph } from './speciesVisual';
 
 // Almanac grid (T-025 · USER-FLOWS §2). Every species with ●/◐/◑ tier overlays; undiscovered
@@ -98,6 +99,7 @@ export default function AlmanacScreen({
   onSelectSpecies,
   onOpenBadges,
   onOpenImpact,
+  month = monthOf(new Date()),
 }: {
   species: Species[];
   records?: CollectionRecord[];
@@ -107,10 +109,15 @@ export default function AlmanacScreen({
   /** Entry points to the Badges (T-082) / Impact (T-081) screens, shown when provided (T-058). */
   onOpenBadges?: () => void;
   onOpenImpact?: () => void;
+  /** The month "Active this month" filters on; injectable for tests. */
+  month?: Month;
 }) {
   const tr = createTranslator(locale);
   const [category, setCategory] = useState<SpeciesCategory | null>(null);
-  const entries = almanacEntries(species, records, category ?? undefined);
+  // With 3,000+ species in a county list, "what can I find now" is the useful cut (T-057). It is
+  // the honest season window from the presence data, never "here right now" (invariant #1).
+  const [activeNow, setActiveNow] = useState(false);
+  const entries = almanacEntries(species, records, category ?? undefined, activeNow ? month : undefined);
   const counts = categoryCounts(species, records);
   const discovered = discoveredCount(species, records);
   const summary = progressSummary(records);
@@ -157,6 +164,11 @@ export default function AlmanacScreen({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.chips}
       >
+        <Chip
+          label={`🗓 ${tr('almanac.filter.activeNow')}`}
+          active={activeNow}
+          onPress={() => setActiveNow((on) => !on)}
+        />
         <Chip label={tr('almanac.filter.all')} active={category === null} onPress={() => setCategory(null)} />
         {counts.map((c) => (
           <Chip
@@ -170,13 +182,15 @@ export default function AlmanacScreen({
 
       <FlatList
         data={entries}
-        key={category ?? 'all'}
+        key={`${category ?? 'all'}-${activeNow ? 'now' : 'any'}`}
         keyExtractor={(e) => e.species.id}
         numColumns={3}
         columnWrapperStyle={styles.gridRow}
         renderItem={({ item }) => <Cell entry={item} locale={locale} onSelect={onSelectSpecies} />}
         contentContainerStyle={styles.grid}
-        ListEmptyComponent={<Text style={styles.empty}>{tr('almanac.empty')}</Text>}
+        ListEmptyComponent={
+          <Text style={styles.empty}>{tr(activeNow ? 'almanac.activeNow.empty' : 'almanac.empty')}</Text>
+        }
       />
     </View>
   );

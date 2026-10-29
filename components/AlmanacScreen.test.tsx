@@ -95,4 +95,32 @@ describe('AlmanacScreen', () => {
       expect(screen.queryByTestId('almanac-photo-gbif:1')).toBeNull();
     });
   });
+
+  describe('active-this-month filter (T-057)', () => {
+    const swift = KRONOBERG_SPECIES.find((x) => x.id === 'common-swift')!;
+    const summerOnly: Species = { ...swift, id: 'summer', commonName: 'Summer bird', activeMonths: [6, 7] };
+    const winterOnly: Species = { ...swift, id: 'winter', commonName: 'Winter bird', activeMonths: [1] };
+
+    it('shows only species active in the current month when switched on', async () => {
+      await render(<AlmanacScreen species={[summerOnly, winterOnly]} month={1} />);
+      expect(screen.getAllByText('—')).toHaveLength(2); // both undiscovered cells shown
+      await fireEvent.press(screen.getByText(new RegExp(tr('almanac.filter.activeNow'))));
+      expect(screen.getAllByText('—')).toHaveLength(1);
+    });
+
+    it('says so when nothing in the list is active this month', async () => {
+      await render(<AlmanacScreen species={[summerOnly]} month={1} />);
+      await fireEvent.press(screen.getByText(new RegExp(tr('almanac.filter.activeNow'))));
+      expect(screen.getByText(tr('almanac.activeNow.empty'))).toBeTruthy();
+    });
+
+    it('marks the chip as selected for screen readers', async () => {
+      await render(<AlmanacScreen species={[summerOnly]} month={1} />);
+      const chip = screen.getByRole('button', { name: new RegExp(tr('almanac.filter.activeNow')) });
+      await fireEvent.press(chip);
+      expect(
+        screen.getByRole('button', { name: new RegExp(tr('almanac.filter.activeNow')) }).props.accessibilityState,
+      ).toEqual({ selected: true });
+    });
+  });
 });

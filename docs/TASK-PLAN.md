@@ -678,7 +678,7 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     T-102 (households) lands; the current `user_id` shape covers v1.
 
 ## F4.2 — Almanac
-- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (**Supabase repo injected**; secondary filters pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
+- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (**Supabase repo injected**; season filter done; habitat filter pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ Data-access seam `lib/speciesRepository.ts` (7 tests): `SpeciesRepository` (`listSpecies` +
     `getContent`) with a `HardcodedSpeciesRepository` (the bundled set the app runs on today) and a
     `SupabaseSpeciesRepository` (reads the seeded `species`/`species_content` tables via a fakeable
@@ -697,7 +697,15 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     database has no row for — or, in `getContentInLocale`, surface a language the user never chose,
     which is the precise thing that method exists to prevent. Failures are logged rather than
     swallowed, because a silent fallback makes a persistent outage look like a small catalogue.
-  - Remaining: season/habitat secondary filters (habitat needs E3).
+  - ✅ **Season filter (2026-10-29):** a "🗓 Active this month" toggle chip. It combines with the
+    category chips and narrows the grid to species whose county `active_months` include the
+    current month. It has its own empty state. With 3,000+ species in a county list this is the
+    useful cut, and the copy stays honest: "active this month", never "here now" (invariant #1).
+    `almanacEntries(…, activeIn)` is tested in `lib/almanac.test.ts`, the chip in
+    `AlmanacScreen.test.tsx`.
+  - Remaining: **habitat filter.** The data exists only in the pipeline (`_realms` from GBIF
+    species profiles, T-191, in `vernacular.json`); no database column carries it yet. It needs
+    a `species.realms` column and loader before any UI.
   - 🚦→✅ **The seed gate is CLEARED (2026-08-18).** The gate read: do not inject the Supabase repo
     until all 38 locales are seeded, because `SupabaseSpeciesRepository.getContentInLocale` has no
     English fallback by design — switching over with only en/sv/so live would have silently blanked

@@ -45,6 +45,8 @@ export const en = {
   'almanac.empty': 'Your almanac is waiting — spot your first species.',
   'almanac.loading': 'Loading your almanac…',
   'almanac.filter.all': 'All',
+  'almanac.filter.activeNow': 'Active this month',
+  'almanac.activeNow.empty': 'Nothing here is active this month. Try another category.',
   'almanac.progress': '{discovered} of {total} spotted',
 
   // Category labels (Almanac filter chips)
@@ -273,6 +275,8 @@ const sv: Catalog = {
   'almanac.empty': 'Din almanacka väntar – hitta din första art.',
   'almanac.loading': 'Laddar din almanacka…',
   'almanac.filter.all': 'Alla',
+  'almanac.filter.activeNow': 'Aktiva den här månaden',
+  'almanac.activeNow.empty': 'Inget här är aktivt den här månaden. Prova en annan kategori.',
   'almanac.progress': '{discovered} av {total} sedda',
 
   // Category labels (Almanac filter chips)

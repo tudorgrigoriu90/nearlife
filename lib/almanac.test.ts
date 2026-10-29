@@ -40,6 +40,15 @@ describe('almanacEntries', () => {
     const entries = almanacEntries(species, [], 'bird');
     expect(entries.map((e) => e.species.id)).toEqual(['a-bird', 'b-bird']);
   });
+
+  it('narrows to species active in the given month (T-057)', () => {
+    expect(almanacEntries(species, [], undefined, 6).map((e) => e.species.id)).toEqual(['b-bird']);
+  });
+
+  it('combines the month filter with the category filter', () => {
+    expect(almanacEntries(species, [], 'plant', 7).map((e) => e.species.id)).toEqual(['c-plant']);
+    expect(almanacEntries(species, [], 'plant', 6)).toEqual([]);
+  });
 });
 
 describe('categoryCounts', () => {
