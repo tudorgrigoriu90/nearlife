@@ -61,6 +61,9 @@ had is fun. So:
     is ours: membership lives in Supabase, and the server grants the entitlement.
   - Joining a household adds no personal data. Members are the same anonymous accounts, linked by
     a code.
+- **Region packs in v1 (Director, 2026-10-29).** v1 is Sweden only, so a region pack opens
+  another **county**, and the World Pass becomes an **all-of-Sweden** pass. The $2.99 / $19.99
+  figures below predate the 49 SEK anchor and await the Director's confirmation.
 
 ### Post-validation (v2+)
 

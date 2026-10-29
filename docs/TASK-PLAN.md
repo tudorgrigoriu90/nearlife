@@ -1243,8 +1243,23 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
     Deferred: v1 Family is the shared unlock only.
 
 ## F12.2 — Regions & World Pass
-- **T-105 · Region pack + World Pass products** — *Claude · M · deps: T-083 · [ECONOMY](ECONOMY.md)*
-  - $2.99 region packs and $19.99 World Pass; region switcher unlock/lock states in almanac/store.
+> **Moved into v1 (Director, 2026-10-29).** v1 is Sweden only, so a "region" is one of the 20
+> counties that are not your home county, and the "World Pass" covers all of Sweden. Prices are
+> still to be confirmed against the new 49 SEK anchor; the ECONOMY.md figures are $2.99 / $19.99.
+
+- **T-105 · Region pack + All-Sweden pass products** — *Claude + Director · M · `TODO` · deps: T-217, T-083 · [ECONOMY](ECONOMY.md)*
+  - Products (Director creates them in Play Console): one pack per county, or a single
+    "pick a county" pack, plus the all-counties pass. Owned regions are recorded server-side by
+    the T-217 webhook, never client-side.
+  - Region switcher: home county plus owned counties. A locked county shows its This Week list
+    as a preview (names + photos), with catching and the full Almanac locked. The mission
+    content stays free everywhere (invariant #2).
+- **T-218 · Travel: notice when the phone is in another county** — *Claude · S · `TODO` · deps: T-105, T-090 · [ECONOMY](ECONOMY.md)*
+  - While the app is open, a coarse position check (county only, discarded at once, same
+    resolver as onboarding, T-090) notices that you are outside your home county. It offers that
+    county's preview and its pack, once per county per visit. It never nags, and it never fires on
+    a delight moment (invariant #4).
+  - The hometown stays locked (ECONOMY.md); this only opens another county alongside it.
 - **T-106 · New-region onboarding pipeline (repeatable)** — *Claude + Director · L · deps: T-042, T-052 · [ECONOMY](ECONOMY.md)*
   - Repeatable process to open a region: run GBIF/OSM pipeline + light content pass (safe-default
     advice + follow-law) + Director editorial review. Modeled as growth spend.
