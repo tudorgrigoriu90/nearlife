@@ -990,7 +990,7 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
     → `{ fullGame }`, the single source of truth the app already consumes (depth tiers T-138,
     free-catch T-113). Remaining (needs the RevenueCat account, T-004): the SDK integration that
     produces the active-entitlement ids and mirrors `full_game` to Supabase.
-- **T-217 · Entitlements are granted by the server (RevenueCat webhook)** — *Claude + Director · M · `TODO` · deps: T-200 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
+- **T-217 · Entitlements are granted by the server (RevenueCat webhook)** — *Claude + Director · M · `IN-PROGRESS` (built + tested; apply, live verify, deploy pending; webhook secret = Director) · deps: T-200 · [ECONOMY](ECONOMY.md), [TSD §3](TSD.md)*
   - `profiles.full_game` is server-only since T-200, and the free-catch trigger already honours it.
     Nothing sets it yet.
   - An Edge Function receives RevenueCat webhooks (purchase, refund/cancel, transfer),
@@ -999,6 +999,33 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
   - Family (T-102) needs this, because a member's entitlement must come from the buyer's
     server-side purchase, not from the member's own store account.
   - Director: set the webhook URL and secret in RevenueCat once T-004 exists.
+  - ✅ **Built (2026-10-29):**
+    - `lib/revenuecatEvents.ts` (12 tests) turns a webhook body into grant/revoke changes.
+      - Purchases grant. A refund (CANCELLATION of a one-time product) or EXPIRATION revokes.
+      - TRANSFER revokes from the old account and grants to the new one.
+      - It drops unknown entitlement ids, anonymous `$RCAnonymousID`s and malformed bodies.
+      - `secretMatches` is a constant-time bearer check that fails closed when no secret is set.
+    - Migration `20261029000006_entitlements.sql`:
+      - `entitlements` table: owner-readable, never client-writable.
+      - `set_entitlement(…)` is service-role only. It applies a change only if it is **newer**
+        than the row, so RevenueCat's retries and out-of-order deliveries are harmless. It skips
+        unknown (deleted) users.
+      - `profiles.full_game` is *derived* from the rows: Full Game or Family grants it.
+    - `supabase/functions/revenuecat-webhook`: I/O only, deployed by `deploy-functions.yml`
+      (now a loop over both functions). It returns 200 for ignored events so they are not
+      retried, and 500 on database failure so they are.
+    - `verify.py` gains 9 rolled-back live checks:
+      - a purchase grants the Full Game, a late older event changes nothing, a refund revokes,
+        and Family grants;
+      - **with the Full Game a 4th catch is accepted** (the T-200 trigger, end to end);
+      - a user cannot call `set_entitlement` or write the table, but can read their own rows.
+  - ⏳ Director, once RevenueCat exists (T-004):
+    - generate a long random secret and add it as the Supabase function secret
+      `REVENUECAT_WEBHOOK_SECRET`;
+    - in RevenueCat → Integrations → Webhooks, set the URL
+      `https://subjdoiicfmiimtvlzsg.supabase.co/functions/v1/revenuecat-webhook` and the
+      Authorization header `Bearer <that secret>`;
+    - create the entitlements `full_game`, `family`, `all_regions` and `region_SWE_<n>_1`.
 - **T-084 · Full Game product + purchase flow** — *Claude · M · deps: T-083 · [ECONOMY](ECONOMY.md)*
   - **$4.99 / 49 SEK** one-time product (price set by the Director 2026-10-29, was $9.99; see
     ECONOMY.md for the trade-off) purchasable on both stores (sandbox verified); unlocks unlimited

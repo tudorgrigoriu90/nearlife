@@ -44,6 +44,16 @@ EXPECTED: dict[str, str] = {
     "community totals count a pledge made today": "ok",
     "anon can read the community totals": "ok",
     "anon reads no collection rows": "ok",
+    # T-217 entitlements: only the server grants them, and the latest event wins.
+    "purchase grants the Full Game": "ok",
+    "an older event arriving late changes nothing": "ok",
+    "with the Full Game a 4th catch is accepted": "ok",
+    "refund revokes the Full Game": "ok",
+    "Family also grants the Full Game": "ok",
+    "a purchase for a deleted account is skipped": "ok",
+    "user cannot grant themselves an entitlement": "permission denied",
+    "user cannot write the entitlements table": "permission denied",
+    "user can read their own entitlements": "ok",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -211,6 +221,58 @@ def run_community_impact_checks(cur) -> dict[str, str]:
     return results
 
 
+def run_entitlement_checks(cur) -> dict[str, str]:
+    """T-217: purchases reach the database only through set_entitlement, newest event first."""
+    results: dict[str, str] = {}
+    cur.execute(
+        "insert into auth.users (id, instance_id, aud, role, is_anonymous, created_at, updated_at) "
+        "values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', "
+        "'authenticated', true, now(), now()) returning id"
+    )
+    buyer = str(cur.fetchone()[0])
+    full_game = "(select full_game from public.profiles where user_id = %s)"
+
+    def grant(name: str, entitlement: str, active: bool, at: str, expect: str, check: str = "") -> None:
+        _step(
+            cur, results, name,
+            "select case when public.set_entitlement(%s, %s, %s, " + at + ", 'p', 'evt') = %s "
+            + (f"and {check} " if check else "") + "then 'ok' else 'wrong' end",
+            (buyer, entitlement, active, expect, *([buyer] if check else [])),
+        )
+
+    grant("purchase grants the Full Game", "full_game", True, "now()", "applied", f"{full_game} = true")
+    grant("an older event arriving late changes nothing", "full_game", False,
+          "now() - interval '1 hour'", "stale", f"{full_game} = true")
+    for i in range(1, 4):
+        cur.execute(
+            "insert into public.collection (user_id, species_id, spotted_at, caught_at) values (%s, %s, now(), now())",
+            (buyer, f"zz-verify-paid-{i}"),
+        )
+    _step(cur, results, "with the Full Game a 4th catch is accepted",
+          "insert into public.collection (user_id, species_id, spotted_at, caught_at) "
+          "values (%s, 'zz-verify-paid-4', now(), now())", (buyer,))
+    grant("refund revokes the Full Game", "full_game", False,
+          "now() + interval '1 second'", "applied", f"{full_game} = false")
+    grant("Family also grants the Full Game", "family", True,
+          "now() + interval '2 seconds'", "applied", f"{full_game} = true")
+    _step(cur, results, "a purchase for a deleted account is skipped",
+          "select case when public.set_entitlement(gen_random_uuid(), 'full_game', true, now(), 'p', 'evt') "
+          "= 'unknown_user' then 'ok' else 'wrong' end")
+
+    cur.execute("set local role authenticated")
+    cur.execute("select set_config('request.jwt.claims', %s, true)",
+                (json.dumps({"sub": buyer, "role": "authenticated"}),))
+    _step(cur, results, "user cannot grant themselves an entitlement",
+          "select public.set_entitlement(%s, 'full_game', true, now() + interval '1 day', 'p', 'evt')", (buyer,))
+    _step(cur, results, "user cannot write the entitlements table",
+          "insert into public.entitlements (user_id, entitlement, active, event_id, changed_at) "
+          "values (%s, 'all_regions', true, 'x', now())", (buyer,))
+    _step(cur, results, "user can read their own entitlements",
+          "select case when count(*) = 2 then 'ok' else 'saw ' || count(*) end from public.entitlements")
+    cur.execute("reset role")
+    return results
+
+
 def main() -> None:
     dsn = os.environ.get("SUPABASE_DB_URL")
     if not dsn:
@@ -223,6 +285,7 @@ def main() -> None:
                 results = run_free_catch_checks(cur)
                 results.update(run_retention_checks(cur))
                 results.update(run_community_impact_checks(cur))
+                results.update(run_entitlement_checks(cur))
         finally:
             conn.rollback()  # always: these checks must never leave a trace
 

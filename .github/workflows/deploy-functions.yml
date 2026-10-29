@@ -1,7 +1,7 @@
 name: Deploy Edge Functions
 
-# T-206. Redeploys `send-notifications` whenever its code changes on main, so the server never
-# quietly runs older notification rules than the repo. Before this, a change to lib/pushDispatch.ts
+# T-206. Redeploys `send-notifications` and `revenuecat-webhook` (T-217) whenever their code changes
+# on main, so the server never quietly runs older rules than the repo. Before this, a change to lib/pushDispatch.ts
 # needed a manual redeploy through the Supabase connector.
 #
 # Needs the repo secret SUPABASE_ACCESS_TOKEN (a Supabase personal access token, `sbp_…`).
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy send-notifications
+    name: Deploy Edge Functions
     runs-on: ubuntu-latest
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -57,9 +57,11 @@ jobs:
         with:
           version: latest
 
-      # --no-verify-jwt: pg_cron calls with no user JWT; the function checks x-cron-secret itself.
+      # --no-verify-jwt: neither caller has a user JWT. pg_cron calls send-notifications, which
+      # checks x-cron-secret; RevenueCat calls revenuecat-webhook, which checks its bearer secret.
       # --use-api bundles server-side, so the runner needs no Docker.
       - name: Deploy
         run: |
-          supabase functions deploy send-notifications \
-            --project-ref "$PROJECT_REF" --no-verify-jwt --use-api
+          for fn in send-notifications revenuecat-webhook; do
+            supabase functions deploy "$fn" --project-ref "$PROJECT_REF" --no-verify-jwt --use-api
+          done

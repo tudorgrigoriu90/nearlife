@@ -1,0 +1,94 @@
+// RevenueCat webhook → entitlement changes (T-217). Pure, so the rules are unit-tested here and the
+// `revenuecat-webhook` Edge Function (a transpiled copy, scripts/edgeShared.js) only does I/O.
+//
+// The store purchase is the truth, but the app must never be trusted to report it: an entitlement
+// that a client can set is a free unlock (the T-200 lesson). So entitlements reach the database
+// only through this webhook, which RevenueCat calls server to server, authenticated by a shared
+// secret. The app's RevenueCat user id is its Supabase user id (set when the SDK is configured,
+// T-083), so an event names the account directly.
+//
+// Every product here is a one-time purchase, so a CANCELLATION means a refund and ends access.
+// Out-of-order and repeated deliveries are made harmless by the database, which applies a change
+// only if it is newer than the one it holds (`public.set_entitlement`).
+
+export type Entitlement = string;
+
+export interface EntitlementChange {
+  userId: string;
+  entitlement: Entitlement;
+  active: boolean;
+  atMs: number;
+  productId: string | null;
+  eventId: string;
+}
+
+export type EntitlementPlan =
+  | { kind: 'apply'; changes: EntitlementChange[] }
+  | { kind: 'ignore'; reason: string };
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** RevenueCat entitlement identifiers this app understands. Anything else is dropped. */
+const KNOWN = /^(full_game|family|all_regions|region_SWE_\d+_1)$/;
+
+const GRANT = new Set(['INITIAL_PURCHASE', 'NON_RENEWING_PURCHASE', 'RENEWAL', 'UNCANCELLATION', 'PRODUCT_CHANGE']);
+const REVOKE = new Set(['CANCELLATION', 'EXPIRATION']);
+
+/** The entitlement id for one county pack: `SWE.9_1` → `region_SWE_9_1` (no dots in RC ids). */
+export function regionEntitlement(regionId: string): Entitlement {
+  return `region_${regionId.replace(/[^A-Za-z0-9]/g, '_')}`;
+}
+
+function uuids(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string' && UUID.test(v)) : [];
+}
+
+export function planEntitlementChanges(body: unknown): EntitlementPlan {
+  const ev = (body as { event?: Record<string, unknown> } | null)?.event;
+  if (!ev || typeof ev !== 'object') return { kind: 'ignore', reason: 'no event' };
+  const type = ev.type;
+  if (typeof type !== 'string') return { kind: 'ignore', reason: 'no type' };
+  if (!GRANT.has(type) && !REVOKE.has(type) && type !== 'TRANSFER') {
+    return { kind: 'ignore', reason: `type ${type} does not change access` };
+  }
+  if (typeof ev.id !== 'string' || ev.id === '') return { kind: 'ignore', reason: 'no event id' };
+  if (typeof ev.event_timestamp_ms !== 'number' || !Number.isFinite(ev.event_timestamp_ms)) {
+    return { kind: 'ignore', reason: 'no timestamp' };
+  }
+  if (!Array.isArray(ev.entitlement_ids)) return { kind: 'ignore', reason: 'no entitlement list' };
+  const entitlements = ev.entitlement_ids.filter((e): e is string => typeof e === 'string' && KNOWN.test(e));
+  if (entitlements.length === 0) return { kind: 'ignore', reason: 'no known entitlement' };
+
+  const base = {
+    atMs: ev.event_timestamp_ms,
+    productId: typeof ev.product_id === 'string' ? ev.product_id : null,
+    eventId: ev.id,
+  };
+  const forUsers = (users: string[], active: boolean) =>
+    users.flatMap((userId) => entitlements.map((entitlement) => ({ userId, entitlement, active, ...base })));
+
+  if (type === 'TRANSFER') {
+    const changes = [...forUsers(uuids(ev.transferred_from), false), ...forUsers(uuids(ev.transferred_to), true)];
+    return changes.length > 0 ? { kind: 'apply', changes } : { kind: 'ignore', reason: 'transfer between unknown ids' };
+  }
+  // An anonymous RevenueCat id ($RCAnonymousID:…) means the SDK was used before it knew the
+  // Supabase user. Nothing in the database can own that purchase; the restore after sign-in
+  // re-sends it under the real id.
+  const user = uuids([ev.app_user_id]);
+  if (user.length === 0) return { kind: 'ignore', reason: 'not a Supabase user id' };
+  return { kind: 'apply', changes: forUsers(user, GRANT.has(type)) };
+}
+
+/**
+ * Whether an Authorization header carries exactly `Bearer <secret>`. Compares every character so
+ * the time taken does not reveal how much of a guess was right. An unset secret matches nothing:
+ * a webhook that is not configured must refuse everyone, never accept everyone.
+ */
+export function secretMatches(header: string | null, secret: string | undefined): boolean {
+  if (!secret || header === null) return false;
+  const expected = `Bearer ${secret}`;
+  if (header.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= header.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
+}
