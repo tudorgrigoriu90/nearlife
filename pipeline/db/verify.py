@@ -40,6 +40,10 @@ EXPECTED: dict[str, str] = {
     "email-linked, no activity for 200 days": "kept",
     "notification sent 40 days ago": "deleted",
     "notification sent yesterday": "kept",
+    # T-081 community totals: everyone may read the counts, nobody may read the rows behind them.
+    "community totals count a pledge made today": "ok",
+    "anon can read the community totals": "ok",
+    "anon reads no collection rows": "ok",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -173,6 +177,40 @@ def run_retention_checks(cur) -> dict[str, str]:
     return results
 
 
+def run_community_impact_checks(cur) -> dict[str, str]:
+    """T-081: the aggregate counts a real pledge, and exposing it does not expose the rows."""
+    results: dict[str, str] = {}
+    cur.execute("select pledges from public.community_impact()")
+    before = cur.fetchone()[0]
+    cur.execute(
+        "insert into auth.users (id, instance_id, aud, role, is_anonymous, created_at, updated_at) "
+        "values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', "
+        "'authenticated', true, now(), now()) returning id"
+    )
+    helper = str(cur.fetchone()[0])
+    # Two statements on purpose: a data-modifying CTE's insert is invisible to the rest of its own
+    # statement, so a one-statement version would never see the new pledge.
+    cur.execute(
+        "insert into public.collection (user_id, species_id, spotted_at, helped_at, helped_kind) "
+        "values (%s, 'zz-verify-help', now(), now(), 'give')",
+        (helper,),
+    )
+    _step(
+        cur, results, "community totals count a pledge made today",
+        "select case when pledges = %s + 1 then 'ok' else 'counted ' || pledges end "
+        "from public.community_impact()",
+        (before,),
+    )
+    cur.execute("set local role anon")
+    cur.execute("select set_config('request.jwt.claims', %s, true)", (json.dumps({"role": "anon"}),))
+    _step(cur, results, "anon can read the community totals",
+          "select case when pledges >= 1 then 'ok' else 'empty' end from public.community_impact()")
+    _step(cur, results, "anon reads no collection rows",
+          "select case when count(*) = 0 then 'ok' else 'LEAK: ' || count(*) end from public.collection")
+    cur.execute("reset role")
+    return results
+
+
 def main() -> None:
     dsn = os.environ.get("SUPABASE_DB_URL")
     if not dsn:
@@ -184,6 +222,7 @@ def main() -> None:
             with conn.cursor() as cur:
                 results = run_free_catch_checks(cur)
                 results.update(run_retention_checks(cur))
+                results.update(run_community_impact_checks(cur))
         finally:
             conn.rollback()  # always: these checks must never leave a trace
 

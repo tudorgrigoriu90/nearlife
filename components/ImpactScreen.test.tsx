@@ -33,4 +33,21 @@ describe('ImpactScreen', () => {
     // Empty state is gone.
     expect(screen.queryByText(tr('impact.empty'))).toBeNull();
   });
+
+  it('shows real community totals when enough people are helping (T-081)', async () => {
+    const community = { season: '2026-autumn', helpers: 12, pledges: 30, give: 18, protect: 12 };
+    await render(<ImpactScreen locale="en" records={[]} community={community} />);
+    expect(
+      screen.getByText(tr('impact.communityTotals', { helpers: 12, pledges: 30, give: 18, protect: 12 }), {
+        exact: false,
+      }),
+    ).toBeTruthy();
+    expect(screen.queryByText(tr('impact.community'))).toBeNull();
+  });
+
+  it('keeps the honest note when totals are too small to show', async () => {
+    const community = { season: '2026-autumn', helpers: 1, pledges: 1, give: 1, protect: 0 };
+    await render(<ImpactScreen locale="en" records={[]} community={community} />);
+    expect(screen.getByText(tr('impact.community'))).toBeTruthy();
+  });
 });

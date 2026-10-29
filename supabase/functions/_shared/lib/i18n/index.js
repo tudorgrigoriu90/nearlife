@@ -205,6 +205,7 @@ export const en = {
     'impact.protect': 'Protect actions',
     'impact.empty': 'No pledges yet — open a species and choose a give or protect action.',
     'impact.community': 'Community totals arrive once more neighbours are helping.',
+    'impact.communityTotals': 'This season, {helpers} people pledged {pledges} actions for wildlife: {give} give, {protect} protect.',
 };
 // Swedish — full coverage for the alpha. Reviewed before shipping (INTERNATIONALIZATION.md).
 const sv = {
@@ -398,6 +399,7 @@ const sv = {
     'impact.protect': 'Skydda-handlingar',
     'impact.empty': 'Inga löften än – öppna en art och välj en ge- eller skydda-handling.',
     'impact.community': 'Gemensamma summor kommer när fler grannar hjälper till.',
+    'impact.communityTotals': 'Den här säsongen lovade {helpers} personer {pledges} handlingar för djur och natur: {give} ge, {protect} skydda.',
 };
 const CATALOGS = { en, sv };
 function interpolate(template, params) {

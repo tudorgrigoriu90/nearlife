@@ -929,7 +929,7 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
     Kronoberg set with E3 (T-079/T-044).
 
 ## F8.3 — Impact & Badges
-- **T-081 · Collective impact counters** — *Claude · M · `IN-PROGRESS` (personal impact screen done; community aggregation is server-side) · deps: T-077 · [GDD §7](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
+- **T-081 · Collective impact counters** — *Claude · M · `IN-PROGRESS` (community totals built + tested; apply + live verify pending) · deps: T-077 · [GDD §7](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
   - ✅ `components/ImpactScreen.tsx` (2 tests) shows the help the user has pledged this season —
     species helped / give / protect counts from the tested `lib/impact.ts` `impactSummary`. Honest by
     construction (invariant #1): counts only real pledges, and shows a plain "community totals coming"
@@ -938,6 +938,23 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
   - ⏳ Remaining (server): **community totals** ("4,200 nest boxes this spring") from
     `impact_counters` refreshed by cron (needs T-077 table + pg_cron), then swap the note for the real
     aggregate. Shareable once the community number is real.
+  - ✅ **Community totals (2026-10-29):**
+    - `public.community_impact()` (migration `20261029000005`) is one aggregate over the Helped
+      rows of `collection` for the server's current season. It returns helpers, pledges, give and
+      protect. SECURITY DEFINER because collection RLS is owner-only; it returns counts, never
+      rows. Executable by anon + authenticated.
+    - **No `impact_counters` table + cron:** at MVP scale the scan is milliseconds, and a counter
+      table is a second copy that can drift from the rows it counts. Revisit past ~1M collection
+      rows, starting with an index on `helped_at` and a season range predicate.
+    - App: `lib/communityImpact.ts` (parse, `COMMUNITY_MIN_HELPERS = 3` threshold, supabase
+      source) and `components/useCommunityImpact.ts`. The totals are read only while the Impact
+      screen is open.
+    - The screen shows "This season, N people pledged M actions for wildlife: X give, Y protect"
+      (en + sv). Below 3 helpers, or when the read fails, it keeps the honest "coming" note.
+    - Tests: 14 app tests; 3 live checks in `verify.py` (a pledge made today is counted, anon can
+      read the totals, anon still reads no collection rows); a verdict test for a leak.
+  - Not built: the per-species line "You + N others helped swifts this spring" (USER-FLOWS §4).
+    It would be the same aggregate filtered to one species.
 - **T-082 · Badges & completion** — *Claude · M · `DONE` (category + spotted/helped milestones; season/habitat need E3) · deps: T-057 · [GDD §8](GDD.md)*
   - ✅ `components/BadgesScreen.tsx` (3 tests) renders the full badge set — earned ones lit, the rest
     as locked goals with a "{earned} of {total} earned" line — over the tested earn rules in
@@ -2475,6 +2492,12 @@ only.**
     first render until the stored language is read, so a Swedish user never sees an English frame,
     and push registration waits for it too, so the device row is not written in the wrong language
     first. Test: choose Svenska → restart → Swedish UI.
+- **T-216 · The Impact screen says "this season" but counts all time** — *Claude · S · `TODO` · deps: T-081*
+  - The subtitle reads "The help you've pledged this season", but `impactSummary` counts every
+    Helped record ever. The community totals are season-scoped (T-081), so the two numbers
+    disagree after the first season change. Either filter the personal summary to
+    `season_key(helped_at)` or reword the subtitle. Filtering is the honest fix, since the
+    community line is seasonal.
 - **T-213 · Turning notifications on in Settings never asked Android** — *Claude · S · `DONE` · deps: T-201*
   - Found while debugging T-205: the Settings switch recorded notification consent without the OS
     permission, so the device registered for pushes the phone then silently dropped — the user

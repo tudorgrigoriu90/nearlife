@@ -53,3 +53,9 @@ def test_kept_is_not_matched_as_a_substring():
     results = passing()
     results["anonymous, no activity for 200 days"] = "kept"
     assert len(evaluate(results)) == 1
+
+
+def test_a_collection_leak_to_anon_is_a_failure():
+    results = passing()
+    results["anon reads no collection rows"] = "LEAK: 15"
+    assert evaluate(results) == ["anon reads no collection rows: expected 'ok', got 'LEAK: 15'"]

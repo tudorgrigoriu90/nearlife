@@ -15,6 +15,7 @@ import DeleteAccountConfirm from './components/DeleteAccountConfirm';
 import LinkEmail from './components/LinkEmail';
 import BadgesScreen from './components/BadgesScreen';
 import ImpactScreen from './components/ImpactScreen';
+import { useCommunityImpact } from './components/useCommunityImpact';
 import { useCollection } from './components/useCollection';
 import { usePushRegistration } from './components/usePushRegistration';
 import { useThisWeek } from './components/useThisWeek';
@@ -44,6 +45,8 @@ import type { ContentLocale } from './lib/i18n/contentLocale';
 import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
 import { SupabaseAuthGateway } from './lib/accountLinking';
 import { getSupabase } from './lib/supabase';
+import { hasSupabaseConfig } from './lib/supabaseConfig';
+import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib/communityImpact';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import type { Region } from './lib/hometown';
 import { AsyncStorageHometownStore } from './lib/hometownStore';
@@ -67,6 +70,16 @@ import type { Species } from './lib/species/types';
 // repo once the DB is seeded (T-055 content seed). Module-level so its identity is stable.
 // Supabase when configured, bundled data otherwise, with a fallback on failure (T-057).
 const SPECIES_REPO = createSpeciesRepository();
+
+// Community totals source (T-081), built on first use so importing App never creates a client
+// (tests have no Supabase config). null without a backend: the Impact screen keeps its note.
+let communitySource: CommunityImpactSource | null | undefined;
+function communityImpactSource(): CommunityImpactSource | null {
+  if (communitySource === undefined) {
+    communitySource = hasSupabaseConfig() ? new SupabaseCommunityImpactSource(getSupabase()) : null;
+  }
+  return communitySource;
+}
 
 // Device-local consent persistence (T-088) — granular opt-ins survive restarts. Module-level so
 // its identity is stable across renders.
@@ -129,6 +142,8 @@ export default function App() {
   const [showLinkEmail, setShowLinkEmail] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
   const [showImpact, setShowImpact] = useState(false);
+  // Read only while the Impact screen is open, so each visit shows a fresh total (T-081).
+  const community = useCommunityImpact(showImpact ? communityImpactSource() : null);
   const [exportJson, setExportJson] = useState<string | null>(null);
   const [consent, setConsentState] = useState<ConsentState>(DEFAULT_CONSENT);
   // Push registration must not act on the all-off default before the stored choice loads: that
@@ -495,6 +510,7 @@ export default function App() {
         <ImpactScreen
           locale={locale}
           records={collection.records}
+          community={community}
           onDone={() => setShowImpact(false)}
         />
         <StatusBar style="auto" />
