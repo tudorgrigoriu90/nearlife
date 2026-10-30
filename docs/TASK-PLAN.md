@@ -417,9 +417,15 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
 ## F2.3 — Prototype Notifications
 
 ### S2.3.1 — Scheduled push
-- **T-030 · pg_cron + Edge Function picks a species** — *Claude · M · deps: T-017, T-019 · [TSD §4](TSD.md)*
+- **T-030 · pg_cron + Edge Function picks a species** — *Claude · M · `DONE` (superseded by T-062/T-064/T-201) · deps: T-017, T-019 · [TSD §4](TSD.md)*
   - Scheduled Edge Function selects one active-season species (simple weighting ok), dedupes
     against the user's collection.
+  - ✅ **Superseded by the production engine (recorded 2026-10-30).** The prototype version was
+    never needed, because the production chain went live first:
+    - T-062: weighted species sampling, deduped against the user's collection;
+    - T-064 / T-201: pg_cron `send-notifications` (hourly) → Edge Function → FCM, live and
+      verified 2026-10-28;
+    - T-186: per-user send slots.
 - **T-031 · Push delivery + deep link** — *Claude · M · `DONE` (on-device check rides on T-205) · deps: T-030 · [USER-FLOWS §4](USER-FLOWS.md)*
   - Push arrives on device with honest copy; tapping deep-links straight to that species card
     and marks it Spotted.
