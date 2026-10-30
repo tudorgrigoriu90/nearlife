@@ -3211,7 +3211,7 @@ only.**
     hypothetical `Taraxacumoides`.
   - Applied inside `build_presence.py` *before* meta is computed, so the reported counts describe
     what ships rather than GBIF's split. Takes effect on the next ingest.
-- **T-164 · Review Supabase security advisories** — *Director · S · `TODO` · deps: —*
+- **T-164 · Review Supabase security advisories** — *Director · S · `DONE` (reviewed 2026-10-30; fixes in T-224) · deps: —*
   - `get_advisors(security)` reports 5 warnings on the live project. None are caused by the
     T-146/T-160 changes; recorded here so they are triaged rather than rediscovered.
   - `public.profiles` and `public.collection` RLS policies include the `anon` role. This is likely
@@ -3221,6 +3221,15 @@ only.**
   - Leaked-password protection (HaveIBeenPwned) is disabled in Auth — a dashboard toggle, Director's
     call, and relevant once email/password linking is live.
   - `cron.job` / `cron.job_run_details` warnings are Supabase-managed tables, not ours.
+  - ✅ **Reviewed (Claude, 2026-10-30), with both advisor runs (security + performance).**
+    - Every finding is triaged in **T-224**: fixed, or kept with a recorded reason.
+    - **The anon-role question above is answered.** Supabase gives anonymous sign-ins the
+      `authenticated` role; `anon` is a request with no session. Scoping the owner policies
+      `to authenticated` (T-224) therefore locks nobody out, and the live verify proves it.
+    - **Leaked-password protection does not apply:** the app has no passwords. Accounts are
+      anonymous, and linking an email (T-133) only confirms the address by email. On Supabase the toggle
+      also needs a paid plan (invariant #7), so it stays off.
+  - Director: nothing to do unless email + password sign-in is ever added.
 - **T-224 · Fix the actionable Supabase advisor findings** — *Claude · S · `IN-PROGRESS` (migration written + guarded; apply + live verify pending) · deps: T-164*
   - From the 2026-10-30 advisor run (security + performance). Migration `20261030000006`:
     - **7 owner-only policies on `collection` / `profiles`** evaluated `auth.uid()` once per
