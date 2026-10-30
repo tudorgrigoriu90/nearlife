@@ -105,3 +105,58 @@ def test_a_failed_county_names_the_query_that_failed():
         assert str(exc).startswith("near coast:")
     else:
         raise AssertionError("expected a failure")
+
+
+class _BodySession(_Session):
+    def __init__(self, bodies):
+        super().__init__([200] * len(bodies))
+        self.bodies = list(bodies)
+
+    def post(self, url, data, timeout):
+        self.urls.append(url)
+        self.statuses.pop(0)
+        return _Resp(200, self.bodies.pop(0))
+
+
+TIMEOUT_REMARK = {
+    "elements": [],
+    "remark": 'runtime error: Query timed out in "query" at line 4 after 901 seconds.',
+}
+
+
+def test_a_timed_out_query_is_an_error_not_an_empty_answer():
+    # 2026-10-30: Overpass answers a timeout with HTTP 200, no elements and a remark. Read as
+    # "nothing found", it left every spot near a motorway unflagged in Stockholm and Skåne.
+    from osm.overpass import OverpassClient
+
+    client = OverpassClient(endpoints=["https://a/api", "https://b/api"], pause=0, backoff=0, max_retries=2)
+    client.session = _BodySession([TIMEOUT_REMARK, TIMEOUT_REMARK])
+    try:
+        client.run("q")
+    except RuntimeError as exc:
+        assert "timed out" in str(exc)
+    else:
+        raise AssertionError("a runtime error must not pass as an empty result")
+    assert client.session.urls == ["https://a/api", "https://b/api"]  # retried on the other server
+
+
+def test_a_runtime_error_on_one_server_can_succeed_on_the_other():
+    from osm.overpass import OverpassClient
+
+    client = OverpassClient(endpoints=["https://a/api", "https://b/api"], pause=0, backoff=0, max_retries=2)
+    client.session = _BodySession([TIMEOUT_REMARK, {"elements": [{"type": "node", "id": 1}]}])
+    assert client.run("q")["elements"] == [{"type": "node", "id": 1}]
+
+
+def test_a_harmless_remark_is_not_an_error():
+    from osm.overpass import OverpassClient
+
+    client = OverpassClient(endpoints=["https://a/api"], pause=0, backoff=0, max_retries=1)
+    client.session = _BodySession([{"elements": [], "remark": "Note: nothing changed"}])
+    assert client.run("q") == {"elements": [], "remark": "Note: nothing changed"}
+
+
+def test_queries_ask_for_enough_memory_for_the_largest_counties():
+    for q in (spots_query("SE-AB"), near_coast_query("SE-AB"), near_roads_query("SE-AB"),
+              inside_query("SE-AB", RESERVE_FILTERS)):
+        assert "[maxsize:" in q.splitlines()[0]

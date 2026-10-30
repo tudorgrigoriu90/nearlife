@@ -747,7 +747,7 @@ key before loading into Supabase.**
       artifacts without refetching.
     - 5 tests here; 4 live checks in `verify.py` (unflagged visible; reserve- and road-flagged
       invisible; users cannot insert).
-- **T-049 · Hard safety exclusions** — *Claude · M · `DONE` (verified live 2026-10-30) · deps: T-048 · [TSD §5](TSD.md), [GDD §4](GDD.md)*
+- **T-049 · Hard safety exclusions** — *Claude · M · `IN-PROGRESS` (live data unsafe until the re-fetch; fix pushed 2026-10-30) · deps: T-048 · [TSD §5](TSD.md), [GDD §4](GDD.md)*
   - Private property, roads/rail, water hazards, protected reserves excluded via `safety_flags`;
     a flagged spot is **never** surfaced. Tests cover each exclusion class.
   - ✅ **Every exclusion class, and where it is decided:**
@@ -765,6 +765,24 @@ key before loading into Supabase.**
     and road-flagged spots invisible to users, unflagged visible, users cannot insert.
   - Smoke-test cost in Kronoberg: 54 of 611 spots excluded as reserves, 1 private. T-050 judges
     whether excluding reserves leaves enough spots.
+  - 🐛 **Safety bug found in the first full load (2026-10-30), fixed; re-fetch pending.**
+    - The 20 loaded counties showed **0 spots near a major road** in Stockholm, Skåne,
+      Västra Götaland, Uppsala, Södermanland, Dalarna and others. Coastal spots were also 0
+      in coastal counties (Stockholm, Skåne, Västra Götaland, Kalmar, Blekinge). That is
+      impossible.
+    - Cause: Overpass answers a query that times out or runs out of memory with HTTP 200, no
+      elements and a `runtime error` remark. The client read that as "no spot is near a road",
+      so spots beside motorways and railways in those counties were left unflagged and are
+      readable.
+    - Fix: such an answer is now a failure. It is retried on the other instance, then fails
+      the county, which is then not loaded (fail closed). Queries also ask for 2 GB
+      (`[maxsize:]`) instead of the 512 MB default, so the largest counties can complete.
+      4 tests.
+    - Reserve and military flags were non-zero in every county, so those queries look
+      complete; the re-fetch replaces them anyway.
+    - Exposure: catch spots are only in the Director's dev build, with no public users yet.
+      The full re-fetch replaces every county. Back to `DONE` only when every county's road
+      and coast counts are plausible.
 - **T-050 · Catch-spot density audit (Kronoberg)** — *Claude · M · deps: T-048 · [review finding]*
   - Report: what % of Kronoberg residents have a catch spot within a ~15-min walk. If low,
     flag that Caught skews to a car feature and record the design implication before launch.
