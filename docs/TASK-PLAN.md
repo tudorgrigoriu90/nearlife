@@ -1764,7 +1764,7 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
   - ✅ **Applied + verified live (2026-10-30):** db-migrate run 41109167369 applied
     `20261030000003`. Verify run 41109358934 passed, including the new check "a member sees
     since when they joined".
-- **T-220 · iNaturalist as a second photo source** — *Claude · M · `IN-PROGRESS` (built + tested; migration apply + first run pending) · deps: T-202 · [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
+- **T-220 · iNaturalist as a second photo source** — *Claude · M · `DONE` (first run 2026-10-30: 637 photos, coverage 80%) · deps: T-202 · [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
   - Director request (2026-10-30). 2,027 of 6,824 species (30%) had no commercial-safe
     Wikipedia photo. By group: insects 61% covered, plants 84%, birds 92%, mammals 98%, fish
     99%.
@@ -1784,6 +1784,14 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
     - 12 tests (9 Python, 3 TS).
   - Storage: at most ~2,000 × ~60 KB ≈ 120 MB more, so ≤ ~450 MB of the 1 GB free tier
     (invariant #7).
+  - ✅ **Applied + first run done (2026-10-30, run 41111237736, green, 1 h 27 min).**
+    - iNaturalist was asked about 2,027 species without a photo: **637 photos found** and
+      1,381 without a commercial-safe one. 9 hit connection resets and stay pending, so the
+      weekly run retries them.
+    - Catalogue coverage is now **5,435 of 6,825 species (80%, up from 70%)**. By group:
+      insects 74% · arachnids 65% · plants 87% · birds 92% · mammals 98% · molluscs 98% ·
+      fish, amphibians and reptiles 100%.
+    - Storage: 5,435 objects, **391 MB of the 1 GB free tier** (invariant #7).
 - **T-221 · 679 species have no category** — *Claude · S · `DONE` (2026-10-30) · deps: T-177*
   - Found with T-220 (2026-10-30): `species.category` is null for 679 catalogue species. They
     get only a generic glyph, the cautious habitat default (T-047) and no category in the
