@@ -1343,7 +1343,7 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
 manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch.**
 
 ## F10.1 — Consent & Age-Gate
-- **T-088 · Granular consent (no pre-ticked boxes)** — *Claude · M · `IN-PROGRESS` (model + UI + local persistence + analytics gate done; Supabase profile sync pending) · deps: T-018 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
+- **T-088 · Granular consent (no pre-ticked boxes)** — *Claude · M · `DONE` (2026-10-30; server copy dropped on purpose, see note) · deps: T-018 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
   - ✅ `lib/consent.ts` (5 tests): `ConsentState` for location/notifications/analytics, all
     defaulting **off** (no pre-ticked boxes); `grant`/`revoke`/`setConsent`/`hasConsent`, immutable.
     **No `ads` consent kind** (no ads — invariant #3). ✅ **UI:** the Settings screen has the three
@@ -1356,6 +1356,18 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     no analytics event reaches PostHog before `analytics` consent is granted (invariant #6).
   - Remaining: sync consent to the Supabase **profile** (pairs with the export/delete flows,
     T-092/T-093); location/notification consent already mirror their OS-permission results.
+  - ✅ **Done (2026-10-30). The "sync consent to the profile" step was dropped on purpose.**
+    - Each consent's server-side effect is already enforced where server data exists:
+      - **Notifications:** revoking deletes the user's `push_devices` rows
+        (`syncPushRegistration`, `wanted=false`), and the sender only targets registered
+        devices.
+      - **Analytics:** `ConsentGatedTracker` stops every event before it leaves the phone.
+      - **Location:** nothing is sent (T-091).
+    - A server copy of the toggles would add personal data with no use: data minimisation,
+      PRIVACY §1. The export already includes the consent state (T-092).
+    - ❓ **For the legal reviewer (T-095 batch):** does GDPR Art. 7(1), being able to *show*
+      that consent was given, call for a consent log, for analytics in particular? If yes,
+      that is a small new task (a timestamped grant/revoke row, analytics only).
 - **T-089 · Age-gate (GDPR-K, Sweden 13)** — *Claude · S · `DONE` (birth-year step + restricted routing; on-device layout unverified) · deps: T-088 · [PRIVACY §3](PRIVACY-COMPLIANCE.md), [USER-FLOWS §1](USER-FLOWS.md)*
   - ✅ `lib/ageGate.ts` (4 tests): birth-**year**-only gate (data minimization), `DIGITAL_CONSENT_AGE_SE = 13`,
     `agePath()` → `full` | `restricted` for the minimal-data path.
