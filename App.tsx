@@ -269,7 +269,7 @@ export default function App() {
   });
   const [selected, setSelected] = useState<Species | null>(null);
   const [catching, setCatching] = useState<Species | null>(null);
-  const [caughtTip, setCaughtTip] = useState<Species | null>(null);
+  const [caughtTip, setCaughtTip] = useState<{ species: Species; prime: boolean } | null>(null);
   const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
   const [paywall, setPaywall] = useState(false);
 
@@ -752,7 +752,7 @@ export default function App() {
     // Catch-success delight moment: contextual protect tip, kept clean — no upsell (invariant #4).
     return (
       <>
-        <ProtectTip species={caughtTip} locale={locale} onDone={() => setCaughtTip(null)} />
+        <ProtectTip species={caughtTip.species} prime={caughtTip.prime} locale={locale} onDone={() => setCaughtTip(null)} />
         <StatusBar style="auto" />
       </>
     );
@@ -809,13 +809,14 @@ export default function App() {
             if (success) {
               // The count follows from the collection: recording the catch is what spends one.
               // Prime bonus when caught within the species' active window (GDD §6, T-074).
-              collection.markCaught(target.id, isPrimeCatch(target, new Date()));
+              const prime = isPrimeCatch(target, new Date());
+              collection.markCaught(target.id, prime);
               track('catch_succeeded', {
                 speciesId: target.id,
                 // Derive the analytics grade from the unified 0–1 score (success ⇒ perfect|good).
                 grade: gradeFromScore(true, score) === 'perfect' ? 'perfect' : 'good',
               });
-              setCaughtTip(target);
+              setCaughtTip({ species: target, prime });
             }
           }}
         />

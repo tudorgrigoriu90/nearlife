@@ -11,10 +11,13 @@ import type { Species } from '../../lib/species/types';
 export default function ProtectTip({
   species,
   locale = 'en',
+  prime = false,
   onDone,
 }: {
   species: Species;
   locale?: Locale;
+  /** Caught inside its active season (lib/primeBonus): a quiet extra line, never a reward to buy. */
+  prime?: boolean;
   onDone: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -25,6 +28,7 @@ export default function ProtectTip({
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.badge}>🎣 {tr('catch.caught', { name })}</Text>
+        {prime ? <Text style={styles.prime}>✨ {tr('catch.prime')}</Text> : null}
         {content ? (
           <View style={styles.tipCard}>
             <Text style={styles.tipLabel}>{tr('card.protect')}</Text>
@@ -44,6 +48,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingHorizontal: 24, paddingTop: 96, paddingBottom: 40 },
   content: { flex: 1, justifyContent: 'center' },
   badge: { fontSize: 22, fontWeight: '800', color: '#2f7d4f', textAlign: 'center', marginBottom: 24 },
+  prime: { marginTop: -16, marginBottom: 24, fontSize: 15, fontWeight: '600', color: '#8a6d1f', textAlign: 'center' },
   tipCard: { backgroundColor: '#fff', borderRadius: 16, padding: 20 },
   tipLabel: { fontSize: 12, fontWeight: '700', letterSpacing: 1, color: '#2f5d8a', textTransform: 'uppercase' },
   tipBody: { marginTop: 8, fontSize: 16, lineHeight: 23, color: '#2f3d2c' },

@@ -19,4 +19,14 @@ describe('ProtectTip', () => {
     fireEvent.press(screen.getByText(tr('catch.continue')));
     expect(onDone).toHaveBeenCalledTimes(1);
   });
+
+  it('celebrates a prime catch, made inside the species\' active season (T-074)', async () => {
+    await render(<ProtectTip species={swift} prime onDone={() => {}} />);
+    expect(screen.getByText(`✨ ${tr('catch.prime')}`)).toBeTruthy();
+  });
+
+  it('says nothing about prime for a catch outside the season', async () => {
+    await render(<ProtectTip species={swift} onDone={() => {}} />);
+    expect(screen.queryByText(`✨ ${tr('catch.prime')}`)).toBeNull();
+  });
 });

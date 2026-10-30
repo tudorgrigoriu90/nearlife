@@ -1049,9 +1049,24 @@ same mechanic ([GDD §4](GDD.md)).
     plants, then capture; reticle↔subject distance → `evaluateFrame`. ⚠️ not device-verified.
 
 ## F6.3 — Catch Resolution & Entitlement
-- **T-074 · Caught resolution + prime bonus + contextual protect tip** — *Claude · M · deps: T-069, T-052 · [GDD §4,§5](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
+- **T-074 · Caught resolution + prime bonus + contextual protect tip** — *Claude · M · `DONE` (2026-10-30) · deps: T-069, T-052 · [GDD §4,§5](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)*
   - Success writes Caught; **prime bonus** if within the active window; the "killer moment"
     contextual protect tip fires in-habitat, in-season.
+  - ✅ **Done (2026-10-30).** Each acceptance point, with where it is met:
+    - **Success writes Caught:** `collection.markCaught`, behind the server-side free-catch
+      limit (T-200).
+    - **Prime bonus within the active window:** `isPrimeCatch` is stored with the catch
+      (`collection.prime_bonus`) and now also shown on the success screen ("✨ Prime catch:
+      found in its season", en + sv). It is a quiet line on a delight moment, with no upsell
+      (invariant #4).
+    - **Protect tip in-habitat, in-season:** `ProtectTip` shows the species' protect content
+      and the follow-local-law line after every catch. Since T-068 a catch happens at a public
+      spot that suits the species' habitat, within 100 m. The one exception is a county with no
+      spots loaded, which says so.
+    - 2 tests.
+  - Deps: T-069 is DONE. T-052 (give/protect authoring) has no status of its own, but the
+    protect content it describes ships for the whole catalogue through the content pipeline
+    (T-210, verified live). ProtectTip shows the catch without a tip if a species has no content.
 - **T-075 · Server-side free-catch enforcement (3/season)** — *Claude · M · deps: T-056, T-074 · [ECONOMY](ECONOMY.md), [TSD §5b](TSD.md)*
   - An Edge Function checks `full_game` entitlement OR `free_catches_used < 3` for the current
     `free_catch_season` **before** writing `caught_at`. Client only displays the counter;
