@@ -698,7 +698,7 @@ key before loading into Supabase.**
     - ⚠️ Density looks low: 556 spots over ~8,500 km² is about one per 15 km². Expect them dense in
       towns (parks) and sparse in forest. T-050 measures what this means for people's walking
       distance.
-- **T-047 · species_habitat mapping** — *Claude · M · `IN-PROGRESS` (built + tested; migration apply + species reload pending) · deps: T-046 · [TSD §3](TSD.md)*
+- **T-047 · species_habitat mapping** — *Claude · M · `DONE` (applied + loaded live 2026-10-30) · deps: T-046 · [TSD §3](TSD.md)*
   - Each catchable species mapped to the habitat types it's plausibly caught in.
   - ✅ **Built (2026-10-30):** `species.catch_habitats text[]` ⊆ {land, freshwater, coast}
     (migration `20261030000001`, with a check constraint).
@@ -715,6 +715,12 @@ key before loading into Supabase.**
     still ran the content load. The only content file on disk was then the committed August
     validation file (`content_mammal.json`), so it would have overwritten current mammal content
     with stale rows. The content load now runs only when the run generated content.
+  - ✅ **Live (2026-10-30):** migration applied and verified; the species reload filled
+    `catch_habitats` for 11,936 of 11,937 rows: land 10,705 · land+freshwater+coast 641 ·
+    freshwater 169 · land+freshwater 163 · freshwater+coast 120 · land+coast 92 · coast 46.
+    For the one NULL row the app falls back to the cautious default by group
+    (`habitatsFor`, lib/catchSpots.ts). The reload reused the stored
+    `vernacular.json` (T-198 restore verified live: "6831 already fetched, 0 to do").
 
 ### S3.2.2 — Catch-spot generation & safety
 - **T-048 · Generate catch_spots on public/accessible land** — *Claude · L · `IN-PROGRESS` (applied + verified live; first load waits on the full fetch) · deps: T-046 · [TSD §5](TSD.md)*
