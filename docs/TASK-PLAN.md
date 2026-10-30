@@ -129,9 +129,13 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
 The go/no-go items from the licensing and privacy docs. **These gate Phase 2, not Phase 1**
 (the prototype uses hand-curated data), but start them early — they have external lead time.
 
-- **T-007 · Obtain written GBIF commercial-use confirmation (filtered subset)** — *Director · M · deps: — · [DATA-SOURCING §1](DATA-SOURCING-LICENSING.md)*
+- **T-007 · Obtain written GBIF commercial-use confirmation (filtered subset)** — *Director · M · `DONE` (Director 2026-10-31) · deps: — · [DATA-SOURCING §1](DATA-SOURCING-LICENSING.md)*
   - Written confirmation that a CC0/CC-BY-only filtered subset may be used in a paid app.
   - Attribution/DOI obligations documented. **Blocks the real data pipeline (E3).**
+  - ✅ **Confirmed (Director, 2026-10-31):** the CC0/CC-BY-only filtered subset may be used in the
+    paid app. The ingest has requested only `CC0_1_0` / `CC_BY_4_0` records since T-042, so the
+    data in production is that subset. Attribution: GBIF and the publishing datasets are credited
+    per DATA-SOURCING §1.
 - **T-008 · Confirm OSM/ODbL attribution & derived-DB obligations** — *Director + Claude · S · `DONE` (Director decision 2026-10-30; legal confirmation rides on T-009) · deps: — · [DATA-SOURCING §4](DATA-SOURCING-LICENSING.md)*
   - ODbL attribution requirement confirmed; decision recorded on keeping derived habitat DB
     internal vs. ODbL-published.
