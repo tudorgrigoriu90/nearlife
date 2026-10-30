@@ -831,7 +831,7 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     T-102 (households) lands; the current `user_id` shape covers v1.
 
 ## F4.2 — Almanac
-- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (**Supabase repo injected**; season filter done; habitat filter pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
+- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (habitat filter built; migration apply pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ Data-access seam `lib/speciesRepository.ts` (7 tests): `SpeciesRepository` (`listSpecies` +
     `getContent`) with a `HardcodedSpeciesRepository` (the bundled set the app runs on today) and a
     `SupabaseSpeciesRepository` (reads the seeded `species`/`species_content` tables via a fakeable
@@ -856,9 +856,16 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     useful cut, and the copy stays honest: "active this month", never "here now" (invariant #1).
     `almanacEntries(…, activeIn)` is tested in `lib/almanac.test.ts`, the chip in
     `AlmanacScreen.test.tsx`.
-  - Remaining: **habitat filter.** The data exists only in the pipeline (`_realms` from GBIF
-    species profiles, T-191, in `vernacular.json`); no database column carries it yet. It needs
-    a `species.realms` column and loader before any UI.
+  - ✅ **Habitat filter (2026-10-30).** The column the filter needed now exists:
+    `species.catch_habitats`, loaded in T-047.
+    - Three chips: 🌲 On land · 💧 Lakes & rivers · 🌊 Coast & sea. Each is a toggle and
+      combines with the category and season filters. It has its own empty state; en + sv.
+    - A species matches with the same rule the catch screen uses to send people to a spot
+      (`habitatsFor`). The almanac and the catch screen can never disagree, and species without
+      data get the same cautious default by category.
+    - `region_catalogue` returns `catch_habitats` (migration `20261030000005`; drop and recreate
+      as in T-215). The extra column is ignored by older app builds.
+    - 7 tests: 3 TS logic and screen, 3 static SQL, and the catalogue mapping.
   - 🚦→✅ **The seed gate is CLEARED (2026-08-18).** The gate read: do not inject the Supabase repo
     until all 38 locales are seeded, because `SupabaseSpeciesRepository.getContentInLocale` has no
     English fallback by design — switching over with only en/sv/so live would have silently blanked

@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { almanacEntries, categoryCounts, discoveredCount, type AlmanacEntry } from '../lib/almanac';
 import { progressSummary, type CollectionRecord } from '../lib/collection';
-import { createTranslator, type Locale } from '../lib/i18n';
+import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
 import { photoFor } from '../lib/species/media';
 import { commonNameFor } from '../lib/species/localized';
 import { monthOf } from '../lib/season';
 import { groupOf, type SpeciesGroup } from '../lib/species/group';
-import type { Month, Species } from '../lib/species/types';
+import type { Habitat, Month, Species } from '../lib/species/types';
 import { CATEGORY_EMOJI, GROUP_LABEL_KEY, speciesGlyph } from './speciesVisual';
 
 // Almanac grid (T-025 · USER-FLOWS §2). Every species with ●/◐/◑ tier overlays; undiscovered
@@ -109,7 +109,15 @@ export default function AlmanacScreen({
   // With 3,000+ species in a county list, "what can I find now" is the useful cut (T-057). It is
   // the honest season window from the presence data, never "here right now" (invariant #1).
   const [activeNow, setActiveNow] = useState(false);
-  const entries = almanacEntries(species, records, category ?? undefined, activeNow ? month : undefined);
+  // Where to go looking (T-057): the habitats the catch screen sends people to.
+  const [habitat, setHabitat] = useState<Habitat | null>(null);
+  const entries = almanacEntries(
+    species,
+    records,
+    category ?? undefined,
+    activeNow ? month : undefined,
+    habitat ?? undefined,
+  );
   const counts = categoryCounts(species, records);
   const discovered = discoveredCount(species, records);
   const summary = progressSummary(records);
@@ -161,6 +169,14 @@ export default function AlmanacScreen({
           active={activeNow}
           onPress={() => setActiveNow((on) => !on)}
         />
+        {HABITAT_CHIPS.map(([h, emoji, key]) => (
+          <Chip
+            key={h}
+            label={`${emoji} ${tr(key)}`}
+            active={habitat === h}
+            onPress={() => setHabitat((current) => (current === h ? null : h))}
+          />
+        ))}
         <Chip label={tr('almanac.filter.all')} active={category === null} onPress={() => setCategory(null)} />
         {counts.map((c) => (
           <Chip
@@ -174,19 +190,27 @@ export default function AlmanacScreen({
 
       <FlatList
         data={entries}
-        key={`${category ?? 'all'}-${activeNow ? 'now' : 'any'}`}
+        key={`${category ?? 'all'}-${activeNow ? 'now' : 'any'}-${habitat ?? 'anywhere'}`}
         keyExtractor={(e) => e.species.id}
         numColumns={3}
         columnWrapperStyle={styles.gridRow}
         renderItem={({ item }) => <Cell entry={item} locale={locale} onSelect={onSelectSpecies} />}
         contentContainerStyle={styles.grid}
         ListEmptyComponent={
-          <Text style={styles.empty}>{tr(activeNow ? 'almanac.activeNow.empty' : 'almanac.empty')}</Text>
+          <Text style={styles.empty}>
+            {tr(activeNow ? 'almanac.activeNow.empty' : habitat ? 'almanac.habitat.empty' : 'almanac.empty')}
+          </Text>
         }
       />
     </View>
   );
 }
+
+const HABITAT_CHIPS: [Habitat, string, TranslationKey][] = [
+  ['land', '🌲', 'almanac.filter.land'],
+  ['freshwater', '💧', 'almanac.filter.freshwater'],
+  ['coast', '🌊', 'almanac.filter.coast'],
+];
 
 function TierStat({ glyph, label, count }: { glyph: string; label: string; count: number }) {
   return (

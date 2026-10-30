@@ -1,7 +1,8 @@
 import { tierStateFor, type CollectionRecord, type TierState } from './collection';
 import { isActiveInMonth } from './season';
 import { groupOf, type SpeciesGroup } from './species/group';
-import type { Month, Species } from './species/types';
+import { habitatsFor } from './catchSpots';
+import type { Habitat, Month, Species } from './species/types';
 
 // Almanac grid model (T-025). Pure core of the Almanac screen (USER-FLOWS §2): every species
 // with its three-tier overlay state (● Spotted / ◐ Caught / ◑ Helped), optionally filtered to a
@@ -40,9 +41,14 @@ export function almanacEntries(
   records: CollectionRecord[],
   category?: SpeciesGroup,
   activeIn?: Month,
+  habitat?: Habitat,
 ): AlmanacEntry[] {
   const filtered = species.filter(
-    (s) => (!category || groupOf(s) === category) && (activeIn === undefined || isActiveInMonth(s, activeIn)),
+    (s) =>
+      (!category || groupOf(s) === category) &&
+      (activeIn === undefined || isActiveInMonth(s, activeIn)) &&
+      // The same habitats the catch screen sends people to, defaults included (T-057).
+      (habitat === undefined || habitatsFor(s).includes(habitat)),
   );
   return filtered.map((s) => {
     const tier = tierStateFor(records, s.id);

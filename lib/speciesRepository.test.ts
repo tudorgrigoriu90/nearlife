@@ -243,5 +243,14 @@ describe('mediaRowToPhoto (T-215)', () => {
       'en',
     );
     expect(species.photo).toBeUndefined();
+    expect(species.catchHabitats).toBeUndefined();
+  });
+
+  it('carries the habitats a species can be met in, for the almanac filter (T-057)', () => {
+    const species = catalogueRowToSpecies(
+      { id: 'pike', scientific_name: 'Esox lucius', common_name: null, local_name: null, category: 'fish', rarity: 'common', active_months: [5], occurrences: 1, catch_habitats: ['freshwater', 'coast', 'lava'] },
+      'en',
+    );
+    expect(species.catchHabitats).toEqual(['freshwater', 'coast']); // unknown values dropped
   });
 });

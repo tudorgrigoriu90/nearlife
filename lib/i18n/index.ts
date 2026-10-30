@@ -46,7 +46,11 @@ export const en = {
   'almanac.loading': 'Loading your almanac…',
   'almanac.filter.all': 'All',
   'almanac.filter.activeNow': 'Active this month',
+  'almanac.filter.land': 'On land',
+  'almanac.filter.freshwater': 'Lakes & rivers',
+  'almanac.filter.coast': 'Coast & sea',
   'almanac.activeNow.empty': 'Nothing here is active this month. Try another category.',
+  'almanac.habitat.empty': 'Nothing in this list lives there. Try another place or category.',
   'almanac.progress': '{discovered} of {total} spotted',
 
   // Category labels (Almanac filter chips)
@@ -358,7 +362,11 @@ const sv: Catalog = {
   'almanac.loading': 'Laddar din almanacka…',
   'almanac.filter.all': 'Alla',
   'almanac.filter.activeNow': 'Aktiva den här månaden',
+  'almanac.filter.land': 'På land',
+  'almanac.filter.freshwater': 'Sjöar & vattendrag',
+  'almanac.filter.coast': 'Kust & hav',
   'almanac.activeNow.empty': 'Inget här är aktivt den här månaden. Prova en annan kategori.',
+  'almanac.habitat.empty': 'Inget i listan lever där. Prova en annan plats eller kategori.',
   'almanac.progress': '{discovered} av {total} sedda',
 
   // Category labels (Almanac filter chips)

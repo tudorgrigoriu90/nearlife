@@ -11,6 +11,9 @@ import type { SpeciesMedia } from './media';
  */
 export type SpeciesCategory = 'bird' | 'mammal' | 'insect' | 'plant' | 'fish' | 'fungus';
 
+/** Where a species can be met (T-047): from its GBIF realms, matched to catch-spot habitats. */
+export type Habitat = 'land' | 'freshwater' | 'coast';
+
 /** Observation-frequency flavour used to weight notifications (TSD §4), not true rarity. */
 export type Rarity = 'common' | 'uncommon' | 'rare';
 
@@ -28,6 +31,8 @@ export interface Species {
   category: SpeciesCategory;
   /** Set only when the species is not what its minigame category says (a snail, a frog). */
   group?: SpeciesGroup;
+  /** From the database (T-047); absent for the bundled set, which uses the default by category. */
+  catchHabitats?: Habitat[];
   rarity: Rarity;
   /**
    * Months in which the species is plausibly active/notable in the region — the honest

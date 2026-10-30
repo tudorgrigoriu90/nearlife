@@ -1,3 +1,4 @@
+import { parseHabitats } from './catchSpots';
 import { GROUP_BY_TAXON } from './species/group';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Locale } from './i18n';
@@ -157,6 +158,8 @@ export interface CatalogueRow extends SpeciesRow {
   photo_source_url?: string | null;
   photo_author?: string | null;
   photo_license?: string | null;
+  /** Since T-057; absent from an older function. */
+  catch_habitats?: string[] | null;
 }
 
 export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Species {
@@ -168,10 +171,12 @@ export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Specie
     author: row.photo_author ?? null,
     license: row.photo_license ?? null,
   });
+  const catchHabitats = parseHabitats(row.catch_habitats);
   return {
     ...base,
     ...(row.local_name ? { names: { [locale]: row.local_name } } : {}),
     ...(photo ? { photo } : {}),
+    ...(catchHabitats ? { catchHabitats } : {}),
   };
 }
 

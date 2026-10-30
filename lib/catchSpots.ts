@@ -1,12 +1,12 @@
 import { DEFAULT_CATCH_RANGE_M, haversineMeters, type LatLng, type ProximityState } from './proximity';
-import type { SpeciesCategory } from './species/types';
+import type { Habitat, SpeciesCategory } from './species/types';
 
 // Catch spots for the app (T-068). The app downloads its county's spots, which the database only
 // ever returns unflagged (T-049), and finds the nearest suitable one ON THE DEVICE: no query ever
 // carries the user's position (PRIVACY §1). A spot suits a species when its habitat is one the
 // species lives in (T-047), so a pike is only ever sent to water.
 
-export type SpotHabitat = 'land' | 'freshwater' | 'coast';
+export type SpotHabitat = Habitat;
 
 export interface CatchSpot {
   id: string;
@@ -24,6 +24,13 @@ const DEFAULT_BY_CATEGORY: Partial<Record<SpeciesCategory, SpotHabitat[]>> = {
   fish: ['freshwater', 'coast'],
   bird: ['land', 'freshwater', 'coast'],
 };
+
+/** The known habitats in a database value, unknown ones dropped; null when none are left. */
+export function parseHabitats(list: unknown): SpotHabitat[] | null {
+  if (!Array.isArray(list)) return null;
+  const habitats = list.filter((h): h is SpotHabitat => typeof h === 'string' && HABITATS.has(h));
+  return habitats.length > 0 ? habitats : null;
+}
 
 export function habitatsFor(species: { category: SpeciesCategory; catchHabitats?: SpotHabitat[] }): SpotHabitat[] {
   if (species.catchHabitats && species.catchHabitats.length > 0) return species.catchHabitats;
@@ -145,9 +152,6 @@ export class SupabaseCatchSpotSource implements CatchSpotSource {
   async habitatsOf(speciesId: string): Promise<SpotHabitat[] | null> {
     const { data, error } = await this.client.from('species').select('catch_habitats').eq('id', speciesId).maybeSingle();
     if (error) throw new Error(`species habitats read failed: ${error.message}`);
-    const list = (data as { catch_habitats?: unknown } | null)?.catch_habitats;
-    if (!Array.isArray(list)) return null;
-    const habitats = list.filter((h): h is SpotHabitat => typeof h === 'string' && HABITATS.has(h));
-    return habitats.length > 0 ? habitats : null;
+    return parseHabitats((data as { catch_habitats?: unknown } | null)?.catch_habitats);
   }
 }

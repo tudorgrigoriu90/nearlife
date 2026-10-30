@@ -123,4 +123,24 @@ describe('AlmanacScreen', () => {
       ).toEqual({ selected: true });
     });
   });
+
+  it('filters to species of one habitat, and back (T-057)', async () => {
+    const base = KRONOBERG_SPECIES[0];
+    const species = [
+      { ...base, id: 'pike', commonName: 'Pike', category: 'fish' as const, catchHabitats: ['freshwater' as const] },
+      { ...base, id: 'hare', commonName: 'Hare', category: 'mammal' as const, catchHabitats: ['land' as const] },
+    ];
+    const records = [
+      { speciesId: 'pike', spottedAt: 't', caughtAt: null, helpedAt: null, helpedKind: null, primeBonus: false },
+      { speciesId: 'hare', spottedAt: 't', caughtAt: null, helpedAt: null, helpedKind: null, primeBonus: false },
+    ];
+    await render(<AlmanacScreen species={species} records={records} locale="en" />);
+    const chip = () => screen.getByRole('button', { name: new RegExp(tr('almanac.filter.freshwater')) });
+    await fireEvent.press(chip());
+    expect(screen.queryByText('Hare')).toBeNull();
+    expect(screen.getByText('Pike')).toBeTruthy();
+    expect(chip().props.accessibilityState).toEqual({ selected: true });
+    await fireEvent.press(chip());
+    expect(screen.getByText('Hare')).toBeTruthy();
+  });
 });
