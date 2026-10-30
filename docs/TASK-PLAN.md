@@ -89,9 +89,12 @@ legal signature. Claude prepares everything that can be prepared.
 ### S1.1.1 — Developer & service accounts
 The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
 
-- **T-001 · Enroll in Apple Developer Program** — *Director · XS · deps: — · [TSD §1](TSD.md)*
+- **T-001 · Enroll in Apple Developer Program** — *Director · XS · `DEFERRED` (v2, Director 2026-10-31) · deps: — · [TSD §1](TSD.md)*
   - Apple Developer account active ($99/yr paid).
   - App Store Connect access confirmed; team ID recorded in a private secrets note.
+  - ⏸ **Postponed to v2 (Director, 2026-10-31).** v1 ships on Android only. The iOS pieces already
+    built (purchases via RevenueCat, the map) work on iOS too once this account exists; push
+    notifications on iOS need the Firebase SDK route noted in T-201.
 - **T-002 · Register Google Play Developer account** — *Director · XS · deps: — · [TSD §1](TSD.md)*
   - Play Console account active ($25 one-time paid); identity verification complete.
 - **T-003 · Create Supabase project (EU region)** — *Director + Claude · XS · `DONE` · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
