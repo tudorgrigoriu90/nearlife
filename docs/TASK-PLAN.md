@@ -3254,7 +3254,7 @@ only.**
       anonymous, and linking an email (T-133) only confirms the address by email. On Supabase the toggle
       also needs a paid plan (invariant #7), so it stays off.
   - Director: nothing to do unless email + password sign-in is ever added.
-- **T-224 · Fix the actionable Supabase advisor findings** — *Claude · S · `IN-PROGRESS` (migration written + guarded; apply + live verify pending) · deps: T-164*
+- **T-224 · Fix the actionable Supabase advisor findings** — *Claude · S · `DONE` (applied + verified live 2026-10-30) · deps: T-164*
   - From the 2026-10-30 advisor run (security + performance). Migration `20261030000006`:
     - **7 owner-only policies on `collection` / `profiles`** evaluated `auth.uid()` once per
       row (`auth_rls_initplan`). They are rewritten as `(select auth.uid()) = user_id`, which is
@@ -3280,6 +3280,11 @@ only.**
       deleted (a rare pipeline operation), not worth ~6 MB of index.
     - `species_taxon_group_idx` (unused, 0.3 MB) is kept for the pipeline's group queries.
     - `cron.*` warnings come from Supabase-managed tables.
+  - ✅ **Applied + verified live (2026-10-30).**
+    - db-migrate applied `20261030000006`, and the live policies now read
+      `(( SELECT auth.uid() AS uid) = user_id)` `to authenticated`.
+    - Verify run 41121612142 passed every check. That includes an anonymous user's catches up
+      to the free limit (the `authenticated` path) and "anon reads no collection rows".
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
