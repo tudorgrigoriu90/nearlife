@@ -925,11 +925,30 @@ enforcement ([GDD §4](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)).
 - **T-067 · MapLibre catch-spot map** — *Claude · M · deps: T-048 · [TSD §1,§5](TSD.md), [USER-FLOWS §6](USER-FLOWS.md)*
   - MapLibre map with free tiles shows the user and nearby (public-land) habitat spots for the
     target species; OSM attribution visible.
-- **T-068 · Proximity gating & states** — *Claude · M · `IN-PROGRESS` (geo core done; map UI pending) · deps: T-067 · [USER-FLOWS §6](USER-FLOWS.md)*
+- **T-068 · Proximity gating & states** — *Claude · M · `DONE` (the map view itself is T-067) · deps: T-067 · [USER-FLOWS §6](USER-FLOWS.md)*
   - ✅ `lib/proximity.ts` (9 tests): `haversineMeters`, `nearestSpot`, and `proximityState` →
     `in-range` / `too-far` / `no-spots` / `gps-off` against a configurable catch radius
     (`DEFAULT_CATCH_RANGE_M = 100`). Remaining: the MapLibre map + wiring the state to the catch
     CTA — depends on real catch spots (T-048, E3) and the map screen (T-067).
+  - ✅ **Catching now means going there (2026-10-30):**
+    - The species card's catch button opens the **Catch spot** screen
+      (`components/CatchSpotScreen.tsx`, 8 tests). It shows the nearest designated public place
+      that suits the species (habitat from T-047; a pike only ever gets water), its distance, and
+      **Directions**, which hands the walk to the phone's maps app with the *destination only*.
+    - **Catch** unlocks within 100 m (`DEFAULT_CATCH_RANGE_M`). "I'm here, check again" takes a
+      fresh fix after walking there. A safety line and the OSM credit are always shown.
+    - `lib/catchSpots.ts` (14 tests): habitat-filtered nearest spot and `catchSpotView` states
+      (in-range, too-far, no-spots, gps-off, unmapped). The source reads a county past the
+      1,000-row cap, in id order.
+    - `components/useCatchSpot.ts` (4 tests): spots cache first, then the server. The cache
+      (`lib/catchSpotStore.ts`) means it **works offline in the forest**.
+    - **Privacy:** the position never leaves the phone. The app downloads the county's public spots
+      and measures locally; no query carries a position.
+    - **Unmapped county:** if a county has no spots loaded at all, it says so and lets the user catch
+      from anywhere, rather than blocking catching on our missing data. Today that is every county
+      until the first load (T-048).
+    - App: catching follows the county being viewed; the free-catch check runs at the Catch button.
+      Without a backend (preview) catching works as before.
 
 ## F6.2 — Per-Category Minigames
 Each category gets a distinct one-thumb, 10–20s minigame; species within a category reskin the

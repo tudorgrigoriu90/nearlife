@@ -18,6 +18,8 @@ import ImpactScreen from './components/ImpactScreen';
 import FamilyScreen from './components/FamilyScreen';
 import StoreScreen from './components/StoreScreen';
 import CountiesScreen from './components/CountiesScreen';
+import CatchSpotRoute from './components/CatchSpotRoute';
+import { commonNameFor } from './lib/species/localized';
 import { useCommunityImpact } from './components/useCommunityImpact';
 import { useEntitlements } from './components/useEntitlements';
 import { useTravelOffer } from './components/useTravelOffer';
@@ -56,6 +58,8 @@ import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib
 import { SupabaseEntitlementSource, type EntitlementClient, type EntitlementSource } from './lib/entitlement';
 import { AsyncStorageEntitlementStore } from './lib/entitlementStore';
 import { AsyncStorageTravelStore } from './lib/travelStore';
+import { SupabaseCatchSpotSource, type CatchSpotClient, type CatchSpotSource } from './lib/catchSpots';
+import { AsyncStorageCatchSpotStore } from './lib/catchSpotStore';
 import { SupabaseFamilyGateway } from './lib/family';
 import { canCollectIn, regionAccess, type County } from './lib/regionAccess';
 import { RevenueCatPurchaseGateway, loadRevenueCat, revenueCatKey, type PurchaseGateway } from './lib/purchases';
@@ -99,6 +103,19 @@ function entitlementSource(): EntitlementSource | null {
       : null;
   }
   return entitlementSourceInstance;
+}
+
+// Catch spots (T-068): the county's spots, cached for offline use outdoors. Null without a backend:
+// catching then works as before, with no spot to walk to.
+const CATCH_SPOT_STORE = new AsyncStorageCatchSpotStore();
+let catchSpotSourceInstance: CatchSpotSource | null | undefined;
+function catchSpotSource(): CatchSpotSource | null {
+  if (catchSpotSourceInstance === undefined) {
+    catchSpotSourceInstance = hasSupabaseConfig()
+      ? new SupabaseCatchSpotSource(getSupabase() as unknown as CatchSpotClient)
+      : null;
+  }
+  return catchSpotSourceInstance;
 }
 
 // Store purchases (T-084), built on first use: the native module exists only in builds made after
@@ -191,6 +208,8 @@ export default function App() {
   // The county This Week and the Almanac show (T-105): home unless the user is looking around
   // another one. Notifications always follow the home county.
   const [viewCounty, setViewCounty] = useState<County | null>(null);
+  // The species whose catch spot is on screen (T-068); the minigame starts from there.
+  const [goCatch, setGoCatch] = useState<Species | null>(null);
   // Read only while the Impact screen is open, so each visit shows a fresh total (T-081).
   const community = useCommunityImpact(showImpact ? communityImpactSource() : null);
   const [exportJson, setExportJson] = useState<string | null>(null);
@@ -489,6 +508,14 @@ export default function App() {
 
   // Catch entry (T-034): a free user gets 3 catches/season; the 4th attempt shows the gentle
   // sheet instead of the minigame. The counter increments only on a successful catch.
+  // Catching means going to a spot that suits the species (T-068). With spots available the card's
+  // button opens the catch spot; its Catch button (once in range) runs the free-catch check.
+  const catchRegion = viewCounty?.id ?? hometown?.id ?? null;
+  const findCatchSpot = (species: Species) => {
+    if (catchSpotSource() !== null && catchRegion !== null) setGoCatch(species);
+    else attemptCatch(species);
+  };
+
   const attemptCatch = (species: Species) => {
     if (canCatch(freeCatch, seasonKey)) {
       track('catch_attempted', { speciesId: species.id });
@@ -701,6 +728,29 @@ export default function App() {
     );
   }
 
+  if (goCatch && catchRegion !== null && catchSpotSource() !== null && !catching) {
+    const target = goCatch;
+    return (
+      <>
+        <CatchSpotRoute
+          species={target}
+          speciesName={commonNameFor(target, locale)}
+          regionId={catchRegion}
+          source={catchSpotSource()!}
+          store={CATCH_SPOT_STORE}
+          getFix={getLocationFixOnce}
+          locale={locale}
+          onCatch={() => {
+            setGoCatch(null);
+            attemptCatch(target);
+          }}
+          onBack={() => setGoCatch(null)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (catching) {
     const target = catching;
     return (
@@ -748,7 +798,7 @@ export default function App() {
           tier={tierStateFor(collection.records, selected.id)}
           fullGame={freeCatch.fullGame}
           onBack={() => setSelected(null)}
-          onFindNearby={canCollect ? attemptCatch : () => setShowCounties(true)}
+          onFindNearby={canCollect ? findCatchSpot : () => setShowCounties(true)}
           onPledge={(species, kind) => {
             // Helped tier: one-tap honor-system pledge (GDD §5) → mark Helped + confirm.
             collection.help(species.id, kind);
