@@ -23,10 +23,34 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  spots:
-    name: Fetch catch spots
+  # One job per county, one at a time. A single county took 15 min in the first run (Kronoberg,
+  # 2026-10-30), so all 21 in one job could pass the 6 h job limit; separate jobs each get their own.
+  # max-parallel 1 keeps us to one query at a time on the shared Overpass server.
+  plan:
+    name: Pick counties
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    outputs:
+      counties: ${{ steps.pick.outputs.counties }}
+    steps:
+      - id: pick
+        env:
+          COUNTIES: ${{ inputs.counties }}
+        run: |
+          ALL="SE-K SE-W SE-X SE-I SE-N SE-Z SE-F SE-H SE-G SE-BD SE-T SE-E SE-M SE-D SE-AB SE-C SE-S SE-AC SE-Y SE-U SE-O"
+          LIST="${COUNTIES:-$ALL}"
+          JSON=$(printf '%s\n' $LIST | grep -E '^SE-[A-Z]{1,2}$' | jq -R . | jq -cs .)
+          echo "counties=$JSON" >> "$GITHUB_OUTPUT"
+
+  spots:
+    name: Fetch catch spots (${{ matrix.county }})
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        county: ${{ fromJson(needs.plan.outputs.counties) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -37,16 +61,15 @@ jobs:
 
       - run: pip install -r pipeline/requirements.txt
 
-      # Free text reaches the shell through env, never `${{ }}` interpolation into the script.
       - name: Fetch from Overpass
         env:
-          COUNTIES: ${{ inputs.counties }}
-        run: python pipeline/build_catch_spots.py $COUNTIES
+          COUNTY: ${{ matrix.county }}
+        run: python pipeline/build_catch_spots.py "$COUNTY"
 
       - name: Upload the spots
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: catch-spots
+          name: catch-spots-${{ matrix.county }}
           path: pipeline/data/catch_spots_*.json
           retention-days: 90

@@ -676,6 +676,15 @@ key before loading into Supabase.**
     - 13 pipeline tests.
     - Overpass is blocked from the dev sandbox, so the first live run is a one-county smoke test
       (SE-G) in CI.
+  - ✅ **Smoke test (run 41071521472, Kronoberg, 2026-10-30):** 611 spots, **556 shown** (361
+    land, 195 freshwater, 0 coast: Kronoberg is inland). Excluded: 54 inside reserves, 1 private,
+    0 near major roads, 0 military.
+    - Took **15 min for one county**, so all 21 in one job could pass the 6 h limit. The workflow
+      is now one job per county (matrix, `max-parallel: 1`, one Overpass query at a time), each
+      with its own limit and artifact. The counties input is filtered to valid ISO codes.
+    - ⚠️ Density looks low: 556 spots over ~8,500 km² is about one per 15 km². Expect them dense in
+      towns (parks) and sparse in forest. T-050 measures what this means for people's walking
+      distance.
 - **T-047 · species_habitat mapping** — *Claude · M · deps: T-046 · [TSD §3](TSD.md)*
   - Each catchable species mapped to the habitat types it's plausibly caught in.
 
