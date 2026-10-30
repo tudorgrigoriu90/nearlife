@@ -1232,9 +1232,21 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
   - Restore works across reinstall/devices tied to the account.
 
 ## F9.2 — Conversion Funnel
-- **T-087 · Out-of-free-catches sheet + funnel analytics** — *Claude · S · deps: T-075, T-085, T-035 · [ECONOMY](ECONOMY.md)*
+- **T-087 · Out-of-free-catches sheet + funnel analytics** — *Claude · S · `DONE` · deps: T-075, T-085, T-035 · [ECONOMY](ECONOMY.md)*
   - Gentle "3 free catches used — unlimited with Full Game" sheet; PostHog tracks the taste
     funnel (used-all-3 → purchased), the key economy metric.
+  - ✅ **Done (2026-10-31).** The sheet itself shipped with T-034/T-085; its button opens the Store.
+    This adds the measurement:
+    - Events: `paywall_shown` (now actually sent), `store_opened {source: paywall | settings |
+      catch_spot}`, and `purchase_started / completed / cancelled / failed {sku}`. All anonymous,
+      product ids only, and sent only with analytics consent (`ConsentGatedTracker`).
+    - `TrackingPurchaseGateway` wraps the purchase layer, so the Store and Counties screens report
+      the same steps with no per-screen code. Errors still reach the screen.
+    - `salesFunnel(events)` returns out of catches → store opened (from the sheet) → purchase
+      started → **Full Game or Family bought**, plus the conversion. County packs and store visits
+      from elsewhere are other journeys and are left out.
+    - 6 tests (`lib/salesFunnel.test.ts`). PostHog builds the same funnel per person once its key
+      is set (T-005/T-035).
 
 ---
 ---

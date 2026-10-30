@@ -16,6 +16,13 @@ export interface AnalyticsEventProps {
   catch_succeeded: { speciesId: string; grade: 'perfect' | 'good' };
   free_catches_exhausted: Record<string, never>;
   paywall_shown: Record<string, never>;
+  // The sales funnel (T-087). `sku` is a store product id (full_game, family, region_swe_<n>, …),
+  // never a price or anything about the person.
+  store_opened: { source: 'paywall' | 'settings' | 'counties' | 'catch_spot' };
+  purchase_started: { sku: string };
+  purchase_completed: { sku: string };
+  purchase_cancelled: { sku: string };
+  purchase_failed: { sku: string };
 }
 
 export type AnalyticsEvent = keyof AnalyticsEventProps;

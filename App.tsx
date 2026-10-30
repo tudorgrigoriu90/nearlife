@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AlmanacScreen from './components/AlmanacScreen';
@@ -63,6 +63,7 @@ import { AsyncStorageCatchSpotStore } from './lib/catchSpotStore';
 import { SupabaseFamilyGateway } from './lib/family';
 import { canCollectIn, regionAccess, type County } from './lib/regionAccess';
 import { RevenueCatPurchaseGateway, loadRevenueCat, revenueCatKey, type PurchaseGateway } from './lib/purchases';
+import { TrackingPurchaseGateway } from './lib/salesFunnel';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import type { Region } from './lib/hometown';
 import { AsyncStorageHometownStore } from './lib/hometownStore';
@@ -220,6 +221,8 @@ export default function App() {
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
   const track = useTracker(consent);
+  // Every purchase screen reports the same funnel steps (T-087).
+  const purchases = useMemo(() => new TrackingPurchaseGateway(purchaseGateway(), { track }), [track]);
   // The Almanac lists the user's county + anything collected outside it (T-208); Badges count over
   // the same list so the two never disagree.
   const { species: almanacSpecies, loading: speciesLoading } = useAlmanacCatalogue(
@@ -522,6 +525,7 @@ export default function App() {
       setCatching(species);
     } else {
       track('free_catches_exhausted', {});
+      track('paywall_shown', {});
       setPaywall(true);
     }
   };
@@ -578,7 +582,7 @@ export default function App() {
           locale={locale}
           homeId={hometown?.id ?? null}
           entitlements={entitlements}
-          gateway={purchaseGateway()}
+          gateway={purchases}
           onView={(county) => {
             setViewCounty(county.id === hometown?.id ? null : county);
             // Land on that county's This Week, wherever Counties was opened from.
@@ -602,7 +606,7 @@ export default function App() {
       <>
         <StoreScreen
           locale={locale}
-          gateway={purchaseGateway()}
+          gateway={purchases}
           entitlements={entitlements}
           onPurchased={() => {
             for (const ms of AFTER_PURCHASE_REREAD_MS) setTimeout(refreshEntitlements, ms);
@@ -693,7 +697,14 @@ export default function App() {
           onLinkEmail={() => setShowLinkEmail(true)}
           // Family needs the backend: households live in Supabase (T-102).
           onOpenFamily={hasSupabaseConfig() ? () => setShowFamily(true) : undefined}
-          onOpenStore={hasSupabaseConfig() ? () => setShowStore(true) : undefined}
+          onOpenStore={
+            hasSupabaseConfig()
+              ? () => {
+                  track('store_opened', { source: 'settings' });
+                  setShowStore(true);
+                }
+              : undefined
+          }
           onOpenCounties={hasSupabaseConfig() && hometown ? () => setShowCounties(true) : undefined}
           onDeleteAccount={() => setShowDelete(true)}
           onDone={() => setShowSettings(false)}
@@ -798,7 +809,14 @@ export default function App() {
           tier={tierStateFor(collection.records, selected.id)}
           fullGame={freeCatch.fullGame}
           onBack={() => setSelected(null)}
-          onFindNearby={canCollect ? findCatchSpot : () => setShowCounties(true)}
+          onFindNearby={
+            canCollect
+              ? findCatchSpot
+              : () => {
+                  track('store_opened', { source: 'catch_spot' });
+                  setShowCounties(true);
+                }
+          }
           onPledge={(species, kind) => {
             // Helped tier: one-tap honor-system pledge (GDD §5) → mark Helped + confirm.
             collection.help(species.id, kind);
@@ -819,6 +837,7 @@ export default function App() {
               hasSupabaseConfig()
                 ? () => {
                     setPaywall(false);
+                    track('store_opened', { source: 'paywall' });
                     setShowStore(true);
                   }
                 : undefined
