@@ -17,6 +17,10 @@ on:
         description: "ISO 3166-2 codes, space-separated (e.g. SE-G), or empty for all 21"
         required: false
         default: ""
+      from_run:
+        description: "Skip fetching and load the spots of this earlier run id (its artifacts last 90 days)"
+        required: false
+        default: ""
 
 concurrency:
   group: catch-spots
@@ -44,6 +48,7 @@ jobs:
   spots:
     name: Fetch catch spots (${{ matrix.county }})
     needs: plan
+    if: ${{ inputs.from_run == '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
@@ -73,3 +78,38 @@ jobs:
           name: catch-spots-${{ matrix.county }}
           path: pipeline/data/catch_spots_*.json
           retention-days: 90
+
+  # Loads every county that was fetched. A county whose fetch failed is simply absent, and the
+  # loader refuses any county arriving with far fewer spots than the database holds (T-048).
+  load:
+    name: Load into Supabase
+    needs: spots
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r pipeline/requirements.txt
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: catch-spots*
+          path: pipeline/data
+          merge-multiple: true
+          # This run's artifacts, or an earlier run's when from_run is given.
+          run-id: ${{ inputs.from_run || github.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Load catch spots
+        working-directory: pipeline
+        run: python -m osm.load

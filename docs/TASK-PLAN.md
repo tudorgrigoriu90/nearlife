@@ -700,8 +700,24 @@ key before loading into Supabase.**
       query reads it in the same row.
 
 ### S3.2.2 — Catch-spot generation & safety
-- **T-048 · Generate catch_spots on public/accessible land** — *Claude · L · deps: T-046 · [TSD §5](TSD.md)*
+- **T-048 · Generate catch_spots on public/accessible land** — *Claude · L · `IN-PROGRESS` (built + tested; apply, live verify and first load pending) · deps: T-046 · [TSD §5](TSD.md)*
   - `catch_spots` generated only on public/accessible land, snapped to habitat.
+  - ✅ **Built (2026-10-30):** migration `20261030000002_catch_spots.sql`.
+    - Table: `catch_spots`, keyed by OSM id, with region, kind, habitat, name, lat/lon and
+      `flags`. Lat/lon and flags are checked against Sweden's bounds and the pipeline's flag list.
+    - **Privacy design: no query takes a user's position.** The app downloads its county's shown
+      spots and finds the nearest one on the device (`lib/proximity.ts`), so coordinates never
+      leave the phone. That is also why there is no PostGIS geometry column.
+    - **Safety is enforced by the database.** Flagged spots are stored for the audit, but the
+      read policy is `cardinality(flags) = 0`, so no user query, bug or future screen can show one
+      (T-049). Users cannot write.
+    - `pipeline/osm/load.py`, per county in one transaction: upsert, then delete spots gone from
+      OSM. It refuses a county arriving below 75% of what is loaded, or empty (same guard as
+      T-192).
+    - `catch-spots.yml` gained a `load` job, plus a `from_run` input to load an earlier run's
+      artifacts without refetching.
+    - 5 tests here; 4 live checks in `verify.py` (unflagged visible; reserve- and road-flagged
+      invisible; users cannot insert).
 - **T-049 · Hard safety exclusions** — *Claude · M · deps: T-048 · [TSD §5](TSD.md), [GDD §4](GDD.md)*
   - Private property, roads/rail, water hazards, protected reserves excluded via `safety_flags`;
     a flagged spot is **never** surfaced. Tests cover each exclusion class.

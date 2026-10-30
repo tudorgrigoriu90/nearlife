@@ -71,6 +71,11 @@ EXPECTED: dict[str, str] = {
     "leaving removes the Full Game": "ok",
     "a Family refund removes every member's Full Game": "ok",
     "nobody can join a household whose Family was refunded": "household_inactive",
+    # T-048/T-049 catch spots: a flagged spot is never visible to a user.
+    "a user sees an unflagged catch spot": "ok",
+    "a spot inside a nature reserve is invisible": "ok",
+    "a spot near a major road is invisible": "ok",
+    "a user cannot add a catch spot": "permission denied",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -385,6 +390,32 @@ def run_household_checks(cur) -> dict[str, str]:
     return results
 
 
+def run_catch_spot_checks(cur) -> dict[str, str]:
+    """T-049: the read policy, not the app, is what keeps a flagged spot from ever being shown."""
+    results: dict[str, str] = {}
+    cur.execute(
+        "insert into public.catch_spots (id, region_id, kind, habitat, lat, lon, flags) values "
+        "('zz-verify-ok', 'SWE.9_1', 'viewpoint', 'land', 56.9, 14.8, '{}'), "
+        "('zz-verify-reserve', 'SWE.9_1', 'bird_hide', 'freshwater', 56.9, 14.8, '{reserve}'), "
+        "('zz-verify-road', 'SWE.9_1', 'picnic_site', 'land', 56.9, 14.8, '{major_road}')"
+    )
+    cur.execute("set local role anon")
+    cur.execute("select set_config('request.jwt.claims', %s, true)", (json.dumps({"role": "anon"}),))
+    for name, sid, want in (
+        ("a user sees an unflagged catch spot", "zz-verify-ok", 1),
+        ("a spot inside a nature reserve is invisible", "zz-verify-reserve", 0),
+        ("a spot near a major road is invisible", "zz-verify-road", 0),
+    ):
+        _step(cur, results, name,
+              "select case when count(*) = %s then 'ok' else 'saw ' || count(*) end "
+              "from public.catch_spots where id = %s", (want, sid))
+    _step(cur, results, "a user cannot add a catch spot",
+          "insert into public.catch_spots (id, region_id, kind, habitat, lat, lon) "
+          "values ('zz-verify-mine', 'SWE.9_1', 'viewpoint', 'land', 56.9, 14.8)")
+    cur.execute("reset role")
+    return results
+
+
 def main() -> None:
     dsn = os.environ.get("SUPABASE_DB_URL")
     if not dsn:
@@ -399,6 +430,7 @@ def main() -> None:
                 results.update(run_community_impact_checks(cur))
                 results.update(run_entitlement_checks(cur))
                 results.update(run_household_checks(cur))
+                results.update(run_catch_spot_checks(cur))
         finally:
             conn.rollback()  # always: these checks must never leave a trace
 
