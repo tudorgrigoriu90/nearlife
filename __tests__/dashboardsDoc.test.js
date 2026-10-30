@@ -37,6 +37,8 @@ describe('docs/launch/DASHBOARDS.md', () => {
     const inTables = [...DOC.matchAll(/^\|.*$/gm)].flatMap((row) =>
       [...row[0].matchAll(/`([a-z]+_[a-z_]+)`/g)].map((e) => e[1]),
     );
-    expect(inTables.filter((e) => !listed.has(e))).toEqual([]);
+    // Product ids, source values and table names also appear in backticks; they are not events.
+    const notEvents = new Set(['full_game', 'all_regions', 'notification_log', 'catch_spot', 'this_week']);
+    expect(inTables.filter((e) => !listed.has(e) && !notEvents.has(e))).toEqual([]);
   });
 });

@@ -1609,8 +1609,19 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
   - Builds submitted; review passed; app live in target market.
 
 ## F11.2 — Observability
-- **T-099 · Production analytics dashboards** — *Claude · S · deps: T-035 · [TSD §8](TSD.md)*
+- **T-099 · Production analytics dashboards** — *Claude · S · `IN-PROGRESS` (defined + drift-tested; creating it in PostHog pending) · deps: T-035 · [TSD §8](TSD.md)*
   - Retention, conversion (taste funnel), notification open rate dashboards live.
+  - ✅ **Defined (2026-10-30):** [docs/launch/DASHBOARDS.md](launch/DASHBOARDS.md) §2, one
+    "Nearby: production" dashboard:
+    - **Retention:** weekly retention and active people.
+    - **Sales:** the catch-limit funnel, the same steps as `salesFunnel()` and limited to
+      Full Game and Family. Plus purchases by product, where the store is opened, and purchases
+      that don't finish. Revenue itself comes from RevenueCat and Play, because the app never
+      sends prices.
+    - **Notifications and pull:** opens (rate against `notification_log`), how people find
+      species, organic pull, and demand for identification (T-222's evidence).
+    - Guarded by the same drift test (`__tests__/dashboardsDoc.test.js`).
+  - **To close:** create it in PostHog, the same way as T-037.
 - **T-100 · Error & pipeline monitoring** — *Claude · S · `IN-PROGRESS` (pipeline + cron alerting done; app crash reporting needs a Director decision) · deps: T-045, T-064*
   - Crash/error reporting on the app; alerting if the data pipeline or notification cron fails.
   - ✅ **Pipeline and cron alerting built (2026-10-30)**: `pipeline/db/health.py` plus
