@@ -1608,7 +1608,7 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
       it sells nothing: a pack is one more tap away, on Counties. en + sv.
     - Privacy: this fits the policy's "approximate location while using the app". Here it is
       coarser than a grid cell, a county, and it never leaves the device.
-- **T-219 · Data export includes purchases and Family membership** — *Claude · S · `IN-PROGRESS` (built + tested; migration apply pending) · deps: T-092, T-217, T-102 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+- **T-219 · Data export includes purchases and Family membership** — *Claude · S · `DONE` (applied + verified live 2026-10-30) · deps: T-092, T-217, T-102 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - Found by T-095: "Export my data" holds the profile, consent and collection, but not the
     purchase records (`entitlements`) or the household link (role, joined date), which the
     server now keeps per account. Under GDPR access/portability the export must show them.
@@ -1626,6 +1626,9 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
       `20261030000003` adds `since` to `my_household()`. Owner: household created. Member:
       joined. Grants unchanged.
     - Covered by 8 tests, 1 static SQL guard and 1 live verify check.
+  - ✅ **Applied + verified live (2026-10-30):** db-migrate run 41109167369 applied
+    `20261030000003`. Verify run 41109358934 passed, including the new check "a member sees
+    since when they joined".
 - **T-220 · iNaturalist as a second photo source** — *Claude · M · `IN-PROGRESS` (built + tested; migration apply + first run pending) · deps: T-202 · [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
   - Director request (2026-10-30). 2,027 of 6,824 species (30%) had no commercial-safe
     Wikipedia photo. By group: insects 61% covered, plants 84%, birds 92%, mammals 98%, fish
