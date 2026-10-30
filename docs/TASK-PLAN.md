@@ -3221,6 +3221,32 @@ only.**
   - Leaked-password protection (HaveIBeenPwned) is disabled in Auth — a dashboard toggle, Director's
     call, and relevant once email/password linking is live.
   - `cron.job` / `cron.job_run_details` warnings are Supabase-managed tables, not ours.
+- **T-224 · Fix the actionable Supabase advisor findings** — *Claude · S · `IN-PROGRESS` (migration written + guarded; apply + live verify pending) · deps: T-164*
+  - From the 2026-10-30 advisor run (security + performance). Migration `20261030000006`:
+    - **7 owner-only policies on `collection` / `profiles`** evaluated `auth.uid()` once per
+      row (`auth_rls_initplan`). They are rewritten as `(select auth.uid()) = user_id`, which is
+      evaluated once per query, and scoped `to authenticated`.
+    - This is not a lockout: Supabase gives anonymous sign-ins the `authenticated` role. The
+      `anon` role is a request with no session at all, which matched no rows before either.
+      The live verify proves both: an anonymous user's catches go through, and anon reads
+      nothing.
+    - Dropped 2 redundant indexes: `collection_user_idx` (covered by the unique
+      `(user_id, species_id)`) and `species_presence_region_idx` (covered by the primary key
+      `(region_id, species_id)`).
+    - 3 static guards: every dropped policy is recreated, each one is owner-only with the
+      cached uid, and writes keep their `with check`.
+  - Left as is, with reasons:
+    - `households` / `household_members` have RLS with no policies: deliberate; only the
+      SECURITY DEFINER functions touch them (T-102).
+    - The household functions and `community_impact` are callable SECURITY DEFINER functions:
+      deliberate, they are the API. `community_impact` returns only totals, and anon reading
+      them is a verify check.
+    - `pg_net` sits in `public`: the extension cannot be moved in place, and recreating it
+      would break the notification cron. Its functions live in schema `net` anyway.
+    - The unindexed FK on `species_presence.species_id` only matters when a species row is
+      deleted (a rare pipeline operation), not worth ~6 MB of index.
+    - `species_taxon_group_idx` (unused, 0.3 MB) is kept for the pipeline's group queries.
+    - `cron.*` warnings come from Supabase-managed tables.
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
