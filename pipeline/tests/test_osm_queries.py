@@ -43,3 +43,65 @@ def test_major_roads_and_railways_only():
 
 def test_ids_match_the_spot_id_format():
     assert ids_from({"elements": [{"type": "node", "id": 1}, {"type": "way", "id": 2}]}) == {"n1", "w2"}
+
+
+class _Resp:
+    def __init__(self, status, body=None):
+        self.status_code = status
+        self._body = body or {"elements": []}
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise RuntimeError(f"{self.status_code} Server Error")
+
+    def json(self):
+        return self._body
+
+
+class _Session:
+    def __init__(self, statuses):
+        self.statuses = list(statuses)
+        self.urls = []
+        self.headers = {}
+
+    def post(self, url, data, timeout):
+        self.urls.append(url)
+        return _Resp(self.statuses.pop(0))
+
+
+def _client(statuses, endpoints=("https://a/api", "https://b/api")):
+    from osm.overpass import OverpassClient
+
+    client = OverpassClient(endpoints=list(endpoints), pause=0, backoff=0, max_retries=4)
+    client.session = _Session(statuses)
+    return client
+
+
+def test_a_busy_server_moves_the_next_attempt_to_the_other_endpoint():
+    # Norrbotten (2026-10-30): six 502s in a row from one server lost the county.
+    client = _client([502, 200])
+    assert client.run("q") == {"elements": []}
+    assert client.session.urls == ["https://a/api", "https://b/api"]
+
+
+def test_endpoints_alternate_and_give_up_after_max_retries():
+    client = _client([504, 502, 429, 503])
+    try:
+        client.run("q")
+    except RuntimeError as exc:
+        assert "503" in str(exc)
+    else:
+        raise AssertionError("expected the last error to surface")
+    assert client.session.urls == ["https://a/api", "https://b/api", "https://a/api", "https://b/api"]
+
+
+def test_a_failed_county_names_the_query_that_failed():
+    import build_catch_spots
+
+    client = _client([200, 502, 502, 502, 502])
+    try:
+        build_catch_spots.build_county(client, "SWE.9_1", "SE-G")
+    except RuntimeError as exc:
+        assert str(exc).startswith("near coast:")
+    else:
+        raise AssertionError("expected a failure")

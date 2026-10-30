@@ -34,11 +34,17 @@ DATA = Path(__file__).resolve().parent / "data"
 
 
 def build_county(client: OverpassClient, region_id: str, iso: str) -> list[dict]:
-    spots = client.run(spots_query(iso))
-    near_coast = ids_from(client.run(near_coast_query(iso)))
-    reserves = ids_from(client.run(inside_query(iso, RESERVE_FILTERS)))
-    military = ids_from(client.run(inside_query(iso, MILITARY_FILTERS)))
-    roads = ids_from(client.run(near_roads_query(iso)))
+    def step(name: str, query: str) -> dict:
+        try:
+            return client.run(query)
+        except Exception as exc:
+            raise RuntimeError(f"{name}: {exc}") from exc  # which of the five queries the county lost
+
+    spots = step("spots", spots_query(iso))
+    near_coast = ids_from(step("near coast", near_coast_query(iso)))
+    reserves = ids_from(step("reserves", inside_query(iso, RESERVE_FILTERS)))
+    military = ids_from(step("military", inside_query(iso, MILITARY_FILTERS)))
+    roads = ids_from(step("near roads", near_roads_query(iso)))
     return county_spots(region_id, spots, near_coast, reserves, military, roads)
 
 

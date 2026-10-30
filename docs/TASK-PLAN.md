@@ -657,7 +657,7 @@ key before loading into Supabase.**
 ## F3.2 — OSM Habitat & Catch Spots
 
 ### S3.2.1 — Habitat classification
-- **T-046 · Overpass ingest → habitat_types via osm_tag_rules** — *Claude · L · `IN-PROGRESS` (built + tested; first live run pending) · deps: T-008, T-015 · [TSD §5](TSD.md), [DATA-SOURCING §4](DATA-SOURCING-LICENSING.md)*
+- **T-046 · Overpass ingest → habitat_types via osm_tag_rules** — *Claude · L · `IN-PROGRESS` (first full run fetched every county but Norrbotten; its re-fetch pending) · deps: T-008, T-015 · [TSD §5](TSD.md), [DATA-SOURCING §4](DATA-SOURCING-LICENSING.md)*
   - OSM features pulled via Overpass and classified into habitat types by tag rules.
   - "© OpenStreetMap contributors" attribution recorded for display.
   - ✅ **Built (2026-10-30), design decisions:**
@@ -698,6 +698,12 @@ key before loading into Supabase.**
     - ⚠️ Density looks low: 556 spots over ~8,500 km² is about one per 15 km². Expect them dense in
       towns (parks) and sparse in forest. T-050 measures what this means for people's walking
       distance.
+  - 🐛 **First full run (41080920423, 2026-10-30):** 18 counties fetched by the time of
+    writing, with the last two still running. Norrbotten was lost to six 502s in a row from overpass-api.de over 30 minutes. The client now alternates
+    between two public Overpass instances (overpass-api.de, overpass.private.coffee; same OSM
+    data), so a busy server no longer costs the county. A failed county's error now also names
+    which of its five queries failed. 3 tests. Norrbotten is re-fetched on its own
+    (`counties=SE-BD`).
 - **T-047 · species_habitat mapping** — *Claude · M · `DONE` (applied + loaded live 2026-10-30) · deps: T-046 · [TSD §3](TSD.md)*
   - Each catchable species mapped to the habitat types it's plausibly caught in.
   - ✅ **Built (2026-10-30):** `species.catch_habitats text[]` ⊆ {land, freshwater, coast}

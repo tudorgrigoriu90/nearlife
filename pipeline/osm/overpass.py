@@ -4,7 +4,11 @@ result means lives in osm/rules.py.
 One county per query, selected by its boundary's ISO 3166-2 tag. Five queries per county: the
 spots themselves, then the ids of spots near the coast, inside protected or military land, and near
 major roads. Overpass is a shared community service, so the client paces itself and backs off on
-429/504. The whole country is about 105 queries, run yearly from CI.
+429/502/503/504. The whole country is about 105 queries, run yearly from CI.
+
+A busy answer moves the next attempt to the other public instance: in the first full run
+(2026-10-30) the main server answered Norrbotten's queries with six 502s in a row, and retrying the
+same server only lost the county. Both instances serve the same OSM data.
 """
 
 import time
@@ -13,7 +17,7 @@ import requests
 
 from .rules import COAST_RADIUS_M, KINDS, ROAD_RADIUS_M
 
-ENDPOINT = "https://overpass-api.de/api/interpreter"
+ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter"]
 TIMEOUT_S = 900
 
 
@@ -65,20 +69,30 @@ def ids_from(result: dict) -> set[str]:
 
 
 class OverpassClient:
-    def __init__(self, endpoint: str = ENDPOINT, pause: float = 5.0, max_retries: int = 6):
-        self.endpoint = endpoint
+    def __init__(
+        self,
+        endpoints: list[str] | None = None,
+        pause: float = 5.0,
+        backoff: float = 30.0,
+        max_retries: int = 6,
+    ):
+        self.endpoints = endpoints or ENDPOINTS
         self.pause = pause
+        self.backoff = backoff
         self.max_retries = max_retries
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": "nearby-nearlife-pipeline/0.1 (catch spots; yearly)"})
 
     def run(self, query: str) -> dict:
-        delay = 30.0
-        for _ in range(self.max_retries):
-            resp = self.session.post(self.endpoint, data={"data": query}, timeout=TIMEOUT_S + 60)
+        delay = self.backoff
+        resp = None
+        for attempt in range(self.max_retries):
+            endpoint = self.endpoints[attempt % len(self.endpoints)]
+            resp = self.session.post(endpoint, data={"data": query}, timeout=TIMEOUT_S + 60)
             if resp.status_code in (429, 502, 503, 504):
-                time.sleep(delay)  # the shared server is busy: wait, never hammer
-                delay = min(delay * 2, 300.0)
+                if attempt + 1 < self.max_retries:
+                    time.sleep(delay)  # the shared server is busy: wait, never hammer
+                    delay = min(delay * 2, 300.0)
                 continue
             resp.raise_for_status()
             time.sleep(self.pause)
