@@ -1373,16 +1373,21 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
 
 ## F12.2 — Regions & World Pass
 > **Moved into v1 (Director, 2026-10-29).** v1 is Sweden only, so a "region" is one of the 20
-> counties that are not your home county, and the "World Pass" covers all of Sweden. Prices are
-> still to be confirmed against the new 49 SEK anchor; the ECONOMY.md figures are $2.99 / $19.99.
+> counties that are not your home county, and the "World Pass" covers all of Sweden. **Prices
+> (Director, 2026-10-30): 29 SEK per county, 99 SEK for all of Sweden.**
 
-- **T-105 · Region pack + All-Sweden pass products** — *Claude + Director · M · `TODO` · deps: T-217, T-083 · [ECONOMY](ECONOMY.md)*
+- **T-105 · Region pack + All-Sweden pass products** — *Claude + Director · M · `IN-PROGRESS` (server mapping done; switcher UI next) · deps: T-217, T-083 · [ECONOMY](ECONOMY.md)*
   - Products (Director creates them in Play Console): one pack per county, or a single
     "pick a county" pack, plus the all-counties pass. Owned regions are recorded server-side by
     the T-217 webhook, never client-side.
   - Region switcher: home county plus owned counties. A locked county shows its This Week list
     as a preview (names + photos), with catching and the full Almanac locked. The mission
     content stays free everywhere (invariant #2).
+  - ✅ **Products recognised by id (2026-10-30).** `region_swe_<n>` (21 products, 29 SEK) and
+    `all_regions` (99 SEK) grant `region_SWE_<n>_1` / `all_regions` from the webhook's
+    `product_id`. The Director therefore creates the products but **no** RevenueCat entitlements
+    for them, 22 fewer by hand. A grant named both ways is applied once. The guide lists every
+    product id with its county (PAYMENTS-SETUP.md, Part E). 7 more planner tests.
 - **T-218 · Travel: notice when the phone is in another county** — *Claude · S · `TODO` · deps: T-105, T-090 · [ECONOMY](ECONOMY.md)*
   - While the app is open, a coarse position check (county only, discarded at once, same
     resolver as onboarding, T-090) notices that you are outside your home county. It offers that

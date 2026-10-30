@@ -1,4 +1,4 @@
-import { planEntitlementChanges, regionEntitlement, secretMatches } from './revenuecatEvents';
+import { planEntitlementChanges, regionEntitlement, regionProductId, secretMatches } from './revenuecatEvents';
 
 const USER = '0e08dc15-1111-4222-8333-444455556666';
 const OTHER = '5e6763d4-aaaa-4bbb-8ccc-ddddeeeeffff';
@@ -60,7 +60,7 @@ describe('planEntitlementChanges', () => {
 
   it('keeps every known entitlement of a purchase and drops unknown ones', () => {
     const plan = planEntitlementChanges(
-      event({ entitlement_ids: ['family', 'all_regions', regionEntitlement('SWE.9_1'), 'admin'] }),
+      event({ entitlement_ids: ['family', 'all_regions', regionEntitlement('SWE.9_1'), 'admin'], product_id: 'family' }),
     );
     expect(plan.kind === 'apply' && plan.changes.map((c) => c.entitlement)).toEqual([
       'family',
@@ -88,7 +88,7 @@ describe('planEntitlementChanges', () => {
   });
 
   it('ignores a purchase with no known entitlement', () => {
-    expect(planEntitlementChanges(event({ entitlement_ids: [] })).kind).toBe('ignore');
+    expect(planEntitlementChanges(event({ entitlement_ids: [], product_id: 'mystery' })).kind).toBe('ignore');
   });
 });
 
@@ -113,3 +113,33 @@ describe('secretMatches', () => {
     expect(secretMatches('Bearer anything', undefined)).toBe(false);
   });
 });
+
+describe('region packs are recognised by product id (T-105)', () => {
+  // 21 county products would otherwise need 21 matching RevenueCat entitlements set up by hand.
+  it('maps a county product to its region entitlement even with no RevenueCat entitlement', () => {
+    const plan = planEntitlementChanges(event({ entitlement_ids: [], product_id: 'region_swe_9' }));
+    expect(plan.kind === 'apply' && plan.changes.map((c) => c.entitlement)).toEqual(['region_SWE_9_1']);
+  });
+
+  it('maps the all-Sweden product', () => {
+    const plan = planEntitlementChanges(event({ entitlement_ids: [], product_id: 'all_regions' }));
+    expect(plan.kind === 'apply' && plan.changes.map((c) => c.entitlement)).toEqual(['all_regions']);
+  });
+
+  it('does not double a grant named both ways', () => {
+    const plan = planEntitlementChanges(event({ entitlement_ids: ['full_game'], product_id: 'full_game' }));
+    expect(plan.kind === 'apply' && plan.changes.map((c) => c.entitlement)).toEqual(['full_game']);
+  });
+
+  it('ignores an unknown product with no known entitlement', () => {
+    expect(planEntitlementChanges(event({ entitlement_ids: [], product_id: 'mystery' })).kind).toBe('ignore');
+  });
+});
+
+describe('regionProductId', () => {
+  it('names the Play product for a county', () => {
+    expect(regionProductId('SWE.9_1')).toBe('region_swe_9');
+    expect(regionProductId('SWE.21_1')).toBe('region_swe_21');
+  });
+});
+

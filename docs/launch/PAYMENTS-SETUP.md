@@ -85,6 +85,37 @@ You do this on your computer, in the project folder (where you run `npx expo sta
    - Save, then **Activate**.
 3. Second product: **Product ID** `family`, name Family, description "The Full Game for up to 5
    people", **99 SEK**. Save and **Activate**.
+4. **All of Sweden:** Product ID `all_regions`, name "All of Sweden", description "Every county,
+   not just your home", **99 SEK**. Save and **Activate**.
+5. **One product per county, 29 SEK each** (21 products). Same steps; the Product ID must be
+   exactly as listed. Name: "<County> pack", description "Explore <County> beyond your home
+   county".
+
+   | Product ID | County |
+   |---|---|
+   | `region_swe_1` | Blekinge |
+   | `region_swe_2` | Dalarna |
+   | `region_swe_3` | Gävleborg |
+   | `region_swe_4` | Gotland |
+   | `region_swe_5` | Halland |
+   | `region_swe_6` | Jämtland |
+   | `region_swe_7` | Jönköping |
+   | `region_swe_8` | Kalmar |
+   | `region_swe_9` | Kronoberg |
+   | `region_swe_10` | Norrbotten |
+   | `region_swe_11` | Örebro |
+   | `region_swe_12` | Östergötland |
+   | `region_swe_13` | Skåne |
+   | `region_swe_14` | Södermanland |
+   | `region_swe_15` | Stockholm |
+   | `region_swe_16` | Uppsala |
+   | `region_swe_17` | Värmland |
+   | `region_swe_18` | Västerbotten |
+   | `region_swe_19` | Västernorrland |
+   | `region_swe_20` | Västmanland |
+   | `region_swe_21` | Västra Götaland |
+
+   Tip: create one, then repeat the steps for the rest; only the ID and the name change.
 
 ## Part F — Connect RevenueCat to Google Play (service account)
 
@@ -113,11 +144,15 @@ This lets RevenueCat check purchases with Google. It is a one-off setup.
 
 1. RevenueCat → **Product catalog → Products → + New** (or **Import** to pull them from Play).
    Add `full_game` and `family` for the Play Store app.
+   Use **Import** to bring in all 24 at once: `full_game`, `family`, `all_regions` and the 21
+   `region_swe_…` packs.
 2. **Product catalog → Entitlements → + New**:
    - Identifier **`full_game`**, then **Attach** the `full_game` product.
    - Identifier **`family`**, then **Attach** the `family` product.
    - Use exactly these identifiers. The server only accepts these names (Family already includes
      the Full Game; the server handles that).
+   - The county packs and `all_regions` need **no** entitlements: the server recognises them by
+     product ID, which saves you creating 22 more.
 
 ## Part H — Purchase notifications to our server (webhook)
 

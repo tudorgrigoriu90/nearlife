@@ -39,6 +39,25 @@ export function regionEntitlement(regionId: string): Entitlement {
   return `region_${regionId.replace(/[^A-Za-z0-9]/g, '_')}`;
 }
 
+/** The Play Console product id for one county pack: `SWE.9_1` → `region_swe_9`. */
+export function regionProductId(regionId: string): string {
+  const m = /^SWE\.(\d+)_1$/.exec(regionId);
+  if (!m) throw new Error(`not a Swedish county id: ${regionId}`);
+  return `region_swe_${m[1]}`;
+}
+
+/**
+ * The entitlement a product grants on its own (T-105). County packs are recognised by product id, so
+ * the 21 county products need no matching RevenueCat entitlement each, only the product. The other
+ * products share their entitlement's name, so either route gives the same grant.
+ */
+function productEntitlement(productId: unknown): Entitlement | null {
+  if (typeof productId !== 'string') return null;
+  const county = /^region_swe_(\d+)$/.exec(productId);
+  if (county) return `region_SWE_${county[1]}_1`;
+  return KNOWN.test(productId) ? productId : null;
+}
+
 function uuids(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string' && UUID.test(v)) : [];
 }
@@ -56,7 +75,13 @@ export function planEntitlementChanges(body: unknown): EntitlementPlan {
     return { kind: 'ignore', reason: 'no timestamp' };
   }
   if (!Array.isArray(ev.entitlement_ids)) return { kind: 'ignore', reason: 'no entitlement list' };
-  const entitlements = ev.entitlement_ids.filter((e): e is string => typeof e === 'string' && KNOWN.test(e));
+  const fromProduct = productEntitlement(ev.product_id);
+  const entitlements = [
+    ...new Set([
+      ...ev.entitlement_ids.filter((e): e is string => typeof e === 'string' && KNOWN.test(e)),
+      ...(fromProduct ? [fromProduct] : []),
+    ]),
+  ];
   if (entitlements.length === 0) return { kind: 'ignore', reason: 'no known entitlement' };
 
   const base = {

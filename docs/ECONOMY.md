@@ -62,8 +62,10 @@ had is fun. So:
   - Joining a household adds no personal data. Members are the same anonymous accounts, linked by
     a code.
 - **Region packs in v1 (Director, 2026-10-29).** v1 is Sweden only, so a region pack opens
-  another **county**, and the World Pass becomes an **all-of-Sweden** pass. The $2.99 / $19.99
-  figures below predate the 49 SEK anchor and await the Director's confirmation.
+  another **county**, and the World Pass becomes an **all-of-Sweden** pass. **Prices (Director,
+  2026-10-30): 29 SEK per county, 99 SEK for all of Sweden.** These replace the $2.99 / $19.99
+  figures in the table below, which predate the 49 SEK anchor. All of Sweden costs the same as
+  Family, and buying it is cheaper than opening four counties one by one.
 
 ### Post-validation (v2+)
 
