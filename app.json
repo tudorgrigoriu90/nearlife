@@ -33,7 +33,8 @@
         {
           "locationWhenInUsePermission": "Nearby uses your location once to set your home region, then discards the coordinates."
         }
-      ]
+      ],
+      "@maplibre/maplibre-react-native"
     ],
     "extra": {
       "eas": {

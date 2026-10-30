@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { CatchSpotView } from '../lib/catchSpots';
 import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
@@ -38,6 +39,7 @@ export default function CatchSpotScreen({
   onCatch,
   onCheckAgain,
   onBack,
+  map,
 }: {
   locale?: Locale;
   speciesName: string;
@@ -46,6 +48,8 @@ export default function CatchSpotScreen({
   onCatch: () => void;
   onCheckAgain: () => void;
   onBack?: () => void;
+  /** The map (T-067), when this build has one; the screen works the same without it. */
+  map?: ReactNode;
 }) {
   const tr = createTranslator(locale);
   const spot = view?.spot ?? null;
@@ -60,6 +64,8 @@ export default function CatchSpotScreen({
           </Pressable>
         ) : null}
       </View>
+
+      {view !== null && view.state !== 'unmapped' && view.state !== 'no-spots' ? map : null}
 
       {view === null ? (
         <View style={styles.card}>

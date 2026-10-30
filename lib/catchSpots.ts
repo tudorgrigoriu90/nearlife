@@ -62,6 +62,8 @@ export function catchSpotView(
   spots: CatchSpot[],
   habitats: SpotHabitat[],
   rangeM: number = DEFAULT_CATCH_RANGE_M,
+  /** A spot the user picked on the map (T-067); ignored if it does not suit the species. */
+  chosenId: string | null = null,
 ): CatchSpotView {
   // No spots at all means the county has not been mapped (or loaded) yet, not that it has no
   // public places. Blocking every catch there would punish the user for our data.
@@ -69,7 +71,10 @@ export function catchSpotView(
   const suitable = spots.filter((s) => habitats.includes(s.habitat));
   if (suitable.length === 0) return { state: 'no-spots', spot: null, distanceM: null };
   if (user === null) return { state: 'gps-off', spot: null, distanceM: null };
-  const nearest = nearestSpotFor(user, suitable, habitats)!;
+  const chosen = suitable.find((s) => s.id === chosenId);
+  const nearest = chosen
+    ? { spot: chosen, distanceM: haversineMeters(user, { latitude: chosen.lat, longitude: chosen.lon }) }
+    : nearestSpotFor(user, suitable, habitats)!;
   return {
     state: nearest.distanceM <= rangeM ? 'in-range' : 'too-far',
     spot: nearest.spot,

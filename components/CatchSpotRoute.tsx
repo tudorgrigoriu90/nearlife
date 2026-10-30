@@ -1,4 +1,5 @@
 import CatchSpotScreen from './CatchSpotScreen';
+import SpotMap from './SpotMap';
 import { useCatchSpot } from './useCatchSpot';
 import type { CatchSpotSource } from '../lib/catchSpots';
 import type { CatchSpotStore } from '../lib/catchSpotStore';
@@ -28,7 +29,7 @@ export default function CatchSpotRoute({
   onCatch: () => void;
   onBack: () => void;
 }) {
-  const { view, checkAgain } = useCatchSpot({ species, regionId, source, store, getFix });
+  const { view, checkAgain, suitable, fix, pick } = useCatchSpot({ species, regionId, source, store, getFix });
   return (
     <CatchSpotScreen
       locale={locale}
@@ -37,6 +38,7 @@ export default function CatchSpotRoute({
       onCatch={onCatch}
       onCheckAgain={checkAgain}
       onBack={onBack}
+      map={<SpotMap user={fix} spots={suitable} targetId={view?.spot?.id ?? null} onPick={pick} />}
     />
   );
 }

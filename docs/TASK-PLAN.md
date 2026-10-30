@@ -922,9 +922,25 @@ proximity gating, per-category minigames with genuine game feel, and server-side
 enforcement ([GDD §4](GDD.md), [USER-FLOWS §6](USER-FLOWS.md)).
 
 ## F6.1 — Map & Proximity
-- **T-067 · MapLibre catch-spot map** — *Claude · M · deps: T-048 · [TSD §1,§5](TSD.md), [USER-FLOWS §6](USER-FLOWS.md)*
+- **T-067 · MapLibre catch-spot map** — *Claude · M · `IN-PROGRESS` (built; needs the next native build + a device check) · deps: T-048 · [TSD §1,§5](TSD.md), [USER-FLOWS §6](USER-FLOWS.md)*
   - MapLibre map with free tiles shows the user and nearby (public-land) habitat spots for the
     target species; OSM attribution visible.
+  - ✅ **Built (2026-10-30):**
+    - `@maplibre/maplibre-react-native` is pinned at **11.5.0**: four weeks old, rather than the
+      11.5.1 released the day before. Its Expo plugin is in app.json; `@types/geojson` is pinned.
+    - `components/SpotMap.tsx` sits on the Catch spot screen:
+      - **OpenFreeMap** tiles, free and keyless (invariant #7), OSM-based, with the attribution
+        built into the style (T-008);
+      - the phone's own location dot; suitable spots as green dots and the chosen one larger;
+      - **tap a dot to pick that spot**, and distance and directions follow it.
+    - Only the nearest 150 spots are drawn, so a big county does not ship thousands of points.
+    - `lib/spotMap.ts` (6 tests) builds the GeoJSON ([lon, lat]), picks the nearest spots and
+      handles the chosen-spot measurement (`catchSpotView(…, chosenId)`, which ignores a choice
+      that does not suit the species).
+    - **Native-safe:** the module is required only when `TurboModuleRegistry.get('MLRNNetworkModule')`
+      exists. Today's dev build and Jest get no map and the same working screen (tested).
+    - ⚠️ The native rendering cannot be tested in Jest. It needs the next EAS build (the same one
+      purchases need) and a check on a phone.
 - **T-068 · Proximity gating & states** — *Claude · M · `DONE` (the map view itself is T-067) · deps: T-067 · [USER-FLOWS §6](USER-FLOWS.md)*
   - ✅ `lib/proximity.ts` (9 tests): `haversineMeters`, `nearestSpot`, and `proximityState` →
     `in-range` / `too-far` / `no-spots` / `gps-off` against a configurable catch radius

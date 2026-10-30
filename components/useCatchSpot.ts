@@ -19,10 +19,15 @@ export interface UseCatchSpotInput {
 export function useCatchSpot({ species, regionId, source, store, getFix }: UseCatchSpotInput): {
   view: CatchSpotView | null;
   checkAgain: () => void;
+  /** For the map (T-067): the spots that suit the species, the last fix, and picking one. */
+  suitable: CatchSpot[];
+  fix: LatLng | null;
+  pick: (spotId: string) => void;
 } {
   const [spots, setSpots] = useState<CatchSpot[] | null>(null);
   const [habitats, setHabitats] = useState(() => habitatsFor(species));
   const [fix, setFix] = useState<LatLng | null | undefined>(undefined);
+  const [chosenId, setChosenId] = useState<string | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -61,6 +66,7 @@ export function useCatchSpot({ species, regionId, source, store, getFix }: UseCa
 
   useEffect(checkAgain, [checkAgain]);
 
-  const view = spots === null || fix === undefined ? null : catchSpotView(fix, spots, habitats);
-  return { view, checkAgain };
+  const view = spots === null || fix === undefined ? null : catchSpotView(fix, spots, habitats, undefined, chosenId);
+  const suitable = (spots ?? []).filter((s) => habitats.includes(s.habitat));
+  return { view, checkAgain, suitable, fix: fix ?? null, pick: setChosenId };
 }
