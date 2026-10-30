@@ -10,8 +10,8 @@ import { speciesGlyph } from './speciesVisual';
 // Attribution (author + license) is shown whenever a photo is displayed — required for CC-BY /
 // CC-BY-SA (invariant #8).
 //
-// What ships is a ~40 KB thumbnail; tapping opens the Wikimedia Commons file page for the full
-// resolution. That is a storage decision as much as a UX one — re-hosting full-size photos for
+// What ships is a ~40 KB thumbnail; tapping opens the photo's source page (Wikimedia Commons, or
+// iNaturalist since T-220) for the full resolution. That is a storage decision as much as a UX one — re-hosting full-size photos for
 // every Nordic species would exhaust the 1 GB free tier — and it has the happy property that the
 // "bigger photo" destination is also the page carrying the licence and author, which is what the
 // attribution terms actually ask for.
@@ -31,7 +31,7 @@ export default function SpeciesHero({ species, spotted }: { species: Species; sp
           }}
           accessibilityRole="imagebutton"
           accessibilityLabel={species.commonName}
-          accessibilityHint="Opens the full-size photo and its licence on Wikimedia Commons"
+          accessibilityHint="Opens the full-size photo and its licence"
         >
           <Image
             source={{ uri: photo.url }}

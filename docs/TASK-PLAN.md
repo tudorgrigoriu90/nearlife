@@ -1626,6 +1626,33 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
       `20261030000003` adds `since` to `my_household()`. Owner: household created. Member:
       joined. Grants unchanged.
     - Covered by 8 tests, 1 static SQL guard and 1 live verify check.
+- **T-220 · iNaturalist as a second photo source** — *Claude · M · `IN-PROGRESS` (built + tested; migration apply + first run pending) · deps: T-202 · [DATA-SOURCING §5](DATA-SOURCING-LICENSING.md)*
+  - Director request (2026-10-30). 2,027 of 6,824 species (30%) had no commercial-safe
+    Wikipedia photo. By group: insects 61% covered, plants 84%, birds 92%, mammals 98%, fish
+    99%.
+  - ✅ **Built:**
+    - `pipeline/media/inaturalist.py`: taxa search with an exact species match (or a synonym
+      via `matched_term`); the default photo if its licence is safe, else the first safe
+      taxon photo; iNaturalist's 500 px rendition.
+    - `media/licenses.inat_license` is an allow-list of `cc0` / `cc-by` / `cc-by-sa`; every NC
+      and ND code, and "all rights reserved", is dropped.
+    - The photo job runs it after the Wikipedia pass, for misses only, most-observed first,
+      in the same time budget.
+    - Migration `20261030000004` adds `species_media.sources_tried`, so each miss gets one
+      iNaturalist look and is not re-queried weekly. A later source never replaces a photo
+      already chosen (`url is null` guard).
+    - The app credits "via iNaturalist" or "via Wikimedia Commons" from the source page's host
+      (`photoSourceName`), and never names a platform it can't recognise.
+    - 12 tests (9 Python, 3 TS).
+  - Storage: at most ~2,000 × ~60 KB ≈ 120 MB more, so ≤ ~450 MB of the 1 GB free tier
+    (invariant #7).
+- **T-221 · 679 species have no category** — *Claude · S · `TODO` · deps: T-177*
+  - Found with T-220 (2026-10-30): `species.category` is null for 679 catalogue species. They
+    get only a generic glyph, the cautious habitat default (T-047) and no category in the
+    almanac filters.
+  - Acceptance: find why the taxon-group mapping leaves them out (likely groups outside
+    bird / mammal / fish / insect / plant: spiders, molluscs, fungi, lichens, reptiles,
+    amphibians), map each to a category the app has or add one, reload, and leave none null.
 - **T-106 · New-region onboarding pipeline (repeatable)** — *Claude + Director · L · deps: T-042, T-052 · [ECONOMY](ECONOMY.md)*
   - Repeatable process to open a region: run GBIF/OSM pipeline + light content pass (safe-default
     advice + follow-law) + Director editorial review. Modeled as growth spend.

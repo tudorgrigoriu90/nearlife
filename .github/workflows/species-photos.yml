@@ -3,6 +3,8 @@ name: Species photos
 # Gives every catalogue species a licence-clear hero photo, re-hosted in Supabase Storage (T-202).
 # Resumable: each run looks up the species not yet recorded (most-observed first) until its time
 # budget, so the full catalogue (~6 h of polite Wikimedia requests) completes over a few runs.
+# Species Wikipedia had no usable photo for then get one look on iNaturalist (T-220), in the same
+# run and time budget.
 # Once every species is recorded a run finds nothing to do and exits in seconds — the weekly
 # schedule then only picks up species a catalogue refresh has added.
 #

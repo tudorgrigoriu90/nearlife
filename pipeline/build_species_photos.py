@@ -5,6 +5,11 @@ image, keeps it only if the licence is commercial-safe (CC0 / CC BY / CC BY-SA, 
 re-hosts the ~400 px thumbnail in the `species-media` bucket, and records url + author + licence +
 source page in `public.species_media`.
 
+A species Wikipedia has no usable photo for then gets one look on iNaturalist (T-220), whose
+community photos cover many of the insects Wikipedia misses. Only CC0 / CC BY / CC BY-SA photos
+ship from either source. `sources_tried` records which sources a miss has been through, so neither
+is asked twice.
+
 Resumable by design. Polite pacing makes the full catalogue ~6 hours — longer than one Actions job
 can run — so it works most-observed species first (the ones people actually meet), stops at a time
 budget, and the next run skips every species already recorded, including those recorded as having
@@ -31,10 +36,21 @@ CURATED_MEDIA = ROOT / "pipeline" / "data" / "media_kronoberg.json"
 BUCKET = "species-media"
 
 UPSERT_SQL = (
-    "insert into public.species_media (species_id, url, source_url, author, license) "
-    "values (%(species_id)s, %(url)s, %(source_url)s, %(author)s, %(license)s) "
+    "insert into public.species_media (species_id, url, source_url, author, license, sources_tried) "
+    "values (%(species_id)s, %(url)s, %(source_url)s, %(author)s, %(license)s, '{wikipedia}') "
     "on conflict (species_id) do update set url = excluded.url, source_url = excluded.source_url, "
-    "author = excluded.author, license = excluded.license, checked_at = now()"
+    "author = excluded.author, license = excluded.license, checked_at = now(), "
+    "sources_tried = excluded.sources_tried"
+)
+
+SECOND_SOURCE = "inaturalist"
+
+# A hit fills the row; a miss only records that the source was tried. `url is null` keeps a photo
+# already chosen (or a curated one) from ever being replaced by a later source.
+SECOND_SOURCE_SQL = (
+    "update public.species_media set url = %(url)s, source_url = %(source_url)s, author = %(author)s, "
+    "license = %(license)s, checked_at = now(), sources_tried = array_append(sources_tried, %(source)s) "
+    "where species_id = %(species_id)s and url is null"
 )
 
 # The curated 54 are seeded, never overwritten: their hand-checked photos win over a lead image.
@@ -69,6 +85,15 @@ def pending_targets(
             continue
         targets.append({"speciesId": species_id, "scientificName": sp["scientificName"]})
     return targets
+
+
+def second_source_targets(rows: list[tuple], source: str) -> list[dict]:
+    """Misses `source` has not looked at yet, most-observed first.
+
+    rows: (species_id, scientific_name, occurrences, url, sources_tried)."""
+    pending = [r for r in rows if r[3] is None and source not in (r[4] or [])]
+    pending.sort(key=lambda r: (-int(r[2] or 0), r[0]))
+    return [{"speciesId": r[0], "scientificName": r[1]} for r in pending]
 
 
 def media_row(species_id: str, found: dict | None, url: str | None) -> dict:
@@ -168,6 +193,60 @@ def main() -> int:
                 conn.commit()  # progress survives a timeout or a cancelled job
                 print(f"  {i}/{len(targets)}: {photos} photos, {misses} without a usable photo", flush=True)
         conn.commit()
+
+        # Second source (T-220): the misses, most-observed first, within the same time budget.
+        from media.inaturalist import INaturalistClient
+
+        inat = INaturalistClient()
+        by_key = {int(sp["speciesKey"]): sp for sp in included}
+        cur.execute(
+            "select m.species_id, s.gbif_key, m.url, m.sources_tried "
+            "from public.species_media m join public.species s on s.id = m.species_id"
+        )
+        rows = []
+        for species_id, gbif_key, url, tried in cur.fetchall():
+            sp = by_key.get(int(gbif_key)) if gbif_key is not None else None
+            if sp is not None:
+                rows.append((species_id, sp["scientificName"], sp.get("occurrences", 0), url, tried))
+        second = second_source_targets(rows, SECOND_SOURCE)
+        print(f"\n{SECOND_SOURCE}: {len(second)} species without a photo to look up", flush=True)
+        found_2 = missed_2 = 0
+        for i, sp in enumerate(second, 1):
+            if time.monotonic() > deadline:
+                print(f"time budget reached after {i - 1} species — the next run resumes here", flush=True)
+                break
+            url = None
+            found = None
+            try:
+                found = inat.fetch_image(sp["scientificName"])
+                if found:
+                    img = fetch_with_retry(downloads, found["imageUrl"])
+                    path = storage_path(sp["speciesId"])
+                    upload_one(base, key, path, img.content, img.headers.get("Content-Type") or "image/jpeg")
+                    url = public_url(base, path)
+            except Exception as exc:  # stays pending for the next run
+                print(f"  ! {sp['scientificName']}: {exc}", flush=True)
+                continue
+            # found["license"] is already in the app form (CC0 / CC-BY / CC-BY-SA).
+            ok = bool(found and url)
+            cur.execute(
+                SECOND_SOURCE_SQL,
+                {
+                    "species_id": sp["speciesId"],
+                    "url": url if ok else None,
+                    "source_url": found["sourceUrl"] if ok else None,
+                    "author": (found["author"] or "Unknown") if ok else None,
+                    "license": found["license"] if ok else None,
+                    "source": SECOND_SOURCE,
+                },
+            )
+            found_2 += ok
+            missed_2 += not ok
+            if i % 25 == 0:
+                conn.commit()
+                print(f"  {i}/{len(second)}: {found_2} photos, {missed_2} without a usable photo", flush=True)
+        conn.commit()
+        print(f"{SECOND_SOURCE} this run: {found_2} photos, {missed_2} without a usable photo")
 
         cur.execute("select count(*) filter (where url is not null), count(*) from public.species_media")
         with_photo, recorded = cur.fetchone()

@@ -90,3 +90,23 @@ def test_app_licence_mapping():
     assert app_license("CC BY-ND 4.0") is None
     assert app_license("GFDL") is None
     assert app_license(None) is None
+
+
+def test_the_second_source_only_reconsiders_misses_it_has_not_tried():
+    # T-220: rows Wikipedia recorded as a miss get one iNaturalist look, then are not re-queried.
+    from build_species_photos import second_source_targets
+
+    rows = [
+        ("gbif:1", "Rare one", 5, None, ["wikipedia"]),
+        ("gbif:2", "Common one", 5000, None, ["wikipedia"]),
+        ("gbif:3", "Has a photo", 9000, "https://x/3.jpg", ["wikipedia"]),
+        ("gbif:4", "Tried both", 100, None, ["wikipedia", "inaturalist"]),
+    ]
+    assert [t["speciesId"] for t in second_source_targets(rows, "inaturalist")] == ["gbif:2", "gbif:1"]
+
+
+def test_a_second_source_hit_is_recorded_with_its_own_attribution():
+    from build_species_photos import SECOND_SOURCE_SQL
+
+    assert "array_append(sources_tried" in SECOND_SOURCE_SQL
+    assert "url is null" in SECOND_SOURCE_SQL  # never replaces a photo already chosen

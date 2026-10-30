@@ -16,9 +16,25 @@ export function assertAllowedLicense(media) {
         throw new Error(`disallowed photo license for ${media.speciesId}: ${media.license}`);
     }
 }
+const PHOTO_SOURCES = [
+    ['wikimedia.org', 'Wikimedia Commons'],
+    ['wikipedia.org', 'Wikimedia Commons'],
+    ['inaturalist.org', 'iNaturalist'],
+];
+/**
+ * The platform a photo came from, by its source page's host (T-220: Wikimedia or iNaturalist).
+ * Parsed with a pattern, not `URL`: React Native's URL polyfill does not implement `hostname`.
+ */
+export function photoSourceName(sourceUrl) {
+    const host = /^https?:\/\/([^/?#:]+)/i.exec(sourceUrl)?.[1]?.toLowerCase();
+    if (!host)
+        return null;
+    return PHOTO_SOURCES.find(([domain]) => host === domain || host.endsWith(`.${domain}`))?.[1] ?? null;
+}
 /** Human-readable credit line for the About/card attribution surface. */
 export function attributionFor(media) {
-    return `Photo: ${media.author} · ${media.license} · via Wikimedia Commons`;
+    const via = photoSourceName(media.sourceUrl);
+    return `Photo: ${media.author} · ${media.license}${via ? ` · via ${via}` : ''}`;
 }
 /** The primary photo for a species (or the first, or null if none sourced yet). */
 export function primaryPhoto(media, speciesId) {

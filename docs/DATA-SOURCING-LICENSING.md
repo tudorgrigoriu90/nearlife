@@ -73,8 +73,18 @@ conservation institutions under licenses written for *research and non-commercia
   - **Share-alike (CC-BY-SA)** only obliges share-alike if we *modify the image*. Displaying it
     **unmodified** in the app with attribution is fine — do not crop/edit CC-BY-SA photos, or
     treat the edit as CC-BY-SA.
-- **Secondary:** GBIF media (filter to CC0/CC-BY, exclude NC) and iNaturalist (CC0/CC-BY only —
-  many iNat photos are CC-BY-NC and must be excluded).
+- **Second source: iNaturalist (T-220, built 2026-10-30).** Used only for species Wikipedia
+  had no usable photo for (~30% of the catalogue, mostly insects).
+  - Each photo carries its photographer's own licence. iNaturalist's default is CC-BY-NC, so
+    many photos are excluded.
+  - Exactly `cc0`, `cc-by` and `cc-by-sa` ship, as an allow-list in `media/licenses.inat_license`.
+  - CC-BY-SA is accepted on the same terms as Commons: we re-host iNaturalist's own 500 px
+    rendition, unmodified. (This widens the earlier "CC0/CC-BY only" note, for the reason
+    given in the share-alike bullet above.)
+  - Source page: the photo's iNaturalist page, which shows author and licence. The app credits
+    "via iNaturalist".
+  - Pacing: about 1 request per second, with a descriptive User-Agent.
+- GBIF media remains a possible third source (filter to CC0/CC-BY, exclude NC).
 - **Obligation:** store and display **author + license + source URL** per photo.
 - **Storage:** Supabase Storage; a `species_media` table holds the refs (TSD §3).
 - **Action:** source from Wikimedia Commons, record attribution, keep images unmodified.

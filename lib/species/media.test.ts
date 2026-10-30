@@ -4,6 +4,7 @@ import {
   isCommercialUseAllowed,
   KRONOBERG_MEDIA,
   photoFor,
+  photoSourceName,
   primaryPhoto,
   type SpeciesMedia,
 } from './media';
@@ -44,6 +45,25 @@ describe('attributionFor', () => {
     const line = attributionFor(media({ speciesId: 'swift', author: 'Jane Doe', license: 'CC0' }));
     expect(line).toContain('Jane Doe');
     expect(line).toContain('CC0');
+  });
+
+  it('credits the platform the photo came from (T-220)', () => {
+    expect(attributionFor(media({ speciesId: 'a' }))).toBe('Photo: A. Photographer · CC-BY · via Wikimedia Commons');
+    expect(
+      attributionFor(media({ speciesId: 'b', sourceUrl: 'https://www.inaturalist.org/photos/12345' })),
+    ).toBe('Photo: A. Photographer · CC-BY · via iNaturalist');
+    // An unrecognised or missing source never claims a platform it can't vouch for.
+    expect(attributionFor(media({ speciesId: 'c', sourceUrl: 'https://evil.example/inaturalist.org' }))).toBe(
+      'Photo: A. Photographer · CC-BY',
+    );
+  });
+});
+
+describe('photoSourceName', () => {
+  it('names the platform from the source page host', () => {
+    expect(photoSourceName('https://commons.wikimedia.org/wiki/File:X.jpg')).toBe('Wikimedia Commons');
+    expect(photoSourceName('https://inaturalist.org/photos/1')).toBe('iNaturalist');
+    expect(photoSourceName('not a url')).toBeNull();
   });
 });
 

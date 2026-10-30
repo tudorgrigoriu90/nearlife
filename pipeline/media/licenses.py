@@ -39,3 +39,15 @@ def app_license(short_name: str | None) -> str | None:
     if s.startswith("cc by"):
         return "CC-BY"
     return None
+
+
+_INAT = {"cc0": "CC0", "cc-by": "CC-BY", "cc-by-sa": "CC-BY-SA"}
+
+
+def inat_license(code: str | None) -> str | None:
+    """Map an iNaturalist `license_code` to the app's MediaLicense (T-220).
+
+    iNaturalist codes are exact (`cc-by-nc`, `cc-by-nd`, …, or null for all rights reserved), so
+    this is an allow-list lookup: anything not listed, including every NC/ND code, does not ship.
+    """
+    return _INAT.get((code or "").strip().lower())
