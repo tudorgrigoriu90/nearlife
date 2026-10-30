@@ -824,6 +824,15 @@ key before loading into Supabase.**
       outside the county boundary.
     - 2 tests replace the maxsize one. The runtime-error detection from above stays, so a
       failure still fails closed.
+  - 🐛→✅ **Re-fetch run 41125176901 (cheaper queries):** most counties came through, Norrbotten
+    included (6.5 min). Three failed, now fixed:
+    - **Kronoberg (SE-K, military query) and Halland (SE-N, spots query):** lost to one
+      "Connection aborted" each, because a dropped connection was not retried at all. It now
+      counts as a busy answer: wait, then try the other instance.
+    - **Kalmar (SE-H, coast query):** busy (504) through all 6 attempts. Attempts go up to 8,
+      with back-off capped at 5 min.
+    - 2 tests. The failed counties are re-fetched on their own after the run (the load job
+      keeps every county that did succeed).
 - **T-050 · Catch-spot density audit (Kronoberg)** — *Claude · M · deps: T-048 · [review finding]*
   - Report: what % of Kronoberg residents have a catch spot within a ~15-min walk. If low,
     flag that Caught skews to a car feature and record the design implication before launch.

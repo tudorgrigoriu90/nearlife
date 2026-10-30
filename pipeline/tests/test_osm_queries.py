@@ -169,3 +169,43 @@ def test_coast_and_roads_are_searched_near_spots_not_across_the_county():
     assert '(around.p:' in roads and '"highway"' in roads and '](area.c);\n  way["railway"' not in roads
     assert '"railway"="rail"](around.p:' in roads
     assert '"natural"="coastline"](around.p:' in coast and '"coastline"](area.c)' not in coast
+
+
+class _FlakySession(_Session):
+    """Drops the connection for the first `drops` attempts, then answers."""
+
+    def __init__(self, drops):
+        super().__init__([200])
+        self.drops = drops
+
+    def post(self, url, data, timeout):
+        import requests
+
+        self.urls.append(url)
+        if self.drops > 0:
+            self.drops -= 1
+            raise requests.exceptions.ConnectionError("Remote end closed connection without response")
+        return _Resp(200, {"elements": [{"type": "way", "id": 7}]})
+
+
+def test_a_dropped_connection_is_retried_on_the_other_server():
+    # 2026-10-30: Kronoberg and Halland were lost to a single "Connection aborted".
+    from osm.overpass import OverpassClient
+
+    client = OverpassClient(endpoints=["https://a/api", "https://b/api"], pause=0, backoff=0, max_retries=3)
+    client.session = _FlakySession(drops=2)
+    assert client.run("q")["elements"] == [{"type": "way", "id": 7}]
+    assert client.session.urls == ["https://a/api", "https://b/api", "https://a/api"]
+
+
+def test_dropped_connections_that_never_recover_fail_with_the_reason():
+    from osm.overpass import OverpassClient
+
+    client = OverpassClient(endpoints=["https://a/api"], pause=0, backoff=0, max_retries=2)
+    client.session = _FlakySession(drops=5)
+    try:
+        client.run("q")
+    except RuntimeError as exc:
+        assert "Remote end closed" in str(exc)
+    else:
+        raise AssertionError("expected the failure to surface")

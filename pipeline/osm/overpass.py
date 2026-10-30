@@ -83,7 +83,7 @@ class OverpassClient:
         endpoints: list[str] | None = None,
         pause: float = 5.0,
         backoff: float = 30.0,
-        max_retries: int = 6,
+        max_retries: int = 8,
     ):
         self.endpoints = endpoints or ENDPOINTS
         self.pause = pause
@@ -97,10 +97,15 @@ class OverpassClient:
         failure = "no attempt made"
         for attempt in range(self.max_retries):
             endpoint = self.endpoints[attempt % len(self.endpoints)]
-            resp = self.session.post(endpoint, data={"data": query}, timeout=TIMEOUT_S + 60)
-            if resp.status_code in (429, 502, 503, 504):
+            try:
+                resp = self.session.post(endpoint, data={"data": query}, timeout=TIMEOUT_S + 60)
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as exc:
+                # A busy server also drops connections outright (Kronoberg, 2026-10-30): same as a 504.
+                resp = None
+                failure = f"{exc} ({endpoint})"
+            if resp is not None and resp.status_code in (429, 502, 503, 504):
                 failure = f"{resp.status_code} from {endpoint}"
-            else:
+            elif resp is not None:
                 resp.raise_for_status()
                 body = resp.json()
                 # A timeout or out-of-memory comes back as HTTP 200 with no elements and a
