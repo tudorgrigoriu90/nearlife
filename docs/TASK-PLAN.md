@@ -144,9 +144,15 @@ The go/no-go items from the licensing and privacy docs. **These gate Phase 2, no
     internal: no download, export or bulk API. The app shows nearby spots as a Produced Work.
     T-009 confirms the reading before launch. Tiles: OpenFreeMap (free, no key). Recorded in
     DATA-SOURCING §4.
-- **T-009 · Kick off legal review (privacy policy, DPAs, EU residency)** — *Director · M · deps: T-003 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+- **T-009 · Kick off legal review (privacy policy, DPAs, EU residency)** — *Director · M · `DONE` (Director 2026-10-31) · deps: T-003 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - Legal reviewer engaged; scope = privacy policy, processor DPAs (Supabase/RevenueCat/PostHog),
     GDPR-K age-gate, SCC/residency. **Blocks public launch (E11), not prototype.**
+  - ✅ **Done (Director, 2026-10-31):** legal review completed. It also covers the readings this
+    plan deferred to it: the OSM Produced-Work reading (T-008) and the Family flow for minors
+    (T-103).
+  - ⚠️ The privacy policy has gained sections since the draft went to review: purchases, Family
+    households, travel offer, catch spots and retention (T-094, T-217, T-102, T-218, T-068). T-095
+    updates the text; any change of substance goes back to the reviewer.
 
 ## F1.2 — Repository, Tooling & CI/CD
 
