@@ -1,0 +1,38 @@
+name: Health
+
+# Daily read-only check of the live project (T-100, pipeline/db/health.py): the notification and
+# retention crons are running and succeeding, the notification function is not answering with
+# errors, and every Swedish county has visible catch spots. A problem fails the run, and GitHub
+# emails the repository owner about a failed scheduled workflow. That email is the alert.
+#
+# Secrets: SUPABASE_DB_URL (read-only queries).
+
+on:
+  schedule:
+    - cron: "37 5 * * *" # 05:37 UTC daily, after the 03:41 retention run
+  workflow_dispatch:
+
+concurrency:
+  group: health
+  cancel-in-progress: true
+
+jobs:
+  health:
+    name: Check the live project
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r pipeline/requirements.txt
+
+      - name: Check
+        working-directory: pipeline
+        run: python -m db.health

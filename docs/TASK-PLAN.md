@@ -1548,8 +1548,24 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
 ## F11.2 — Observability
 - **T-099 · Production analytics dashboards** — *Claude · S · deps: T-035 · [TSD §8](TSD.md)*
   - Retention, conversion (taste funnel), notification open rate dashboards live.
-- **T-100 · Error & pipeline monitoring** — *Claude · S · deps: T-045, T-064*
+- **T-100 · Error & pipeline monitoring** — *Claude · S · `IN-PROGRESS` (pipeline + cron alerting done; app crash reporting needs a Director decision) · deps: T-045, T-064*
   - Crash/error reporting on the app; alerting if the data pipeline or notification cron fails.
+  - ✅ **Pipeline and cron alerting built (2026-10-30)**: `pipeline/db/health.py` plus
+    `.github/workflows/health.yml`, running daily at 05:37 UTC. A red run is the alert, through
+    GitHub's failed-workflow email to the owner: no new service, no cost.
+    - **Crons:** each must be scheduled, have a successful last run, and have succeeded
+      recently. send-notifications within 3 h; apply-retention within 26 h, because a stalled
+      retention job means data outliving the stated window.
+    - **The notification Edge Function's answers to pg_net** (any timeout or ≥ 400 in the
+      ~6 h pg_net keeps). The cron reports "succeeded" as soon as the call is queued, so this
+      is the only place a failing function shows.
+    - **Every Swedish county with presence also has visible catch spots.**
+    - The yearly pipelines (data, catch spots, photos) are workflows, and GitHub already
+      emails when they fail.
+    - 8 tests.
+  - Remaining: **crash and error reporting in the app.** The usual tool, Sentry, has a free
+    tier but means a new dependency, a Director-owned account and a privacy-policy processor
+    entry. Director decision before building.
 
 ## F11.3 — Attribution
 - **T-101 · Attribution surfaces** — *Claude · XS · `DONE` (copy live; DOIs when the pipeline lands) · deps: T-045, T-046 · [DATA-SOURCING](DATA-SOURCING-LICENSING.md), [USER-FLOWS §9](USER-FLOWS.md)*
