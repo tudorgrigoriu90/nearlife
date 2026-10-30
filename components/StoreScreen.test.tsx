@@ -62,6 +62,26 @@ describe('StoreScreen', () => {
     await waitFor(() => expect(gw.restore).toHaveBeenCalled());
   });
 
+  it('re-reads what the account owns after a restore (T-086)', async () => {
+    // A restore on a new install moves the purchase to this account on the server (a RevenueCat
+    // TRANSFER through the webhook); only a re-read shows it.
+    const onPurchased = jest.fn();
+    await render(
+      <StoreScreen locale="en" gateway={gateway()} entitlements={NO_ENTITLEMENTS} onPurchased={onPurchased} />,
+    );
+    await fireEvent.press(screen.getByText(tr('store.restore')));
+    await waitFor(() => expect(onPurchased).toHaveBeenCalledTimes(1));
+  });
+
+  it('a failed restore says so and re-reads nothing', async () => {
+    const onPurchased = jest.fn();
+    const gw = gateway({ restore: jest.fn().mockRejectedValue(new Error('offline')) });
+    await render(<StoreScreen locale="en" gateway={gw} entitlements={NO_ENTITLEMENTS} onPurchased={onPurchased} />);
+    await fireEvent.press(screen.getByText(tr('store.restore')));
+    await waitFor(() => expect(screen.getByText(tr('store.error'))).toBeTruthy());
+    expect(onPurchased).not.toHaveBeenCalled();
+  });
+
   it('explains plainly when this build cannot buy', async () => {
     await render(<StoreScreen locale="en" gateway={gateway({ available: () => false })} entitlements={NO_ENTITLEMENTS} />);
     expect(screen.getByText(tr('store.unavailable'))).toBeTruthy();

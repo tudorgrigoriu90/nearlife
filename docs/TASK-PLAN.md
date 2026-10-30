@@ -1298,8 +1298,22 @@ subscription ([ECONOMY](ECONOMY.md)). Free-catch limit is the only conversion nu
       signal), and from **Settings → Full Game & Family**. Never from a delight moment.
     - After a purchase or restore the app re-reads entitlements at 0, 2, 6 and 15 s, because the
       webhook usually lands within seconds but not instantly.
-- **T-086 · Restore purchases** — *Claude · XS · deps: T-083 · [USER-FLOWS §8](USER-FLOWS.md)*
+- **T-086 · Restore purchases** — *Claude · XS · `IN-PROGRESS` (built + tested; device check needs T-004) · deps: T-083 · [USER-FLOWS §8](USER-FLOWS.md)*
   - Restore works across reinstall/devices tied to the account.
+  - ✅ **Built (2026-10-30). Device check waits on the Play setup (T-004).**
+    - Store → "Restore purchases" calls RevenueCat `restorePurchases`, then re-reads entitlements
+      on the same back-off as a purchase (`AFTER_PURCHASE_REREAD_MS`).
+    - Same account (email linked, T-133): nothing moves, and the re-read shows it.
+    - New anonymous account after a reinstall: RevenueCat sends a TRANSFER, and the webhook
+      revokes the entitlement from the old account and grants it to the new one (T-217,
+      tested). A Family owner's household follows, because a member's Full Game is derived
+      from the owner.
+    - This needs RevenueCat's restore behaviour set to "Transfer to new App User ID", now a step
+      in docs/launch/PAYMENTS-SETUP.md (Part G.3).
+    - 2 tests added: re-read after a restore; a failed restore shows the error and re-reads
+      nothing.
+  - **To close:** on the internal-testing build, buy, uninstall, reinstall without an email,
+    then Restore → ✓ Unlocked.
 
 ## F9.2 — Conversion Funnel
 - **T-087 · Out-of-free-catches sheet + funnel analytics** — *Claude · S · `DONE` · deps: T-075, T-085, T-035 · [ECONOMY](ECONOMY.md)*

@@ -153,6 +153,12 @@ This lets RevenueCat check purchases with Google. It is a one-off setup.
      the Full Game; the server handles that).
    - The county packs and `all_regions` need **no** entitlements: the server recognises them by
      product ID, which saves you creating 22 more.
+3. **Project settings → Restore behavior** (sometimes under the app's settings): choose
+   **Transfer to new App User ID**.
+   - Why: if someone reinstalls without linking an email, the app gets a new anonymous account.
+   - "Restore purchases" then moves their purchase to that new account, and our server follows
+     it. With any other setting the restore would find the purchase but leave it on the old,
+     unreachable account.
 
 ## Part H — Purchase notifications to our server (webhook)
 
