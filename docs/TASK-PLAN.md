@@ -439,8 +439,16 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     Settings/Badges/Impact. A species a catalogue refresh removed just opens the app.
   - ✅ Foreground: a notification handler shows the banner while the app is open — without one a push
     at the user's slot is silently dropped if they happen to be in the app.
-- **T-032 · Cadence, quiet hours & prefs** — *Claude · S · deps: T-030 · [TSD §4](TSD.md), [USER-FLOWS §9](USER-FLOWS.md)*
+- **T-032 · Cadence, quiet hours & prefs** — *Claude · S · `DONE` (superseded by T-131/T-063/T-065) · deps: T-030 · [TSD §4](TSD.md), [USER-FLOWS §9](USER-FLOWS.md)*
   - Frequency cap + quiet hours honored; all tunable via config without redeploy.
+  - ✅ **Superseded (recorded 2026-10-30).**
+    - The frequency cap and quiet hours are `lib/cadence.ts` (T-131), applied by the live
+      sender (T-063).
+    - Prefs: the notification toggle in Settings unregisters the device on the server (T-088).
+    - Tuning levers are config (`DEFAULT_CADENCE`, `lib/tuning.ts`, T-065).
+    - Caveat on "without redeploy": the values live in code shared with the Edge Function, so a
+      change means a function deploy. That is one push plus the automatic deploy workflow, with
+      no app release. A database-backed config was judged not worth it at MVP scale.
 
 ## F2.4 — Prototype Catch Taste
 
