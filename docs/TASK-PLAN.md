@@ -685,8 +685,19 @@ key before loading into Supabase.**
     - ⚠️ Density looks low: 556 spots over ~8,500 km² is about one per 15 km². Expect them dense in
       towns (parks) and sparse in forest. T-050 measures what this means for people's walking
       distance.
-- **T-047 · species_habitat mapping** — *Claude · M · deps: T-046 · [TSD §3](TSD.md)*
+- **T-047 · species_habitat mapping** — *Claude · M · `IN-PROGRESS` (built + tested; migration apply + species reload pending) · deps: T-046 · [TSD §3](TSD.md)*
   - Each catchable species mapped to the habitat types it's plausibly caught in.
+  - ✅ **Built (2026-10-30):** `species.catch_habitats text[]` ⊆ {land, freshwater, coast}
+    (migration `20261030000001`, with a check constraint).
+    - `pipeline/gbif/habitats.py` maps GBIF realms (T-191): terrestrial → land, freshwater →
+      freshwater, marine → coast; a species can have several (a duck: land + freshwater).
+    - Without realm data, a cautious default by group: fish only at water, birds anywhere,
+      amphibians land + freshwater, the rest land.
+    - Written by the species loader from `vernacular.json`'s `_realms`. As with names, a run
+      without fresh realm data only fills gaps and never overwrites.
+    - 6 tests.
+    - Not a separate `species_habitat` table: three values fit an array column, and the catch
+      query reads it in the same row.
 
 ### S3.2.2 — Catch-spot generation & safety
 - **T-048 · Generate catch_spots on public/accessible land** — *Claude · L · deps: T-046 · [TSD §5](TSD.md)*

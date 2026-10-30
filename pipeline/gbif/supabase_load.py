@@ -59,9 +59,10 @@ REGION_SQL = (
 )
 _SPECIES_INSERT = (
     "insert into public.species "
-    "(id, gbif_key, scientific_name, common_name, category, rarity, taxon_group, vertebrate, active_months) "
+    "(id, gbif_key, scientific_name, common_name, category, rarity, taxon_group, vertebrate, active_months, "
+    "catch_habitats) "
     "values (%(id)s, %(gbif_key)s, %(scientific_name)s, %(common_name)s, %(category)s, %(rarity)s, "
-    "%(taxon_group)s, %(vertebrate)s, %(active_months)s) "
+    "%(taxon_group)s, %(vertebrate)s, %(active_months)s, %(catch_habitats)s) "
     "on conflict (id) do update set gbif_key=excluded.gbif_key, scientific_name=excluded.scientific_name, "
     "taxon_group=excluded.taxon_group, vertebrate=excluded.vertebrate, active_months=excluded.active_months, "
 )
@@ -79,7 +80,14 @@ def species_sql(have_names: bool) -> str:
     gbif_name = "excluded.common_name" if have_names else (
         "nullif(public.species.common_name, public.species.scientific_name)"
     )
+    # Catch habitats (T-047) follow the same rule: fresh realm data replaces them; without it the
+    # group default only fills a gap, never overwriting habitats a richer run already wrote.
+    habitats = (
+        "excluded.catch_habitats" if have_names
+        else "coalesce(public.species.catch_habitats, excluded.catch_habitats)"
+    )
     return _SPECIES_INSERT + (
+        f"catch_habitats = {habitats}, "
         f"common_name = case when left(public.species.id, 5) = 'gbif:' then {gbif_name} "
         "else coalesce(public.species.common_name, excluded.common_name) end"
     )

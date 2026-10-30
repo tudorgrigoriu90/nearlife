@@ -15,6 +15,7 @@ insect/plant); the rest keep ``category = None`` and are classified by ``taxon_g
 from typing import Iterable, Iterator
 
 from gbif.counties import NORDIC_COUNTRIES
+from gbif.habitats import catch_habitats
 
 # file taxon key → (taxon_group, vertebrate, app category or None)
 TAXON_MAP: dict[str, tuple[str, bool, str | None]] = {
@@ -75,6 +76,10 @@ def build_rows(
                     "vertebrate": vertebrate,
                     "active_months": set(months),
                     "occurrences": occ,
+                    # Which catch spots it can be met at (T-047), from its GBIF realms (T-191).
+                    "catch_habitats": catch_habitats(
+                        group, vernacular.get(str(r["speciesKey"]), {}).get("_realms")
+                    ),
                 }
             else:
                 sp["active_months"].update(months)
