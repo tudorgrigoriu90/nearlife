@@ -1,0 +1,52 @@
+name: Catch spots
+
+# Fetches catch spots from OpenStreetMap via Overpass (T-046 · T-049): designated public places
+# (viewpoints, picnic sites, shelters, parks, trailheads, bird hides, beaches, bathing and fishing
+# places), each with a habitat (land / freshwater / coast) and any exclusion flags. Output is an
+# artifact; loading into Supabase is T-048. Overpass is a shared community service: one county
+# at a time, paced, yearly.
+#
+# Map data © OpenStreetMap contributors (ODbL). The derived data stays internal (T-008).
+
+on:
+  schedule:
+    - cron: "23 4 12 2 *" # 12 February, yearly: OSM changes slowly, and a week after the data pipeline
+  workflow_dispatch:
+    inputs:
+      counties:
+        description: "ISO 3166-2 codes, space-separated (e.g. SE-G), or empty for all 21"
+        required: false
+        default: ""
+
+concurrency:
+  group: catch-spots
+  cancel-in-progress: false
+
+jobs:
+  spots:
+    name: Fetch catch spots
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r pipeline/requirements.txt
+
+      # Free text reaches the shell through env, never `${{ }}` interpolation into the script.
+      - name: Fetch from Overpass
+        env:
+          COUNTIES: ${{ inputs.counties }}
+        run: python pipeline/build_catch_spots.py $COUNTIES
+
+      - name: Upload the spots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: catch-spots
+          path: pipeline/data/catch_spots_*.json
+          retention-days: 90

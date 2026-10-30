@@ -644,9 +644,38 @@ key before loading into Supabase.**
 ## F3.2 — OSM Habitat & Catch Spots
 
 ### S3.2.1 — Habitat classification
-- **T-046 · Overpass ingest → habitat_types via osm_tag_rules** — *Claude · L · deps: T-008, T-015 · [TSD §5](TSD.md), [DATA-SOURCING §4](DATA-SOURCING-LICENSING.md)*
+- **T-046 · Overpass ingest → habitat_types via osm_tag_rules** — *Claude · L · `IN-PROGRESS` (built + tested; first live run pending) · deps: T-008, T-015 · [TSD §5](TSD.md), [DATA-SOURCING §4](DATA-SOURCING-LICENSING.md)*
   - OSM features pulled via Overpass and classified into habitat types by tag rules.
   - "© OpenStreetMap contributors" attribution recorded for display.
+  - ✅ **Built (2026-10-30), design decisions:**
+    - **Spots are designated public places only:** viewpoints, picnic sites, wilderness
+      shelters (not bus shelters), parks, trailheads, bird hides, beaches, bathing places and
+      fishing places. A point inside a forest polygon could be a garden or a field in crop; a
+      picnic site is somewhere people are meant to go. That means fewer spots, which T-050
+      measures, and a much stronger safety story.
+    - **Habitat is coarse on purpose: land / freshwater / coast**, matched to each species' GBIF
+      realm (T-191, wired in T-047). Water-edge kinds are coastal within 300 m of the coastline
+      and freshwater otherwise. Forest and meadow are not told apart: that needs a join over
+      millions of habitat polygons, and the realm split covers what matters, never sending
+      someone to a picnic table to catch a pike.
+    - `pipeline/osm/` contains:
+      - `rules.py`: kinds, habitat, and tag-level exclusions (private access; piers and other
+        structures in water);
+      - `overpass.py`: one county per query via its `ISO3166-2` boundary tag, plus id-only
+        queries for near-coast spots and for the T-049 spatial exclusions (nature
+        reserves / protected areas / national parks, military land, within 30 m of a
+        motorway/trunk/primary road or railway). The client paces itself (5 s) and backs off on
+        429/504;
+      - `spots.py`: assembles a county and keeps excluded spots *with their flags*, so the audit
+        sees what each rule cost;
+      - `counties.py`: GADM → ISO codes, pinned by a test.
+    - `build_catch_spots.py` writes `data/catch_spots_<ISO>.json`. One county failing never
+      discards the rest.
+    - `.github/workflows/catch-spots.yml` runs it on dispatch (counties input, via env) and yearly
+      on 12 February.
+    - 13 pipeline tests.
+    - Overpass is blocked from the dev sandbox, so the first live run is a one-county smoke test
+      (SE-G) in CI.
 - **T-047 · species_habitat mapping** — *Claude · M · deps: T-046 · [TSD §3](TSD.md)*
   - Each catchable species mapped to the habitat types it's plausibly caught in.
 
