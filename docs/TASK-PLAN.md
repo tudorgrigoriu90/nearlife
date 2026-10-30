@@ -1394,7 +1394,7 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     covers "anonymous, idle for 200 days but owns a purchase: kept".
 
 ## F10.4 — Legal Artifacts
-- **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · `IN-PROGRESS` (policy drafted; legal review + hosting pending) · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*
+- **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · `IN-PROGRESS` (policy updated 2026-10-30; 🆕 passages need the reviewer, then hosting) · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*
   - ✅ Draft policy `docs/legal/PRIVACY-POLICY.md` written from PRIVACY-COMPLIANCE.md: what's
     collected + legal basis, no-ads/no-sale, location derive-once-and-discard, sub-processors
     (Supabase/PostHog/RevenueCat/Google Play), retention windows, GDPR rights (in-app export +
@@ -1402,6 +1402,21 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - ⚠️ **Director:** fill the `[bracketed]` controller identity + contact email, get legal review
     (T-009), and **publish at a stable URL** — that URL is the required Google Play privacy-policy
     link. In-app "Privacy policy" link (Settings) wires up once the URL exists.
+  - ✅ **Updated for the features built since review (2026-10-30)**, every new passage marked 🆕
+    so the reviewer sees only what changed:
+    - purchases: what the entitlements table holds, refunds, restore;
+    - Family: invite code, members as "joined on <date>", minors joining;
+    - catch spots: one fix compared on the device; neither the position nor the spot is sent,
+      and a catch records only species and time;
+    - travel notice: on the device only;
+    - community totals: counts only;
+    - processors: OpenFreeMap tiles (IP + viewed area, no account id) and FCM;
+    - retention: accounts holding a purchase are not expired; purchase and Family records end
+      with the account; deleting the account does not refund.
+    - Each claim was checked against the code, which found one gap: the data export leaves out
+      purchases and Family membership. That is now **T-219**.
+  - ⚠️ **Director:** send the 🆕 passages to the legal reviewer. Then fill the brackets and
+    publish (unchanged).
 - **T-096 · Processor DPAs + EU residency verified** — *Director · M · `DONE` (Director 2026-10-31) · deps: T-009 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - Signed DPAs and verified EU residency/SCCs for Supabase, RevenueCat, PostHog.
   - ✅ **Done (Director, 2026-10-31):** DPAs signed and EU residency / SCCs verified for Supabase,
@@ -1593,6 +1608,13 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
       it sells nothing: a pack is one more tap away, on Counties. en + sv.
     - Privacy: this fits the policy's "approximate location while using the app". Here it is
       coarser than a grid cell, a county, and it never leaves the device.
+- **T-219 · Data export includes purchases and Family membership** — *Claude · S · `TODO` · deps: T-092, T-217, T-102 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+  - Found by T-095: "Export my data" holds the profile, consent and collection, but not the
+    purchase records (`entitlements`) or the household link (role, joined date), which the
+    server now keeps per account. Under GDPR access/portability the export must show them.
+  - Acceptance: the export bundle lists each entitlement (id, product, active, changed at) and
+    the household (role, joined/created at, member count; never other members' ids). Tests cover
+    an account with none, with purchases, as owner and as member.
 - **T-106 · New-region onboarding pipeline (repeatable)** — *Claude + Director · L · deps: T-042, T-052 · [ECONOMY](ECONOMY.md)*
   - Repeatable process to open a region: run GBIF/OSM pipeline + light content pass (safe-default
     advice + follow-law) + Director editorial review. Modeled as growth spend.
