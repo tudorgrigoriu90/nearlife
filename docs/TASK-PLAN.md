@@ -323,9 +323,12 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     shared `FOLLOW_LOCAL_LAW` line. `content.test.ts` (6 tests) enforces full coverage, the
     honesty rule (no "right now" claims), and the invasive-risk rule (no "plant/release a
     specific species" in give actions). Prototype content — Director review before public use.
-- **T-021 · Prototype imagery** — *Claude · S · deps: T-019 · (absorbed into E14)*
+- **T-021 · Prototype imagery** — *Claude · S · `DONE` (superseded by E14: T-119/T-202/T-220) · deps: T-019 · (absorbed into E14)*
   - Superseded by **E14**: the prototype uses the media schema (T-118) with a category-emoji
     fallback; real license-clear photos + attribution come from T-119. See E14.
+  - ✅ **Closed (recorded 2026-10-30).** E14 delivered it: the curated 54 (T-119), then the whole
+    catalogue at 80% coverage from Wikipedia + iNaturalist (T-202, T-220). The category glyph is
+    the fallback (T-221 added the group glyphs).
 
 ## F2.2 — Prototype App Shell
 
