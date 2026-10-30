@@ -1391,7 +1391,7 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - ⚠️ Outside Sweden currently means preview mode, not a "not here yet" path — that is **T-107**.
   - ⚠️ Tornio (FI) and Helsingør (DK) touch Sweden and resolve to Norrbotten / Skåne at any limit.
     Accepted: same species, and v1 is not marketed there.
-- **T-091 · Cell-level location storage only** — *Claude · S · `IN-PROGRESS` (H3 adopted; runtime wiring pending) · deps: T-090 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [TSD §3](TSD.md)*
+- **T-091 · Cell-level location storage only** — *Claude · S · `DONE` (no position retained at all; county is the finest level, 2026-10-30) · deps: T-090 · [PRIVACY §1](PRIVACY-COMPLIANCE.md), [TSD §3](TSD.md)*
   - ✅ **H3 adopted (Director decision).** `lib/cell.ts` (5 tests) now uses **`h3-js`** — `cellKey`
     returns an H3 index at `DEFAULT_CELL_RESOLUTION = 8` (~0.74 km² hex), so only a coarse area is
     ever retained, never a precise point (PRIVACY §1). Same H3 system the pipeline's per-cell presence
@@ -1402,6 +1402,18 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     winter runtime stubs and throws on — restored Node's `TextDecoder`/`TextEncoder` via a
     `setupFilesAfterEnv` (`jest.setup.js`; the preset left that unset, so it adds not clobbers).
   - Remaining: wire the runtime catch-location through `cellKey` (deferred with the catch/geo work).
+  - ✅ **Done, more strictly than asked (2026-10-30).** The planned "catch location through
+    `cellKey`" never became needed: the catch-spot design (T-068) keeps the position on the
+    phone. What is stored, by whom:
+    - **Server:** only `profiles.home_region`, a county. A catch row holds species and times
+      (`COLLECTION_COLUMNS`), no position and no spot (checked for T-095). No query takes the
+      user's position (T-048).
+    - **Device:** the hometown (`{id, name}` of a county), the travel log (`county → time
+      offered`, T-218), and the county's public catch spots (places, not the user).
+    - **Fixes** are taken once, used, and dropped (`getLocationFixOnce`; the onboarding
+      resolver; the T-218 travel check).
+  - So nothing finer than a county is retained anywhere. `lib/cell.ts` (H3, res 8) stays for
+    per-cell presence (T-043/T-044), the one future use that would need a cell.
 
 ## F10.3 — GDPR Rights
 - **T-092 · Data export endpoint** — *Claude · M · `DONE` (reachable + produces the bundle; file-share later) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
