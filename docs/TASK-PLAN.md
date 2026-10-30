@@ -510,8 +510,21 @@ can answer **"does passive collecting feel rewarding or hollow?"** ([GDD §9](GD
     catch taste) and a weighted qualitative rubric (rewarding vs. hollow). n≈25 read as
     directional; each metric maps to a T-035 event. Indexed in docs/README.
   - ⚠️ **Director-gated:** must be reviewed/approved and frozen **before** recruiting testers (T-038).
-- **T-037 · Validation funnel dashboard** — *Claude · S · deps: T-035*
+- **T-037 · Validation funnel dashboard** — *Claude · S · `IN-PROGRESS` (defined + drift-tested; creating it in PostHog pending) · deps: T-035*
   - PostHog dashboard showing the onboarding→spot→return funnel and day-7 open rate.
+  - ✅ **Defined (2026-10-30):** [docs/launch/DASHBOARDS.md](launch/DASHBOARDS.md) §1 gives
+    click-by-click PostHog insights for:
+    - Day-7 return (primary);
+    - onboarding → spot → return;
+    - notification open rate (sends come from `notification_log` in SQL, since PostHog never
+      sees server pushes);
+    - non-notification pull;
+    - catch taste.
+    - Each comes with its go/kill threshold. `__tests__/dashboardsDoc.test.js` fails if the guide
+      names an event the app does not send. Rates cover consenting users only, as the guide
+      says.
+  - **To close:** create the dashboard in PostHog. That is the Director following §1 (~15 min),
+    or Claude, given a PostHog personal API key as a GitHub secret (never in chat).
 
 ### S2.5.2 — Real-user test
 - **T-038 · Recruit 20–30 Kronoberg testers** — *Director · M · deps: T-036*
