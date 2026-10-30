@@ -831,7 +831,7 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     T-102 (households) lands; the current `user_id` shape covers v1.
 
 ## F4.2 — Almanac
-- **T-057 · Almanac grid (production)** — *Claude · M · `IN-PROGRESS` (habitat filter built; migration apply pending) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
+- **T-057 · Almanac grid (production)** — *Claude · M · `DONE` (applied + checked live 2026-10-30) · deps: T-056 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ Data-access seam `lib/speciesRepository.ts` (7 tests): `SpeciesRepository` (`listSpecies` +
     `getContent`) with a `HardcodedSpeciesRepository` (the bundled set the app runs on today) and a
     `SupabaseSpeciesRepository` (reads the seeded `species`/`species_content` tables via a fakeable
@@ -882,6 +882,9 @@ species card backed by the real data model. Supersedes the E2 prototype screens.
     per cold start that would be ~6,500 sessions/month, so keep the per-row read.
   - Moving content to the DB also *shrinks* the app bundle: today every user downloads all 38
     languages to read at most two.
+  - ✅ **Applied + checked live (2026-10-30).** `region_catalogue('SWE.9_1','en')` returns
+    `catch_habitats`. Kronoberg's list has 2,927 species met on land, 324 in lakes and rivers,
+    and 181 on the coast (a species can count in several).
 - **T-058 · Almanac states & progress summary** — *Claude · S · `DONE` · deps: T-057 · [USER-FLOWS §2](USER-FLOWS.md)*
   - ✅ 3-tier progress summary row (● Spotted / ◐ Caught / ◑ Helped counts via the tested
     `progressSummary`, T-115) added to the Almanac header; empty + loading states already present
