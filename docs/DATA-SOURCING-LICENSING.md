@@ -52,6 +52,16 @@ conservation institutions under licenses written for *research and non-commercia
 - **Obligation:** display "© OpenStreetMap contributors"; if we publish a derived DB, it must
   be ODbL. Using it to *drive app behavior* is fine.
 - **Action:** include attribution; keep derived habitat DB internal (or ODbL if published).
+- **Decision (Director, 2026-10-30, T-008):**
+  - The map screen and every surface showing OSM-derived spots carry **"© OpenStreetMap
+    contributors"**, linked to openstreetmap.org/copyright.
+  - The derived habitat / catch-spot database stays **internal**: it is never offered for download,
+    export or bulk API access.
+  - The app shows individual spots near the user (a Produced Work). Under ODbL a Produced Work
+    needs the attribution notice, not ODbL licensing.
+  - The legal review (T-009) confirms this reading before public launch.
+  - Base map tiles come from **OpenFreeMap** (free, no account, OSM data; same attribution),
+    keeping invariant #7 at $0.
   Verdict: **OK with attribution.**
 
 ### 5. Species photos — the hero image on every card

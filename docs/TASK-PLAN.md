@@ -129,9 +129,14 @@ The go/no-go items from the licensing and privacy docs. **These gate Phase 2, no
 - **T-007 · Obtain written GBIF commercial-use confirmation (filtered subset)** — *Director · M · deps: — · [DATA-SOURCING §1](DATA-SOURCING-LICENSING.md)*
   - Written confirmation that a CC0/CC-BY-only filtered subset may be used in a paid app.
   - Attribution/DOI obligations documented. **Blocks the real data pipeline (E3).**
-- **T-008 · Confirm OSM/ODbL attribution & derived-DB obligations** — *Director + Claude · S · deps: — · [DATA-SOURCING §4](DATA-SOURCING-LICENSING.md)*
+- **T-008 · Confirm OSM/ODbL attribution & derived-DB obligations** — *Director + Claude · S · `DONE` (Director decision 2026-10-30; legal confirmation rides on T-009) · deps: — · [DATA-SOURCING §4](DATA-SOURCING-LICENSING.md)*
   - ODbL attribution requirement confirmed; decision recorded on keeping derived habitat DB
     internal vs. ODbL-published.
+  - ✅ **Decided (Director, 2026-10-30):** show "© OpenStreetMap contributors" on the map and on
+    every surface with OSM-derived spots. The derived habitat / catch-spot database stays
+    internal: no download, export or bulk API. The app shows nearby spots as a Produced Work.
+    T-009 confirms the reading before launch. Tiles: OpenFreeMap (free, no key). Recorded in
+    DATA-SOURCING §4.
 - **T-009 · Kick off legal review (privacy policy, DPAs, EU residency)** — *Director · M · deps: T-003 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - Legal reviewer engaged; scope = privacy policy, processor DPAs (Supabase/RevenueCat/PostHog),
     GDPR-K age-gate, SCC/residency. **Blocks public launch (E11), not prototype.**
