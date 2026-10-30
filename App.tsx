@@ -20,6 +20,7 @@ import StoreScreen from './components/StoreScreen';
 import CountiesScreen from './components/CountiesScreen';
 import { useCommunityImpact } from './components/useCommunityImpact';
 import { useEntitlements } from './components/useEntitlements';
+import { useTravelOffer } from './components/useTravelOffer';
 import { useCollection } from './components/useCollection';
 import { usePushRegistration } from './components/usePushRegistration';
 import { useThisWeek } from './components/useThisWeek';
@@ -28,6 +29,7 @@ import {
   onNotificationTap,
   requestNotificationPermission,
   showNotificationsInForeground,
+  getLocationFixOnce,
 } from './lib/permissions';
 import { useTracker } from './components/useTracker';
 import {
@@ -53,6 +55,7 @@ import { hasSupabaseConfig } from './lib/supabaseConfig';
 import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib/communityImpact';
 import { SupabaseEntitlementSource, type EntitlementClient, type EntitlementSource } from './lib/entitlement';
 import { AsyncStorageEntitlementStore } from './lib/entitlementStore';
+import { AsyncStorageTravelStore } from './lib/travelStore';
 import { SupabaseFamilyGateway } from './lib/family';
 import { canCollectIn, regionAccess, type County } from './lib/regionAccess';
 import { RevenueCatPurchaseGateway, loadRevenueCat, revenueCatKey, type PurchaseGateway } from './lib/purchases';
@@ -86,6 +89,8 @@ let communitySource: CommunityImpactSource | null | undefined;
 // What the user owns, read from the server (T-083/T-217) and cached on the device. Built on first
 // use like the community source.
 const ENTITLEMENT_STORE = new AsyncStorageEntitlementStore();
+// Which counties the travel banner has offered (T-218). Counties and times only, never positions.
+const TRAVEL_STORE = new AsyncStorageTravelStore();
 let entitlementSourceInstance: EntitlementSource | null | undefined;
 function entitlementSource(): EntitlementSource | null {
   if (entitlementSourceInstance === undefined) {
@@ -218,6 +223,18 @@ export default function App() {
     wanted: consent.notifications,
     locale,
     homeRegion: hometown?.id ?? null,
+  });
+  // Travel (T-218): with location consent, notice another county while the app is open.
+  const travel = useTravelOffer({
+    enabled: onboarded && consentLoaded && consent.location && hometown !== null && hasSupabaseConfig(),
+    homeId: hometown?.id ?? null,
+    viewingId: viewCounty?.id ?? null,
+    getFix: getLocationFixOnce,
+    store: TRAVEL_STORE,
+    onAccept: (county) => {
+      setViewCounty(county);
+      setTab('thisWeek');
+    },
   });
   const [selected, setSelected] = useState<Species | null>(null);
   const [catching, setCatching] = useState<Species | null>(null);
@@ -455,6 +472,7 @@ export default function App() {
     void ONBOARDING_STORE.clear();
     void HOMETOWN_STORE.clear();
     void ENTITLEMENT_STORE.clear();
+    void TRAVEL_STORE.clear();
     return true;
   };
 
@@ -790,6 +808,11 @@ export default function App() {
             regionName={viewCounty?.name ?? hometown?.name}
             spottedIds={spottedIds(collection.records)}
             onOpenCounties={hasSupabaseConfig() && hometown ? () => setShowCounties(true) : undefined}
+            travel={
+              travel.offer
+                ? { county: travel.offer.name, onLook: travel.accept, onDismiss: travel.dismiss }
+                : null
+            }
             onSelectSpecies={(species) => {
               // Tapping a This Week entry marks it Spotted and opens its card (same as a
               // notification tap, USER-FLOWS §4). In a county the user has not opened it only

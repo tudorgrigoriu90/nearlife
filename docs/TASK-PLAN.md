@@ -1410,12 +1410,26 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
     - The purchase gateway now takes any product id (+1 test).
     - Not covered by an App-level test: the switching wiring itself. The rules it calls are
       unit-tested.
-- **T-218 · Travel: notice when the phone is in another county** — *Claude · S · `TODO` · deps: T-105, T-090 · [ECONOMY](ECONOMY.md)*
+- **T-218 · Travel: notice when the phone is in another county** — *Claude · S · `DONE` · deps: T-105, T-090 · [ECONOMY](ECONOMY.md)*
   - While the app is open, a coarse position check (county only, discarded at once, same
     resolver as onboarding, T-090) notices that you are outside your home county. It offers that
     county's preview and its pack, once per county per visit. It never nags, and it never fires on
     a delight moment (invariant #4).
   - The hometown stays locked (ECONOMY.md); this only opens another county alongside it.
+  - ✅ **Built (2026-10-30):**
+    - `lib/travel.ts` (7 tests): `travelOffer` returns the county the phone is in, never home,
+      never the county already on screen, and the same county at most once per **14 days**.
+    - `lib/travelStore.ts` keeps "county X offered at time T" on the device only. It never holds
+      a position (tested) and is cleared with the account.
+    - `components/useTravelOffer.ts` (5 tests) takes **one** coarse fix (`getLocationFixOnce`)
+      on launch and when the app returns to the foreground, at most every 30 minutes. It resolves
+      the fix with the onboarding county resolver and drops it. It runs only with location
+      consent and never asks for a fix otherwise (tested). No background location.
+    - On This Week, a quiet banner reads "You're in Skåne. See what's active in this county this
+      season?" with **Look around** / **Not now**. Never a modal, never on a delight moment, and
+      it sells nothing: a pack is one more tap away, on Counties. en + sv.
+    - Privacy: this fits the policy's "approximate location while using the app". Here it is
+      coarser than a grid cell, a county, and it never leaves the device.
 - **T-106 · New-region onboarding pipeline (repeatable)** — *Claude + Director · L · deps: T-042, T-052 · [ECONOMY](ECONOMY.md)*
   - Repeatable process to open a region: run GBIF/OSM pipeline + light content pass (safe-default
     advice + follow-law) + Director editorial review. Modeled as growth spend.

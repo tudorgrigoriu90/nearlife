@@ -236,6 +236,9 @@ export const en = {
   'badge.helped': 'Helped {count} species',
 
   // Impact (T-081)
+  'travel.banner': 'You’re in {county}. See what’s active in this county this season?',
+  'travel.look': 'Look around',
+  'travel.notNow': 'Not now',
   'counties.title': 'Counties',
   'counties.intro': 'Look around any county in Sweden. Open one to spot and catch there too.',
   'counties.home': 'Your home county',
@@ -511,6 +514,9 @@ const sv: Catalog = {
   'badge.helped': 'Hjälpt {count} arter',
 
   // Impact (T-081)
+  'travel.banner': 'Du är i {county}. Vill du se vad som är aktivt i länet den här säsongen?',
+  'travel.look': 'Titta runt',
+  'travel.notNow': 'Inte nu',
   'counties.title': 'Län',
   'counties.intro': 'Titta runt i vilket län som helst. Lås upp ett för att se och fånga där också.',
   'counties.home': 'Ditt hemlän',

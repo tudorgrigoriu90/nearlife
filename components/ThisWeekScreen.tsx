@@ -96,6 +96,7 @@ export default function ThisWeekScreen({
   live = null,
   regionName,
   onOpenCounties,
+  travel,
 }: {
   locale?: Locale;
   spottedIds?: ReadonlySet<string>;
@@ -105,6 +106,8 @@ export default function ThisWeekScreen({
   regionName?: string;
   /** Show the Counties screen (T-105): look around, or open, another county. */
   onOpenCounties?: () => void;
+  /** The phone is in another county (T-218): a quiet offer to look around there. */
+  travel?: { county: string; onLook: () => void; onDismiss: () => void } | null;
 }) {
   const tr = createTranslator(locale);
   const month = monthOf(new Date());
@@ -126,6 +129,19 @@ export default function ThisWeekScreen({
       <Text style={styles.subtitle}>
         {tr('thisWeek.subtitle', { region, count })}
       </Text>
+      {travel ? (
+        <View style={styles.travel}>
+          <Text style={styles.travelText}>{tr('travel.banner', { county: travel.county })}</Text>
+          <View style={styles.travelActions}>
+            <Pressable onPress={travel.onLook} accessibilityRole="button" style={styles.travelLook}>
+              <Text style={styles.travelLookText}>{tr('travel.look')}</Text>
+            </Pressable>
+            <Pressable onPress={travel.onDismiss} accessibilityRole="button" style={styles.travelLater}>
+              <Text style={styles.travelLaterText}>{tr('travel.notNow')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
       {onOpenCounties ? (
         <Pressable onPress={onOpenCounties} accessibilityRole="button" style={styles.countiesLink}>
           <Text style={styles.countiesText}>🗺 {tr('counties.title')}</Text>
@@ -150,6 +166,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingTop: 64, paddingHorizontal: 20 },
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34' },
   subtitle: { marginTop: 4, marginBottom: 16, fontSize: 14, color: '#4a5c4d' },
+  travel: { backgroundColor: '#eaf4ea', borderRadius: 12, padding: 12, marginBottom: 12 },
+  travelText: { fontSize: 14, lineHeight: 20, color: '#22331f' },
+  travelActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  travelLook: { backgroundColor: '#3a7d44', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 14 },
+  travelLookText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  travelLater: { paddingVertical: 8, paddingHorizontal: 8 },
+  travelLaterText: { color: '#4a5c4d', fontSize: 14, fontWeight: '600' },
   countiesLink: { alignSelf: 'flex-start', marginTop: -8, marginBottom: 12, paddingVertical: 4 },
   countiesText: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
   list: { paddingBottom: 24 },
