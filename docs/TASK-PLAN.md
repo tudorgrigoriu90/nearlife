@@ -1074,10 +1074,28 @@ same mechanic ([GDD §4](GDD.md)).
   - Deps: T-069 is DONE. T-052 (give/protect authoring) has no status of its own, but the
     protect content it describes ships for the whole catalogue through the content pipeline
     (T-210, verified live). ProtectTip shows the catch without a tip if a species has no content.
-- **T-075 · Server-side free-catch enforcement (3/season)** — *Claude · M · deps: T-056, T-074 · [ECONOMY](ECONOMY.md), [TSD §5b](TSD.md)*
+- **T-075 · Server-side free-catch enforcement (3/season)** — *Claude · M · `DONE` (via T-200, verified live 2026-10-28) · deps: T-056, T-074 · [ECONOMY](ECONOMY.md), [TSD §5b](TSD.md)*
   - An Edge Function checks `full_game` entitlement OR `free_catches_used < 3` for the current
     `free_catch_season` **before** writing `caught_at`. Client only displays the counter;
     counter resets on season rollover. **Not client-trusted** — verified by test.
+  - ✅ **Done by T-200 (applied + verified live 2026-10-28), recorded 2026-10-30.** Each
+    criterion, with where it is met:
+    - **Checked before `caught_at` is written:** trigger `collection_enforce_free_catch`
+      (migration `20261029000001`) on `collection`, the only path catches take. A 4th new catch
+      in a season raises `free_catch_limit`.
+    - **`full_game` OR `free_catches_used < 3`:** `profiles.full_game` is server-derived (T-217,
+      including Family members, T-102), and users have no column grant on it or on the
+      counter.
+    - **Season rollover:** the season comes from the server clock (`public.season_key`,
+      Stockholm time), never the client's `caught_at`, so backdating cannot reuse an old
+      allowance.
+    - **Client only displays:** `freeCatchStateFrom` derives the count from the collection. A
+      refusal un-catches the species locally (`CatchRefusedError`).
+    - **Verified by test:** `test_free_catch_limit.py`, plus the live checks in
+      `pipeline/db/verify.py`.
+  - Built as a database trigger rather than the Edge Function this task described. Every catch
+    already reaches the database through `collection` under RLS, so a trigger there cannot be
+    bypassed. An Edge Function would be a second door that something could skip.
 
 ---
 ---
