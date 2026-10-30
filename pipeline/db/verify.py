@@ -365,6 +365,9 @@ def run_household_checks(cur) -> dict[str, str]:
     _step(cur, results, "a member sees the household size but not the code",
           "select case when (h->>'people')::int = 5 and h->>'invite_code' is null and h->>'role' = 'member' "
           "then 'ok' else h::text end from (select public.my_household() as h) x")
+    _step(cur, results, "a member sees since when they joined (T-219)",
+          "select case when (h->>'since')::timestamptz <= now() then 'ok' else coalesce(h::text, 'no household') end "
+          "from (select public.my_household() as h) x")
     _step(cur, results, "members cannot read the household tables", "select count(*) from public.households")
     _step(cur, results, "only the owner can remove a member", "select public.remove_household_member(%s)", (m2,))
 

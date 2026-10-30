@@ -11,6 +11,7 @@ describe('parseHousehold', () => {
     expect(
       parseHousehold({
         role: 'owner',
+        since: '2026-10-28T09:00:00Z',
         people: 2,
         active: true,
         invite_code: 'ABCD2345',
@@ -18,6 +19,7 @@ describe('parseHousehold', () => {
       }),
     ).toEqual({
       role: 'owner',
+      since: '2026-10-28T09:00:00Z',
       people: 2,
       active: true,
       inviteCode: 'ABCD2345',
@@ -28,6 +30,7 @@ describe('parseHousehold', () => {
   it('reads a member view, which never carries the code', () => {
     expect(parseHousehold({ role: 'member', people: 3, active: true, invite_code: null, members: null })).toEqual({
       role: 'member',
+      since: null,
       people: 3,
       active: true,
       inviteCode: null,

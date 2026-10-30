@@ -1608,13 +1608,24 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
       it sells nothing: a pack is one more tap away, on Counties. en + sv.
     - Privacy: this fits the policy's "approximate location while using the app". Here it is
       coarser than a grid cell, a county, and it never leaves the device.
-- **T-219 · Data export includes purchases and Family membership** — *Claude · S · `TODO` · deps: T-092, T-217, T-102 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+- **T-219 · Data export includes purchases and Family membership** — *Claude · S · `IN-PROGRESS` (built + tested; migration apply pending) · deps: T-092, T-217, T-102 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - Found by T-095: "Export my data" holds the profile, consent and collection, but not the
     purchase records (`entitlements`) or the household link (role, joined date), which the
     server now keeps per account. Under GDPR access/portability the export must show them.
   - Acceptance: the export bundle lists each entitlement (id, product, active, changed at) and
     the household (role, joined/created at, member count; never other members' ids). Tests cover
     an account with none, with purchases, as owner and as member.
+  - ✅ **Built (2026-10-30):** export format `nearby.export.v2` (lib/dataExport.ts).
+    - `purchases`: every `entitlements` row (refunded ones too), read under RLS by
+      `SupabaseExportSource`.
+    - `household`: role, since, people, active, code (owner only), and members' join dates.
+      Member account ids are left out: they identify other people's accounts.
+    - `unavailable` names a section the server couldn't be asked for (offline), so an empty
+      list is never mistaken for "we hold nothing".
+    - A member had no way to read their own join date (no table access, T-102), so migration
+      `20261030000003` adds `since` to `my_household()`. Owner: household created. Member:
+      joined. Grants unchanged.
+    - Covered by 8 tests, 1 static SQL guard and 1 live verify check.
 - **T-106 · New-region onboarding pipeline (repeatable)** — *Claude + Director · L · deps: T-042, T-052 · [ECONOMY](ECONOMY.md)*
   - Repeatable process to open a region: run GBIF/OSM pipeline + light content pass (safe-default
     advice + follow-law) + Director editorial review. Modeled as growth spend.

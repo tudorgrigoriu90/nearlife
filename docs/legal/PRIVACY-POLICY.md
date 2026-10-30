@@ -93,7 +93,9 @@ appropriate safeguards (Standard Contractual Clauses) for any transfer outside t
 ## Your rights
 Under the GDPR you can **access**, **export**, **correct**, **delete**, and **restrict** your data,
 and **withdraw consent**. The app provides **"Export my data"** and **"Delete account & data"**
-directly in Settings. You also have the right to lodge a complaint with your supervisory authority
+directly in Settings. 🆕 The export holds everything we keep for your account: home region,
+consent choices, collection, purchase records and, if you're in a Family, your role and dates. An
+owner's export shows when members joined, not who they are. You also have the right to lodge a complaint with your supervisory authority
 — in Sweden, the **Integritetsskyddsmyndigheten (IMY)**.
 
 ## Children and families

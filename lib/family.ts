@@ -14,6 +14,8 @@ export interface HouseholdMember {
 
 export interface Household {
   role: 'owner' | 'member';
+  /** Owner: when the household was created. Member: when they joined. Null from an older server. */
+  since: string | null;
   /** Owner included. */
   people: number;
   /** False once the owner's Family purchase has ended (refund): nobody can join. */
@@ -37,6 +39,7 @@ export function parseHousehold(raw: unknown): Household | null {
     : [];
   return {
     role: r.role,
+    since: typeof r.since === 'string' ? r.since : null,
     people: r.people,
     active: r.active,
     inviteCode: typeof r.invite_code === 'string' ? r.invite_code : null,

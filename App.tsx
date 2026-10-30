@@ -64,7 +64,15 @@ import { SupabaseFamilyGateway } from './lib/family';
 import { canCollectIn, regionAccess, type County } from './lib/regionAccess';
 import { RevenueCatPurchaseGateway, loadRevenueCat, revenueCatKey, type PurchaseGateway } from './lib/purchases';
 import { TrackingPurchaseGateway } from './lib/salesFunnel';
-import { buildDataExport, exportToJson } from './lib/dataExport';
+import {
+  buildDataExport,
+  exportToJson,
+  householdForExport,
+  SupabaseExportSource,
+  type ExportClient,
+  type ExportHousehold,
+  type PurchaseRecord,
+} from './lib/dataExport';
 import type { Region } from './lib/hometown';
 import { AsyncStorageHometownStore } from './lib/hometownStore';
 import { AsyncStorageOnboardingStore } from './lib/onboardingStore';
@@ -464,12 +472,37 @@ export default function App() {
     };
   }, [selected, secondaryLocale]);
 
-  const exportMyData = () => {
+  const exportMyData = async () => {
+    // The server-side sections (T-219). Without a backend there is nothing held there to export.
+    const unavailable: ('purchases' | 'household')[] = [];
+    let purchases: PurchaseRecord[] = [];
+    let household: ExportHousehold | null = null;
+    if (hasSupabaseConfig()) {
+      const client = getSupabase();
+      [purchases, household] = await Promise.all([
+        new SupabaseExportSource(client as unknown as ExportClient, ensureAnonymousSession)
+          .purchases()
+          .catch(() => {
+            unavailable.push('purchases');
+            return [];
+          }),
+        new SupabaseFamilyGateway(client)
+          .mine()
+          .then(householdForExport)
+          .catch(() => {
+            unavailable.push('household');
+            return null;
+          }),
+      ]);
+    }
     const bundle = buildDataExport({
       exportedAt: new Date().toISOString(),
       profile: { homeRegion: hometown?.id ?? null },
       consent,
       collection: collection.records,
+      purchases,
+      household,
+      unavailable,
     });
     setExportJson(exportToJson(bundle));
   };
@@ -693,7 +726,7 @@ export default function App() {
           onSelectSecondaryLocale={(loc) =>
             updateDualLanguage(setSecondaryLocale(dualLanguage, loc, locale as ContentLocale))
           }
-          onExportData={exportMyData}
+          onExportData={() => void exportMyData()}
           onLinkEmail={() => setShowLinkEmail(true)}
           // Family needs the backend: households live in Supabase (T-102).
           onOpenFamily={hasSupabaseConfig() ? () => setShowFamily(true) : undefined}

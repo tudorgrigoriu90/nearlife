@@ -34,3 +34,18 @@ def test_the_app_constant_matches_the_database_cap():
     m = re.search(r"FAMILY_MAX_PEOPLE = (\d+);", app)
     assert m, "FAMILY_MAX_PEOPLE not found in lib/family.ts"
     assert f"if people >= {m.group(1)} then raise exception 'household_full'" in SQL
+
+
+SINCE = (Path(__file__).resolve().parents[2] / "supabase" / "migrations" / "20261030000003_my_household_since.sql").read_text(
+    encoding="utf-8"
+)
+
+
+def test_my_household_since_keeps_the_security_of_the_original():
+    # T-219 replaces the function; it must stay a definer function with a pinned search path, and
+    # the owner-only fields must stay owner-only.
+    assert "security definer" in SINCE and "set search_path = ''" in SINCE
+    assert "'invite_code', case when mine.role = 'owner' then mine.invite_code end" in SINCE
+    assert "'members', case when mine.role = 'owner'" in SINCE
+    assert "'since', mine.since" in SINCE
+    assert "grant" not in SINCE.lower().split("$$")[-1]  # grants carried over, none widened

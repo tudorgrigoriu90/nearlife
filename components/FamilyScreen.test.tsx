@@ -19,6 +19,7 @@ function gateway(over: Partial<FamilyGateway> = {}, household: Household | null 
 
 const owner: Household = {
   role: 'owner',
+  since: '2026-10-28T09:00:00Z',
   people: 2,
   active: true,
   inviteCode: 'ABCD2345',
@@ -79,7 +80,7 @@ describe('FamilyScreen', () => {
 
   it('shows a member their status and lets them leave', async () => {
     const onChanged = jest.fn();
-    const gw = gateway({}, { role: 'member', people: 3, active: true, inviteCode: null, members: [] });
+    const gw = gateway({}, { role: 'member', since: null, people: 3, active: true, inviteCode: null, members: [] });
     await render(<FamilyScreen locale="en" gateway={gw} ownsFamily={false} onChanged={onChanged} />);
     await waitFor(() =>
       expect(screen.getByText(tr('family.member.status', { people: 3, max: 5 }))).toBeTruthy(),
@@ -91,7 +92,7 @@ describe('FamilyScreen', () => {
   });
 
   it('says so plainly when the family purchase has ended', async () => {
-    const gw = gateway({}, { role: 'member', people: 2, active: false, inviteCode: null, members: [] });
+    const gw = gateway({}, { role: 'member', since: null, people: 2, active: false, inviteCode: null, members: [] });
     await render(<FamilyScreen locale="en" gateway={gw} ownsFamily={false} />);
     await waitFor(() => expect(screen.getByText(tr('family.inactive'))).toBeTruthy());
   });
