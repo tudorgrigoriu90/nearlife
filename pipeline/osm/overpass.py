@@ -19,10 +19,10 @@ from .rules import COAST_RADIUS_M, KINDS, ROAD_RADIUS_M
 
 ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter"]
 TIMEOUT_S = 900
-# Overpass's default memory cap is 512 MB. The road and coast queries for the largest counties
-# (Stockholm, Skåne, Västra Götaland) need more, and past the cap they fail (see `run`).
-MAXSIZE = 2 * 1024**3
-HEADER = f"[out:json][timeout:{TIMEOUT_S}][maxsize:{MAXSIZE}];"
+# Default memory cap on purpose. Asking for 2 GB (2026-10-30) got even small Kronoberg turned
+# away with 504s: a busy server will not admit a query that big. The road and coast queries are
+# instead built to stay small (below).
+HEADER = f"[out:json][timeout:{TIMEOUT_S}];"
 
 
 def _county(iso: str) -> str:
@@ -38,10 +38,15 @@ def spots_query(iso: str) -> str:
     return f"{HEADER}\n{_county(iso)}\n{_spots_set()}\n.p out tags center;"
 
 
+# The coast and road queries start from the spots, not the county. Collecting every motorway and
+# every coastline way in Stockholm or Skåne first is what timed out in the first full run. Looking
+# only within the radius of a spot touches a few hundred ways, and the answer is the same: a spot
+# is near a road exactly when a road is near the spot. It also catches a coastline just outside
+# the county boundary, which the county-wide version missed.
 def near_coast_query(iso: str) -> str:
     return (
         f"{HEADER}\n{_county(iso)}\n{_spots_set()}\n"
-        f'way["natural"="coastline"](area.c)->.coast;\n'
+        f'way["natural"="coastline"](around.p:{COAST_RADIUS_M})->.coast;\n'
         f"nwr.p(around.coast:{COAST_RADIUS_M});\nout ids;"
     )
 
@@ -62,8 +67,8 @@ MILITARY_FILTERS = ['["landuse"="military"]', '["military"]']
 def near_roads_query(iso: str) -> str:
     return (
         f"{HEADER}\n{_county(iso)}\n{_spots_set()}\n"
-        f'(\n  way["highway"~"^(motorway|trunk|primary|motorway_link|trunk_link)$"](area.c);\n'
-        f'  way["railway"="rail"](area.c);\n)->.roads;\n'
+        f'(\n  way["highway"~"^(motorway|trunk|primary|motorway_link|trunk_link)$"](around.p:{ROAD_RADIUS_M});\n'
+        f'  way["railway"="rail"](around.p:{ROAD_RADIUS_M});\n)->.roads;\n'
         f"nwr.p(around.roads:{ROAD_RADIUS_M});\nout ids;"
     )
 

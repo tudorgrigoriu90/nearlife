@@ -156,7 +156,16 @@ def test_a_harmless_remark_is_not_an_error():
     assert client.run("q") == {"elements": [], "remark": "Note: nothing changed"}
 
 
-def test_queries_ask_for_enough_memory_for_the_largest_counties():
+def test_no_query_asks_for_more_than_the_default_memory():
+    # A 2 GB request got queries turned away with 504s by a busy server, even for small counties.
     for q in (spots_query("SE-AB"), near_coast_query("SE-AB"), near_roads_query("SE-AB"),
               inside_query("SE-AB", RESERVE_FILTERS)):
-        assert "[maxsize:" in q.splitlines()[0]
+        assert "maxsize" not in q
+
+
+def test_coast_and_roads_are_searched_near_spots_not_across_the_county():
+    # County-wide road and coastline sets timed out for Stockholm and Skåne (2026-10-30).
+    roads, coast = near_roads_query("SE-AB"), near_coast_query("SE-AB")
+    assert '(around.p:' in roads and '"highway"' in roads and '](area.c);\n  way["railway"' not in roads
+    assert '"railway"="rail"](around.p:' in roads
+    assert '"natural"="coastline"](around.p:' in coast and '"coastline"](area.c)' not in coast

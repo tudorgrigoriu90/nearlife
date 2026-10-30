@@ -806,13 +806,24 @@ key before loading into Supabase.**
       readable.
     - Fix: such an answer is now a failure. It is retried on the other instance, then fails
       the county, which is then not loaded (fail closed). Queries also ask for 2 GB
-      (`[maxsize:]`) instead of the 512 MB default, so the largest counties can complete.
+      (`[maxsize:]`); that was reverted the same evening, see below.
       4 tests.
     - Reserve and military flags were non-zero in every county, so those queries look
       complete; the re-fetch replaces them anyway.
     - Exposure: catch spots are only in the Director's dev build, with no public users yet.
       The full re-fetch replaces every county. Back to `DONE` only when every county's road
       and coast counts are plausible.
+  - 🐛→✅ **The 2 GB memory request backfired (re-fetch run 41116548680, cancelled).** Busy
+    Overpass servers turned away the large declared queries with 504s, even for small, inland
+    Kronoberg ("near coast: 504"). Dalarna failed the same way.
+    - Fix: back to the default memory cap, with the road and coast queries rebuilt to stay
+      small. They now start from the spots: `way[...](around.p:R)`, then
+      `nwr.p(around.ways:R)`.
+    - The result is the same set (nearness is symmetric), but it touches a few hundred ways
+      instead of every motorway or coastline in the county. It also catches a coastline just
+      outside the county boundary.
+    - 2 tests replace the maxsize one. The runtime-error detection from above stays, so a
+      failure still fails closed.
 - **T-050 · Catch-spot density audit (Kronoberg)** — *Claude · M · deps: T-048 · [review finding]*
   - Report: what % of Kronoberg residents have a catch spot within a ~15-min walk. If low,
     flag that Caught skews to a car feature and record the design implication before launch.
