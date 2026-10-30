@@ -9,9 +9,10 @@
 // (and Jest) load the JS without it, so the module is required lazily and its absence just means
 // "purchases unavailable": the Store hides its buy buttons and nothing else changes.
 
-export type Sku = 'full_game' | 'family';
+/** A Play Console product id: `full_game`, `family`, `all_regions` or a county pack `region_swe_<n>`. */
+export type Sku = string;
 
-/** Display order on the Store. The ids are the Play Console product ids. */
+/** The Store's products, in display order. County packs are sold from the Counties screen (T-105). */
 export const SKUS: Sku[] = ['full_game', 'family'];
 
 export interface StoreProduct {
@@ -24,7 +25,8 @@ export type PurchaseOutcome = 'purchased' | 'cancelled';
 
 export interface PurchaseGateway {
   available(): boolean;
-  products(): Promise<StoreProduct[]>;
+  /** The given products (default: the Store's), in that order, skipping any the store lacks. */
+  products(skus?: Sku[]): Promise<StoreProduct[]>;
   purchase(sku: Sku): Promise<PurchaseOutcome>;
   restore(): Promise<void>;
 }
@@ -88,22 +90,22 @@ export class RevenueCatPurchaseGateway implements PurchaseGateway {
     );
   }
 
-  private async storeProducts(): Promise<RcProduct[]> {
+  private async storeProducts(skus: Sku[]): Promise<RcProduct[]> {
     const rc = await this.ready();
-    return rc.getProducts(SKUS, rc.PRODUCT_CATEGORY.NON_SUBSCRIPTION);
+    return rc.getProducts(skus, rc.PRODUCT_CATEGORY.NON_SUBSCRIPTION);
   }
 
-  async products(): Promise<StoreProduct[]> {
+  async products(skus: Sku[] = SKUS): Promise<StoreProduct[]> {
     if (!this.available()) return [];
-    const found = await this.storeProducts();
-    return SKUS.flatMap((sku) => {
+    const found = await this.storeProducts(skus);
+    return skus.flatMap((sku) => {
       const p = found.find((x) => x.identifier === sku);
       return p ? [{ sku, priceString: p.priceString }] : [];
     });
   }
 
   async purchase(sku: Sku): Promise<PurchaseOutcome> {
-    const product = (await this.storeProducts()).find((p) => p.identifier === sku);
+    const product = (await this.storeProducts([sku])).find((p) => p.identifier === sku);
     if (!product) throw new Error(`${sku} is not available in the store`);
     try {
       await (await this.ready()).purchaseStoreProduct(product);

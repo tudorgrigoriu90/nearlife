@@ -75,3 +75,21 @@ describe('RevenueCatPurchaseGateway', () => {
     expect(mod.restorePurchases).toHaveBeenCalled();
   });
 });
+
+describe('county packs (T-105)', () => {
+  it('lists the requested products in the requested order', async () => {
+    const mod = fakeModule({
+      getProducts: jest.fn().mockResolvedValue([
+        { identifier: 'region_swe_9', priceString: '29,00 kr' },
+        { identifier: 'all_regions', priceString: '99,00 kr' },
+      ]),
+    });
+    const gw = new RevenueCatPurchaseGateway(mod, 'goog_x', async () => USER);
+    await expect(gw.products(['all_regions', 'region_swe_9', 'region_swe_1'])).resolves.toEqual([
+      { sku: 'all_regions', priceString: '99,00 kr' },
+      { sku: 'region_swe_9', priceString: '29,00 kr' },
+    ]);
+    expect(mod.getProducts).toHaveBeenCalledWith(['all_regions', 'region_swe_9', 'region_swe_1'], 'NON_SUBSCRIPTION');
+  });
+});
+

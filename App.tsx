@@ -17,6 +17,7 @@ import BadgesScreen from './components/BadgesScreen';
 import ImpactScreen from './components/ImpactScreen';
 import FamilyScreen from './components/FamilyScreen';
 import StoreScreen from './components/StoreScreen';
+import CountiesScreen from './components/CountiesScreen';
 import { useCommunityImpact } from './components/useCommunityImpact';
 import { useEntitlements } from './components/useEntitlements';
 import { useCollection } from './components/useCollection';
@@ -53,6 +54,7 @@ import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib
 import { SupabaseEntitlementSource, type EntitlementClient, type EntitlementSource } from './lib/entitlement';
 import { AsyncStorageEntitlementStore } from './lib/entitlementStore';
 import { SupabaseFamilyGateway } from './lib/family';
+import { canCollectIn, regionAccess, type County } from './lib/regionAccess';
 import { RevenueCatPurchaseGateway, loadRevenueCat, revenueCatKey, type PurchaseGateway } from './lib/purchases';
 import { buildDataExport, exportToJson } from './lib/dataExport';
 import type { Region } from './lib/hometown';
@@ -180,6 +182,10 @@ export default function App() {
   });
   const [showFamily, setShowFamily] = useState(false);
   const [showStore, setShowStore] = useState(false);
+  const [showCounties, setShowCounties] = useState(false);
+  // The county This Week and the Almanac show (T-105): home unless the user is looking around
+  // another one. Notifications always follow the home county.
+  const [viewCounty, setViewCounty] = useState<County | null>(null);
   // Read only while the Impact screen is open, so each visit shows a fresh total (T-081).
   const community = useCommunityImpact(showImpact ? communityImpactSource() : null);
   const [exportJson, setExportJson] = useState<string | null>(null);
@@ -194,14 +200,14 @@ export default function App() {
   // the same list so the two never disagree.
   const { species: almanacSpecies, loading: speciesLoading } = useAlmanacCatalogue(
     SPECIES_REPO,
-    hometown?.id ?? null,
+    viewCounty?.id ?? hometown?.id ?? null,
     locale,
     new Set(collection.records.map((r) => r.speciesId)),
   );
   // This Week over the user's own county (T-207); null in preview mode → bundled list.
   const thisWeekLive = useThisWeek(
     SPECIES_REPO,
-    hometown?.id ?? null,
+    viewCounty?.id ?? hometown?.id ?? null,
     monthOf(new Date()),
     spottedIds(collection.records),
     locale,
@@ -453,6 +459,9 @@ export default function App() {
   };
 
   const seasonKey = seasonKeyOf(new Date());
+  // Spotting and catching need the home county or an opened one (T-105); a preview is look-only.
+  const viewingAccess = viewCounty ? regionAccess(viewCounty.id, hometown?.id ?? null, entitlements) : 'home';
+  const canCollect = canCollectIn(viewingAccess);
   // Derived from the persisted collection (T-200), so a restart cannot reset it; the database
   // trigger is the authority and refuses a 4th catch however this is tampered with. Full Game is
   // false until the purchase flow exists (T-074).
@@ -511,6 +520,32 @@ export default function App() {
           locale={locale}
           onConfirm={confirmDeleteAccount}
           onCancel={() => setShowDelete(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
+  if (showCounties) {
+    return (
+      <>
+        <CountiesScreen
+          locale={locale}
+          homeId={hometown?.id ?? null}
+          entitlements={entitlements}
+          gateway={purchaseGateway()}
+          onView={(county) => {
+            setViewCounty(county.id === hometown?.id ? null : county);
+            // Land on that county's This Week, wherever Counties was opened from.
+            setShowCounties(false);
+            setShowSettings(false);
+            setSelected(null);
+            setTab('thisWeek');
+          }}
+          onPurchased={() => {
+            for (const ms of AFTER_PURCHASE_REREAD_MS) setTimeout(refreshEntitlements, ms);
+          }}
+          onDone={() => setShowCounties(false)}
         />
         <StatusBar style="auto" />
       </>
@@ -614,6 +649,7 @@ export default function App() {
           // Family needs the backend: households live in Supabase (T-102).
           onOpenFamily={hasSupabaseConfig() ? () => setShowFamily(true) : undefined}
           onOpenStore={hasSupabaseConfig() ? () => setShowStore(true) : undefined}
+          onOpenCounties={hasSupabaseConfig() && hometown ? () => setShowCounties(true) : undefined}
           onDeleteAccount={() => setShowDelete(true)}
           onDone={() => setShowSettings(false)}
         />
@@ -694,13 +730,19 @@ export default function App() {
           tier={tierStateFor(collection.records, selected.id)}
           fullGame={freeCatch.fullGame}
           onBack={() => setSelected(null)}
-          onFindNearby={attemptCatch}
+          onFindNearby={canCollect ? attemptCatch : () => setShowCounties(true)}
           onPledge={(species, kind) => {
             // Helped tier: one-tap honor-system pledge (GDD §5) → mark Helped + confirm.
             collection.help(species.id, kind);
             setPledge({ species, kind });
           }}
-          nearbyNote={freeCatch.fullGame ? undefined : tr('catch.remaining', { count: remaining })}
+          nearbyNote={
+            !canCollect && viewCounty
+              ? tr('counties.locked', { county: viewCounty.name })
+              : freeCatch.fullGame
+                ? undefined
+                : tr('catch.remaining', { count: remaining })
+          }
         />
         {paywall ? <FreeCatchSheet
             locale={locale}
@@ -726,18 +768,36 @@ export default function App() {
           <Text style={styles.previewText}>{tr('preview.banner')}</Text>
         </View>
       ) : null}
+      {viewCounty ? (
+        <View style={styles.previewBanner}>
+          <Text style={styles.previewText}>
+            {canCollect
+              ? viewCounty.name
+              : tr('counties.previewBanner', { county: viewCounty.name })}
+          </Text>
+          <Pressable onPress={() => setViewCounty(null)} accessibilityRole="button">
+            <Text style={[styles.previewText, styles.previewLink]}>
+              {tr('counties.backHome', { county: hometown?.name ?? '' })}
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
       <View style={styles.screen}>
         {tab === 'thisWeek' ? (
           <ThisWeekScreen
             locale={locale}
             live={thisWeekLive}
-            regionName={hometown?.name}
+            regionName={viewCounty?.name ?? hometown?.name}
             spottedIds={spottedIds(collection.records)}
+            onOpenCounties={hasSupabaseConfig() && hometown ? () => setShowCounties(true) : undefined}
             onSelectSpecies={(species) => {
               // Tapping a This Week entry marks it Spotted and opens its card (same as a
-              // notification tap, USER-FLOWS §4).
-              collection.spot(species.id);
-              track('species_spotted', { speciesId: species.id, source: 'this_week' });
+              // notification tap, USER-FLOWS §4). In a county the user has not opened it only
+              // opens the card: spotting there is what a county pack buys (T-105).
+              if (canCollect) {
+                collection.spot(species.id);
+                track('species_spotted', { speciesId: species.id, source: 'this_week' });
+              }
               setSelected(species);
             }}
           />
@@ -776,6 +836,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   previewBanner: { backgroundColor: '#fbe9c6', paddingTop: 44, paddingBottom: 8, paddingHorizontal: 16 },
   previewText: { fontSize: 12, color: '#7a5a1f', textAlign: 'center' },
+  previewLink: { marginTop: 4, fontWeight: '700', textDecorationLine: 'underline' },
   tabBar: {
     flexDirection: 'row',
     borderTopWidth: StyleSheet.hairlineWidth,

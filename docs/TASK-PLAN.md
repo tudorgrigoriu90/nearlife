@@ -1376,7 +1376,7 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
 > counties that are not your home county, and the "World Pass" covers all of Sweden. **Prices
 > (Director, 2026-10-30): 29 SEK per county, 99 SEK for all of Sweden.**
 
-- **T-105 · Region pack + All-Sweden pass products** — *Claude + Director · M · `IN-PROGRESS` (server mapping done; switcher UI next) · deps: T-217, T-083 · [ECONOMY](ECONOMY.md)*
+- **T-105 · Region pack + All-Sweden pass products** — *Claude + Director · M · `IN-PROGRESS` (built; sandbox purchase pending the Play setup, T-004) · deps: T-217, T-083 · [ECONOMY](ECONOMY.md)*
   - Products (Director creates them in Play Console): one pack per county, or a single
     "pick a county" pack, plus the all-counties pass. Owned regions are recorded server-side by
     the T-217 webhook, never client-side.
@@ -1388,6 +1388,23 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
     `product_id`. The Director therefore creates the products but **no** RevenueCat entitlements
     for them, 22 fewer by hand. A grant named both ways is applied once. The guide lists every
     product id with its county (PAYMENTS-SETUP.md, Part E). 7 more planner tests.
+  - ✅ **Counties screen + county switching (2026-10-30):**
+    - `lib/regionAccess.ts` (5 tests): `regionAccess` gives home / owned (pack or all-Sweden pass)
+      / locked; `canCollectIn`; `countyList` lists home first, then alphabetical in the reader's
+      language (Swedish puts Ö last).
+    - `components/CountiesScreen.tsx` (5 tests): all 21 counties with the store's pack prices, the
+      All of Sweden card, and Open / Your home county tags. Any county can be opened to look
+      around. Buying uses the product id `region_swe_<n>`, and with the pass nothing is for sale.
+    - App: This Week and the Almanac follow the **county being viewed**; notifications always
+      follow the home county. In a locked county:
+      - tapping a species opens its card **without spotting** it;
+      - the card's catch button explains how to open the county and leads to Counties;
+      - help/protect stays free (invariant #2);
+      - a banner says which county you are looking at and offers "Back to <home>".
+    - Entry points: a 🗺 Counties link under the This Week title, and Settings → Counties.
+    - The purchase gateway now takes any product id (+1 test).
+    - Not covered by an App-level test: the switching wiring itself. The rules it calls are
+      unit-tested.
 - **T-218 · Travel: notice when the phone is in another county** — *Claude · S · `TODO` · deps: T-105, T-090 · [ECONOMY](ECONOMY.md)*
   - While the app is open, a coarse position check (county only, discarded at once, same
     resolver as onboarding, T-090) notices that you are outside your home county. It offers that

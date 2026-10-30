@@ -95,6 +95,7 @@ export default function ThisWeekScreen({
   onSelectSpecies,
   live = null,
   regionName,
+  onOpenCounties,
 }: {
   locale?: Locale;
   spottedIds?: ReadonlySet<string>;
@@ -102,6 +103,8 @@ export default function ThisWeekScreen({
   /** The user's county list (T-207); null → the bundled preview list. */
   live?: LiveThisWeek | null;
   regionName?: string;
+  /** Show the Counties screen (T-105): look around, or open, another county. */
+  onOpenCounties?: () => void;
 }) {
   const tr = createTranslator(locale);
   const month = monthOf(new Date());
@@ -123,6 +126,11 @@ export default function ThisWeekScreen({
       <Text style={styles.subtitle}>
         {tr('thisWeek.subtitle', { region, count })}
       </Text>
+      {onOpenCounties ? (
+        <Pressable onPress={onOpenCounties} accessibilityRole="button" style={styles.countiesLink}>
+          <Text style={styles.countiesText}>🗺 {tr('counties.title')}</Text>
+        </Pressable>
+      ) : null}
       <FlatList
         data={rows}
         keyExtractor={(r) => r.species.id}
@@ -142,6 +150,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingTop: 64, paddingHorizontal: 20 },
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34' },
   subtitle: { marginTop: 4, marginBottom: 16, fontSize: 14, color: '#4a5c4d' },
+  countiesLink: { alignSelf: 'flex-start', marginTop: -8, marginBottom: 12, paddingVertical: 4 },
+  countiesText: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
   list: { paddingBottom: 24 },
   events: { marginBottom: 8 },
   eventsTitle: { fontSize: 12, fontWeight: '700', color: '#7a8a7c', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },

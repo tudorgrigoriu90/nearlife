@@ -36,6 +36,7 @@ export default function SettingsScreen({
   onLinkEmail,
   onOpenFamily,
   onOpenStore,
+  onOpenCounties,
   onDeleteAccount,
   onDone,
 }: {
@@ -56,6 +57,8 @@ export default function SettingsScreen({
   onOpenFamily?: () => void;
   /** Open the Store (T-085): buy or restore the Full Game / Family. */
   onOpenStore?: () => void;
+  /** Open the Counties screen (T-105). */
+  onOpenCounties?: () => void;
   /** Open the account/data deletion flow (T-093 · GDPR erasure, reachable from Settings). */
   onDeleteAccount?: () => void;
   onDone: () => void;
@@ -177,6 +180,12 @@ export default function SettingsScreen({
                 <Text style={styles.rowLabel}>{tr('settings.family')}</Text>
                 <Text style={styles.chevron}>›</Text>
               </Pressable>
+              {onOpenCounties ? (
+                <Pressable onPress={onOpenCounties} accessibilityRole="button" style={[styles.row, styles.rowBorder]}>
+                  <Text style={styles.rowLabel}>{tr('settings.counties')}</Text>
+                  <Text style={styles.chevron}>›</Text>
+                </Pressable>
+              ) : null}
             </View>
           </>
         ) : null}
