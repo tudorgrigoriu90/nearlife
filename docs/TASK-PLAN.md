@@ -1550,6 +1550,34 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
 - **T-104 · Family shared almanac** — *Claude · L · v2 · deps: T-102 · [USER-FLOWS §7 (v1 note)](USER-FLOWS.md)*
   - Household view, member activity feed, family impact counter, personal/family toggle on Home.
     Deferred: v1 Family is the shared unlock only.
+- **T-222 · Photo identification, on the phone** — *Claude + Director · XL · `DEFERRED` (v2, Director 2026-10-30) · deps: T-202, T-221 · [PRIVACY](PRIVACY-COMPLIANCE.md), [GDD §4](GDD.md)*
+  - Director request: identify a photographed organism (insects, mammals, birds, flowers,
+    trees, mushrooms) for free.
+  - **Approach chosen: BioCLIP running on the phone, limited to our catalogue.**
+    - The rejected alternatives all cost money or need a partnership: the iNaturalist / Seek
+      vision API (partners only), Pl@ntNet (plants only; commercial use believed paid), and
+      Google Lens or general AI vision APIs (paid per photo).
+    - BioCLIP is an open model trained across the tree of life. Its weights are reported
+      MIT-licensed; **confirm before building.**
+    - It scores the photo only against our ~6,824 species names. That is more accurate than
+      ranking every species in the world, and it shows "best guesses", never one confident
+      answer.
+    - No server and no per-photo cost (invariant #7). The photo never leaves the phone
+      (PRIVACY §1).
+  - **Mushroom safety rule (invariant #5), non-negotiable:**
+    - Every fungus result says "never eat anything based on this app".
+    - Edibility is never shown or implied.
+    - Tests enforce both.
+  - Costs to plan for:
+    - The model adds ~100–200 MB (quantised), so download it on first use rather than in the
+      install.
+    - A native ML runtime (ONNX Runtime or TFLite) means a new EAS build.
+    - Accuracy is weaker for small insects.
+  - Possible game tie-in: a confident identification of a species active in the region can
+    count as the "Spotted" confirmation.
+  - Checks before starting: whether fungi are in the catalogue at all (T-221 shows what the
+    679 uncategorised species are), the licence of the model and its training data, and
+    on-device speed on a mid-range Android phone.
 
 ## F12.2 — Regions & World Pass
 > **Moved into v1 (Director, 2026-10-29).** v1 is Sweden only, so a "region" is one of the 20
