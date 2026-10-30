@@ -1378,8 +1378,12 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - ⚠️ **Director:** fill the `[bracketed]` controller identity + contact email, get legal review
     (T-009), and **publish at a stable URL** — that URL is the required Google Play privacy-policy
     link. In-app "Privacy policy" link (Settings) wires up once the URL exists.
-- **T-096 · Processor DPAs + EU residency verified** — *Director · M · deps: T-009 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
+- **T-096 · Processor DPAs + EU residency verified** — *Director · M · `DONE` (Director 2026-10-31) · deps: T-009 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - Signed DPAs and verified EU residency/SCCs for Supabase, RevenueCat, PostHog.
+  - ✅ **Done (Director, 2026-10-31):** DPAs signed and EU residency / SCCs verified for Supabase,
+    RevenueCat and PostHog. Supabase runs in eu-central-1 (Frankfurt), and PostHog uses EU Cloud
+    (`eu.i.posthog.com`, see `.env.example`). OpenFreeMap tile requests carry only the area being
+    viewed, never a user identifier.
 
 ---
 ---
