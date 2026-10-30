@@ -700,7 +700,7 @@ key before loading into Supabase.**
       query reads it in the same row.
 
 ### S3.2.2 — Catch-spot generation & safety
-- **T-048 · Generate catch_spots on public/accessible land** — *Claude · L · `IN-PROGRESS` (built + tested; apply, live verify and first load pending) · deps: T-046 · [TSD §5](TSD.md)*
+- **T-048 · Generate catch_spots on public/accessible land** — *Claude · L · `IN-PROGRESS` (applied + verified live; first load waits on the full fetch) · deps: T-046 · [TSD §5](TSD.md)*
   - `catch_spots` generated only on public/accessible land, snapped to habitat.
   - ✅ **Built (2026-10-30):** migration `20261030000002_catch_spots.sql`.
     - Table: `catch_spots`, keyed by OSM id, with region, kind, habitat, name, lat/lon and
@@ -718,9 +718,24 @@ key before loading into Supabase.**
       artifacts without refetching.
     - 5 tests here; 4 live checks in `verify.py` (unflagged visible; reserve- and road-flagged
       invisible; users cannot insert).
-- **T-049 · Hard safety exclusions** — *Claude · M · deps: T-048 · [TSD §5](TSD.md), [GDD §4](GDD.md)*
+- **T-049 · Hard safety exclusions** — *Claude · M · `DONE` (verified live 2026-10-30) · deps: T-048 · [TSD §5](TSD.md), [GDD §4](GDD.md)*
   - Private property, roads/rail, water hazards, protected reserves excluded via `safety_flags`;
     a flagged spot is **never** surfaced. Tests cover each exclusion class.
+  - ✅ **Every exclusion class, and where it is decided:**
+    | Class | Flag | Decided by |
+    |---|---|---|
+    | Private | `private` | the spot's own `access=private/no` tag (`osm/rules.py`) |
+    | Roads/rail | `major_road` | Overpass: within 30 m of a motorway/trunk/primary road or a railway |
+    | Water hazards | `water` | in-water structures (pier, breakwater, jetty…) or `natural=water` |
+    | Protected reserves | `reserve` | Overpass: inside a nature reserve, protected area or national park |
+    | Restricted land | `military` | Overpass: inside military land |
+  - **Never surfaced, by the database itself.** The `catch_spots` read policy only admits
+    `cardinality(flags) = 0`, so no app code is trusted with the rule.
+  - Tests: one pipeline test per class (`test_osm_rules.py`, `test_osm_queries.py`,
+    `test_catch_spots_load.py`). Live (verify run 41081600996, all 54 checks passed): reserve-
+    and road-flagged spots invisible to users, unflagged visible, users cannot insert.
+  - Smoke-test cost in Kronoberg: 54 of 611 spots excluded as reserves, 1 private. T-050 judges
+    whether excluding reserves leaves enough spots.
 - **T-050 · Catch-spot density audit (Kronoberg)** — *Claude · M · deps: T-048 · [review finding]*
   - Report: what % of Kronoberg residents have a catch spot within a ~15-min walk. If low,
     flag that Caught skews to a car feature and record the design implication before launch.
