@@ -1115,11 +1115,20 @@ useful info, never a chore ([GDD §5](GDD.md), [USER-FLOWS §7](USER-FLOWS.md)).
     (`onPledge`) → `collection.help(kind)` marks Helped and shows `PledgeConfirm` — a clean
     honor-system confirmation with the standing follow-local-law line and **no upsell/ads**
     (invariant #4). `useCollection` gained `help()`. ⚠️ On-device layout not visually verified.
-- **T-077 · pledges table + impact feed** — *Claude · S · `IN-PROGRESS` (pledges recorded via collection; dedicated table/feed pending) · deps: T-076, T-056 · [TSD §3](TSD.md), [GDD §7](GDD.md)*
+- **T-077 · pledges table + impact feed** — *Claude · S · `DONE` (pledges = Helped collection records; totals via T-081) · deps: T-076, T-056 · [TSD §3](TSD.md), [GDD §7](GDD.md)*
   - ✅ Pledges are recorded as Helped collection records (`helped_at` / `helped_kind`), persisted
     via the Supabase store (T-027) with owner RLS; the impact aggregation (`lib/impact.ts`, T-128)
     already derives give/protect/helped counts from them — no proof required, no upsell on the
     moment. Remaining: a dedicated `pledges`/`impact_counters` surface + community feed (T-081).
+  - ✅ **Done (2026-10-30), by design rather than with a new table.** A pledge is a Helped
+    record on `collection` (`helped_at` / `helped_kind`), under owner RLS.
+    - The personal impact view reads it (`lib/impact.ts`).
+    - So do the community totals: `public.community_impact()`, T-081, applied + verified live
+      2026-10-29.
+    - A separate `pledges` table would be a second copy of the same fact that could drift from
+      it. The reasoning is recorded in T-081: revisit past ~1M collection rows.
+    - The "impact feed" is the Impact screen (T-081). A social feed of other people's pledges is
+      the local social layer (T-108, v2).
 
 ---
 ---
