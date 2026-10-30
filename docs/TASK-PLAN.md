@@ -698,6 +698,10 @@ key before loading into Supabase.**
     - 6 tests.
     - Not a separate `species_habitat` table: three values fit an array column, and the catch
       query reads it in the same row.
+  - 🐛 **Found while planning the habitat load:** a data-pipeline run with `content_scope=skip`
+    still ran the content load. The only content file on disk was then the committed August
+    validation file (`content_mammal.json`), so it would have overwritten current mammal content
+    with stale rows. The content load now runs only when the run generated content.
 
 ### S3.2.2 — Catch-spot generation & safety
 - **T-048 · Generate catch_spots on public/accessible land** — *Claude · L · `IN-PROGRESS` (applied + verified live; first load waits on the full fetch) · deps: T-046 · [TSD §5](TSD.md)*
