@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import ThisWeekScreen from './ThisWeekScreen';
 import { createTranslator } from '../lib/i18n';
 
@@ -26,5 +26,17 @@ describe('ThisWeekScreen', () => {
     expect(screen.getByText('I grunda vikar')).toBeTruthy();
     expect(screen.getAllByText('Rana temporaria')).toHaveLength(2); // name falls back, detail too
     expect(screen.getAllByText(tr('thisWeek.new'))).toHaveLength(1);
+  });
+
+  it('offers to identify something with iNaturalist when the app can open it (T-223)', async () => {
+    const onIdentify = jest.fn();
+    await render(<ThisWeekScreen locale="en" onIdentify={onIdentify} />);
+    await fireEvent.press(screen.getByText(`📷 ${tr('identify.cta')}`));
+    expect(onIdentify).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows no identify button without a handler', async () => {
+    await render(<ThisWeekScreen locale="en" />);
+    expect(screen.queryByText(`📷 ${tr('identify.cta')}`)).toBeNull();
   });
 });

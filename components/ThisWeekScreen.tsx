@@ -97,6 +97,7 @@ export default function ThisWeekScreen({
   regionName,
   onOpenCounties,
   travel,
+  onIdentify,
 }: {
   locale?: Locale;
   spottedIds?: ReadonlySet<string>;
@@ -108,6 +109,8 @@ export default function ThisWeekScreen({
   onOpenCounties?: () => void;
   /** The phone is in another county (T-218): a quiet offer to look around there. */
   travel?: { county: string; onLook: () => void; onDismiss: () => void } | null;
+  /** Hand off to Seek by iNaturalist to identify something (T-223). */
+  onIdentify?: () => void;
 }) {
   const tr = createTranslator(locale);
   const month = monthOf(new Date());
@@ -142,10 +145,24 @@ export default function ThisWeekScreen({
           </View>
         </View>
       ) : null}
-      {onOpenCounties ? (
-        <Pressable onPress={onOpenCounties} accessibilityRole="button" style={styles.countiesLink}>
-          <Text style={styles.countiesText}>🗺 {tr('counties.title')}</Text>
-        </Pressable>
+      {onOpenCounties || onIdentify ? (
+        <View style={styles.links}>
+          {onOpenCounties ? (
+            <Pressable onPress={onOpenCounties} accessibilityRole="button" style={styles.countiesLink}>
+              <Text style={styles.countiesText}>🗺 {tr('counties.title')}</Text>
+            </Pressable>
+          ) : null}
+          {onIdentify ? (
+            <Pressable
+              onPress={onIdentify}
+              accessibilityRole="link"
+              accessibilityHint={tr('identify.hint')}
+              style={styles.countiesLink}
+            >
+              <Text style={styles.countiesText}>📷 {tr('identify.cta')}</Text>
+            </Pressable>
+          ) : null}
+        </View>
       ) : null}
       <FlatList
         data={rows}
@@ -173,7 +190,8 @@ const styles = StyleSheet.create({
   travelLookText: { color: '#fff', fontSize: 14, fontWeight: '600' },
   travelLater: { paddingVertical: 8, paddingHorizontal: 8 },
   travelLaterText: { color: '#4a5c4d', fontSize: 14, fontWeight: '600' },
-  countiesLink: { alignSelf: 'flex-start', marginTop: -8, marginBottom: 12, paddingVertical: 4 },
+  links: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 20, marginTop: -8, marginBottom: 12 },
+  countiesLink: { paddingVertical: 4 },
   countiesText: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
   list: { paddingBottom: 24 },
   events: { marginBottom: 8 },

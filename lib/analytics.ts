@@ -19,6 +19,8 @@ export interface AnalyticsEventProps {
   // The sales funnel (T-087). `sku` is a store product id (full_game, family, region_swe_<n>, …),
   // never a price or anything about the person.
   store_opened: { source: 'paywall' | 'settings' | 'counties' | 'catch_spot' };
+  // How often people want to identify something (T-223): the evidence for building T-222.
+  identify_opened: Record<string, never>;
   purchase_started: { sku: string };
   purchase_completed: { sku: string };
   purchase_cancelled: { sku: string };

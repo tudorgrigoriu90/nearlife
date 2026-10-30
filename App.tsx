@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AlmanacScreen from './components/AlmanacScreen';
 import OnboardingFlow from './components/OnboardingFlow';
@@ -80,6 +80,7 @@ import { AsyncStorageLocaleStore } from './lib/localeStore';
 import { spottedIds, tierStateFor } from './lib/collection';
 import { canCatch, freeCatchStateFrom, remainingFreeCatches } from './lib/freeCatch';
 import { isPrimeCatch } from './lib/primeBonus';
+import { openIdentifier } from './lib/identify';
 import { gradeFromScore } from './lib/minigame/grade';
 import { monthOf, seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
@@ -910,6 +911,10 @@ export default function App() {
             regionName={viewCounty?.name ?? hometown?.name}
             spottedIds={spottedIds(collection.records)}
             onOpenCounties={hasSupabaseConfig() && hometown ? () => setShowCounties(true) : undefined}
+            onIdentify={() => {
+              track('identify_opened', {});
+              void openIdentifier((url) => Linking.openURL(url));
+            }}
             travel={
               travel.offer
                 ? { county: travel.offer.name, onLook: travel.accept, onDismiss: travel.dismiss }

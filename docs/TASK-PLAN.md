@@ -1550,6 +1550,22 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
 - **T-104 · Family shared almanac** — *Claude · L · v2 · deps: T-102 · [USER-FLOWS §7 (v1 note)](USER-FLOWS.md)*
   - Household view, member activity feed, family impact counter, personal/family toggle on Home.
     Deferred: v1 Family is the shared unlock only.
+- **T-223 · "Identify with iNaturalist" button (v1 stopgap for T-222)** — *Claude · XS · `DONE` (Director 2026-10-30) · deps: — · [USER-FLOWS](USER-FLOWS.md)*
+  - Director decision: until on-phone identification ships (T-222, v2), v1 hands identification
+    to iNaturalist.
+  - ✅ **Built:**
+    - The This Week screen's link row gains "📷 Identify with iNaturalist" next to Counties.
+    - It opens the Play Store listing of **Seek by iNaturalist**
+      (`org.inaturalist.seek`): free, no account, works offline, made for families. Chosen over
+      the main iNaturalist app, which asks people to sign up and post observations. The listing
+      shows "Open" when Seek is installed.
+    - Android can't launch an app by package through a link, and checking for it would need a
+      package-visibility permission. If there is no Play Store app, the web listing opens
+      instead; it never throws.
+    - We send iNaturalist nothing.
+    - Analytics `identify_opened` (with consent) measures demand: the evidence for building
+      T-222.
+    - en + sv copy. 6 tests.
 - **T-222 · Photo identification, on the phone** — *Claude + Director · XL · `DEFERRED` (v2, Director 2026-10-30) · deps: T-202, T-221 · [PRIVACY](PRIVACY-COMPLIANCE.md), [GDD §4](GDD.md)*
   - Director request: identify a photographed organism (insects, mammals, birds, flowers,
     trees, mushrooms) for free.
