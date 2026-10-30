@@ -6,24 +6,16 @@ import {
   SPOTTED_MILESTONES,
 } from '../lib/badges';
 import type { CollectionRecord } from '../lib/collection';
-import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
-import type { Species, SpeciesCategory } from '../lib/species/types';
-import { CATEGORY_EMOJI } from './speciesVisual';
+import { createTranslator, type Locale } from '../lib/i18n';
+import { groupOf } from '../lib/species/group';
+import type { Species } from '../lib/species/types';
+import { CATEGORY_EMOJI, GROUP_LABEL_KEY } from './speciesVisual';
 
 // Badges & completion screen (T-082 · GDD §8). Presentational: the earn rules live in the tested
 // pure core (lib/badges.ts). Shows the full badge set — earned ones lit, the rest as locked goals
 // so there's always something to reach for. Category-completion + spotted/helped milestones are
 // derivable now; habitat/season badges arrive with the real data layer (E3). No upsell (invariant
 // #4). NOTE: on-device layout not visually verified.
-
-const CATEGORY_KEY: Record<SpeciesCategory, TranslationKey> = {
-  bird: 'category.bird',
-  mammal: 'category.mammal',
-  insect: 'category.insect',
-  plant: 'category.plant',
-  fish: 'category.fish',
-  fungus: 'category.fungus',
-};
 
 interface BadgeItem {
   id: string;
@@ -47,12 +39,12 @@ export default function BadgesScreen({
   const earned = new Set(earnedBadges(records, species));
 
   // Full badge set, in the same order the core reports earned ids (categories → spotted → helped).
-  const categories = [...new Set(species.map((s) => s.category))];
+  const categories = [...new Set(species.map(groupOf))];
   const items: BadgeItem[] = [
     ...categories.map((c) => ({
       id: categoryBadgeId(c),
       emoji: CATEGORY_EMOJI[c],
-      label: tr('badge.category', { category: tr(CATEGORY_KEY[c]) }),
+      label: tr('badge.category', { category: tr(GROUP_LABEL_KEY[c]) }),
       earned: earned.has(categoryBadgeId(c)),
     })),
     ...SPOTTED_MILESTONES.map((m) => ({

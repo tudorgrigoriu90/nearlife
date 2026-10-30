@@ -1711,13 +1711,28 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
     - 12 tests (9 Python, 3 TS).
   - Storage: at most ~2,000 × ~60 KB ≈ 120 MB more, so ≤ ~450 MB of the 1 GB free tier
     (invariant #7).
-- **T-221 · 679 species have no category** — *Claude · S · `TODO` · deps: T-177*
+- **T-221 · 679 species have no category** — *Claude · S · `DONE` (2026-10-30) · deps: T-177*
   - Found with T-220 (2026-10-30): `species.category` is null for 679 catalogue species. They
     get only a generic glyph, the cautious habitat default (T-047) and no category in the
     almanac filters.
   - Acceptance: find why the taxon-group mapping leaves them out (likely groups outside
     bird / mammal / fish / insect / plant: spiders, molluscs, fungi, lichens, reptiles,
     amphibians), map each to a category the app has or add one, reload, and leave none null.
+  - ✅ **Done (2026-10-30). The real problem was the display, not the data.**
+    - The null-category species are, across the whole database: 844 arachnids, 400 molluscs,
+      17 amphibians and 15 reptiles; 679 of them are in the catalogue. **No fungi:** the
+      catalogue has none, which matters for T-222's mushroom plans.
+    - `category` is null on purpose (T-042/T-207): it is the catch minigame, and these groups
+      borrow one. But the app also showed and filed species by it, so a snail was a 🌼 under
+      Plants, a spider a 🦋 under Insects, and a frog a 🦔 under Mammals.
+    - Fix: `lib/species/group.ts` adds `SpeciesGroup`, the minigame categories plus amphibian,
+      reptile, arachnid and mollusc, set from `taxon_group`. Glyphs, almanac chips, completion
+      badges and This Week use `groupOf`; the minigame is unchanged.
+    - New glyphs 🐸 🦎 🕷️ 🐌, with en + sv labels. Chip order: vertebrates, invertebrates, then
+      plants and fungi.
+    - The acceptance's "leave none null" was dropped on purpose. Filling `category` would also
+      change which minigame these species play, and nothing needs that.
+    - 5 tests.
 - **T-106 · New-region onboarding pipeline (repeatable)** — *Claude + Director · L · deps: T-042, T-052 · [ECONOMY](ECONOMY.md)*
   - Repeatable process to open a region: run GBIF/OSM pipeline + light content pass (safe-default
     advice + follow-law) + Director editorial review. Modeled as growth spend.

@@ -56,6 +56,10 @@ export const en = {
   'category.plant': 'Plants',
   'category.fish': 'Fish',
   'category.fungus': 'Fungi',
+  'category.amphibian': 'Amphibians',
+  'category.reptile': 'Reptiles',
+  'category.arachnid': 'Spiders & kin',
+  'category.mollusc': 'Snails & molluscs',
 
   // Three tiers
   'tier.spotted': 'Spotted',
@@ -363,6 +367,10 @@ const sv: Catalog = {
   'category.plant': 'Växter',
   'category.fish': 'Fiskar',
   'category.fungus': 'Svampar',
+  'category.amphibian': 'Groddjur',
+  'category.reptile': 'Kräldjur',
+  'category.arachnid': 'Spindeldjur',
+  'category.mollusc': 'Snäckor & blötdjur',
 
   // Three tiers
   'tier.spotted': 'Sedd',

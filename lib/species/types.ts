@@ -2,6 +2,7 @@
 // reused by the app, the notification engine, and (later) the data pipeline.
 // Card content (fact / trivia / give / protect) is a separate concern — see T-020.
 
+import type { SpeciesGroup } from './group';
 import type { SpeciesMedia } from './media';
 
 /**
@@ -23,7 +24,10 @@ export interface Species {
   scientificName: string;
   /** English common name shown on the card. */
   commonName: string;
+  /** The catch minigame. Shown and filed by `groupOf`, which can differ (T-221). */
   category: SpeciesCategory;
+  /** Set only when the species is not what its minigame category says (a snail, a frog). */
+  group?: SpeciesGroup;
   rarity: Rarity;
   /**
    * Months in which the species is plausibly active/notable in the region — the honest

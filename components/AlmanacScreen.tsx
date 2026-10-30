@@ -2,27 +2,19 @@ import { useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { almanacEntries, categoryCounts, discoveredCount, type AlmanacEntry } from '../lib/almanac';
 import { progressSummary, type CollectionRecord } from '../lib/collection';
-import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
+import { createTranslator, type Locale } from '../lib/i18n';
 import { photoFor } from '../lib/species/media';
 import { commonNameFor } from '../lib/species/localized';
 import { monthOf } from '../lib/season';
-import type { Month, Species, SpeciesCategory } from '../lib/species/types';
-import { CATEGORY_EMOJI, speciesGlyph } from './speciesVisual';
+import { groupOf, type SpeciesGroup } from '../lib/species/group';
+import type { Month, Species } from '../lib/species/types';
+import { CATEGORY_EMOJI, GROUP_LABEL_KEY, speciesGlyph } from './speciesVisual';
 
 // Almanac grid (T-025 · USER-FLOWS §2). Every species with ●/◐/◑ tier overlays; undiscovered
 // species show as a greyed silhouette; category filter chips narrow the grid. Empty and loading
 // states included. All chrome runs through i18n (invariant #7); species names localize via
 // commonNameFor. Collection is passed in — an in-memory store now (T-116), Supabase later (T-056).
 // NOTE: logic is unit-tested (lib/almanac.test.ts); on-device layout not yet visually verified.
-
-const CATEGORY_KEY: Record<SpeciesCategory, TranslationKey> = {
-  bird: 'category.bird',
-  mammal: 'category.mammal',
-  insect: 'category.insect',
-  plant: 'category.plant',
-  fish: 'category.fish',
-  fungus: 'category.fungus',
-};
 
 function TierOverlay({ entry }: { entry: AlmanacEntry }) {
   // ● Spotted / ◐ Caught / ◑ Helped — lit glyphs for reached tiers, faint for unreached.
@@ -61,7 +53,7 @@ function CellVisual({ species, discovered }: { species: Species; discovered: boo
       />
     );
   }
-  return <Text style={styles.cellEmoji}>{speciesGlyph(species.category, discovered)}</Text>;
+  return <Text style={styles.cellEmoji}>{speciesGlyph(groupOf(species), discovered)}</Text>;
 }
 
 function Cell({
@@ -113,7 +105,7 @@ export default function AlmanacScreen({
   month?: Month;
 }) {
   const tr = createTranslator(locale);
-  const [category, setCategory] = useState<SpeciesCategory | null>(null);
+  const [category, setCategory] = useState<SpeciesGroup | null>(null);
   // With 3,000+ species in a county list, "what can I find now" is the useful cut (T-057). It is
   // the honest season window from the presence data, never "here right now" (invariant #1).
   const [activeNow, setActiveNow] = useState(false);
@@ -173,7 +165,7 @@ export default function AlmanacScreen({
         {counts.map((c) => (
           <Chip
             key={c.category}
-            label={`${CATEGORY_EMOJI[c.category]} ${tr(CATEGORY_KEY[c.category])}`}
+            label={`${CATEGORY_EMOJI[c.category]} ${tr(GROUP_LABEL_KEY[c.category])}`}
             active={category === c.category}
             onPress={() => setCategory(c.category)}
           />

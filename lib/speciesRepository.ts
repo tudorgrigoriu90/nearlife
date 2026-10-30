@@ -1,3 +1,4 @@
+import { GROUP_BY_TAXON } from './species/group';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Locale } from './i18n';
 import type { ContentLocale } from './i18n/contentLocale';
@@ -215,6 +216,9 @@ export function speciesRowToSpecies(row: SpeciesRow): Species {
     // still records that no common name is known, which is what T-187 was protecting.
     commonName: row.common_name?.trim() || row.scientific_name,
     category: minigameCategory(row),
+    ...(row.category == null && GROUP_BY_TAXON[row.taxon_group ?? '']
+      ? { group: GROUP_BY_TAXON[row.taxon_group ?? ''] }
+      : {}),
     rarity: row.rarity,
     activeMonths: [...row.active_months].sort((a, b) => a - b) as Month[],
   };

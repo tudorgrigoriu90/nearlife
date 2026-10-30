@@ -1,5 +1,6 @@
 import { spottedIds, type CollectionRecord } from './collection';
-import type { Species, SpeciesCategory } from './species/types';
+import { groupOf, type SpeciesGroup } from './species/group';
+import type { Species } from './species/types';
 
 // Badges & completion (T-082 core · GDD §8). Pure computation of which badges a collection has
 // earned, from the collection records + the species catalogue. Category-completion and count
@@ -17,7 +18,7 @@ export const SPOTTED_MILESTONES = [10, 25, 50] as const;
 export const HELPED_MILESTONES = [1, 5, 10] as const;
 
 /** Category-completion badge id for a category (all its species spotted). */
-export function categoryBadgeId(category: SpeciesCategory): string {
+export function categoryBadgeId(category: SpeciesGroup): string {
   return `category-complete-${category}`;
 }
 
@@ -27,9 +28,9 @@ export function earnedBadges(records: CollectionRecord[], species: Species[]): s
   const earned: string[] = [];
 
   // Category completion — every species in the category spotted.
-  const categories = [...new Set(species.map((s) => s.category))];
+  const categories = [...new Set(species.map(groupOf))];
   for (const category of categories) {
-    const inCategory = species.filter((s) => s.category === category);
+    const inCategory = species.filter((s) => groupOf(s) === category);
     if (inCategory.length > 0 && inCategory.every((s) => spotted.has(s.id))) {
       earned.push(categoryBadgeId(category));
     }

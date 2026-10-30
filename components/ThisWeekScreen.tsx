@@ -7,6 +7,7 @@ import { commonNameFor, contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import type { Species } from '../lib/species/types';
 import type { LiveThisWeek } from '../lib/thisWeekLive';
+import { groupOf } from '../lib/species/group';
 import { CATEGORY_EMOJI } from './speciesVisual';
 import { LIVE_EVENT_META } from './liveEventVisual';
 
@@ -41,7 +42,7 @@ function Row({
       accessibilityRole="button"
       accessibilityLabel={name}
     >
-      <Text style={styles.emoji}>{CATEGORY_EMOJI[species.category]}</Text>
+      <Text style={styles.emoji}>{CATEGORY_EMOJI[groupOf(species)]}</Text>
       <View style={styles.rowText}>
         <View style={styles.rowHeader}>
           <Text style={styles.name}>{name}</Text>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { attributionFor, photoFor } from '../lib/species/media';
 import type { Species } from '../lib/species/types';
+import { groupOf } from '../lib/species/group';
 import { speciesGlyph } from './speciesVisual';
 
 // Species card hero (T-126, thumbnail tier T-168). Shows the license-clear photo once the species
@@ -44,7 +45,7 @@ export default function SpeciesHero({ species, spotted }: { species: Species; sp
       </View>
     );
   }
-  return <Text style={styles.emoji}>{speciesGlyph(species.category, spotted)}</Text>;
+  return <Text style={styles.emoji}>{speciesGlyph(groupOf(species), spotted)}</Text>;
 }
 
 const styles = StyleSheet.create({

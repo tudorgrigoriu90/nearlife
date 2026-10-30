@@ -1,6 +1,7 @@
 import { tierStateFor, type CollectionRecord, type TierState } from './collection';
 import { isActiveInMonth } from './season';
-import type { Month, Species, SpeciesCategory } from './species/types';
+import { groupOf, type SpeciesGroup } from './species/group';
+import type { Month, Species } from './species/types';
 
 // Almanac grid model (T-025). Pure core of the Almanac screen (USER-FLOWS §2): every species
 // with its three-tier overlay state (● Spotted / ◐ Caught / ◑ Helped), optionally filtered to a
@@ -15,13 +16,17 @@ export interface AlmanacEntry {
   discovered: boolean;
 }
 
-/** Category display order for the filter chips (matches GDD §4 category set). */
-export const ALMANAC_CATEGORIES: SpeciesCategory[] = [
+/** Group display order for the filter chips: vertebrates, then invertebrates, then plants and fungi (T-221). */
+export const ALMANAC_CATEGORIES: SpeciesGroup[] = [
   'bird',
   'mammal',
-  'insect',
-  'plant',
+  'amphibian',
+  'reptile',
   'fish',
+  'insect',
+  'arachnid',
+  'mollusc',
+  'plant',
   'fungus',
 ];
 
@@ -33,11 +38,11 @@ export const ALMANAC_CATEGORIES: SpeciesCategory[] = [
 export function almanacEntries(
   species: Species[],
   records: CollectionRecord[],
-  category?: SpeciesCategory,
+  category?: SpeciesGroup,
   activeIn?: Month,
 ): AlmanacEntry[] {
   const filtered = species.filter(
-    (s) => (!category || s.category === category) && (activeIn === undefined || isActiveInMonth(s, activeIn)),
+    (s) => (!category || groupOf(s) === category) && (activeIn === undefined || isActiveInMonth(s, activeIn)),
   );
   return filtered.map((s) => {
     const tier = tierStateFor(records, s.id);
@@ -46,7 +51,7 @@ export function almanacEntries(
 }
 
 export interface CategoryCount {
-  category: SpeciesCategory;
+  category: SpeciesGroup;
   total: number;
   discovered: number;
 }
@@ -60,7 +65,7 @@ export function categoryCounts(
   records: CollectionRecord[],
 ): CategoryCount[] {
   return ALMANAC_CATEGORIES.map((category) => {
-    const inCategory = species.filter((s) => s.category === category);
+    const inCategory = species.filter((s) => groupOf(s) === category);
     const discovered = inCategory.filter((s) => tierStateFor(records, s.id).spotted).length;
     return { category, total: inCategory.length, discovered };
   }).filter((c) => c.total > 0);
