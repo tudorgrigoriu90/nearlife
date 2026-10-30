@@ -1570,6 +1570,9 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
     - The purchase gateway now takes any product id (+1 test).
     - Not covered by an App-level test: the switching wiring itself. The rules it calls are
       unit-tested.
+  - ✅ **Packs vs Full Game made explicit (2026-10-30):** the Counties screen now says that a
+    county opens *where* you catch, not *how many* (`counties.catchesNote`, en + sv). It is
+    hidden for Full Game owners. Rationale in [ECONOMY](ECONOMY.md). 1 test.
 - **T-218 · Travel: notice when the phone is in another county** — *Claude · S · `DONE` · deps: T-105, T-090 · [ECONOMY](ECONOMY.md)*
   - While the app is open, a coarse position check (county only, discarded at once, same
     resolver as onboarding, T-090) notices that you are outside your home county. It offers that

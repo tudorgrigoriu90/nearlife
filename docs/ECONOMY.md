@@ -66,6 +66,13 @@ had is fun. So:
   2026-10-30): 29 SEK per county, 99 SEK for all of Sweden.** These replace the $2.99 / $19.99
   figures in the table below, which predate the 49 SEK anchor. All of Sweden costs the same as
   Family, and buying it is cheaper than opening four counties one by one.
+  - **Packs open places, not catches (2026-10-30).** A county pack or All of Sweden decides
+    *where* you can spot and catch. The Full Game (or Family) decides *how many* catches you get.
+    They are separate products, and none includes another. The Counties screen says so in one
+    line (`counties.catchesNote`), hidden once the user has the Full Game. That way nobody buys
+    All of Sweden expecting unlimited catches. Bundling All of Sweden with the Full Game was the
+    rejected alternative. At 99 SEK it would undercut Family (99 SEK for five people) and make
+    the 49 SEK anchor look like a bad deal.
 
 ### Post-validation (v2+)
 

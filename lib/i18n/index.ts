@@ -270,6 +270,8 @@ export const en = {
   'counties.buyAll': 'Open all of Sweden',
   'counties.all.name': 'All of Sweden',
   'counties.all.body': 'Every county, for wherever you travel.',
+  'counties.catchesNote':
+    'A county decides where you can catch, not how many. Your free catches each season still apply, or catch without limit with the Full Game.',
   'counties.previewBanner': 'Looking around {county}. Open it to spot and catch here.',
   'counties.backHome': 'Back to {county}',
   'counties.locked': 'Open {county} to spot and catch here. Its help and protect tips are free.',
@@ -570,6 +572,8 @@ const sv: Catalog = {
   'counties.buyAll': 'Lås upp hela Sverige',
   'counties.all.name': 'Hela Sverige',
   'counties.all.body': 'Alla län, vart du än reser.',
+  'counties.catchesNote':
+    'Ett län avgör var du kan fånga, inte hur mycket. Dina gratis fångster varje säsong gäller fortfarande, eller fånga utan gräns med Hela spelet.',
   'counties.previewBanner': 'Du tittar runt i {county}. Lås upp länet för att se och fånga här.',
   'counties.backHome': 'Tillbaka till {county}',
   'counties.locked': 'Lås upp {county} för att se och fånga här. Tipsen om hjälp och skydd är gratis.',

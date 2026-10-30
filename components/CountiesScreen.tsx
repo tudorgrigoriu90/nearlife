@@ -82,6 +82,8 @@ export default function CountiesScreen({
         ) : null}
       </View>
       <Text style={styles.subtitle}>{tr('counties.intro')}</Text>
+      {/* Packs open places; the Full Game opens catches. Said here so neither is bought for the other. */}
+      {entitlements.fullGame ? null : <Text style={styles.note}>{tr('counties.catchesNote')}</Text>}
 
       <ScrollView contentContainerStyle={styles.scroll}>
         {prices[ALL_REGIONS] ? (
@@ -147,6 +149,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34' },
   done: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
   subtitle: { marginTop: 4, marginBottom: 16, fontSize: 14, lineHeight: 20, color: '#4a5c4d', paddingHorizontal: 4 },
+  note: { marginTop: -8, marginBottom: 16, fontSize: 13, lineHeight: 19, color: '#6b7a6d', paddingHorizontal: 4 },
   scroll: { paddingBottom: 32, gap: 12 },
   allCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 14, padding: 16, gap: 12 },
   allName: { fontSize: 17, fontWeight: '700', color: '#22331f' },

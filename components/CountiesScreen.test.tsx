@@ -85,4 +85,23 @@ describe('CountiesScreen (T-105)', () => {
     expect(screen.getAllByText(tr('counties.open'))).toHaveLength(20);
     expect(screen.queryByText('29,00 kr')).toBeNull();
   });
+
+  it('says a pack opens places, not catches, unless the Full Game already makes that moot', async () => {
+    // Director decision 2026-10-30 (option B): packs and the Full Game stay separate products, so the
+    // pack screen must not let anyone think All of Sweden also lifts the free-catch limit.
+    const view = await render(
+      <CountiesScreen locale="en" homeId={HOME} entitlements={NO_ENTITLEMENTS} gateway={gateway()} onView={jest.fn()} />,
+    );
+    expect(screen.getByText(tr('counties.catchesNote'))).toBeTruthy();
+    await view.rerender(
+      <CountiesScreen
+        locale="en"
+        homeId={HOME}
+        entitlements={resolveEntitlements(['full_game'])}
+        gateway={gateway()}
+        onView={jest.fn()}
+      />,
+    );
+    expect(screen.queryByText(tr('counties.catchesNote'))).toBeNull();
+  });
 });
