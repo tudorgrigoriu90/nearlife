@@ -164,7 +164,7 @@ The go/no-go items from the licensing and privacy docs. **These gate Phase 2, no
 
 - **T-010 · Initialize Expo (React Native + TypeScript) app** — *Claude · S · `DONE` · deps: — · [TSD §1](TSD.md)*
   - ✅ Expo SDK 57 app (blank-typescript template), TS strict mode on; branded minimal
-    `App.tsx`; `app.json` name/slug/scheme set to Nearby/nearby.
+    `App.tsx`; `app.json` name/scheme set to Nearby/nearby (slug later `nearlife`, see T-140).
   - Chose the minimal template over the heavy default (which shipped web/CSS-module demo code
     that didn't typecheck clean); router/structure added as screens arrive.
 - **T-011 · Configure lint/format/typecheck** — *Claude · XS · `DONE` · deps: T-010*
@@ -1745,6 +1745,11 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
   - ⚠️ **Package id is permanent once uploaded to Play** — Director confirms/changes
     `com.nearlife.nearby` before the first upload. Creating the EAS env vars and running
     `eas build -p android --profile production` (needs `eas login`) remain Director steps.
+  - ✅ (2026-10-31) `app.json` slug `nearby` → **`nearlife`**: the EAS project behind
+    `extra.eas.projectId` was created with slug `nearlife`, and EAS refuses every command
+    (`env:create`, `build`) on a mismatch. The slug is Expo's internal id only; the store name
+    (Nearby), scheme (`nearby`) and package (`com.nearlife.nearby`) are unchanged. Pinned by
+    `__tests__/appConfig.test.js`. EAS also needs Node ≥ 20.19.4 locally (LAUNCH-CHECKLIST Step 3).
 - **T-141 · On-device smoke test of the prototype loop** — *Claude + Director · M · `TODO` · deps: T-140 · [GDD §9](GDD.md)*
   - Run the app on a real device (Expo Go / dev build) and walk onboarding → This Week (incl. the
     live-events strip) → species card → catch minigame (all five categories) → Helped pledge →

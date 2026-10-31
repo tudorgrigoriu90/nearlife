@@ -31,7 +31,10 @@ Already done: Google Play developer account ✓ · RevenueCat account ✓ (publi
 
 ## Step 3 — First build, uploaded to internal testing (30 min + ~20 min cloud build)
 On your computer, in the project folder:
-1. `npm install -g eas-cli` then `eas login` (your Expo account).
+1. Node **22 LTS** (Expo needs ≥ 20.19.4; check with `node -v`). `git pull` for the latest
+   config, then `npm install`, `npm install -g eas-cli` and `eas login` (your Expo account).
+   If eas-cli prints "env:create is deprecated, use env:set", that is only a warning: the
+   commands below still work.
 2. Give the cloud build the public settings (same values as your `.env.local`). Choose
    **Plain text** when asked:
    ```
