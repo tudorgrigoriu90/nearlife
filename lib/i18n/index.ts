@@ -240,7 +240,10 @@ export const en = {
   'badges.title': 'Badges',
   'badges.progress': '{earned} of {total} earned',
   'badges.empty': 'No badges yet — spot and help species to earn your first.',
-  'badge.category': 'All {category} spotted',
+  'badge.groupTier': '{count} {category} spotted',
+  'badge.groupAll': 'All {count} {category} spotted',
+  'badge.seasonOpener': 'First spot of the season',
+  'badge.progressOf': '{have} of {count}',
   'badge.spotted': '{count} species spotted',
   'badge.helped': 'Helped {count} species',
 
@@ -553,7 +556,10 @@ const sv: Catalog = {
   'badges.title': 'Märken',
   'badges.progress': '{earned} av {total} intjänade',
   'badges.empty': 'Inga märken än – hitta och hjälp arter för att tjäna ditt första.',
-  'badge.category': 'Alla {category} sedda',
+  'badge.groupTier': '{count} {category} sedda',
+  'badge.groupAll': 'Alla {count} {category} sedda',
+  'badge.seasonOpener': 'Säsongens första fynd',
+  'badge.progressOf': '{have} av {count}',
   'badge.spotted': '{count} arter sedda',
   'badge.helped': 'Hjälpt {count} arter',
 

@@ -1,7 +1,7 @@
 import { groupOf } from './group';
 import { speciesRowToSpecies } from '../speciesRepository';
 import { almanacEntries, categoryCounts } from '../almanac';
-import { earnedBadges, categoryBadgeId } from '../badges';
+import { earnedBadges } from '../badges';
 import { speciesGlyph } from '../../components/speciesVisual';
 import type { Species } from './types';
 
@@ -51,9 +51,9 @@ describe('species groups (T-221)', () => {
     expect(categoryCounts(species, []).map((c) => c.category)).toEqual(['mollusc', 'plant']);
   });
 
-  it('category badges count by group', () => {
+  it('group badges count by group', () => {
     const snail = speciesRowToSpecies(row('mollusc'));
     const records = [{ speciesId: snail.id, spottedAt: 't', caughtAt: null, helpedAt: null, helpedKind: null, primeBonus: false }];
-    expect(earnedBadges(records, [snail])).toContain(categoryBadgeId('mollusc'));
+    expect(earnedBadges(records, [snail])).toContain('group-mollusc-1'); // "all 1 snail" (T-212)
   });
 });

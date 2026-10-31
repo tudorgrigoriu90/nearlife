@@ -3249,11 +3249,25 @@ only.**
   - ✅ **Card titles localize for database species**: `Species.names` carries the names the
     database supplied, and `commonNameFor` / `commonNameInLocale` read them after the bundled ones.
   - `listSpecies` is no longer used by the app; kept on the interface for now.
-- **T-212 · Badges were designed for 54 species** — *Director + Claude · S · `TODO` · deps: T-208*
+- **T-212 · Badges were designed for 54 species** — *Director + Claude · S · `DONE` (tiers per group, Director 2026-10-31) · deps: T-208*
   - Badges count over the Almanac's list, which is now the whole county (~3,000; ~300 birds in
     Kronoberg). "All birds spotted" went from a goal to practically unreachable. Decide the shape —
     e.g. tiered thresholds (10 / 50 / 100 birds) or "the county's 20 most-observed birds" — then
     Claude rebuilds `lib/badges.ts` to it. Deliberately not changed silently in T-208.
+  - ✅ **Decided (Director, 2026-10-31): tiers per group. Built.** (`lib/badges.ts`)
+    - **Group tiers:** each group present in the list gets bronze/silver/gold at **10 / 50 /
+      150** spotted. A group of ≤ 150 also gets "all N" (`groupTiers`: 6 reptiles → "all 6";
+      60 birds → 10, 50, all 60).
+    - **Counting:** only species in the list on screen count, so a spot elsewhere never earns a
+      tier here.
+    - **Season opener:** earned by any spot in the current season (`seasonKeyOf`, the same
+      seasons as the free catches).
+    - **Overall spotted milestones** now reach 10 / 25 / 50 / 100 / 250 / 500, for an
+      8,000-species catalogue. Helped milestones are unchanged.
+    - **Screen:** `badgeStatuses` gives the screen everything it renders. Medal + group glyph,
+      🏆 for "all", 🌱 for the season opener. Locked badges show progress ("3 of 10"). en + sv
+      copy. No upsell (invariant #4).
+    - 12 tests (9 logic, 3 screen).
 - **T-209 · Onboarding runs again on every launch** — *Claude · S · `DONE` · deps: T-090*
   - `App.tsx` holds `onboarded` in plain `useState(false)`: nothing persists it, so every cold start
     replays welcome → age gate → location → notifications. Found while building T-031: a notification
