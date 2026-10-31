@@ -66,3 +66,32 @@ jobs:
             supabase functions deploy "$fn" --project-ref "$PROJECT_REF" --no-verify-jwt --use-api
           done
           supabase functions deploy delete-account --project-ref "$PROJECT_REF" --use-api
+
+  # T-093: prove account deletion works end to end after every deploy, on a throwaway anonymous
+  # account. Only the public publishable key is used (the app ships it); the function itself checks
+  # who is calling.
+  smoke-delete-account:
+    name: Account deletion works
+    needs: deploy
+    runs-on: ubuntu-latest
+    env:
+      URL: https://subjdoiicfmiimtvlzsg.supabase.co
+      KEY: sb_publishable_Wq-K09KGV8IDchkTicCkLA_22F8f5GB
+    steps:
+      - name: Sign in anonymously, delete the account, confirm it is gone
+        run: |
+          set -euo pipefail
+          token=$(curl -sS -X POST "$URL/auth/v1/signup" -H "apikey: $KEY" -H "Content-Type: application/json" \
+            -d '{"data":{}}' | jq -r .access_token)
+          [ -n "$token" ] && [ "$token" != null ] || { echo "::error::anonymous sign-in failed"; exit 1; }
+
+          code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$URL/functions/v1/delete-account" -H "apikey: $KEY")
+          [ "$code" = 401 ] || { echo "::error::without a session the function answered $code, not 401"; exit 1; }
+
+          body=$(curl -sS -X POST "$URL/functions/v1/delete-account" -H "apikey: $KEY" -H "Authorization: Bearer $token")
+          echo "delete-account: $body"
+          [ "$(echo "$body" | jq -r .ok)" = true ] || { echo "::error::deletion failed: $body"; exit 1; }
+
+          after=$(curl -sS -o /dev/null -w '%{http_code}' "$URL/auth/v1/user" -H "apikey: $KEY" -H "Authorization: Bearer $token")
+          [ "$after" != 200 ] || { echo "::error::the deleted account's session still works"; exit 1; }
+          echo "deleted account rejected with $after"

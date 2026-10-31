@@ -1617,6 +1617,12 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     - Every table referencing `auth.users` cascades: no `references auth.users` without
       `on delete cascade` in any migration. So deletion erases collection, profile, push
       devices, notification log, purchase records and the household link.
+  - ✅ **Smoke test after every deploy** (`deploy-functions.yml`, job "Account deletion works"):
+    - signs in a throwaway anonymous account with the public key;
+    - checks the function refuses a call without a session (401);
+    - deletes the account (`{ok: true}`);
+    - checks the deleted account's session is rejected.
+    - The sandbox cannot reach Supabase, so the live proof runs in CI.
 - **T-094 · Retention policy & auto-expiry** — *Claude · S · `DONE` (applied + verified live 2026-10-29) · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - ✅ `lib/retention.ts` (3 tests): `DEFAULT_RETENTION` windows (runtime location 30d < inactive
     anonymous 90d < analytics 365d) + `isExpired`/`expiryMs`. Remaining: the pg_cron job that
