@@ -132,3 +132,20 @@ def test_the_filter_removes_a_meaningful_share_without_gutting_the_list():
     share = len(dropped) / len(rows)
     assert 0.15 < share < 0.75, f"dropped {share:.0%} — policy needs review"
     assert len(kept) > 2000
+
+
+def test_a_well_recorded_local_species_ships_where_it_lives():
+    # T-194 option B (Director, 2026-10-31): 100+ records in one or two counties is a species people
+    # meet there, not noise. Presence is per county, so it is only offered where it is recorded.
+    local = SpeciesSignals("Lunaria rediviva", occurrences=150, counties=1, months=6)
+    verdict = classify(local)
+    assert verdict.included and "locally" in verdict.reason
+
+
+def test_a_thinly_recorded_local_species_is_still_left_out():
+    thin = SpeciesSignals("Pilosella dichotoma", occurrences=99, counties=2, months=8)
+    assert not classify(thin).included
+
+
+def test_the_local_threshold_sits_between_the_noise_bar_and_abundance():
+    assert DEFAULT_POLICY.min_occurrences < DEFAULT_POLICY.local_occurrences < DEFAULT_POLICY.abundant_occurrences

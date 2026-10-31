@@ -600,7 +600,7 @@ key before loading into Supabase.**
     (934 records in 2 counties): genuinely common **where they grow**, and invisible nationally. The
     checklist ingest this task originally called for is moot under T-177 (the filter *is* the
     quality bar), but this finding is not — see **T-194**.
-- **T-194 · `min_counties` hides species that are common in one place** — *Claude + Director · M · `BLOCKED` (Director decision: options A/B/C sized below) · deps: T-136*
+- **T-194 · `min_counties` hides species that are common in one place** — *Claude + Director · M · `DONE` (option B built; enforcement in the app is T-225) · deps: T-136*
   - The filter drops a species recorded in fewer than 3 counties. That is right for a *national*
     catalogue and wrong for the app being built, which is **regional by design** — presence is
     per-county and the copy is "active in your region this season".
@@ -625,6 +625,15 @@ key before loading into Supabase.**
       Nobody elsewhere is offered it.
     - **Cost per species, live:** ~12.5 KB of content across the 38 locales, plus a ~75 KB
       photo for about 80% of species.
+  - ✅ **Option B chosen (Director, 2026-10-31) and built.** `Policy.local_occurrences = 100`: a
+    species recorded in 1–2 counties ships when it has ≥ 100 records ("well recorded locally").
+    - `catalogue.json` rebuilt: **8,064 species ship (99.87% of observations)**, 3,844
+      filtered out. The CLAUDE.md scope note is updated. 3 tests.
+    - The new species get photos on the next photo run (it reads `catalogue.json`).
+    - 🐛 **Found while sizing this: the filter never reached the app.** The database holds
+      presence for every recorded species, and `region_catalogue` serves it all. In the live
+      data 4,497 local species and 608 species with < 25 records are shown as "active in your
+      region". That is now **T-225**, which B depends on to mean anything.
 
     | Option | Species | Database (now 204 / 500 MB) | Photo storage (now 391 MB / 1 GB) |
     |---|---|---|---|
@@ -3465,6 +3474,16 @@ only.**
       `(( SELECT auth.uid() AS uid) = user_id)` `to authenticated`.
     - Verify run 41121612142 passed every check. That includes an anonymous user's catches up
       to the free limit (the `authenticated` path) and "anon reads no collection rows".
+- **T-225 · The noise filter never reached the app** — *Claude · M · `TODO` · deps: T-136, T-194 · invariant #1*
+  - Found 2026-10-31 while sizing T-194. The T-136 filter decides `catalogue.json`, which drives
+    names, content and photos. But the loader writes **presence for every recorded species**,
+    and `region_catalogue` (the almanac and This Week) serves whatever has presence.
+  - Live: 11,936 species have Swedish presence, and 5,105 of them fail the filter (4,497 local,
+    608 with < 25 records). The likely escapees, vagrants and misidentifications are shown as
+    "active in your region this season", which breaks invariant #1.
+  - Fix: `species.in_catalogue`, set by the loader from the filter verdict. `region_catalogue`
+    and the notification sender serve only catalogue species, enforced in the database so no
+    client path can show them. Tests and a live verify check.
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

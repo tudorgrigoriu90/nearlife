@@ -29,6 +29,10 @@ class Policy:
     # A species can be genuinely local and still perfectly encounterable where it lives, so heavy
     # local recording rescues it from the breadth rule.
     abundant_occurrences: int = 1_000
+    # T-194 option B (Director, 2026-10-31): 100+ records in fewer than `min_counties` counties is
+    # well recorded locally too. Presence is per county, so such a species is offered only where it
+    # is recorded. Below this, a one- or two-county species stays out as likely noise.
+    local_occurrences: int = 100
 
 
 DEFAULT_POLICY = Policy()
@@ -72,6 +76,11 @@ def classify(
         return Verdict(True, f"abundant locally ({signals.occurrences} records)")
     if signals.occurrences < policy.min_occurrences:
         return Verdict(False, f"only {signals.occurrences} records (< {policy.min_occurrences})")
+    if signals.counties < policy.min_counties and signals.occurrences >= policy.local_occurrences:
+        return Verdict(
+            True,
+            f"well recorded locally ({signals.occurrences} records in {signals.counties} county/counties)",
+        )
     if signals.counties < policy.min_counties:
         return Verdict(
             False,
