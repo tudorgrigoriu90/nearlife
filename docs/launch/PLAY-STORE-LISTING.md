@@ -1,9 +1,9 @@
 # Nearby — Google Play listing & App content (draft)
 
-> **DRAFT (T-097).** Copy + form answers Claude can prepare; the Director enters them in Play
-> Console and supplies the graphic assets. Answers reflect the app **as built for the first
-> internal-testing build** (prototype loop; **in-app purchases not yet enabled**). Revisit the
-> Data safety + "Ads" answers if IAP/analytics scope changes before production.
+> **DRAFT (T-097), updated 2026-10-31** for the v1 app as built: in-app purchases (Full Game,
+> Family, county packs, All of Sweden), catch spots on a map, consent-gated analytics and crash
+> reporting. The Director enters these in Play Console and supplies the graphics. The order to do
+> everything in is [LAUNCH-CHECKLIST.md](LAUNCH-CHECKLIST.md).
 
 ## Store listing (text)
 - **App name:** `Nearby` — ⚠️ generic; run a **trademark/name-collision check** (there are other
@@ -16,19 +16,22 @@
   ```
   Nearby is a calm, honest almanac of the wild things that share your patch of the world.
 
-  Each season, discover the birds, mammals, insects, fish, plants and fungi that are genuinely
-  active in your region — never "here right now", always the true season. No pressure, no feeds
-  to doom-scroll, no ads. Just a quiet nudge now and then when something worth noticing is around.
+  Each season, discover the birds, mammals, insects, fish, plants, spiders, snails, frogs and
+  lizards that are genuinely active in your county: over 8,000 Swedish species, in your own
+  language. Never "here right now", always the true season. No feeds to doom-scroll, no ads, no
+  subscription. Just a quiet nudge now and then when something worth noticing is around.
 
-  • Spotted — build your regional almanac as species come into season.
-  • Caught — when you want more, head out and land a species with a quick, one-thumb skill game
-    tuned to how you'd actually find it: time a bird's dive, reel in a fish, trace an insect's
-    flight, creep up on a mammal, or frame a plant.
-  • Helped — one-tap, honor-system ways to give back and protect, with the reason it matters.
+  • Spotted: build your county almanac as species come into season.
+  • Caught: head out to a nearby public place that suits the species (a lake for a pike, a
+    meadow for a butterfly) and land it with a quick, one-thumb skill game.
+  • Helped: one-tap, honour-system ways to give back and protect, with the reason it matters.
 
-  Nearby is built to respect you: the mission content is always free, there are no ads anywhere,
-  and your location is used once to set your home region and then discarded — we never keep a
-  trail of where you are. Export or delete your data anytime from Settings.
+  Free to use, with 3 free catches every season. Unlock unlimited catching once with the Full
+  Game, share it with up to 5 people with Family, and open other counties when you travel.
+  Every species' facts and help-and-protect tips are always free.
+
+  Nearby respects you: no ads anywhere, and your position never leaves your phone. We only keep
+  your home county. Export or delete your data anytime from Settings.
 
   Get out, look closer, and get to know your neighbours.
   ```
@@ -50,15 +53,20 @@ tracking or advertising.
 
 | Data type | Collected | Shared | Purpose | Optional | Notes |
 |-----------|-----------|--------|---------|----------|-------|
-| **Approximate location** | Yes | No | App functionality | Yes (consent) | Resolved once to a region, then coordinates discarded; coarse cell only. |
+| **Approximate location** | Yes | No | App functionality | Yes (consent) | Only the home **county** is stored; the fix is resolved to it on the phone and discarded. |
 | **Email address** | Yes | No | Account management | Yes | Only if the user links an email to persist their account. |
 | **User IDs** | Yes | No | App functionality, Analytics | Yes | Anonymous account id; app-generated analytics id (PostHog, EU, IP-anonymized). |
 | **App interactions / in-app actions** | Yes | No | Analytics | Yes (consent) | Only when analytics consent is granted. |
-| **Purchase history** | Not in this build | No | App functionality | — | Enable when IAP ships (handled by Google Play / RevenueCat). |
+| **Purchase history** | Yes | No | App functionality | No (needed to unlock purchases) | What was bought and whether it is active, stored against the anonymous account (RevenueCat → our server). No card details. |
+| **Crash logs** | Yes | No | App functionality (stability) | Yes (consent) | Sentry, only with analytics consent; no identity. |
+| **Diagnostics** | Yes | No | App functionality (stability) | Yes (consent) | App version, phone model and OS in crash reports. |
+| **Precise location** | **No** | No | — | — | Used on the phone only (catch-spot distance, travel notice) and never sent. Play counts data as "collected" only when it leaves the device. |
 
 **Security practices:**
 - Data **encrypted in transit**: Yes.
 - Users can **request data deletion**: Yes — in-app "Delete account & data" (plus export).
+- **Delete account URL** (required by Play): the published `delete-account` page (LAUNCH-CHECKLIST
+  step 10). It explains the in-app path and what happens to an account without the app.
 - Committed to Play **Families** policy: No (general-audience, not kids-category).
 - Independent security review: No (declare honestly).
 
@@ -81,3 +89,11 @@ tracking or advertising.
 ## App access
 - **All functionality is available without special access** — the app uses anonymous sign-in with
   no login wall, so no test credentials are needed for review.
+
+## In-app products
+- **Contains in-app purchases: Yes.** One-time products only (no subscription): Full Game, Family,
+  21 county packs and All of Sweden ([PAYMENTS-SETUP.md](PAYMENTS-SETUP.md) Part E).
+
+## Before production (personal developer accounts)
+- Google requires a **closed test with at least 12 testers for 14 consecutive days** before the
+  production release can be requested. Internal testing does not count towards it.

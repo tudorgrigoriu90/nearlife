@@ -1761,13 +1761,27 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
     install the APK, then `npx expo start --dev-client` (the on-device run is T-141).
 
 ## F11.1 — Store Submission
-- **T-097 · Store listings + assets** — *Claude + Director · M · `IN-PROGRESS` (copy + form answers drafted; final name/graphics/submission pending) · deps: T-084 · [review]*
+- **T-097 · Store listings + assets** — *Claude + Director · M · `IN-PROGRESS` (copy + forms updated, launch checklist written; graphics + hosting + entry pending) · deps: T-084 · [review]*
   - ✅ `docs/launch/PLAY-STORE-LISTING.md`: short + full description (honesty-safe copy), category,
     **Data safety** answers, **content-rating** (IARC) answers, **target audience 13+**, **Ads: No**,
     and **App access = no login required**. All reflect the first internal-testing build (no IAP yet).
   - ⚠️ **Director:** trademark-check the name "Nearby" (generic — may collide); supply the
     **feature graphic (1024×500)** + screenshots (need a running build, T-141); enter the listing +
     App-content answers in Play Console. Revisit Data safety/Ads if IAP or a social layer is added.
+  - ✅ **Updated for the v1 app (2026-10-31).**
+    - [LAUNCH-CHECKLIST.md](launch/LAUNCH-CHECKLIST.md) is the Director's ordered path, 12 steps
+      from Play Console to production, saying where to click and what to enter. It links the
+      payment, Sentry and listing details.
+    - Listing copy: in-app purchases (3 free catches/season, Full Game, Family, county packs),
+      catch spots, 8,000+ species; fungi removed, since the catalogue has none.
+    - Data safety: purchase history, crash logs and diagnostics (consent) added. Approximate
+      location is the home county only. Precise location is declared not collected: it never
+      leaves the phone.
+    - Found: Play requires a public **delete-account URL**. It is now Step 10, published
+      alongside the privacy policy, and the personal-account 12-tester/14-day closed test is
+      written down.
+  - Remaining: name check, graphics and screenshots, the hosted pages (Step 10), then entering it
+    all in Play Console (Director).
 - **T-098 · App Store + Play submission & review** — *Director · L · deps: T-095, T-096, T-097, all P2 build epics · [PRIVACY §3](PRIVACY-COMPLIANCE.md)*
   - Builds submitted; review passed; app live in target market.
 
