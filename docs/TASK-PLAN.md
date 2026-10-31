@@ -1590,7 +1590,7 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     `DataExportView` showing the full bundle as selectable JSON the user can copy — reachable
     anytime (invariant #6). Later: a file/share download and reading server-authoritative profile/
     consent once those persist.
-- **T-093 · Account + data deletion** — *Claude + Director · M · `IN-PROGRESS` (deploy wired; live check with a throwaway account pending) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
+- **T-093 · Account + data deletion** — *Claude + Director · M · `DONE` (deployed + verified live 2026-10-31) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
   - ✅ **Client flow** reachable from Settings at all times (invariant #6): a danger-styled
     "Delete account & data" row → `components/DeleteAccountConfirm.tsx` (4 tests) — an explicit,
     irreversible-delete confirmation (equal-weight Cancel, no dark patterns, retryable error on
@@ -1623,6 +1623,12 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     - deletes the account (`{ok: true}`);
     - checks the deleted account's session is rejected.
     - The sandbox cannot reach Supabase, so the live proof runs in CI.
+  - ✅ **Deployed + verified live (2026-10-31, deploy run 41201818700).** The smoke job:
+    - signed in a throwaway anonymous account;
+    - got 401 calling the function without a session;
+    - deleted the account (`{"ok":true}`);
+    - saw the deleted account's session rejected (403).
+    - Settings → "Delete account & data" now works on any build, with no app update needed.
 - **T-094 · Retention policy & auto-expiry** — *Claude · S · `DONE` (applied + verified live 2026-10-29) · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - ✅ `lib/retention.ts` (3 tests): `DEFAULT_RETENTION` windows (runtime location 30d < inactive
     anonymous 90d < analytics 365d) + `isExpired`/`expiryMs`. Remaining: the pg_cron job that
