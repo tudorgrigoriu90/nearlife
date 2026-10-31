@@ -2019,11 +2019,15 @@ conversion is proven. Cut from v1 deliberately ([ECONOMY](ECONOMY.md), [GDD §8]
     catalog test covers the new strings.
   - The **waitlist** half is deliberately not built: what to collect (an email? only a country
     count?) is a product + privacy decision — logged as T-214.
-- **T-214 · What does the out-of-area waitlist collect?** — *Director · S · `TODO` · deps: T-107*
+- **T-214 · What does the out-of-area waitlist collect?** — *Director · S · `DONE` (decided: collect nothing in v1) · deps: T-107*
   - Options: (a) nothing — the T-107 screen is enough until v2; (b) an anonymous count of
     out-of-area installs (no PII; would need a coarse country, i.e. a reverse lookup the app avoids
     today); (c) an opt-in email for "tell me when Nearby reaches Norway" — PII, needs a consent line
     and deletion path. Claude builds whichever is chosen.
+  - ✅ **Decided (Director, 2026-10-31): (a) nothing for v1.** The T-107 "not in your area yet"
+    screen stays as it is. It collects no data, so it adds nothing to the privacy policy.
+    - Revisit when planning the v2 Nordic launch. The opt-in email waitlist (c) was the
+      recommended alternative.
 
 ## F12.3 — Social
 - **T-108 · Local social layer** — *Claude · L · deps: T-081 · [GDD §7](GDD.md)*
