@@ -295,8 +295,10 @@ before pushing — CI runs after the push and reports (does not block) a red `ma
     frictionless prototype session (`supabase.auth.signInAnonymously()`); email magic-link is the
     fallback. Client-side auth bootstrap is wired next with T-027.
   - ✅ **Done (verified live 2026-10-31).** Anonymous sign-ins are on: `auth.users` holds an
-    anonymous account created this month (the Director's phone, T-205), and the live verify
-    signs in anonymous test users on every run (T-200/T-224).
+    anonymous account created through the app this month. The account itself is not
+    identified here; the count is enough. The live verify also exercises the anonymous-user
+    path on every run with throwaway `is_anonymous` users, created and rolled back
+    (T-200/T-224).
     - Email linking for reinstall survival is T-133.
     - Advisor review: T-164.
 
