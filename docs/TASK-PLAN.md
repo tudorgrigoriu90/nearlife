@@ -870,9 +870,25 @@ key before loading into Supabase.**
   - ⏸️ Large content effort with unpinned scope (what fills each level, and at 54 vs 12k scale) and
     no generation pipeline — deferred until post-validation. The depth row stays a locked placeholder;
     the unlock *logic* (T-060) is deferred with it.
-- **T-054 · Regional invasive-check for any plant/release advice** — *Claude + Director · M · deps: T-052 · [GDD §5](GDD.md), [TSD §7](TSD.md)*
+- **T-054 · Regional invasive-check for any plant/release advice** — *Claude + Director · M · `IN-PROGRESS` (review pass done + test-guarded; Director confirmation pending) · deps: T-052 · [GDD §5](GDD.md), [TSD §7](TSD.md)*
   - Any advice naming a species to plant/release is checked against Kronoberg invasives; risky
     items removed or genericized. Director confirms the review pass.
+  - ✅ **Claude's review pass (2026-10-31), now guarded by tests.**
+    - **Generated advice** (`pipeline/media/content_templates.py`, the give/protect for every
+      species without curated content) is one template per taxon group and never names a
+      species. It says "native plants", "a variety of pollinator-friendly flowers" and "never
+      introduce non-native plants". `test_template_invasives.py` fails if a give template ever
+      tells people to plant, sow, release or introduce something specific.
+    - **Curated advice** (the 54 Kronoberg species, en + sv; the other 36 locales translate it)
+      names only plants native to Sweden: rowan, hawthorn, nettle, buckthorn (*Frangula* /
+      *Rhamnus*, native here and invasive only in North America), clover, trefoil, birch and oak.
+      It says to *leave* or *support* them, never to introduce anything.
+      `lib/species/invasiveAdvice.test.ts` fails if any give advice names a species on the EU
+      or Swedish invasive lists, in English or Swedish names (lupin, Himalayan balsam, giant
+      hogweed, Japanese knotweed, Rosa rugosa, goldenrod, signal crayfish and more).
+    - 5 tests.
+  - **Director:** confirm the review pass (the plan asks for it). The lists are in the test
+    files.
 
 ---
 ---
