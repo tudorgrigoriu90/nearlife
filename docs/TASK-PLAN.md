@@ -1766,7 +1766,7 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
     install the APK, then `npx expo start --dev-client` (the on-device run is T-141).
 
 ## F11.1 — Store Submission
-- **T-097 · Store listings + assets** — *Claude + Director · M · `IN-PROGRESS` (copy + forms updated, launch checklist written; graphics + hosting + entry pending) · deps: T-084 · [review]*
+- **T-097 · Store listings + assets** — *Claude + Director · M · `IN-PROGRESS` (copy sv+en, icon and feature graphics done; screenshots, privacy URL + Play entry pending) · deps: T-084 · [review]*
   - ✅ `docs/launch/PLAY-STORE-LISTING.md`: short + full description (honesty-safe copy), category,
     **Data safety** answers, **content-rating** (IARC) answers, **target audience 13+**, **Ads: No**,
     and **App access = no login required**. All reflect the first internal-testing build (no IAP yet).
@@ -1787,6 +1787,18 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
       written down.
   - Remaining: name check, graphics and screenshots, the hosted pages (Step 10), then entering it
     all in Play Console (Director).
+  - ✅ **Brand mark + store graphics (2026-10-31).** The app still shipped Expo's template icon (a
+    blue "A"). New mark: a cream map pin holding a leaf on the app's greens, drawn as SVG in
+    `scripts/store-assets/` and rendered with the bundled Playwright, so every size comes from one
+    source: `assets/icon.png`, the adaptive foreground/background, the themed (monochrome) icon,
+    splash, favicon, the 512² Play icon and 1024×500 feature graphics in sv and en
+    (`docs/launch/store-assets/`). Adaptive fallback colour → `#1c3a28`. `__tests__/storeAssets.test.js`
+    pins the Play sizes and fails if the template icon comes back.
+  - ✅ Listing: Swedish default + English, name `Nearby: Naturalmanacka` / `Nearby: Nature Almanac`
+    (a suffix against the "Nearby" name collision), short and full descriptions with paste-ready
+    files, App access answered **restricted** (paid products + Family code; reviewers can't buy).
+  - Remaining: screenshots from the real app (a CI job against live data; the sandbox can't reach
+    Supabase), the privacy-policy URL (Step 10), a reviewer access code before review, Play entry.
 - **T-098 · App Store + Play submission & review** — *Director · L · deps: T-095, T-096, T-097, all P2 build epics · [PRIVACY §3](PRIVACY-COMPLIANCE.md)*
   - Builds submitted; review passed; app live in target market.
 

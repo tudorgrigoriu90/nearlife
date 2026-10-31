@@ -6,12 +6,46 @@
 > everything in is [LAUNCH-CHECKLIST.md](LAUNCH-CHECKLIST.md).
 
 ## Store listing (text)
-- **App name:** `Nearby` — ⚠️ generic; run a **trademark/name-collision check** (there are other
-  "Nearby" apps and a Google "Nearby" feature) before production. If it needs changing, do it
-  before the first upload.
-- **Short description** (≤80 chars):
-  `A living almanac of the wildlife active around you this season.`
-- **Full description** (≤4000 chars):
+Enter Swedish as the **default language (sv-SE)**, then **Add translation → English (en-GB)**.
+Play limits: name 30 characters, short description 80, full description 4,000. Paste the full
+descriptions from [`store-assets/description-sv.txt`](store-assets/description-sv.txt) and
+[`description-en.txt`](store-assets/description-en.txt): the copies below are wrapped for reading,
+and Play would keep those line breaks.
+
+- **App name:** `Nearby: Naturalmanacka` (sv) · `Nearby: Nature Almanac` (en). The suffix keeps
+  the name findable and apart from other "Nearby" apps and Google's "Nearby" feature. ⚠️ Still
+  run a quick trademark search on "Nearby" before production.
+- **Short description:**
+  - sv: `Upptäck djuren och växterna som är aktiva i ditt län den här säsongen.`
+  - en: `Discover the wildlife and plants active in your county this season.`
+- **Full description (sv):**
+
+  ```
+  Nearby är en lugn och ärlig almanacka över det vilda som delar din bit av världen.
+
+  Varje säsong upptäcker du fåglarna, däggdjuren, insekterna, fiskarna, växterna, spindlarna,
+  sniglarna, grodorna och ödlorna som verkligen är aktiva i ditt län: över 8 000 svenska arter,
+  på ditt eget språk. Aldrig "här just nu", alltid den sanna säsongen. Inga flöden att fastna i,
+  ingen reklam, ingen prenumeration. Bara en stilla påminnelse ibland när något värt att se är
+  i farten.
+
+  • Sett: bygg din läns-almanacka i takt med att arterna kommer in i säsong.
+  • Fångat: gå till en allmän plats i närheten som passar arten (en sjö för en gädda, en äng för
+    en fjäril) och fånga den i ett snabbt spel med en tumme.
+  • Hjälpt: enkla sätt att ge tillbaka och skydda naturen, på hedersord, och varför det spelar
+    roll.
+
+  Gratis att använda, med 3 gratis fångster varje säsong. Lås upp obegränsat fångande en gång
+  med Hela spelet, dela det med upp till 5 personer med Familj, och öppna andra län när du
+  reser. Varje arts fakta och tips för att hjälpa och skydda är alltid gratis.
+
+  Nearby respekterar dig: ingen reklam någonstans, och din position lämnar aldrig telefonen. Vi
+  sparar bara ditt hemlän. Exportera eller radera dina data när du vill under Inställningar.
+
+  Gå ut, titta närmare och lär känna dina grannar.
+  ```
+
+- **Full description (en):**
 
   ```
   Nearby is a calm, honest almanac of the wild things that share your patch of the world.
@@ -36,14 +70,22 @@
   Get out, look closer, and get to know your neighbours.
   ```
 
-- **Category:** Education (alt: Lifestyle). **Not** a kids/Family category — general audience.
-- **Contact details:** support email **[support email]**, website **[url, optional]**.
-- **Privacy policy URL:** the published URL from **T-095** (required).
+- **App category:** Education (alt: Lifestyle). **Not** a kids/Family category — general audience.
+- **Tags** (Store settings → Manage tags): Nature, Education, Outdoor.
+- **Contact details:** the privacy contact email from Step 10; website `https://nytta-ai.se`
+  (optional).
+- **Privacy policy URL:** the published URL from Step 10 (required).
 
-## Graphic assets (Director / design supplies)
-- [ ] **App icon** — 512×512 PNG (have `assets/icon.png`; export at 512²).
-- [ ] **Feature graphic** — 1024×500 PNG/JPG (**required**, none exists yet).
-- [ ] **Phone screenshots** — 2–8, 16:9 or 9:16, min 320px (need a running build — depends on T-141).
+## Graphic assets
+Files are in [`store-assets/`](store-assets/); regenerate with `node scripts/store-assets/render.js`
+and `node scripts/store-assets/feature.js`.
+- [x] **App icon** 512×512: `store-assets/play-icon-512.png`. The same mark is the in-app icon
+  (`assets/icon.png`, adaptive and themed Android icons), so store and phone match.
+- [x] **Feature graphic** 1024×500: `store-assets/feature-graphic-sv.png` on the Swedish listing,
+  `feature-graphic-en.png` on the English one.
+- [ ] **Phone screenshots** 2–8, 9:16: taken from the real app (Play requires they show the app as
+  it is). Planned: This Week, a species card, the Almanac, a catch-spot map, the catch game,
+  Counties.
 - [ ] (Optional) tablet screenshots, promo video.
 
 ## Data safety form (answers)
@@ -87,8 +129,13 @@ tracking or advertising.
 - **Contains ads: No.** (No ad SDK ships — invariant #3, permanent.)
 
 ## App access
-- **All functionality is available without special access** — the app uses anonymous sign-in with
-  no login wall, so no test credentials are needed for review.
+- **Is any part of your app restricted? Yes.** There is no sign-in (anonymous accounts), but paid
+  one-time products and the Family invite code are on Google's list of restrictions, and
+  reviewers can't buy.
+- Sign-in details entry: **Name** `Reviewer access - no sign-in needed`; username and password
+  empty; **Any other information**: how to open the free app, and (once built) the reviewer
+  access code that unlocks the paid content. It must be in place before closed-test/production
+  review.
 
 ## In-app products
 - **Contains in-app purchases: Yes.** One-time products only (no subscription): Full Game, Family,
