@@ -95,6 +95,16 @@ describe('onNotificationTap', () => {
     expect(mocked.clearLastNotificationResponse).toHaveBeenCalledTimes(1);
   });
 
+  it('still listens for taps where the last response is unavailable (web build)', () => {
+    mocked.getLastNotificationResponse.mockImplementationOnce(() => {
+      throw new Error('ExpoNotifications.getLastNotificationResponse is not available on web');
+    });
+    const listener = jest.fn();
+    expect(() => onNotificationTap(listener)).not.toThrow();
+    expect(mocked.addNotificationResponseReceivedListener).toHaveBeenCalled();
+    expect(listener).not.toHaveBeenCalled();
+  });
+
   it('delivers later taps, and ignores responses that are not about a species', () => {
     let fire: (r: unknown) => void = () => {};
     const remove = jest.fn();

@@ -81,7 +81,15 @@ export function onNotificationTap(listener: (speciesId: string) => void): () => 
     Notifications.clearLastNotificationResponse();
     listener(speciesId);
   };
-  handle(Notifications.getLastNotificationResponse());
+  // Unavailable on web, where the store screenshots are rendered (T-226): no cold-launch tap
+  // there, but the page must still start.
+  let last: Notifications.NotificationResponse | null = null;
+  try {
+    last = Notifications.getLastNotificationResponse();
+  } catch {
+    last = null;
+  }
+  handle(last);
   const subscription = Notifications.addNotificationResponseReceivedListener(handle);
   return () => subscription.remove();
 }

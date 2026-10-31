@@ -1,0 +1,65 @@
+name: Store screenshots
+
+# T-226: Google Play phone screenshots from the real app. The web build of the app is walked through
+# onboarding in Kronoberg against the live catalogue (scripts/store-assets/screenshots.js), and the
+# 1080x1920 shots are pushed to the `store-screenshots` branch, which holds only those images.
+# Picked shots are copied into docs/launch/store-assets/ on main by hand, after review.
+#
+# Manual only. The Supabase URL and publishable key are the app's public client settings (they ship
+# in every build and are protected by RLS), so no secret is needed. Each run creates one anonymous
+# user per language, which the retention job removes like any inactive anonymous account.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: store-screenshots
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    name: Take screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      EXPO_PUBLIC_SUPABASE_URL: https://subjdoiicfmiimtvlzsg.supabase.co
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_Wq-K09KGV8IDchkTicCkLA_22F8f5GB
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the web app
+        run: npx expo export --platform web --output-dir web-build
+
+      - name: Install the browser
+        run: npm install --no-save playwright@1.63.0 && npx playwright install --with-deps chromium
+
+      - name: Take screenshots
+        run: |
+          (cd web-build && python3 -m http.server 8765 >/dev/null 2>&1 &)
+          sleep 2
+          node scripts/store-assets/screenshots.js http://localhost:8765/ shots sv en
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-screenshots
+          path: shots/
+
+      - name: Publish to the store-screenshots branch
+        run: |
+          cd shots
+          git init -q -b store-screenshots
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Store screenshots from ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" store-screenshots

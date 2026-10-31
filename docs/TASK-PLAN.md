@@ -1797,8 +1797,7 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
   - ✅ Listing: Swedish default + English, name `Nearby: Naturalmanacka` / `Nearby: Nature Almanac`
     (a suffix against the "Nearby" name collision), short and full descriptions with paste-ready
     files, App access answered **restricted** (paid products + Family code; reviewers can't buy).
-  - Remaining: screenshots from the real app (a CI job against live data; the sandbox can't reach
-    Supabase), the privacy-policy URL (Step 10), a reviewer access code before review, Play entry.
+  - Remaining: screenshots from the real app (T-226), the privacy-policy URL (Step 10), a reviewer access code before review, Play entry.
 - **T-098 · App Store + Play submission & review** — *Director · L · deps: T-095, T-096, T-097, all P2 build epics · [PRIVACY §3](PRIVACY-COMPLIANCE.md)*
   - Builds submitted; review passed; app live in target market.
 
@@ -3620,6 +3619,20 @@ only.**
     - Verify run 41194816058 passed every check, including the 3 catalogue checks.
     - Kronoberg's list as an anonymous user went from 3,020 to 2,914 species.
     - The redeployed notification function answered the 11:07 cron with HTTP 200.
+- **T-226 · Play screenshots from the real app** — *Claude · S · `IN-PROGRESS` (walker + workflow built; first CI run + picking the shots pending) · deps: T-097 · [PLAY-STORE-LISTING](launch/PLAY-STORE-LISTING.md)*
+  - Play requires screenshots that show the app as it is, and the first device build isn't out
+    yet. The app's web build is walked through onboarding in Kronoberg by Playwright
+    (`scripts/store-assets/screenshots.js`) at 1080×1920: first sighting, This Week, a species
+    card, the catch, Almanac, Counties, the store, in sv and en. Button labels are read from
+    `lib/i18n`, and `__tests__/storeScreenshots.test.js` checks each exists in both languages.
+  - The live catalogue and photos are reachable only from CI (the sandbox proxy blocks
+    supabase.co), so `.github/workflows/store-screenshots.yml` (manual) builds and shoots there
+    and pushes the images to the `store-screenshots` branch. Chosen shots get copied into
+    `docs/launch/store-assets/` after review.
+  - `onNotificationTap` no longer throws where `getLastNotificationResponse` is unavailable (web);
+    it still listens for taps. Tested.
+  - Remaining: run the workflow, review the shots, copy the good ones, hand them to the Director.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
