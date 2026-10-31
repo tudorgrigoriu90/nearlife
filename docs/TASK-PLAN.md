@@ -929,7 +929,7 @@ key before loading into Supabase.**
   - ⏸️ Large content effort with unpinned scope (what fills each level, and at 54 vs 12k scale) and
     no generation pipeline — deferred until post-validation. The depth row stays a locked placeholder;
     the unlock *logic* (T-060) is deferred with it.
-- **T-054 · Regional invasive-check for any plant/release advice** — *Claude + Director · M · `IN-PROGRESS` (review pass done + test-guarded; Director confirmation pending) · deps: T-052 · [GDD §5](GDD.md), [TSD §7](TSD.md)*
+- **T-054 · Regional invasive-check for any plant/release advice** — *Claude + Director · M · `DONE` (Director confirmed 2026-10-31) · deps: T-052 · [GDD §5](GDD.md), [TSD §7](TSD.md)*
   - Any advice naming a species to plant/release is checked against Kronoberg invasives; risky
     items removed or genericized. Director confirms the review pass.
   - ✅ **Claude's review pass (2026-10-31), now guarded by tests.**
@@ -948,6 +948,8 @@ key before loading into Supabase.**
     - 5 tests.
   - **Director:** confirm the review pass (the plan asks for it). The lists are in the test
     files.
+  - ✅ **Confirmed (Director, 2026-10-31).** The review pass above is signed off. The two tests
+    keep guarding it.
 
 ---
 ---
