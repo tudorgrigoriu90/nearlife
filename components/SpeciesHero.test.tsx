@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Linking } from 'react-native';
+import { Linking, StyleSheet } from 'react-native';
 import SpeciesHero from './SpeciesHero';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 
@@ -29,6 +29,13 @@ describe('SpeciesHero', () => {
   it('is not tappable before the species is spotted', async () => {
     await render(<SpeciesHero species={swift} spotted={false} />);
     expect(screen.queryByTestId('species-photo')).toBeNull();
+  });
+
+  it('gives the photo the full card width (T-227)', async () => {
+    // The wrapper centres its children, so a tap target without its own width shrinks to zero
+    // and the photo's 100% width resolves to nothing: a blank 220px gap where the photo belongs.
+    await render(<SpeciesHero species={swift} spotted />);
+    expect(StyleSheet.flatten(screen.getByTestId('species-photo').props.style)).toMatchObject({ alignSelf: 'stretch' });
   });
 
   it('labels the tap target for screen readers', async () => {

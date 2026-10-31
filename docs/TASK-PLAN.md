@@ -3633,6 +3633,13 @@ only.**
     it still listens for taps. Tested.
   - Remaining: run the workflow, review the shots, copy the good ones, hand them to the Director.
 
+- **T-227 · Species photo collapsed to a blank gap** — *Claude · XS · `DONE` · deps: T-215*
+  - Found by the T-226 screenshots: on the species card and the first-sighting card the photo
+    area was an empty 220px gap, while the same photo showed as an Almanac thumbnail. The photo's
+    tap target sat in a centring wrapper with no width of its own, so it shrank to zero and the
+    photo's `width: '100%'` resolved to nothing. Yoga lays out the same way on the phone, so this
+    is not web-only. The tap target now stretches (`alignSelf: 'stretch'`); a test pins it.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

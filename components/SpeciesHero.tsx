@@ -26,6 +26,7 @@ export default function SpeciesHero({ species, spotted }: { species: Species; sp
       <View style={styles.wrap}>
         <Pressable
           testID="species-photo"
+          style={styles.tap}
           onPress={() => {
             // Never let a dead link crash a delight moment; the card still stands without it.
             void Linking.openURL(photo.sourceUrl).catch(() => undefined);
@@ -50,6 +51,9 @@ export default function SpeciesHero({ species, spotted }: { species: Species; sp
 
 const styles = StyleSheet.create({
   wrap: { width: '100%', alignItems: 'center' },
+  // Without its own width the tap target shrinks to zero inside the centring wrapper, and the
+  // photo's 100% width with it (T-227).
+  tap: { alignSelf: 'stretch' },
   photo: { width: '100%', height: 220, borderRadius: 16, backgroundColor: '#e2ebe0' },
   credit: { marginTop: 6, fontSize: 11, color: '#7a8a7c', textAlign: 'center' },
   emoji: { fontSize: 72 },
