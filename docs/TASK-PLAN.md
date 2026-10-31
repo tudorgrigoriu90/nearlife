@@ -600,7 +600,7 @@ key before loading into Supabase.**
     (934 records in 2 counties): genuinely common **where they grow**, and invisible nationally. The
     checklist ingest this task originally called for is moot under T-177 (the filter *is* the
     quality bar), but this finding is not — see **T-194**.
-- **T-194 · `min_counties` hides species that are common in one place** — *Claude + Director · M · `TODO` · deps: T-136*
+- **T-194 · `min_counties` hides species that are common in one place** — *Claude + Director · M · `BLOCKED` (Director decision: options A/B/C sized below) · deps: T-136*
   - The filter drops a species recorded in fewer than 3 counties. That is right for a *national*
     catalogue and wrong for the app being built, which is **regional by design** — presence is
     per-county and the copy is "active in your region this season".
@@ -612,6 +612,31 @@ key before loading into Supabase.**
     `species_presence` semantics rather than just a threshold, which is why it is its own task.
   - Not urgent for v1 (the shipped set already carries 99.63% of observations) but it is the
     difference between a national list and a local one, which is what the product claims to be.
+  - 📊 **Sized for a decision (2026-10-31)**, from `pipeline/data/catalogue.json` and live
+    table sizes.
+    - **What's excluded:** 4,479 species are left out for being recorded in fewer than 3
+      counties (3,139 in one, 1,340 in two). That is 457,549 records, **0.36%** of
+      observations. By group: insects 3,038 · plants 1,117 · molluscs 145 · arachnids 137 ·
+      birds 35 · fish 5 · mammals 2.
+    - **How often they're recorded:** 2,551 have ≥ 50 records, 1,240 have ≥ 100, and 112 have
+      ≥ 500. All have ≥ 20 (the occurrence bar).
+    - **No change of meaning is needed after all.** Presence is already stored per county, so
+      a species added here gets presence rows only in the 1–2 counties where it is recorded.
+      Nobody elsewhere is offered it.
+    - **Cost per species, live:** ~12.5 KB of content across the 38 locales, plus a ~75 KB
+      photo for about 80% of species.
+
+    | Option | Species | Database (now 204 / 500 MB) | Photo storage (now 391 MB / 1 GB) |
+    |---|---|---|---|
+    | A. Keep as is | 0 | — | — |
+    | **B. Add those with ≥ 100 records** (recommended) | 1,240 | +~15 MB | +~75 MB |
+    | C. Add all 4,479 | 4,479 | +~56 MB | +~270 MB (≈ 660 MB total) |
+
+    - B adds the species people realistically meet locally, such as *Lunaria rediviva* in its
+      county, at little cost. C uses two thirds of the photo allowance for species with as few
+      as 20 records.
+  - **Director:** pick A, B or C. B or C is one pipeline change (a per-county inclusion rule for
+    `min_counties`) plus one data and content run.
 - **T-134 · Load presence dataset into Supabase (reference schema + writer)** — *Claude + Director · M · `DONE` (bulk load verified live 2026-10-28) · deps: T-042, T-003 · [TSD §3](TSD.md)*
   - ✅ **Schema** `…000003_regions_and_presence.sql`: `regions` (21 counties), `species` taxonomy
     columns (`gbif_key`, `taxon_group`, `vertebrate`; `category` now nullable for amphibians/
