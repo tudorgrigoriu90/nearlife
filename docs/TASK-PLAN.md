@@ -818,7 +818,7 @@ key before loading into Supabase.**
       artifacts without refetching.
     - 5 tests here; 4 live checks in `verify.py` (unflagged visible; reserve- and road-flagged
       invisible; users cannot insert).
-- **T-049 · Hard safety exclusions** — *Claude · M · `IN-PROGRESS` (live data unsafe until the re-fetch; fix pushed 2026-10-30) · deps: T-048 · [TSD §5](TSD.md), [GDD §4](GDD.md)*
+- **T-049 · Hard safety exclusions** — *Claude · M · `DONE` (all 21 counties re-fetched with local distances, verified 2026-10-31) · deps: T-048 · [TSD §5](TSD.md), [GDD §4](GDD.md)*
   - Private property, roads/rail, water hazards, protected reserves excluded via `safety_flags`;
     a flagged spot is **never** surfaced. Tests cover each exclusion class.
   - ✅ **Every exclusion class, and where it is decided:**
@@ -894,6 +894,18 @@ key before loading into Supabase.**
       motorway is flagged; a beach 110 m from the coastline is coastal).
     - The live table is still the mixed load. A full re-fetch replaces it, and T-049 stays open
       until it does.
+  - ✅ **Live data re-fetched and checked (2026-10-31): every county loaded with local
+    distances.** Run 41179290152 loaded 20 counties at 11:32; Södermanland was re-run alone and
+    loaded at 14:58.
+    - **Totals:** 29,673 spots, **24,752 shown**. Excluded: 4,337 reserve · 386 major road or
+      railway · 116 private · 104 military · 20 water hazard.
+    - **Plausible everywhere.** Every county but Gotland has road-excluded spots (Gotland has no
+      motorways). Coastal counties have coastal spots (Stockholm 548, Västra Götaland 516,
+      Skåne 198, Kalmar 189, Norrbotten 51), and inland counties have none.
+    - **Lower road counts than the first, county-wide run** (e.g. Örebro 12 vs 35). Distance is
+      now measured from the catch point people are sent to (a node, or a way's centre), not
+      from a park's outline. That is the safety question that matters.
+    - The daily health check (T-100) confirms every county has visible spots.
 - **T-050 · Catch-spot density audit (Kronoberg)** — *Claude · M · deps: T-048 · [review finding]*
   - Report: what % of Kronoberg residents have a catch spot within a ~15-min walk. If low,
     flag that Caught skews to a car feature and record the design implication before launch.
