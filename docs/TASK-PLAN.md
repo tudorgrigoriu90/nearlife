@@ -3474,7 +3474,7 @@ only.**
       `(( SELECT auth.uid() AS uid) = user_id)` `to authenticated`.
     - Verify run 41121612142 passed every check. That includes an anonymous user's catches up
       to the free limit (the `authenticated` path) and "anon reads no collection rows".
-- **T-225 · The noise filter never reached the app** — *Claude · M · `IN-PROGRESS` (built + tested; migration apply, verify and function deploy pending) · deps: T-136, T-194 · invariant #1*
+- **T-225 · The noise filter never reached the app** — *Claude · M · `DONE` (applied + verified live 2026-10-31) · deps: T-136, T-194 · invariant #1*
   - Found 2026-10-31 while sizing T-194. The T-136 filter decides `catalogue.json`, which drives
     names, content and photos. But the loader writes **presence for every recorded species**,
     and `region_catalogue` (the almanac and This Week) serves whatever has presence.
@@ -3502,6 +3502,12 @@ only.**
     - **Live verify:** 3 checks (anon sees no presence outside the catalogue; catalogue
       presence is readable; `region_catalogue` serves catalogue species only).
     - 6 tests (2 loader, 2 SQL guard, 1 app gateway, plus the T-194 rule).
+  - ✅ **Applied + verified live (2026-10-31).**
+    - db-migrate applied `20261031000001`: 8,080 species are `in_catalogue` (the filter's 8,064
+      plus the curated set) and 3,857 are not.
+    - Verify run 41194816058 passed every check, including the 3 catalogue checks.
+    - Kronoberg's list as an anonymous user went from 3,020 to 2,914 species.
+    - The redeployed notification function answered the 11:07 cron with HTTP 200.
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
