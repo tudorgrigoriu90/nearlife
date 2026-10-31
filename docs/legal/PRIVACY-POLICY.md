@@ -64,6 +64,9 @@ already carried out.
   © OpenStreetMap contributors.
 - 🆕 **Google Firebase Cloud Messaging** — delivers the notifications you turned on, using the
   notification token.
+- 🆕 **Sentry** — crash reports, **only if you allow analytics**. A report holds what is needed to
+  fix the crash (where in the app it happened, app version, phone model and OS), never your
+  account, IP address, location or screenshots. Kept 30 days by Sentry, then deleted.
 
 We put a Data Processing Agreement in place with each processor and verify EU data residency or
 appropriate safeguards (Standard Contractual Clauses) for any transfer outside the EU/EEA.

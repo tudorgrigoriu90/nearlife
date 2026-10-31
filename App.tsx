@@ -37,6 +37,7 @@ import { useTracker } from './components/useTracker';
 import {
   applyConsentChange,
   DEFAULT_CONSENT,
+  hasConsent,
   type ConsentKind,
   type ConsentState,
 } from './lib/consent';
@@ -81,6 +82,7 @@ import { spottedIds, tierStateFor } from './lib/collection';
 import { canCatch, freeCatchStateFrom, remainingFreeCatches } from './lib/freeCatch';
 import { isPrimeCatch } from './lib/primeBonus';
 import { openIdentifier } from './lib/identify';
+import { CrashReporter, loadSentry } from './lib/crashReporting';
 import { gradeFromScore } from './lib/minigame/grade';
 import { monthOf, seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
@@ -230,6 +232,11 @@ export default function App() {
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
   const track = useTracker(consent);
+  // Crash reports follow the analytics consent, on and off (T-100).
+  const crashReporter = useMemo(() => new CrashReporter(loadSentry(), process.env.EXPO_PUBLIC_SENTRY_DSN ?? ''), []);
+  useEffect(() => {
+    if (consentLoaded) crashReporter.setConsent(hasConsent(consent, 'analytics'));
+  }, [crashReporter, consent, consentLoaded]);
   // Every purchase screen reports the same funnel steps (T-087).
   const purchases = useMemo(() => new TrackingPurchaseGateway(purchaseGateway(), { track }), [track]);
   // The Almanac lists the user's county + anything collected outside it (T-208); Badges count over

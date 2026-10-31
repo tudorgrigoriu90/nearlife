@@ -1762,7 +1762,7 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
       species, organic pull, and demand for identification (T-222's evidence).
     - Guarded by the same drift test (`__tests__/dashboardsDoc.test.js`).
   - **To close:** create it in PostHog, the same way as T-037.
-- **T-100 · Error & pipeline monitoring** — *Claude · S · `IN-PROGRESS` (pipeline + cron alerting done; app crash reporting needs a Director decision) · deps: T-045, T-064*
+- **T-100 · Error & pipeline monitoring** — *Claude · S · `IN-PROGRESS` (all built; Sentry project + DSN + next build pending, Director) · deps: T-045, T-064*
   - Crash/error reporting on the app; alerting if the data pipeline or notification cron fails.
   - ✅ **Pipeline and cron alerting built (2026-10-30)**: `pipeline/db/health.py` plus
     `.github/workflows/health.yml`, running daily at 05:37 UTC. A red run is the alert, through
@@ -1780,6 +1780,21 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
   - Remaining: **crash and error reporting in the app.** The usual tool, Sentry, has a free
     tier but means a new dependency, a Director-owned account and a privacy-policy processor
     entry. Director decision before building.
+  - ✅ **App crash reporting built (Director chose Sentry, consent-only, 2026-10-31).**
+    - `lib/crashReporting.ts` starts Sentry only when all three hold: the build has
+      `EXPO_PUBLIC_SENTRY_DSN`, it carries the native module (loaded lazily, like RevenueCat),
+      and the user granted analytics consent. It closes again on withdrawal.
+    - **No identity:** `sendDefaultPii: false`, no screenshots or view hierarchy, `user`
+      stripped from every event, and fetch/xhr/console breadcrumbs dropped (their URLs and logs
+      can carry account ids). 5 tests.
+    - **Dependency:** `@sentry/react-native@8.31.0`, recorded reason: decision above, released
+      2026-10-15. An `overrides` pin (`expo-router: 57.0.11`) settles Sentry's *optional*
+      expo-router peer against Expo 57. expo-router itself is not installed, and `npm ci` stays
+      standard.
+    - Privacy policy: Sentry is added as a 🆕 processor (consent-only, no identity, 30 days).
+    - **Director:** create the Sentry project in the EU region and give me the DSN (public), add
+      it to EAS, and accept the DPA. Steps: [docs/launch/SENTRY-SETUP.md](launch/SENTRY-SETUP.md).
+      The next build then reports.
 
 ## F11.3 — Attribution
 - **T-101 · Attribution surfaces** — *Claude · XS · `DONE` (copy live; DOIs when the pipeline lands) · deps: T-045, T-046 · [DATA-SOURCING](DATA-SOURCING-LICENSING.md), [USER-FLOWS §9](USER-FLOWS.md)*
