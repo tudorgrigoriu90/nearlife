@@ -11,8 +11,9 @@ from osm.overpass import (  # noqa: E402
     RESERVE_FILTERS,
     ids_from,
     inside_query,
-    near_coast_query,
-    near_roads_query,
+    COAST_FILTERS,
+    ROAD_FILTERS,
+    lines_query,
     spots_query,
 )
 
@@ -25,7 +26,7 @@ def test_spots_are_asked_for_one_county_by_its_iso_code():
 
 
 def test_flag_queries_return_ids_only():
-    for q in (near_coast_query("SE-G"), near_roads_query("SE-G"), inside_query("SE-G", RESERVE_FILTERS)):
+    for q in (inside_query("SE-G", RESERVE_FILTERS), inside_query("SE-G", MILITARY_FILTERS)):
         assert q.rstrip().endswith("out ids;")
 
 
@@ -36,9 +37,16 @@ def test_the_exclusion_zones_cover_reserves_parks_and_military_land():
 
 
 def test_major_roads_and_railways_only():
-    q = near_roads_query("SE-G")
+    q = lines_query(ROAD_FILTERS, (59.0, 18.0, 59.5, 18.5))
     assert "motorway|trunk|primary" in q and '"railway"="rail"' in q
     assert "residential" not in q  # quiet streets near a park are not a hazard
+
+
+def test_line_downloads_are_plain_bounding_box_queries_with_geometry():
+    q = lines_query(COAST_FILTERS, (59.0, 18.0, 59.5, 18.5))
+    assert 'way["natural"="coastline"](59.0,18.0,59.5,18.5);' in q
+    assert q.rstrip().endswith("out geom;")
+    assert "around" not in q and "area" not in q
 
 
 def test_ids_match_the_spot_id_format():
@@ -102,7 +110,8 @@ def test_a_failed_county_names_the_query_that_failed():
     try:
         build_catch_spots.build_county(client, "SWE.9_1", "SE-G")
     except RuntimeError as exc:
-        assert str(exc).startswith("near coast:")
+        # The fake answers the spots query with no elements, which is itself a failure now.
+        assert str(exc).startswith("spots:")
     else:
         raise AssertionError("expected a failure")
 
@@ -158,17 +167,10 @@ def test_a_harmless_remark_is_not_an_error():
 
 def test_no_query_asks_for_more_than_the_default_memory():
     # A 2 GB request got queries turned away with 504s by a busy server, even for small counties.
-    for q in (spots_query("SE-AB"), near_coast_query("SE-AB"), near_roads_query("SE-AB"),
+    box = (59.0, 18.0, 59.5, 18.5)
+    for q in (spots_query("SE-AB"), lines_query(ROAD_FILTERS, box), lines_query(COAST_FILTERS, box),
               inside_query("SE-AB", RESERVE_FILTERS)):
         assert "maxsize" not in q
-
-
-def test_coast_and_roads_are_searched_near_spots_not_across_the_county():
-    # County-wide road and coastline sets timed out for Stockholm and Skåne (2026-10-30).
-    roads, coast = near_roads_query("SE-AB"), near_coast_query("SE-AB")
-    assert '(around.p:' in roads and '"highway"' in roads and '](area.c);\n  way["railway"' not in roads
-    assert '"railway"="rail"](around.p:' in roads
-    assert '"natural"="coastline"](around.p:' in coast and '"coastline"](area.c)' not in coast
 
 
 class _FlakySession(_Session):
@@ -209,3 +211,25 @@ def test_dropped_connections_that_never_recover_fail_with_the_reason():
         assert "Remote end closed" in str(exc)
     else:
         raise AssertionError("expected the failure to surface")
+
+
+def test_a_county_build_flags_a_spot_beside_a_motorway_and_marks_a_beach_coastal():
+    # End to end through build_county with canned Overpass answers, in query order:
+    # spots, roads, coastline, reserves, military.
+    import build_catch_spots
+    from osm.overpass import OverpassClient
+
+    spots = {"elements": [
+        {"type": "node", "id": 1, "lat": 59.0002, "lon": 18.005, "tags": {"tourism": "picnic_site"}},
+        {"type": "node", "id": 2, "lat": 59.0100, "lon": 18.005, "tags": {"tourism": "picnic_site"}},
+        {"type": "node", "id": 3, "lat": 59.0300, "lon": 18.005, "tags": {"natural": "beach"}},
+    ]}
+    motorway = {"elements": [{"type": "way", "id": 10, "geometry": [{"lat": 59.0, "lon": 18.0}, {"lat": 59.0, "lon": 18.01}]}]}
+    coastline = {"elements": [{"type": "way", "id": 20, "geometry": [{"lat": 59.031, "lon": 18.0}, {"lat": 59.031, "lon": 18.01}]}]}
+    client = OverpassClient(endpoints=["https://a/api"], pause=0, backoff=0, max_retries=1)
+    client.session = _BodySession([spots, motorway, coastline, {"elements": []}, {"elements": []}])
+
+    built = {s["id"]: s for s in build_catch_spots.build_county(client, "SWE.15_1", "SE-AB")}
+    assert built["n1"]["flags"] == ["major_road"]  # ~22 m from the motorway
+    assert built["n2"]["flags"] == []  # ~1.1 km away
+    assert built["n3"]["habitat"] == "coast"  # ~110 m from the coastline

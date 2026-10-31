@@ -2,8 +2,8 @@
 result means lives in osm/rules.py.
 
 One county per query, selected by its boundary's ISO 3166-2 tag. Five queries per county: the
-spots themselves, then the ids of spots near the coast, inside protected or military land, and near
-major roads. Overpass is a shared community service, so the client paces itself and backs off on
+spots themselves; the ids of spots inside protected or military land; and the geometry of the major
+roads and railways, and of the coastline, in the spots' bounding box (distances measured locally). Overpass is a shared community service, so the client paces itself and backs off on
 429/502/503/504. The whole country is about 105 queries, run yearly from CI.
 
 A busy answer moves the next attempt to the other public instance: in the first full run
@@ -38,17 +38,17 @@ def spots_query(iso: str) -> str:
     return f"{HEADER}\n{_county(iso)}\n{_spots_set()}\n.p out tags center;"
 
 
-# The coast and road queries start from the spots, not the county. Collecting every motorway and
-# every coastline way in Stockholm or Skåne first is what timed out in the first full run. Looking
-# only within the radius of a spot touches a few hundred ways, and the answer is the same: a spot
-# is near a road exactly when a road is near the spot. It also catches a coastline just outside
-# the county boundary, which the county-wide version missed.
-def near_coast_query(iso: str) -> str:
-    return (
-        f"{HEADER}\n{_county(iso)}\n{_spots_set()}\n"
-        f'way["natural"="coastline"](around.p:{COAST_RADIUS_M})->.coast;\n'
-        f"nwr.p(around.coast:{COAST_RADIUS_M});\nout ids;"
-    )
+ROAD_FILTERS = ['["highway"~"^(motorway|trunk|primary|motorway_link|trunk_link)$"]', '["railway"="rail"]']
+COAST_FILTERS = ['["natural"="coastline"]']
+
+
+def lines_query(filters: list[str], bbox: tuple[float, float, float, float]) -> str:
+    """Line geometry inside a box. Distances are measured locally (osm/proximity.py): a bounding-box
+    download is the cheapest query Overpass serves, and it gives the same answer on every
+    instance."""
+    s, w, n, e = (round(v, 5) for v in bbox)
+    parts = "\n".join(f"  way{f}({s},{w},{n},{e});" for f in filters)
+    return f"{HEADER}\n(\n{parts}\n);\nout geom;"
 
 
 def inside_query(iso: str, area_filters: list[str]) -> str:
@@ -62,15 +62,6 @@ def inside_query(iso: str, area_filters: list[str]) -> str:
 
 RESERVE_FILTERS = ['["leisure"="nature_reserve"]', '["boundary"="protected_area"]', '["boundary"="national_park"]']
 MILITARY_FILTERS = ['["landuse"="military"]', '["military"]']
-
-
-def near_roads_query(iso: str) -> str:
-    return (
-        f"{HEADER}\n{_county(iso)}\n{_spots_set()}\n"
-        f'(\n  way["highway"~"^(motorway|trunk|primary|motorway_link|trunk_link)$"](around.p:{ROAD_RADIUS_M});\n'
-        f'  way["railway"="rail"](around.p:{ROAD_RADIUS_M});\n)->.roads;\n'
-        f"nwr.p(around.roads:{ROAD_RADIUS_M});\nout ids;"
-    )
 
 
 def ids_from(result: dict) -> set[str]:

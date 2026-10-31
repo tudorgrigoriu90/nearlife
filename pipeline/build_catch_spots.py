@@ -19,15 +19,18 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from osm.counties import ISO_BY_GADM  # noqa: E402
 from osm.overpass import (  # noqa: E402
+    COAST_FILTERS,
     MILITARY_FILTERS,
     RESERVE_FILTERS,
+    ROAD_FILTERS,
     OverpassClient,
     ids_from,
     inside_query,
-    near_coast_query,
-    near_roads_query,
+    lines_query,
     spots_query,
 )
+from osm.proximity import bbox_around, lines_from, points_near_lines  # noqa: E402
+from osm.rules import COAST_RADIUS_M, ROAD_RADIUS_M, spot_from_element  # noqa: E402
 from osm.spots import county_spots, summary  # noqa: E402
 
 DATA = Path(__file__).resolve().parent / "data"
@@ -41,11 +44,24 @@ def build_county(client: OverpassClient, region_id: str, iso: str) -> list[dict]
             raise RuntimeError(f"{name}: {exc}") from exc  # which of the five queries the county lost
 
     spots = step("spots", spots_query(iso))
-    near_coast = ids_from(step("near coast", near_coast_query(iso)))
+    # A spot's catch point is its location (a node, or a way's centre), so distance is measured
+    # from there: it is where the app sends people.
+    points = {
+        s["id"]: (s["lat"], s["lon"])
+        for s in (spot_from_element(el) for el in spots.get("elements", []))
+        if s is not None
+    }
+    if not points:
+        raise RuntimeError("spots: none found")  # an empty county is a failed query, not a result
+    box = bbox_around(points, COAST_RADIUS_M)
+    roads = lines_from(step("roads", lines_query(ROAD_FILTERS, box)))
+    coast = lines_from(step("coastline", lines_query(COAST_FILTERS, box)))
     reserves = ids_from(step("reserves", inside_query(iso, RESERVE_FILTERS)))
     military = ids_from(step("military", inside_query(iso, MILITARY_FILTERS)))
-    roads = ids_from(step("near roads", near_roads_query(iso)))
-    return county_spots(region_id, spots, near_coast, reserves, military, roads)
+    near_road = points_near_lines(points, roads, ROAD_RADIUS_M)
+    near_coast = points_near_lines(points, coast, COAST_RADIUS_M)
+    print(f"  {iso}: {len(points)} spots, {len(roads)} road/rail ways, {len(coast)} coastline ways", flush=True)
+    return county_spots(region_id, spots, near_coast, reserves, military, near_road)
 
 
 def main(argv: list[str]) -> int:

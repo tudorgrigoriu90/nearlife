@@ -833,6 +833,26 @@ key before loading into Supabase.**
       with back-off capped at 5 min.
     - 2 tests. The failed counties are re-fetched on their own after the run (the load job
       keeps every county that did succeed).
+  - 🐛→✅ **The per-spot `around` queries gave silently empty answers (load of 2026-10-31
+    00:56–01:12).** After loading, counties that certainly have spots beside motorways read 0
+    near a road: Örebro, Värmland, Jämtland and Halland, all of which had 18–37 in the
+    county-wide version. Coastal Kalmar and Norrbotten read 0 coastal spots. Which instance
+    answered what could not be seen from outside.
+    - **Fix: distances are now measured locally, not by Overpass.** `osm/proximity.py` takes the
+      geometry of major roads, railways and coastline, downloaded as a plain bounding-box query
+      around the spots (`lines_query`, `out geom`), the cheapest query Overpass serves and the
+      same on every instance. It then measures each spot's catch point (node, or way centre)
+      against every segment, using a grid of radius-sized cells and a flat projection centred on
+      the spot.
+    - Deterministic, and tested against a brute-force check, far-north latitudes, segment ends
+      and mid-segment distances.
+    - A county whose spots query returns nothing now fails instead of loading empty. The run
+      log prints, per county, how many road and coastline ways were downloaded, so a "0 near a
+      road" can be told apart from "0 roads fetched".
+    - 12 tests: 9 proximity, 2 query, and 1 end-to-end county build (a picnic site 22 m from a
+      motorway is flagged; a beach 110 m from the coastline is coastal).
+    - The live table is still the mixed load. A full re-fetch replaces it, and T-049 stays open
+      until it does.
 - **T-050 · Catch-spot density audit (Kronoberg)** — *Claude · M · deps: T-048 · [review finding]*
   - Report: what % of Kronoberg residents have a catch spot within a ~15-min walk. If low,
     flag that Caught skews to a car feature and record the design implication before launch.
