@@ -83,9 +83,9 @@ and `node scripts/store-assets/feature.js`.
   (`assets/icon.png`, adaptive and themed Android icons), so store and phone match.
 - [x] **Feature graphic** 1024×500: `store-assets/feature-graphic-sv.png` on the Swedish listing,
   `feature-graphic-en.png` on the English one.
-- [ ] **Phone screenshots** 2–8, 9:16: taken from the real app (Play requires they show the app as
-  it is). Planned: This Week, a species card, the Almanac, a catch-spot map, the catch game,
-  Counties.
+- [x] **Phone screenshots** 1080×1920, from the real app (T-226): upload
+  `store-assets/screenshots/sv/1…6` to the Swedish listing and `screenshots/en/1…6` to the
+  English one, in number order. Retake with the **Store screenshots** workflow (Actions tab).
 - [ ] (Optional) tablet screenshots, promo video.
 
 ## Data safety form (answers)
