@@ -806,7 +806,7 @@ key before loading into Supabase.**
     `vernacular.json` (T-198 restore verified live: "6831 already fetched, 0 to do").
 
 ### S3.2.2 — Catch-spot generation & safety
-- **T-048 · Generate catch_spots on public/accessible land** — *Claude · L · `IN-PROGRESS` (applied + verified live; first load waits on the full fetch) · deps: T-046 · [TSD §5](TSD.md)*
+- **T-048 · Generate catch_spots on public/accessible land** — *Claude · L · `DONE` (all 21 counties loaded, 2026-10-31) · deps: T-046 · [TSD §5](TSD.md)*
   - `catch_spots` generated only on public/accessible land, snapped to habitat.
   - ✅ **Built (2026-10-30):** migration `20261030000002_catch_spots.sql`.
     - Table: `catch_spots`, keyed by OSM id, with region, kind, habitat, name, lat/lon and
@@ -824,6 +824,11 @@ key before loading into Supabase.**
       artifacts without refetching.
     - 5 tests here; 4 live checks in `verify.py` (unflagged visible; reserve- and road-flagged
       invisible; users cannot insert).
+  - ✅ **Done (2026-10-31): loaded for all 21 counties.**
+    - 29,673 spots in `catch_spots`, of which 24,752 are shown.
+    - Only designated public places are included, and every hazard class is flagged and
+      unreadable through RLS (T-049).
+    - "Snapped to habitat": each spot carries the habitat a species must match (T-047/T-068).
 - **T-049 · Hard safety exclusions** — *Claude · M · `DONE` (all 21 counties re-fetched with local distances, verified 2026-10-31) · deps: T-048 · [TSD §5](TSD.md), [GDD §4](GDD.md)*
   - Private property, roads/rail, water hazards, protected reserves excluded via `safety_flags`;
     a flagged spot is **never** surfaced. Tests cover each exclusion class.
