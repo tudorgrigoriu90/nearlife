@@ -860,8 +860,18 @@ key before loading into Supabase.**
 ## F3.3 — Production Content Authoring
 
 ### S3.3.1 — Full species content
-- **T-051 · Author Tier-1 fact + trivia + when/how (full set)** — *Claude · XL · deps: T-042 · [GDD §3,§6](GDD.md)*
+- **T-051 · Author Tier-1 fact + trivia + when/how (full set)** — *Claude · XL · `DONE` (via the content pipeline; facts only where sourced, per T-146) · deps: T-042 · [GDD §3,§6](GDD.md)*
   - Every launch species has a fact, trivia, and honest "when & how to see it" line.
+  - ✅ **Done through the content pipeline (recorded 2026-10-31, live counts).**
+    `species_content` has 11,937 English rows (every species in the database), across 38
+    locales (T-210).
+    - **When & how:** 11,937 / 11,937. It comes from the presence data and the habitat hint,
+      so it is honest by construction.
+    - **Fact:** 4,694 species. Facts are sourced from Wikipedia per language and never written
+      without a source (invariant #1). By Director decision T-146 the rest show a mission-only
+      card rather than an invented fact.
+    - **Trivia** was folded into the fact. A separate trivia line had no source for most of
+      the catalogue, and depth content is T-053 (deferred).
 - **T-052 · Author give/protect (safe defaults + follow-law line)** — *Claude · XL · deps: T-051 · [GDD §5](GDD.md)*
   - Give + protect per species; universally safe actions; standing "follow local law" line;
     threat framing where it adds value; **no risky plant/release specifics**.
