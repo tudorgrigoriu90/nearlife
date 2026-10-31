@@ -728,7 +728,7 @@ key before loading into Supabase.**
 ## F3.2 — OSM Habitat & Catch Spots
 
 ### S3.2.1 — Habitat classification
-- **T-046 · Overpass ingest → habitat_types via osm_tag_rules** — *Claude · L · `IN-PROGRESS` (first full run fetched every county but Norrbotten; its re-fetch pending) · deps: T-008, T-015 · [TSD §5](TSD.md), [DATA-SOURCING §4](DATA-SOURCING-LICENSING.md)*
+- **T-046 · Overpass ingest → habitat_types via osm_tag_rules** — *Claude · L · `DONE` (all 21 counties fetched + classified, 2026-10-31) · deps: T-008, T-015 · [TSD §5](TSD.md), [DATA-SOURCING §4](DATA-SOURCING-LICENSING.md)*
   - OSM features pulled via Overpass and classified into habitat types by tag rules.
   - "© OpenStreetMap contributors" attribution recorded for display.
   - ✅ **Built (2026-10-30), design decisions:**
@@ -775,6 +775,12 @@ key before loading into Supabase.**
     data), so a busy server no longer costs the county. A failed county's error now also names
     which of its five queries failed. 3 tests. Norrbotten is re-fetched on its own
     (`counties=SE-BD`).
+  - ✅ **Done (2026-10-31).** All 21 counties are fetched from Overpass and classified (spot kinds
+    → land / freshwater / coast):
+    - 18,567 land, 4,278 freshwater and 1,907 coastal spots are shown.
+    - The pipeline survives busy or dropped Overpass servers: it alternates between two public
+      instances, retries dropped connections, and fails closed on runtime errors (T-049 notes).
+    - Yearly refresh: `catch-spots.yml` (12 February).
 - **T-047 · species_habitat mapping** — *Claude · M · `DONE` (applied + loaded live 2026-10-30) · deps: T-046 · [TSD §3](TSD.md)*
   - Each catchable species mapped to the habitat types it's plausibly caught in.
   - ✅ **Built (2026-10-30):** `species.catch_habitats text[]` ⊆ {land, freshwater, coast}
