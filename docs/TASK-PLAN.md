@@ -872,9 +872,17 @@ key before loading into Supabase.**
       card rather than an invented fact.
     - **Trivia** was folded into the fact. A separate trivia line had no source for most of
       the catalogue, and depth content is T-053 (deferred).
-- **T-052 · Author give/protect (safe defaults + follow-law line)** — *Claude · XL · deps: T-051 · [GDD §5](GDD.md)*
+- **T-052 · Author give/protect (safe defaults + follow-law line)** — *Claude · XL · `DONE` (give/protect for every species; T-054 guards it) · deps: T-051 · [GDD §5](GDD.md)*
   - Give + protect per species; universally safe actions; standing "follow local law" line;
     threat framing where it adds value; **no risky plant/release specifics**.
+  - ✅ **Done (recorded 2026-10-31, live counts):** give and protect exist for 11,937 / 11,937
+    species in English and for all 38 locales.
+    - Curated, species-specific text for the 54 Kronoberg species. Everyone else gets the
+      universally safe taxon-group template (`pipeline/media/content_templates.py`).
+    - The standing "follow local law" line is shown on every card and on the catch-success
+      tip (`FOLLOW_LOCAL_LAW`).
+    - No risky plant or release specifics: checked and test-guarded in T-054.
+    - Mission content is free for every species (invariant #2).
 - **T-053 · Author depth tiers 2–5** — *Claude · XL · `DEFERRED` (Director, 2026-08-11 — post-validation) · deps: T-051 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
   - 5 depth levels of trivia/lore/audio/deep-dive per species (climb-by-play / unlock content).
   - ⏸️ Large content effort with unpinned scope (what fills each level, and at 54 vs 12k scale) and
