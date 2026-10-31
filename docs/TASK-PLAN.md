@@ -1590,7 +1590,7 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     `DataExportView` showing the full bundle as selectable JSON the user can copy — reachable
     anytime (invariant #6). Later: a file/share download and reading server-authoritative profile/
     consent once those persist.
-- **T-093 · Account + data deletion** — *Claude + Director · M · `IN-PROGRESS` (client flow + tested seam + Edge Function written; deploy pending) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
+- **T-093 · Account + data deletion** — *Claude + Director · M · `IN-PROGRESS` (deploy wired; live check with a throwaway account pending) · deps: T-056 · [PRIVACY §2](PRIVACY-COMPLIANCE.md), [USER-FLOWS §9](USER-FLOWS.md)*
   - ✅ **Client flow** reachable from Settings at all times (invariant #6): a danger-styled
     "Delete account & data" row → `components/DeleteAccountConfirm.tsx` (4 tests) — an explicit,
     irreversible-delete confirmation (equal-weight Cancel, no dark patterns, retryable error on
@@ -1606,6 +1606,17 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
   - ⏳ **Director:** deploy the function (`supabase functions deploy delete-account`). Until then,
     `functions.invoke` errors and the confirm screen shows the retryable "not deleted" message — by
     design. Executing a real deletion + on-device verify is a Director/device step.
+  - ✅ **Deploy approved (Director, 2026-10-31) and wired.**
+    - `deploy-functions.yml` now deploys `delete-account` with JWT verification ON. The gateway
+      rejects calls without a session, and the function deletes only the user its token names.
+    - The function was brought up to date before switching it on:
+      - it resolves the service key the same way as `send-notifications` (legacy variable or
+        the new `SUPABASE_SECRET_KEYS`);
+      - it verifies the caller with `admin.auth.getUser(token)` instead of needing a second
+        (anon) key.
+    - Every table referencing `auth.users` cascades: no `references auth.users` without
+      `on delete cascade` in any migration. So deletion erases collection, profile, push
+      devices, notification log, purchase records and the household link.
 - **T-094 · Retention policy & auto-expiry** — *Claude · S · `DONE` (applied + verified live 2026-10-29) · deps: T-091 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - ✅ `lib/retention.ts` (3 tests): `DEFAULT_RETENTION` windows (runtime location 30d < inactive
     anonymous 90d < analytics 365d) + `isExpired`/`expiryMs`. Remaining: the pg_cron job that

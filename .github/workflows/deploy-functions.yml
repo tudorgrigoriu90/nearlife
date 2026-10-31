@@ -6,8 +6,8 @@ name: Deploy Edge Functions
 #
 # Needs the repo secret SUPABASE_ACCESS_TOKEN (a Supabase personal access token, `sbp_…`).
 #
-# `delete-account` is deliberately not deployed here: it is still a reference implementation
-# (T-093) and switching it on is its own decision, not a side effect of this workflow.
+# `delete-account` (T-093, Director approved 2026-10-31) is deployed WITH JWT verification: only a
+# signed-in user can call it, and it deletes only that user.
 
 on:
   push:
@@ -65,3 +65,4 @@ jobs:
           for fn in send-notifications revenuecat-webhook; do
             supabase functions deploy "$fn" --project-ref "$PROJECT_REF" --no-verify-jwt --use-api
           done
+          supabase functions deploy delete-account --project-ref "$PROJECT_REF" --use-api
