@@ -60,11 +60,12 @@ REGION_SQL = (
 _SPECIES_INSERT = (
     "insert into public.species "
     "(id, gbif_key, scientific_name, common_name, category, rarity, taxon_group, vertebrate, active_months, "
-    "catch_habitats) "
+    "catch_habitats, in_catalogue) "
     "values (%(id)s, %(gbif_key)s, %(scientific_name)s, %(common_name)s, %(category)s, %(rarity)s, "
-    "%(taxon_group)s, %(vertebrate)s, %(active_months)s, %(catch_habitats)s) "
+    "%(taxon_group)s, %(vertebrate)s, %(active_months)s, %(catch_habitats)s, %(in_catalogue)s) "
     "on conflict (id) do update set gbif_key=excluded.gbif_key, scientific_name=excluded.scientific_name, "
     "taxon_group=excluded.taxon_group, vertebrate=excluded.vertebrate, active_months=excluded.active_months, "
+    "in_catalogue=excluded.in_catalogue, "
 )
 
 

@@ -146,7 +146,15 @@ Deno.serve(async (req: Request) => {
     const presenceByRegion = new Map();
     for (const region of new Set(users.map((u) => u.homeRegion).filter((r): r is string => r !== null))) {
       const rows = await readAll((from, to) =>
-        db.from('species_presence').select('species_id, active_months, occurrences').eq('region_id', region).range(from, to),
+        // Service role bypasses RLS, so the catalogue rule (T-225) is applied here explicitly:
+        // a species the noise filter rejects is never sent as "active in your region".
+        db
+          .from('species_presence')
+          .select('species_id, active_months, occurrences, species!inner(in_catalogue)')
+          .eq('region_id', region)
+          .eq('species.in_catalogue', true)
+          .order('species_id')
+          .range(from, to),
       );
       presenceByRegion.set(
         region,

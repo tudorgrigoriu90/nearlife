@@ -192,3 +192,30 @@ def test_no_english_name_stays_null_even_when_other_languages_have_one():
     vernacular = {"5333412": {"sv": "Klockljung"}}
     rows, _ = build_rows([("flora", [_rec("SWE.9_1", 5333412, "Erica tetralix", [7], 3)])], vernacular)
     assert rows[0]["common_name"] is None
+
+
+def test_each_species_row_carries_the_noise_filter_verdict():
+    # T-225: the database must know which species ship, or the app shows everything recorded.
+    widespread = [_rec(f"SWE.{n}_1", 1, "Parus major", [5], 50) for n in range(1, 5)]  # 4 counties, 200
+    local_well = [_rec("SWE.9_1", 2, "Lunaria rediviva", [5], 150)]  # 1 county, 150 (T-194 B)
+    local_thin = [_rec("SWE.9_1", 3, "Pilosella dichotoma", [5], 60)]  # 1 county, 60
+    few = [_rec(f"SWE.{n}_1", 4, "Vagrantus rarus", [5], 3) for n in range(1, 5)]  # 12 records
+    species, _ = build_rows([("birds", widespread + few), ("flora", local_well + local_thin)])
+    verdict = {s["scientific_name"]: s["in_catalogue"] for s in species}
+    assert verdict == {
+        "Parus major": True,
+        "Lunaria rediviva": True,
+        "Pilosella dichotoma": False,
+        "Vagrantus rarus": False,
+    }
+
+
+def test_the_verdict_matches_the_catalogue_artefact():
+    # One rule, two outputs: the database flag and catalogue.json must never disagree.
+    from gbif.catalogue import build_catalogue
+
+    recs = [_rec("SWE.9_1", 2, "Lunaria rediviva", [5], 150), _rec("SWE.9_1", 3, "Pilosella dichotoma", [5], 60)]
+    species, _ = build_rows([("flora", recs)])
+    cat = build_catalogue([("flora", recs)])
+    shipped = {e["scientificName"] for e in cat["included"]}
+    assert {s["scientific_name"] for s in species if s["in_catalogue"]} == shipped

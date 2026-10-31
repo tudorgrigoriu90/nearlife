@@ -3474,7 +3474,7 @@ only.**
       `(( SELECT auth.uid() AS uid) = user_id)` `to authenticated`.
     - Verify run 41121612142 passed every check. That includes an anonymous user's catches up
       to the free limit (the `authenticated` path) and "anon reads no collection rows".
-- **T-225 · The noise filter never reached the app** — *Claude · M · `TODO` · deps: T-136, T-194 · invariant #1*
+- **T-225 · The noise filter never reached the app** — *Claude · M · `IN-PROGRESS` (built + tested; migration apply, verify and function deploy pending) · deps: T-136, T-194 · invariant #1*
   - Found 2026-10-31 while sizing T-194. The T-136 filter decides `catalogue.json`, which drives
     names, content and photos. But the loader writes **presence for every recorded species**,
     and `region_catalogue` (the almanac and This Week) serves whatever has presence.
@@ -3484,6 +3484,24 @@ only.**
   - Fix: `species.in_catalogue`, set by the loader from the filter verdict. `region_catalogue`
     and the notification sender serve only catalogue species, enforced in the database so no
     client path can show them. Tests and a live verify check.
+  - ✅ **Built (2026-10-31).**
+    - **Loader:** `gbif/db_rows.py` gives every species row `in_catalogue`, from the same
+      `classify` on the same signals as `catalogue.json`. A test pins the two together.
+      `supabase_load` writes the flag on every run.
+    - **Database:** migration `20261031000001` adds the column and fills it once with the same
+      thresholds in SQL. A test pins those numbers to `noise.Policy`. Curated species always
+      ship. Presence is readable by users only for catalogue species (RLS).
+    - **What inherits the rule:** `region_catalogue` runs with the caller's rights, so the
+      almanac and This Week inherit the rule with no app change. The app's full species list
+      filters on the flag.
+    - **Notifications:** the sender uses the service role, which bypasses RLS, so it joins
+      `species!inner(in_catalogue)` and filters explicitly. It also gained a stable order for
+      its paged read.
+    - **Species table:** stays readable, so a collected species' card still loads if it later
+      leaves the catalogue.
+    - **Live verify:** 3 checks (anon sees no presence outside the catalogue; catalogue
+      presence is readable; `region_catalogue` serves catalogue species only).
+    - 6 tests (2 loader, 2 SQL guard, 1 app gateway, plus the T-194 rule).
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

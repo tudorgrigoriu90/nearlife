@@ -5,6 +5,7 @@ import {
   HardcodedSpeciesRepository,
   minigameCategory,
   speciesRowToSpecies,
+  SupabaseSpeciesGateway,
   SupabaseSpeciesRepository,
   type SpeciesContentRow,
   type SpeciesGateway,
@@ -252,5 +253,23 @@ describe('mediaRowToPhoto (T-215)', () => {
       'en',
     );
     expect(species.catchHabitats).toEqual(['freshwater', 'coast']); // unknown values dropped
+  });
+});
+
+describe('SupabaseSpeciesGateway.fetchSpecies (T-225)', () => {
+  it('asks only for species the noise filter ships', async () => {
+    const calls: unknown[][] = [];
+    const client = {
+      from: (table: string) => ({
+        select: (cols: string) => ({
+          eq: (col: string, val: unknown) => {
+            calls.push([table, cols, col, val]);
+            return Promise.resolve({ data: [], error: null });
+          },
+        }),
+      }),
+    };
+    await new SupabaseSpeciesGateway(client as never).fetchSpecies();
+    expect(calls).toEqual([['species', expect.any(String), 'in_catalogue', true]]);
   });
 });

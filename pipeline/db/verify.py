@@ -393,6 +393,23 @@ def run_household_checks(cur) -> dict[str, str]:
     return results
 
 
+def run_catalogue_checks(cur) -> dict[str, str]:
+    """T-225: users can read presence only for species the noise filter ships."""
+    results: dict[str, str] = {}
+    cur.execute("set local role anon")
+    cur.execute("select set_config('request.jwt.claims', %s, true)", (json.dumps({"role": "anon"}),))
+    _step(cur, results, "presence of a species outside the catalogue is not readable",
+          "select case when count(*) = 0 then 'ok' else 'LEAK: ' || count(*) end "
+          "from public.species_presence p join public.species s on s.id = p.species_id where not s.in_catalogue")
+    _step(cur, results, "presence of catalogue species is readable",
+          "select case when count(*) > 0 then 'ok' else 'nothing readable' end from public.species_presence")
+    _step(cur, results, "region_catalogue serves only catalogue species",
+          "select case when count(*) = 0 then 'ok' else 'LEAK: ' || count(*) end "
+          "from public.region_catalogue('SWE.9_1', 'en') c join public.species s on s.id = c.id where not s.in_catalogue")
+    cur.execute("reset role")
+    return results
+
+
 def run_catch_spot_checks(cur) -> dict[str, str]:
     """T-049: the read policy, not the app, is what keeps a flagged spot from ever being shown."""
     results: dict[str, str] = {}
@@ -434,6 +451,7 @@ def main() -> None:
                 results.update(run_entitlement_checks(cur))
                 results.update(run_household_checks(cur))
                 results.update(run_catch_spot_checks(cur))
+                results.update(run_catalogue_checks(cur))
         finally:
             conn.rollback()  # always: these checks must never leave a trace
 

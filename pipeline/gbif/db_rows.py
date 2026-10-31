@@ -16,6 +16,7 @@ from typing import Iterable, Iterator
 
 from gbif.counties import NORDIC_COUNTRIES
 from gbif.habitats import catch_habitats
+from gbif.noise import SpeciesSignals, classify
 
 # file taxon key → (taxon_group, vertebrate, app category or None)
 TAXON_MAP: dict[str, tuple[str, bool, str | None]] = {
@@ -51,6 +52,7 @@ def build_rows(
     """
     species: dict[str, dict] = {}
     presence: list[dict] = []
+    counties: dict[str, set] = {}
     vernacular = vernacular or {}
 
     for taxon_key, records in datasets:
@@ -85,6 +87,7 @@ def build_rows(
                 sp["active_months"].update(months)
                 sp["occurrences"] += occ
 
+            counties.setdefault(sid, set()).add(r["county"])
             presence.append(
                 {
                     "region_id": r["county"],
@@ -94,8 +97,23 @@ def build_rows(
                 }
             )
 
+    # Whether the species ships (T-225): the same noise filter, on the same signals, as
+    # catalogue.json (gbif/catalogue.py). The database enforces it, so a species the filter
+    # rejects is never served as "active in your region".
     species_rows = [
-        {**sp, "active_months": sorted(sp["active_months"])} for sp in species.values()
+        {
+            **sp,
+            "active_months": sorted(sp["active_months"]),
+            "in_catalogue": classify(
+                SpeciesSignals(
+                    scientific_name=sp["scientific_name"],
+                    occurrences=sp["occurrences"],
+                    counties=len(counties[sp["id"]]),
+                    months=len(sp["active_months"]),
+                )
+            ).included,
+        }
+        for sp in species.values()
     ]
     return species_rows, presence
 

@@ -366,7 +366,10 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
   async fetchSpecies(): Promise<SpeciesRow[]> {
     const { data, error } = await this.client
       .from('species')
-      .select(SPECIES_COLUMNS);
+      .select(SPECIES_COLUMNS)
+      // Only species the noise filter ships (T-225). Presence is already limited by RLS; this
+      // list reads the species table, which stays readable so a collected species' card loads.
+      .eq('in_catalogue', true);
     if (error) throw new Error(`species fetch failed: ${error.message}`);
     return (data ?? []) as SpeciesRow[];
   }
