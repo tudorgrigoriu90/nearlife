@@ -287,13 +287,18 @@ before pushing — CI runs after the push and reports (does not block) a red `ma
 - **T-017 · Enable PostGIS + pg_cron extensions** — *Claude · XS · `DONE` · deps: T-016 · [TSD §1](TSD.md)*
   - ✅ `postgis` 3.3 (GEOS/PROJ) and `pg_cron` 1.6.4 installed and **verified live**
     (`select postgis_version()` returns; `pg_cron` present). Migration `…000002_extensions.sql`.
-- **T-018 · Base auth configuration** — *Claude · S · `IN-PROGRESS` · deps: T-003 · [TSD §1](TSD.md)*
+- **T-018 · Base auth configuration** — *Claude · S · `DONE` (anonymous + email auth live, 2026-10-31) · deps: T-003 · [TSD §1](TSD.md)*
   - ✅ **Email** provider enabled (Director). ⏳ **Anonymous sign-ins** pending — it's a GoTrue
     setting (not a provider card and not exposed to the connector's tools), toggled at
     **Authentication → Sign In / Providers** (`/dashboard/project/subjdoiicfmiimtvlzsg/auth/providers`)
     via the **"Allow anonymous sign-ins"** switch at the top of the page. Recommended for the
     frictionless prototype session (`supabase.auth.signInAnonymously()`); email magic-link is the
     fallback. Client-side auth bootstrap is wired next with T-027.
+  - ✅ **Done (verified live 2026-10-31).** Anonymous sign-ins are on: `auth.users` holds an
+    anonymous account created this month (the Director's phone, T-205), and the live verify
+    signs in anonymous test users on every run (T-200/T-224).
+    - Email linking for reinstall survival is T-133.
+    - Advisor review: T-164.
 
 > **✅ Security finding resolved (2026-07-05):** the pre-existing `SECURITY DEFINER` event-trigger
 > function `public.rls_auto_enable()` had `EXECUTE` granted to `anon`/`authenticated` (advisor
@@ -880,7 +885,7 @@ key before loading into Supabase.**
     - Curated, species-specific text for the 54 Kronoberg species. Everyone else gets the
       universally safe taxon-group template (`pipeline/media/content_templates.py`).
     - The standing "follow local law" line is shown on every card and on the catch-success
-      tip (`FOLLOW_LOCAL_LAW`).
+      tip (`card.followLaw`).
     - No risky plant or release specifics: checked and test-guarded in T-054.
     - Mission content is free for every species (invariant #2).
 - **T-053 · Author depth tiers 2–5** — *Claude · XL · `DEFERRED` (Director, 2026-08-11 — post-validation) · deps: T-051 · [GDD §8](GDD.md), [ECONOMY](ECONOMY.md)*
