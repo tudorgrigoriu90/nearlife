@@ -3662,6 +3662,16 @@ only.**
   - Settings gets a "Privacy policy" row opening https://nytta-ai.se/nearby/privacy/ (Play and
     GDPR transparency expect the policy reachable from inside the app). Test the row and the URL.
 
+- **T-229 · Bottom buttons hidden under the Android navigation bar** — *Claude · XS · `DONE` · deps: T-141*
+  - Found on the Director's phone (first internal build): "Start exploring", "Find it nearby" and the
+    tab bar sat under Android's navigation buttons. Android 15+ and Expo SDK 57 draw apps edge to
+    edge, so the app must inset itself. New `AppRoot.tsx` (now the registered root) wraps App in
+    `react-native-safe-area-context` with the bottom and side edges; every screen renders inside
+    App and there are no RN Modals, so one root inset covers them all, on iOS's home indicator too.
+    The top edge is left out because screens already pad below the status bar.
+  - `react-native-safe-area-context` ~5.7.0 is the SDK-57 bundled version (Expo's standard for
+    this, already expected by the SDK); it's native, so it reaches phones with the next build.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
