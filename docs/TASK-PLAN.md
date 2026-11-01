@@ -3672,6 +3672,19 @@ only.**
   - `react-native-safe-area-context` ~5.7.0 is the SDK-57 bundled version (Expo's standard for
     this, already expected by the SDK); it's native, so it reaches phones with the next build.
 
+- **T-230 · "Machine-translated" label shown over English-only text** — *Claude · XS · `DONE` · deps: T-152*
+  - Found on the Director's phone with Romanian as the second language: the Greylag Goose card said
+    "Română · Machine-translated" while every field was English, because Romanian has content for
+    only the 54 curated species (T-231). The label now shows only when the species has secondary
+    content, so English is never passed off as the translation. Tested.
+- **T-231 · Second-language content for the 20 EU languages** — *Claude · M · `TODO` · deps: T-180*
+  - `species_content` has 11,937 species for en, sv and the 18 immigrant languages, but only the
+    54 curated species for bg, cs, da, de, el, es, et, fi, fr, hr, hu, it, lt, lv, nl, pl, pt, ro,
+    sk, sl (ga and mt have none). Cause: `pipeline/media/templates_i18n.py` has no entry for them,
+    so `build_content.py` never generates their rows. Fix: add the 20 locales (months in three
+    cases, season patterns, give/protect/habitat per taxon, aquatic habitat), regenerate content in
+    CI and load it. Facts come from each language's Wikipedia as for every other locale (T-179).
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

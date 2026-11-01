@@ -87,8 +87,13 @@ export default function SpeciesCard({
   // the whole line and it displayed reversed as "Machine-translated · العربية". Isolates alone do
   // NOT fix it; the line needs an explicit writing direction, taken from the primary (chrome)
   // language. The isolate stays as defence in depth around the embedded endonym.
+  //
+  // Only over text that is actually there (T-230): with no secondary content for this species the
+  // card is all primary, and the label would pass that off as the translation.
   const mtNotice =
-    secondaryLocale !== null && needsMachineTranslationNotice(secondaryLocale)
+    secondaryLocale !== null &&
+    secondaryContent !== null &&
+    needsMachineTranslationNotice(secondaryLocale)
       ? `${isolate(endonymOf(secondaryLocale))} · ${tr('dual.machineTranslated')}`
       : null;
   const chromeDirection = writingDirectionFor(locale as ContentLocale);
@@ -156,7 +161,10 @@ export default function SpeciesCard({
               accent="protect"
             />
             {onPledge && !tier.helped ? (
-              <PledgeButton label={tr('card.pledge')} onPress={() => onPledge(species, 'protect')} />
+              <PledgeButton
+                label={tr('card.pledge')}
+                onPress={() => onPledge(species, 'protect')}
+              />
             ) : null}
             <Text style={styles.law}>⚖ {tr('card.followLaw')}</Text>
           </>
@@ -173,7 +181,9 @@ export default function SpeciesCard({
                   key={level}
                   style={[styles.depthPill, unlocked ? styles.depthUnlocked : styles.depthLocked]}
                 >
-                  <Text style={[styles.depthNum, unlocked && styles.depthNumUnlocked]}>{level}</Text>
+                  <Text style={[styles.depthNum, unlocked && styles.depthNumUnlocked]}>
+                    {level}
+                  </Text>
                 </View>
               );
             })}
@@ -184,7 +194,11 @@ export default function SpeciesCard({
 
       {onFindNearby ? (
         <View style={styles.ctaWrap}>
-          <Pressable onPress={() => onFindNearby(species)} accessibilityRole="button" style={styles.cta}>
+          <Pressable
+            onPress={() => onFindNearby(species)}
+            accessibilityRole="button"
+            style={styles.cta}
+          >
             <Text style={styles.ctaText}>{tr('card.findNearby')} →</Text>
           </Pressable>
           {nearbyNote ? <Text style={styles.nearbyNote}>{nearbyNote}</Text> : null}
@@ -246,17 +260,50 @@ const styles = StyleSheet.create({
   notSpotted: { marginTop: 8, fontSize: 12, fontWeight: '700', color: '#7a8a7c', letterSpacing: 1 },
   fact: { fontSize: 17, lineHeight: 24, color: '#2f3d2c', marginBottom: 8 },
   section: { marginTop: 14 },
-  sectionTitle: { fontSize: 12, fontWeight: '700', letterSpacing: 1, color: '#4a5c4d', textTransform: 'uppercase' },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: '#4a5c4d',
+    textTransform: 'uppercase',
+  },
   giveTitle: { color: '#2f7d4f' },
   protectTitle: { color: '#2f5d8a' },
   sectionBody: { marginTop: 4, fontSize: 15, lineHeight: 21, color: '#2f3d2c' },
-  pledgeBtn: { marginTop: 8, alignSelf: 'flex-start', paddingVertical: 8, paddingHorizontal: 14, borderRadius: 10, backgroundColor: '#e7f2e7', borderWidth: 1, borderColor: '#bcd9bd' },
+  pledgeBtn: {
+    marginTop: 8,
+    alignSelf: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: '#e7f2e7',
+    borderWidth: 1,
+    borderColor: '#bcd9bd',
+  },
   pledgeBtnText: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
   law: { marginTop: 16, fontSize: 12, color: '#7a8a7c', fontStyle: 'italic' },
-  depthBlock: { marginTop: 24, paddingTop: 16, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#d4e0d2' },
-  depthLabel: { fontSize: 12, fontWeight: '700', letterSpacing: 1, color: '#4a5c4d', textTransform: 'uppercase' },
+  depthBlock: {
+    marginTop: 24,
+    paddingTop: 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#d4e0d2',
+  },
+  depthLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: '#4a5c4d',
+    textTransform: 'uppercase',
+  },
   depthRow: { flexDirection: 'row', marginTop: 8, gap: 8 },
-  depthPill: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  depthPill: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
   depthUnlocked: { backgroundColor: '#3a7d44' },
   depthLocked: { backgroundColor: '#e2ebe0' },
   depthNum: { fontSize: 15, fontWeight: '700', color: '#9fb0a0' },

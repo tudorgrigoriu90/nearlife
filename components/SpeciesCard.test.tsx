@@ -134,6 +134,9 @@ describe('SpeciesCard — dual language', () => {
     // Primary content intact, and nothing blank or duplicated in its place.
     expect(screen.getByText(swiftContent!.give)).toBeTruthy();
     expect(screen.getByText(commonNameFor(swift, 'en'), { exact: false })).toBeTruthy();
+    // No "Svenska · Machine-translated" over text that is all English (T-230): the label would
+    // pass the primary off as the translation.
+    expect(screen.queryByText(tr('dual.machineTranslated'), { exact: false })).toBeNull();
   });
 
   it('renders a right-to-left secondary with its own writing direction', async () => {
