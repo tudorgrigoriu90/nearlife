@@ -3751,7 +3751,7 @@ only.**
     `commonNameFor`/`commonNameInLocale`), locale-aware (Turkish i → İ), rest untouched
     ("Större hackspett"). Tested.
 
-- **T-237 · Reviewer access code for Google Play review** — *Claude · S · `IN-PROGRESS` (built + tested; migration apply + live verify pending) · deps: T-217*
+- **T-237 · Reviewer access code for Google Play review** — *Claude · S · `DONE` (app side reaches phones with the next build) · deps: T-217*
   - Play reviewers can't buy and the app has no password login, so they'd only see the free part
     (a rejection risk). Migration `20261101000001_reviewer_access.sql`: `reviewer_codes` (SHA-256
     hashes only, use budget, expiry) and `reviewer_redemptions`, both closed to clients;
@@ -3762,6 +3762,8 @@ only.**
   - App: Settings → Access code (only with a backend) → `AccessCodeScreen`, which sends the code and
     refreshes entitlements on success; Android back closes it. Tests: lib, screen, Settings row,
     static SQL checks, and six live checks in `db/verify.py`.
+  - ✅ Applied and verified live (2026-11-01, db-migrate apply + verify: every rule incl. the six
+    reviewer checks held); the seeded hash matches the code given to the Director.
   - Director: paste the App access text from PLAY-STORE-LISTING.md with the code.
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
