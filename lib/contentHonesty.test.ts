@@ -11,7 +11,12 @@ import { KRONOBERG_CONTENT } from './species/content';
 import { SV_CONTENT } from './species/content.sv';
 import type { SpeciesContent } from './species/content';
 
-const CONTENT_FIELDS: (keyof SpeciesContent)[] = ['fact', 'whenAndHow', 'give', 'protect'];
+const CONTENT_FIELDS = [
+  'fact',
+  'whenAndHow',
+  'give',
+  'protect',
+] as const satisfies readonly (keyof SpeciesContent)[];
 
 describe('findRealtimeClaims', () => {
   it('detects a real-time-presence claim, case-insensitively', () => {

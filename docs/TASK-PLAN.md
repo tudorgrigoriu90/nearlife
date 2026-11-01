@@ -3718,6 +3718,15 @@ only.**
     skipped (no county to confirm), back from the next step skips it too, or it would bounce
     forward again. Unit tests for the step rule plus an App flow test.
 
+- **T-234 · English name shown as the second-language name** — *Claude · XS · `DONE` · deps: T-149*
+  - Found on the Director's phone (Swedish app, Romanian second language): the heron's title read
+    "gråhäger / Grey Heron", because the missing Romanian name fell back to English and was shown
+    as if it were Romanian. The card now uses the second language's name exactly or nothing
+    (`commonNameInLocale`). And the name now has a live source: catalogue species are read in the
+    app language only, so the second language's `common_name` is carried on its content row
+    (`SpeciesContent.commonName`, mapped from the DB row); without it, Romanian names loaded by
+    T-231 would never have reached the card. Tests for both.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

@@ -232,6 +232,7 @@ export function speciesRowToSpecies(row: SpeciesRow): Species {
 export function contentRowToContent(row: SpeciesContentRow): SpeciesContent {
   return {
     speciesId: row.species_id,
+    ...(row.common_name ? { commonName: row.common_name } : {}),
     // A null DB fact (no article, T-146) becomes an empty string in the domain object; the card
     // treats empty as "no fact" and hides the fact block while still showing the mission content.
     fact: row.fact ?? '',

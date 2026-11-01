@@ -60,7 +60,9 @@ describe('row mapping', () => {
       species_id: 'pike', locale: 'en', common_name: 'Northern Pike',
       fact: 'f', when_how: 'w', give: 'g', protect: 'p',
     };
-    expect(contentRowToContent(row)).toEqual({ speciesId: 'pike', fact: 'f', whenAndHow: 'w', give: 'g', protect: 'p' });
+    expect(contentRowToContent(row)).toEqual({
+      speciesId: 'pike', commonName: 'Northern Pike', fact: 'f', whenAndHow: 'w', give: 'g', protect: 'p',
+    });
   });
 
   it('maps a null fact (no article, T-146) to an empty string, keeping the mission content', () => {
@@ -72,6 +74,8 @@ describe('row mapping', () => {
     expect(content.fact).toBe(''); // card treats empty as "no fact" and hides that block
     expect(content.give).toBe('g'); // mission is still free for every species (invariant #2)
     expect(content.protect).toBe('p');
+    // No sourced name stays absent, never a stand-in (T-234).
+    expect(content.commonName).toBeUndefined();
   });
 });
 

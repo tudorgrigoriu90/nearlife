@@ -17,6 +17,12 @@ export const FOLLOW_LOCAL_LAW =
 export interface SpeciesContent {
   /** Matches Species.id in kronoberg.ts. */
   speciesId: string;
+  /**
+   * The species' name in this content's language, when one is sourced (T-234). Lets the
+   * second-language half of a card name the species even when the catalogue was read in the app
+   * language only. Absent, never a stand-in from another language.
+   */
+  commonName?: string;
   /** Tier-1 fact (always free). */
   fact: string;
   /** "When & how to see it" trivia (always free) — seasonal/behavioural, never "right now". */

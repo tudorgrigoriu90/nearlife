@@ -10,7 +10,7 @@ import {
   needsMachineTranslationNotice,
   type ContentLocale,
 } from '../lib/i18n/contentLocale';
-import { commonNameFor } from '../lib/species/localized';
+import { commonNameFor, commonNameInLocale } from '../lib/species/localized';
 import { buildShareMessage } from '../lib/shareSpecies';
 import type { SpeciesContent } from '../lib/species/content';
 import type { Species } from '../lib/species/types';
@@ -74,7 +74,11 @@ export default function SpeciesCard({
   const name = dualTitle(
     dual(
       commonNameFor(species, locale),
-      secondaryLocale ? commonNameFor(species, secondaryLocale) : undefined,
+      // Exactly the second language, never the English fallback: "gråhäger / Grey Heron" passed
+      // English off as Romanian (T-234).
+      secondaryLocale
+        ? (secondaryContent?.commonName ?? commonNameInLocale(species, secondaryLocale))
+        : undefined,
     ),
   );
   // Honesty (T-152/T-153): machine-translated content is always labelled, so the aid is never

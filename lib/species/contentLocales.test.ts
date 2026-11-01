@@ -13,7 +13,12 @@ import {
 // registered in CONTENT_BY_LOCALE, so a new language needs only its content, its names, and its
 // registrations — and cannot skip the checks by forgetting to write a test.
 
-const FIELDS: (keyof SpeciesContent)[] = ['fact', 'whenAndHow', 'give', 'protect'];
+const FIELDS = [
+  'fact',
+  'whenAndHow',
+  'give',
+  'protect',
+] as const satisfies readonly (keyof SpeciesContent)[];
 
 // Scripts that must appear, for locales not written in Latin. Latin-script languages are covered
 // by the differs-from-English check below instead, which is the stronger test anyway.
@@ -91,7 +96,8 @@ describe('every seeded content locale', () => {
 
     it('names every species, with no orphan names', () => {
       expect(names).toBeDefined();
-      for (const s of KRONOBERG_SPECIES) expect(names![s.id]?.trim().length ?? 0).toBeGreaterThan(0);
+      for (const s of KRONOBERG_SPECIES)
+        expect(names![s.id]?.trim().length ?? 0).toBeGreaterThan(0);
       const ids = new Set(KRONOBERG_SPECIES.map((s) => s.id));
       for (const id of Object.keys(names!)) expect(ids.has(id)).toBe(true);
     });

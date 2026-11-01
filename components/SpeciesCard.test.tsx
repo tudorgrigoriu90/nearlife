@@ -30,7 +30,9 @@ describe('SpeciesCard', () => {
 
   it('shows the mission with no fact block when the species has no article (T-146)', async () => {
     // A species with no Wikipedia article arrives with fact = '' (repository maps DB NULL → '').
-    await render(<SpeciesCard species={swift} content={{ ...swiftContent!, fact: '' }} locale="en" />);
+    await render(
+      <SpeciesCard species={swift} content={{ ...swiftContent!, fact: '' }} locale="en" />,
+    );
     // Mission is still free for every species (invariant #2)…
     expect(screen.getByText(tr('card.give'))).toBeTruthy();
     expect(screen.getByText(tr('card.protect'))).toBeTruthy();
@@ -52,7 +54,12 @@ describe('SpeciesCard', () => {
   it('launches the catch flow from "find it nearby"', async () => {
     const onFindNearby = jest.fn();
     await render(
-      <SpeciesCard species={swift} content={swiftContent} locale="en" onFindNearby={onFindNearby} />,
+      <SpeciesCard
+        species={swift}
+        content={swiftContent}
+        locale="en"
+        onFindNearby={onFindNearby}
+      />,
     );
     fireEvent.press(screen.getByText(tr('card.findNearby'), { exact: false }));
     expect(onFindNearby).toHaveBeenCalledTimes(1);
@@ -121,6 +128,49 @@ describe('SpeciesCard — dual language', () => {
     expect(screen.getByText(`${FSI}Svenska${PDI} · ${tr('dual.machineTranslated')}`)).toBeTruthy();
   });
 
+  it('never shows the English name in the second-language slot (Grey Heron under Romanian)', async () => {
+    // Found on the Director's phone: Swedish app, Romanian second language, and the heron's title
+    // read "gråhäger / Grey Heron" because the missing Romanian name fell back to English.
+    const heron = {
+      ...swift,
+      id: 'gbif:9797180',
+      commonName: 'Grey Heron',
+      names: { sv: 'gråhäger' },
+    };
+    await render(
+      <SpeciesCard
+        species={heron}
+        content={swiftContent}
+        locale="sv"
+        secondaryContent={null}
+        secondaryLocale="ro"
+      />,
+    );
+    expect(screen.getByText('gråhäger')).toBeTruthy();
+    expect(screen.queryByText(/Grey Heron/)).toBeNull();
+  });
+
+  it("takes the second-language name from that language's content row", async () => {
+    // Catalogue species carry names only in the app language; the second language's name arrives
+    // with its content row (T-234).
+    const heron = {
+      ...swift,
+      id: 'gbif:9797180',
+      commonName: 'Grey Heron',
+      names: { sv: 'gråhäger' },
+    };
+    await render(
+      <SpeciesCard
+        species={heron}
+        content={swiftContent}
+        locale="sv"
+        secondaryContent={{ ...swiftContent!, commonName: 'Stârc cenușiu' }}
+        secondaryLocale="ro"
+      />,
+    );
+    expect(screen.getByText(/Stârc cenușiu/)).toBeTruthy();
+  });
+
   it('degrades to the primary alone when the secondary content is missing', async () => {
     await render(
       <SpeciesCard
@@ -167,7 +217,9 @@ describe('SpeciesCard — dual language', () => {
       `العربية · ${tr('dual.machineTranslated')}`,
     );
     // The title mixes directions the same way and is pinned to the chrome direction too.
-    const title = screen.getByText(`${FSI}${commonNameFor(swift, 'en')}${PDI} / ${FSI}${AR_NAMES[swift.id]}${PDI}`);
+    const title = screen.getByText(
+      `${FSI}${commonNameFor(swift, 'en')}${PDI} / ${FSI}${AR_NAMES[swift.id]}${PDI}`,
+    );
     expect(StyleSheet.flatten(title.props.style)).toMatchObject({ writingDirection: 'ltr' });
 
     const arabicGive = screen.getByText(arabic.give);
