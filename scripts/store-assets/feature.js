@@ -1,11 +1,11 @@
 /* global __dirname */
 const { chromium } = require('playwright');
-const { PIN, LEAF, VEIN } = require('./mark.js');
+const { DEFS, mark: pinMark } = require('./mark.js');
 const COPY = {
   en: { tag: 'The wildlife and plants active in your county, season by season.', sub: 'Over 8,000 Swedish species · No ads' },
   sv: { tag: 'Djur och växter som är aktiva i ditt län, säsong för säsong.', sub: 'Över 8 000 svenska arter · Ingen reklam' },
 };
-const mark = `<svg viewBox="270 200 484 640" width="150" height="198"><defs><linearGradient id="lf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fae5a"/><stop offset="1" stop-color="#2f7d4f"/></linearGradient></defs><path d="${PIN}" fill="#f4f8f2"/><path d="${LEAF}" fill="url(#lf)"/><path d="${VEIN}" stroke="#eaf4ea" stroke-width="12" stroke-linecap="round" fill="none" opacity="0.85"/></svg>`;
+const mark = `<svg viewBox="270 200 484 640" width="150" height="198"><defs>${DEFS}</defs>${pinMark()}</svg>`;
 const hills = `<svg viewBox="0 0 1024 500" width="1024" height="500" style="position:absolute;inset:0" preserveAspectRatio="none">
   <circle cx="860" cy="150" r="70" fill="#f4f8f2" opacity="0.14"/>
   <circle cx="860" cy="150" r="44" fill="#f4f8f2" opacity="0.18"/>

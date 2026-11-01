@@ -1788,7 +1788,9 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
   - Remaining: name check, graphics and screenshots, the hosted pages (Step 10), then entering it
     all in Play Console (Director).
   - ✅ **Brand mark + store graphics (2026-10-31).** The app still shipped Expo's template icon (a
-    blue "A"). New mark: a cream map pin holding a leaf on the app's greens, drawn as SVG in
+    blue "A"). New mark (Director's pick, 2026-11-01, replacing a first leaf-in-pin version): a
+    children's-book blue tit (blåmes) on a branch inside a cream map pin on the app's greens, ink
+    outlines with watercolour-style paint; the themed icon is a simple bird silhouette. Drawn as SVG in
     `scripts/store-assets/` and rendered with the bundled Playwright, so every size comes from one
     source: `assets/icon.png`, the adaptive foreground/background, the themed (monochrome) icon,
     splash, favicon, the 512² Play icon and 1024×500 feature graphics in sv and en

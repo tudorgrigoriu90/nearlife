@@ -79,7 +79,8 @@ and Play would keep those line breaks.
 ## Graphic assets
 Files are in [`store-assets/`](store-assets/); regenerate with `node scripts/store-assets/render.js`
 and `node scripts/store-assets/feature.js`.
-- [x] **App icon** 512×512: `store-assets/play-icon-512.png`. The same mark is the in-app icon
+- [x] **App icon** 512×512: `store-assets/play-icon-512.png` (a blue tit on a branch in the
+  location pin). The same mark is the in-app icon
   (`assets/icon.png`, adaptive and themed Android icons), so store and phone match.
 - [x] **Feature graphic** 1024×500: `store-assets/feature-graphic-sv.png` on the Swedish listing,
   `feature-graphic-en.png` on the English one.
