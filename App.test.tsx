@@ -375,4 +375,26 @@ describe('App', () => {
     },
     FLOW_TIMEOUT,
   );
+  it(
+    'keeps the second language after switching the app language (Romanian under Swedish)',
+    async () => {
+      await completeOnboarding();
+      // The Director's order: second language picked while the app is in English…
+      await press(tr('nav.settings'), { exact: false });
+      await act(async () => {
+        const switches = screen.getAllByRole('switch'); // consent toggles come first
+        fireEvent(switches[switches.length - 1], 'valueChange', true);
+      });
+      await fireEvent.press(await screen.findByTestId('dual-locale-ro'));
+      // …then the app language switched to Swedish.
+      // "Svenska" is listed twice (app language, then second-language options); the first is the app's.
+      await fireEvent.press(screen.getAllByText(tr('lang.sv'))[0]);
+      const sv = createTranslator('sv');
+      await press(sv('settings.done'));
+      await press(commonNameFor(topRow, 'sv'), { exact: false });
+      expect(await screen.findByText(sv('card.give'))).toBeTruthy();
+      expect(await screen.findByText(/Română/)).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
 });

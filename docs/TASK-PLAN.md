@@ -3691,6 +3691,14 @@ only.**
     to "the species", so pronouns agree with that word rather than a guessed animal gender. All
     existing locale checks pass for them (no doubled words, no invisible characters, aquatic hint,
     every taxon), plus new tests tying the list to the app's coverage table.
+  - Director report (2026-11-01): after switching the app from English to Swedish the second language
+    (Romanian) vanished. Checked: the setting survives the switch, and Romanian shows under Swedish
+    for the species that have it (App flow test added); the cards without it are the T-231 data gap,
+    no longer mislabelled since T-230. The content run now also fetches EU-language names
+    (vernacular=yes), or EU cards would get text without species names.
+  - Decided (Director, 2026-11-01): facts stay sourced from each language's own Wikipedia, never
+    machine-translated (T-179 holds), so small languages keep sparse facts; free offline MT and paid
+    MT were offered and declined.
 
 - **T-232 · Android back left the app from any screen** — *Claude · XS · `DONE` · deps: T-141*
   - Found on the Director's phone: the system back gesture/button closed the app instead of going
