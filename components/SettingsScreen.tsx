@@ -35,6 +35,7 @@ export default function SettingsScreen({
   onSelectSecondaryLocale,
   onExportData,
   onLinkEmail,
+  onOpenAccessCode,
   onOpenFamily,
   onOpenStore,
   onOpenCounties,
@@ -54,6 +55,8 @@ export default function SettingsScreen({
   onExportData: () => void;
   /** Open the link-email flow (T-133 · make the account durable across reinstall/devices). */
   onLinkEmail?: () => void;
+  /** Reviewer access codes (T-237); omitted without a backend, since the server checks the code. */
+  onOpenAccessCode?: () => void;
   /** Open the Family screen (T-103): join with a code, or manage your family. */
   onOpenFamily?: () => void;
   /** Open the Store (T-085): buy or restore the Full Game / Family. */
@@ -214,6 +217,16 @@ export default function SettingsScreen({
               style={[styles.row, styles.rowBorder]}
             >
               <Text style={styles.rowLabel}>{tr('settings.linkEmail')}</Text>
+              <Text style={styles.chevron}>›</Text>
+            </Pressable>
+          ) : null}
+          {onOpenAccessCode ? (
+            <Pressable
+              onPress={onOpenAccessCode}
+              accessibilityRole="button"
+              style={[styles.row, styles.rowBorder]}
+            >
+              <Text style={styles.rowLabel}>{tr('settings.accessCode')}</Text>
               <Text style={styles.chevron}>›</Text>
             </Pressable>
           ) : null}

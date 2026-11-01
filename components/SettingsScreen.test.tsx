@@ -33,6 +33,15 @@ describe('SettingsScreen', () => {
     expect(h.onExportData).toHaveBeenCalledTimes(1);
   });
 
+  it('offers the access code entry only with a backend to check it (T-237)', async () => {
+    await render(<SettingsScreen {...renderSettings()} />);
+    expect(screen.queryByText(tr('settings.accessCode'))).toBeNull();
+    const onOpenAccessCode = jest.fn();
+    await render(<SettingsScreen {...renderSettings()} onOpenAccessCode={onOpenAccessCode} />);
+    fireEvent.press(screen.getByText(tr('settings.accessCode')));
+    expect(onOpenAccessCode).toHaveBeenCalledTimes(1);
+  });
+
   it('opens the published privacy policy (T-228)', async () => {
     const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
     await render(<SettingsScreen {...renderSettings()} />);

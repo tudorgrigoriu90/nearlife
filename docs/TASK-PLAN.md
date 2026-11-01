@@ -3751,6 +3751,19 @@ only.**
     `commonNameFor`/`commonNameInLocale`), locale-aware (Turkish i → İ), rest untouched
     ("Större hackspett"). Tested.
 
+- **T-237 · Reviewer access code for Google Play review** — *Claude · S · `IN-PROGRESS` (built + tested; migration apply + live verify pending) · deps: T-217*
+  - Play reviewers can't buy and the app has no password login, so they'd only see the free part
+    (a rejection risk). Migration `20261101000001_reviewer_access.sql`: `reviewer_codes` (SHA-256
+    hashes only, use budget, expiry) and `reviewer_redemptions`, both closed to clients;
+    `redeem_reviewer_code(text)` (authenticated only, security definer) normalises the code,
+    spends one use, and grants `full_game` + `all_regions` through `set_entitlement`, the purchase
+    path, so every paid gate treats a reviewer like a buyer. Re-redeeming on the same account is a
+    free no-op. Seeded with one code (25 uses, expires 2027-12-31); the Director holds the code.
+  - App: Settings → Access code (only with a backend) → `AccessCodeScreen`, which sends the code and
+    refreshes entitlements on success; Android back closes it. Tests: lib, screen, Settings row,
+    static SQL checks, and six live checks in `db/verify.py`.
+  - Director: paste the App access text from PLAY-STORE-LISTING.md with the code.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

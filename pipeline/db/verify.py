@@ -76,6 +76,13 @@ EXPECTED: dict[str, str] = {
     "a spot inside a nature reserve is invisible": "ok",
     "a spot near a major road is invisible": "ok",
     "a user cannot add a catch spot": "permission denied",
+    # T-237 reviewer access codes: a valid code unlocks everything for that account only.
+    "a wrong reviewer code unlocks nothing": "ok",
+    "a reviewer code unlocks the Full Game and every county": "ok",
+    "redeeming again on the same account uses nothing": "ok",
+    "a used-up reviewer code is refused": "ok",
+    "an expired reviewer code is refused": "ok",
+    "users cannot read the reviewer codes": "permission denied",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -393,6 +400,64 @@ def run_household_checks(cur) -> dict[str, str]:
     return results
 
 
+def run_reviewer_checks(cur) -> dict[str, str]:
+    """T-237: reviewer codes unlock the paid content for one account, within their budget."""
+    results: dict[str, str] = {}
+
+    def new_user() -> str:
+        cur.execute(
+            "insert into auth.users (id, instance_id, aud, role, is_anonymous, created_at, updated_at) "
+            "values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', "
+            "'authenticated', true, now(), now()) returning id"
+        )
+        return str(cur.fetchone()[0])
+
+    def as_user(user: str | None) -> None:
+        if user is None:
+            cur.execute("reset role")
+            return
+        cur.execute("set local role authenticated")
+        cur.execute("select set_config('request.jwt.claims', %s, true)",
+                    (json.dumps({"sub": user, "role": "authenticated"}),))
+
+    def redeem(name: str, code: str, expect: bool) -> None:
+        _step(cur, results, name,
+              "select case when public.redeem_reviewer_code(%s) = %s then 'ok' else 'wrong answer' end",
+              (code, expect))
+
+    # One use left, plus an expired code; hashes of the normalised codes VERIFYTESTCODE / VERIFYOLD.
+    cur.execute(
+        "insert into public.reviewer_codes (code_hash, label, uses_left, expires_at) values "
+        "(encode(extensions.digest('VERIFYTESTCODE', 'sha256'), 'hex'), 'verify', 1, now() + interval '1 day'), "
+        "(encode(extensions.digest('VERIFYOLD', 'sha256'), 'hex'), 'verify old', 5, now() - interval '1 day')"
+    )
+    reviewer, other = new_user(), new_user()
+
+    as_user(reviewer)
+    redeem("a wrong reviewer code unlocks nothing", "NEARBY-ZZZZ-ZZZZ-ZZZZ", False)
+    redeem("a reviewer code unlocks the Full Game and every county", "verify-test-code", True)
+    as_user(None)
+    cur.execute(
+        "select (select full_game from public.profiles where user_id = %s), "
+        "exists (select 1 from public.entitlements where user_id = %s and entitlement = 'all_regions' and active)",
+        (reviewer, reviewer),
+    )
+    full_game, all_regions = cur.fetchone()
+    if results.get("a reviewer code unlocks the Full Game and every county") == "ok" and not (full_game and all_regions):
+        results["a reviewer code unlocks the Full Game and every county"] = (
+            f"redeemed, but full_game={full_game} all_regions={all_regions}"
+        )
+
+    as_user(reviewer)
+    redeem("redeeming again on the same account uses nothing", "VERIFY TEST CODE", True)
+    as_user(other)
+    redeem("a used-up reviewer code is refused", "VERIFYTESTCODE", False)
+    redeem("an expired reviewer code is refused", "verify-old", False)
+    _step(cur, results, "users cannot read the reviewer codes", "select count(*) from public.reviewer_codes")
+    as_user(None)
+    return results
+
+
 def run_catalogue_checks(cur) -> dict[str, str]:
     """T-225: users can read presence only for species the noise filter ships."""
     results: dict[str, str] = {}
@@ -452,6 +517,7 @@ def main() -> None:
                 results.update(run_household_checks(cur))
                 results.update(run_catch_spot_checks(cur))
                 results.update(run_catalogue_checks(cur))
+                results.update(run_reviewer_checks(cur))
         finally:
             conn.rollback()  # always: these checks must never leave a trace
 

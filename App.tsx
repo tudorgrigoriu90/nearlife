@@ -13,6 +13,7 @@ import SettingsScreen from './components/SettingsScreen';
 import DataExportView from './components/DataExportView';
 import DeleteAccountConfirm from './components/DeleteAccountConfirm';
 import LinkEmail from './components/LinkEmail';
+import AccessCodeScreen from './components/AccessCodeScreen';
 import BadgesScreen from './components/BadgesScreen';
 import ImpactScreen from './components/ImpactScreen';
 import FamilyScreen from './components/FamilyScreen';
@@ -53,6 +54,7 @@ import { AsyncStorageDualLanguageStore } from './lib/dualLanguageStore';
 import type { ContentLocale } from './lib/i18n/contentLocale';
 import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
 import { SupabaseAuthGateway } from './lib/accountLinking';
+import { SupabaseAccessCodeGateway } from './lib/reviewerAccess';
 import { ensureAnonymousSession, getSupabase } from './lib/supabase';
 import { hasSupabaseConfig } from './lib/supabaseConfig';
 import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib/communityImpact';
@@ -214,6 +216,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [showLinkEmail, setShowLinkEmail] = useState(false);
+  const [showAccessCode, setShowAccessCode] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
   const [showImpact, setShowImpact] = useState(false);
   const { entitlements, refresh: refreshEntitlements } = useEntitlements({
@@ -596,6 +599,7 @@ export default function App() {
     if (showStore) return closed(() => setShowStore(false));
     if (showFamily) return closed(() => setShowFamily(false));
     if (showLinkEmail) return closed(() => setShowLinkEmail(false));
+    if (showAccessCode) return closed(() => setShowAccessCode(false));
     if (showBadges) return closed(() => setShowBadges(false));
     if (showImpact) return closed(() => setShowImpact(false));
     if (showSettings) return closed(() => setShowSettings(false));
@@ -730,6 +734,20 @@ export default function App() {
     );
   }
 
+  if (showAccessCode) {
+    return (
+      <>
+        <AccessCodeScreen
+          locale={locale}
+          gateway={new SupabaseAccessCodeGateway(getSupabase())}
+          onUnlocked={refreshEntitlements}
+          onDone={() => setShowAccessCode(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (showBadges) {
     return (
       <>
@@ -779,6 +797,7 @@ export default function App() {
           }
           onExportData={() => void exportMyData()}
           onLinkEmail={() => setShowLinkEmail(true)}
+          onOpenAccessCode={hasSupabaseConfig() ? () => setShowAccessCode(true) : undefined}
           // Family needs the backend: households live in Supabase (T-102).
           onOpenFamily={hasSupabaseConfig() ? () => setShowFamily(true) : undefined}
           onOpenStore={

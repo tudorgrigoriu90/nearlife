@@ -133,10 +133,15 @@ tracking or advertising.
 - **Is any part of your app restricted? Yes.** There is no sign-in (anonymous accounts), but paid
   one-time products and the Family invite code are on Google's list of restrictions, and
   reviewers can't buy.
-- Sign-in details entry: **Name** `Reviewer access - no sign-in needed`; username and password
-  empty; **Any other information**: how to open the free app, and (once built) the reviewer
-  access code that unlocks the paid content. It must be in place before closed-test/production
-  review.
+- **Sign-in details** entry (T-237): **Name** `Reviewer access code`; username and password empty;
+  **Any other information required for access**:
+
+  ```
+  No account or sign-in is needed: the app opens fully on first launch. To unlock all paid content (Full Game and every county): open Settings (gear, bottom right) > Access code, enter the code below, tap Unlock. Code: <the reviewer code the Director holds>. To test Family after unlocking, a second device can join with the invite code shown under Settings > Family.
+  ```
+- The code itself is never written in the repository: only its SHA-256 hash is stored
+  (`supabase/migrations/20261101000001_reviewer_access.sql`). It allows 25 redemptions and
+  expires 2027-12-31; a new code is one more hashed row.
 
 ## In-app products
 - **Contains in-app purchases: Yes.** One-time products only (no subscription): Full Game, Family,
