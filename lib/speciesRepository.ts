@@ -1,3 +1,4 @@
+import { asTitleName } from './species/displayName';
 import { parseHabitats } from './catchSpots';
 import { GROUP_BY_TAXON } from './species/group';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -174,7 +175,7 @@ export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Specie
   const catchHabitats = parseHabitats(row.catch_habitats);
   return {
     ...base,
-    ...(row.local_name ? { names: { [locale]: row.local_name } } : {}),
+    ...(row.local_name ? { names: { [locale]: asTitleName(row.local_name, locale) } } : {}),
     ...(photo ? { photo } : {}),
     ...(catchHabitats ? { catchHabitats } : {}),
   };
@@ -219,7 +220,7 @@ export function speciesRowToSpecies(row: SpeciesRow): Species {
     // Nullable since T-196: most GBIF species have no common name in any language. Falling
     // back to the binomial is honest *here* — it is the name we actually have, and the row
     // still records that no common name is known, which is what T-187 was protecting.
-    commonName: row.common_name?.trim() || row.scientific_name,
+    commonName: asTitleName(row.common_name?.trim() || row.scientific_name, 'en'),
     category: minigameCategory(row),
     ...(row.category == null && GROUP_BY_TAXON[row.taxon_group ?? '']
       ? { group: GROUP_BY_TAXON[row.taxon_group ?? ''] }
@@ -232,7 +233,7 @@ export function speciesRowToSpecies(row: SpeciesRow): Species {
 export function contentRowToContent(row: SpeciesContentRow): SpeciesContent {
   return {
     speciesId: row.species_id,
-    ...(row.common_name ? { commonName: row.common_name } : {}),
+    ...(row.common_name ? { commonName: asTitleName(row.common_name, row.locale) } : {}),
     // A null DB fact (no article, T-146) becomes an empty string in the domain object; the card
     // treats empty as "no fact" and hides the fact block while still showing the mission content.
     fact: row.fact ?? '',
@@ -307,7 +308,8 @@ export class SupabaseSpeciesRepository implements SpeciesRepository {
       const base = speciesRowToSpecies(row);
       const own = contentFor(id, locale);
       const english = contentFor(id, 'en');
-      const localName = own?.common_name?.trim() || english?.common_name?.trim();
+      const rawName = own?.common_name?.trim() || english?.common_name?.trim();
+      const localName = rawName ? asTitleName(rawName, locale) : undefined;
       // Carry the name on the species too, so a card opened from this row is titled in the
       // reader's language (commonNameFor reads `names`).
       const photo = photoById.get(id);

@@ -146,7 +146,7 @@ describe('SpeciesCard — dual language', () => {
         secondaryLocale="ro"
       />,
     );
-    expect(screen.getByText('gråhäger')).toBeTruthy();
+    expect(screen.getByText('Gråhäger')).toBeTruthy(); // titled with a capital (T-236)
     expect(screen.queryByText(/Grey Heron/)).toBeNull();
   });
 

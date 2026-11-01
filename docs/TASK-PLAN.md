@@ -3743,6 +3743,14 @@ only.**
     pipeline run or by hand; tests pin the rules and keep the matrix equal to `TARGET_LOCALES`.
   - Remaining: the first run, then record per-language coverage and which languages had no model.
 
+- **T-236 · Species names start with a capital** — *Claude · XS · `DONE` · deps: T-196*
+  - Director's choice (2026-11-01): Swedish sources write names in lower case ("gräsand"), so This
+    Week mixed "gräsand" with "Abborre" from curated data. The catalogue keeps names exactly as
+    sourced; the app capitalises the first letter where names enter it (`asTitleName` in
+    `lib/species/displayName.ts`, applied in the repository row mappers and in
+    `commonNameFor`/`commonNameInLocale`), locale-aware (Turkish i → İ), rest untouched
+    ("Större hackspett"). Tested.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

@@ -251,6 +251,19 @@ describe('mediaRowToPhoto (T-215)', () => {
     expect(species.catchHabitats).toBeUndefined();
   });
 
+  it('titles the local name with a capital, as sourced otherwise (T-236)', () => {
+    const species = catalogueRowToSpecies(
+      { id: 'gbif:1', scientific_name: 'Anas platyrhynchos', common_name: 'mallard', local_name: 'gräsand', category: 'bird', rarity: 'common', active_months: [5], occurrences: 1 },
+      'sv',
+    );
+    expect(species.names?.sv).toBe('Gräsand');
+    expect(species.commonName).toBe('Mallard');
+    expect(
+      contentRowToContent({ species_id: 'x', locale: 'ro', common_name: 'stârc cenușiu', fact: null, when_how: 'w', give: 'g', protect: 'p' })
+        .commonName,
+    ).toBe('Stârc cenușiu');
+  });
+
   it('carries the habitats a species can be met in, for the almanac filter (T-057)', () => {
     const species = catalogueRowToSpecies(
       { id: 'pike', scientific_name: 'Esox lucius', common_name: null, local_name: null, category: 'fish', rarity: 'common', active_months: [5], occurrences: 1, catch_habitats: ['freshwater', 'coast', 'lava'] },
