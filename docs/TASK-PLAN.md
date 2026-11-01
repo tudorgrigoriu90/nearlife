@@ -3696,9 +3696,8 @@ only.**
     for the species that have it (App flow test added); the cards without it are the T-231 data gap,
     no longer mislabelled since T-230. The content run now also fetches EU-language names
     (vernacular=yes), or EU cards would get text without species names.
-  - Decided (Director, 2026-11-01): facts stay sourced from each language's own Wikipedia, never
-    machine-translated (T-179 holds), so small languages keep sparse facts; free offline MT and paid
-    MT were offered and declined.
+  - Decided (Director, 2026-11-01): first "keep facts Wikipedia-only", then revised the same day:
+    fill missing facts by free offline machine translation (T-235).
 
 - **T-232 · Android back left the app from any screen** — *Claude · XS · `DONE` · deps: T-141*
   - Found on the Director's phone: the system back gesture/button closed the app instead of going
@@ -3726,6 +3725,21 @@ only.**
     app language only, so the second language's `common_name` is carried on its content row
     (`SpeciesContent.commonName`, mapped from the DB row); without it, Romanian names loaded by
     T-231 would never have reached the card. Tests for both.
+
+- **T-235 · Machine-translate missing second-language facts ($0, offline)** — *Claude · M · `IN-PROGRESS` (built; runs after the T-231 content load) · deps: T-231*
+  - Director's decision (2026-11-01), revising T-179 for facts only: where a language's own
+    Wikipedia has no article, translate the English Wikipedia fact (else the Swedish one, routed
+    through English) with Argos Translate, an open-source model run on the CI runner. No API, $0.
+    Covered by the "Machine-translated" label every second language already shows (T-152).
+  - `pipeline/translate_facts.py` writes only NULL facts, so a native Wikipedia fact always wins;
+    the content loader now keeps a stored fact when it loads NULL
+    (`fact=coalesce(excluded.fact, …)`), so the annual run doesn't wipe translations, while a real
+    article arriving later still replaces one. English and Swedish are never targets; a language
+    with no Argos model is skipped (expected for some of so, am, ti, ckb, kmr, ps, bs) and keeps
+    Wikipedia-only facts. Species names are never translated (they would be invented).
+  - `.github/workflows/translate-facts.yml`: one job per language, after every successful Data
+    pipeline run or by hand; tests pin the rules and keep the matrix equal to `TARGET_LOCALES`.
+  - Remaining: the first run, then record per-language coverage and which languages had no model.
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in

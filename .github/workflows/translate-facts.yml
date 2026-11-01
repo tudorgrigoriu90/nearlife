@@ -1,0 +1,55 @@
+name: Translate facts
+
+# T-235: fills second-language facts that the language's own Wikipedia does not have, by
+# translating the English (else Swedish) Wikipedia fact with Argos Translate, an open-source model
+# run on the runner ($0, no API). Only NULL facts are written, so a real Wikipedia fact always wins,
+# and the content loader keeps translations when it loads NULL (gbif/supabase_load_content.py).
+# Shown under the "Machine-translated" label the second language already carries.
+#
+# Runs after every successful Data pipeline run (new species and new content), or by hand.
+# One job per language; a language Argos has no model for logs "skipped" and passes.
+#
+# Secret: SUPABASE_DB_URL (privileged Postgres connection string, session pooler).
+
+on:
+  workflow_run:
+    workflows: ["Data pipeline"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: translate-facts
+  cancel-in-progress: false
+
+jobs:
+  translate:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    name: Translate (${{ matrix.locale }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        locale: [ar, so, ru, uk, fa, tr, bs, sq, vi, sr, th, am, ti, ckb, kmr, ps,
+                 ro, de, fr, es, pt, it, nl, da, fi, et, hu, pl, cs, sk, sl, hr, bg, el, lt, lv]
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          pip install -r pipeline/requirements.txt
+          # CPU-only torch first: argostranslate's stanza dependency would otherwise pull the
+          # multi-GB CUDA build onto a runner with no GPU.
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install argostranslate==1.9.6
+
+      - name: Translate missing facts
+        run: python pipeline/translate_facts.py "${{ matrix.locale }}"

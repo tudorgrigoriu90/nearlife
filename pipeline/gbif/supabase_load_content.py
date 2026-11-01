@@ -61,9 +61,15 @@ CONTENT_SQL = (
     "values (%(species_id)s, %(locale)s, %(common_name)s, %(fact)s, %(when_how)s, "
     "%(give)s, %(protect)s, %(always_free)s) "
     "on conflict (species_id, locale) do update set "
-    "common_name=excluded.common_name, fact=excluded.fact, when_how=excluded.when_how, "
+    "common_name=excluded.common_name, fact=coalesce(excluded.fact, public.species_content.fact), "
+    "when_how=excluded.when_how, "
     "give=excluded.give, protect=excluded.protect, always_free=excluded.always_free"
 )
+
+
+# fact keeps the stored value when the new one is NULL (T-235): a language with no Wikipedia article
+# loads NULL here, and that must not erase the machine-translated fact filled in by
+# translate_facts.py. A real article arriving later is non-NULL and replaces the translation.
 
 
 def main() -> None:
