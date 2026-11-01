@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { agePath, type AgePath } from '../lib/ageGate';
 import type { Region } from '../lib/hometown';
 import { AsyncStorageHometownStore, deriveHometown, type HometownLookup } from '../lib/hometownStore';
-import { FIRST_STEP, isComplete, stepAfter, type OnboardingStep } from '../lib/onboarding';
+import { FIRST_STEP, isComplete, stepAfter, stepOnBack, type OnboardingStep } from '../lib/onboarding';
 import {
   getLocationFixOnce,
   requestLocationPermission,
@@ -73,6 +73,27 @@ export default function OnboardingFlow({
   }, []);
 
   const advance = () => setStep((s) => stepAfter(s));
+
+  // Android back steps back through onboarding (T-233); only the welcome screen lets Android leave.
+  // The hometown screen is skipped when there was no county to confirm, so back from the next step
+  // must skip it too, or it would bounce straight forward again and back would seem to do nothing.
+  const hometownShown =
+    (locationOutcome === 'granted' && hometown !== null) ||
+    (lookup?.region === null && lookup.reason === 'outside-sweden');
+  const onBack = (): boolean => {
+    const target = stepOnBack(step);
+    if (target === null) return false;
+    setStep(target === 'hometownConfirm' && !hometownShown ? 'locationPrePrompt' : target);
+    return true;
+  };
+  const onBackRef = useRef(onBack);
+  useEffect(() => {
+    onBackRef.current = onBack;
+  });
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => onBackRef.current());
+    return () => sub.remove();
+  }, []);
 
   useEffect(() => {
     if (isComplete(step)) onComplete({ locationOutcome, agePath: userAgePath, notificationOutcome, hometown });

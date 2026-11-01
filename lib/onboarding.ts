@@ -31,3 +31,14 @@ export function stepAfter(step: OnboardingStep): OnboardingStep {
 export function isComplete(step: OnboardingStep): boolean {
   return step === 'done';
 }
+
+/**
+ * Where Android's back takes the user (T-233), or null to let Android leave the app. One screen
+ * back, except the first sighting card: the sighting is recorded and both asks are answered, so
+ * back closes the card into the app exactly like its "Start exploring" button.
+ */
+export function stepOnBack(step: OnboardingStep): OnboardingStep | null {
+  if (step === 'welcome' || step === 'done') return null;
+  if (step === 'firstSpotted') return 'done';
+  return ONBOARDING_STEPS[ONBOARDING_STEPS.indexOf(step) - 1];
+}

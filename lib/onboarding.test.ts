@@ -1,4 +1,4 @@
-import { FIRST_STEP, ONBOARDING_STEPS, isComplete, stepAfter } from './onboarding';
+import { FIRST_STEP, ONBOARDING_STEPS, isComplete, stepAfter, stepOnBack } from './onboarding';
 
 describe('onboarding flow', () => {
   it('starts at welcome and ends at done', () => {
@@ -28,5 +28,24 @@ describe('onboarding flow', () => {
     expect(stepAfter('done')).toBe('done');
     expect(isComplete('done')).toBe(true);
     expect(isComplete('welcome')).toBe(false);
+  });
+});
+
+describe('stepOnBack (T-233)', () => {
+  it('steps back one screen through the flow', () => {
+    expect(stepOnBack('ageGate')).toBe('welcome');
+    expect(stepOnBack('locationPrePrompt')).toBe('ageGate');
+    expect(stepOnBack('hometownConfirm')).toBe('locationPrePrompt');
+    expect(stepOnBack('notificationPrePrompt')).toBe('hometownConfirm');
+  });
+
+  it('closes the first sighting card the way its own button does', () => {
+    // The sighting is already recorded; back leaves the card for the app, never to an ask again.
+    expect(stepOnBack('firstSpotted')).toBe('done');
+  });
+
+  it('lets Android leave the app only from the welcome screen', () => {
+    expect(stepOnBack('welcome')).toBeNull();
+    expect(stepOnBack('done')).toBeNull();
   });
 });

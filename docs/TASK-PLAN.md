@@ -3702,6 +3702,14 @@ only.**
     there as users expect; onboarding keeps the default. App flow test drives card, nested
     Settings → export, tab and the final exit.
 
+- **T-233 · Android back during onboarding** — *Claude · XS · `DONE` · deps: T-232*
+  - T-232 left onboarding on Android's default, so back mid-onboarding still closed the app (the
+    Director hit it again). `stepOnBack` in `lib/onboarding.ts` steps back one screen; from the
+    first sighting card it finishes like "Start exploring" (the sighting is recorded and both asks
+    are answered); only the welcome screen lets Android leave. When the hometown screen was
+    skipped (no county to confirm), back from the next step skips it too, or it would bounce
+    forward again. Unit tests for the step rule plus an App flow test.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

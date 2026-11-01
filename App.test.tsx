@@ -349,4 +349,30 @@ describe('App', () => {
     },
     FLOW_TIMEOUT,
   );
+  it(
+    'Android back steps back through onboarding and leaves only from the welcome screen (T-233)',
+    async () => {
+      await render(<App />);
+      await press(tr('onboarding.welcome.cta'));
+      expect(await screen.findByPlaceholderText(tr('onboarding.age.placeholder'))).toBeTruthy();
+      expect(await systemBack()).toBe(true);
+      expect(await screen.findByText(tr('onboarding.welcome.title'))).toBeTruthy();
+      expect(await systemBack()).toBe(false);
+
+      // From the first sighting card, back finishes like its own button: into the app.
+      await press(tr('onboarding.welcome.cta'));
+      await fireEvent.changeText(
+        await screen.findByPlaceholderText(tr('onboarding.age.placeholder')),
+        ADULT_BIRTH_YEAR,
+      );
+      await press(tr('onboarding.age.cta'));
+      await press(tr('onboarding.location.cta'));
+      await press(tr('onboarding.hometown.cta', { region: 'Kronoberg' }));
+      await press(tr('onboarding.notif.cta'));
+      expect(await screen.findByText(tr('onboarding.firstSpotted.cta'))).toBeTruthy();
+      expect(await systemBack()).toBe(true);
+      expect(await screen.findByText(tr('thisWeek.honesty'))).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
 });
