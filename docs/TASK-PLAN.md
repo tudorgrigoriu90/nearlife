@@ -3692,6 +3692,16 @@ only.**
     existing locale checks pass for them (no doubled words, no invisible characters, aquatic hint,
     every taxon), plus new tests tying the list to the app's coverage table.
 
+- **T-232 · Android back left the app from any screen** — *Claude · XS · `DONE` · deps: T-141*
+  - Found on the Director's phone: the system back gesture/button closed the app instead of going
+    back a screen. Screens are App state, not a navigation stack, so Android had nothing to pop.
+    App now registers one `hardwareBackPress` listener that closes the topmost open layer, checked
+    in the same order the render picks the screen (export, delete, counties, store, family,
+    link-email, badges, impact, settings, tip, pledge, catch spot, minigame, paywall, species card,
+    another county, another tab). It returns false only on the home tab, so Android leaves the app
+    there as users expect; onboarding keeps the default. App flow test drives card, nested
+    Settings → export, tab and the final exit.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

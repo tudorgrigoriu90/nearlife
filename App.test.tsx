@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { BackHandler } from 'react-native';
 import App from './App';
 import { requestNotificationPermission } from './lib/permissions';
 import { CONSENT_STORAGE_KEY } from './lib/consentStore';
@@ -105,6 +106,25 @@ async function completeOnboarding(
   await press(tr('onboarding.firstSpotted.cta'));
   if (opts.firstCardOpen) return; // a queued notification tap opens a card instead of the tabs
   await screen.findByText(tr('thisWeek.honesty')); // landed on the tabs
+}
+
+// Android's system back (T-232): capture the app's hardware-back listener so a test can press it.
+// The return value is what Android acts on: true = handled in the app, false = leave the app.
+type BackListener = Parameters<typeof BackHandler.addEventListener>[1];
+let backListeners: BackListener[] = [];
+beforeEach(() => {
+  backListeners = [];
+  jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_event, handler) => {
+    backListeners.push(handler);
+    return { remove: () => (backListeners = backListeners.filter((h) => h !== handler)) };
+  });
+});
+async function systemBack(): Promise<boolean> {
+  let handled = false;
+  await act(async () => {
+    handled = backListeners.some((h) => h({} as never) === true);
+  });
+  return handled;
 }
 
 describe('App', () => {
@@ -297,6 +317,35 @@ describe('App', () => {
       await press(commonNameFor(topRow, 'en'));
       // Before T-200 the counter lived in component state and this read 3 again.
       expect(await screen.findByText(tr('catch.remaining', { count: 2 }))).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
+  it(
+    'Android back steps back inside the app and only leaves it from the home screen (T-232)',
+    async () => {
+      await completeOnboarding();
+
+      // Species card → back → the This Week list, not out of the app.
+      await press(commonNameFor(topRow, 'en'));
+      expect(await screen.findByText(tr('card.give'))).toBeTruthy();
+      expect(await systemBack()).toBe(true);
+      expect(await screen.findByText(tr('thisWeek.honesty'))).toBeTruthy();
+
+      // A screen opened from a screen: Settings → export → back → Settings → back → tabs.
+      await press(tr('nav.settings'), { exact: false });
+      await press(tr('settings.exportData'));
+      expect(await screen.findByText(tr('export.title'))).toBeTruthy();
+      expect(await systemBack()).toBe(true);
+      expect(await screen.findByText(tr('settings.exportData'))).toBeTruthy();
+      expect(await systemBack()).toBe(true);
+      expect(await screen.findByText(tr('thisWeek.honesty'))).toBeTruthy();
+
+      // Another tab → back → This Week; from there back is the app's to give up.
+      await press(tr('almanac.title'));
+      expect(await screen.findByText(tr('almanac.filter.all'))).toBeTruthy();
+      expect(await systemBack()).toBe(true);
+      expect(await screen.findByText(tr('thisWeek.honesty'))).toBeTruthy();
+      expect(await systemBack()).toBe(false);
     },
     FLOW_TIMEOUT,
   );

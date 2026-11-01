@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AlmanacScreen from './components/AlmanacScreen';
 import OnboardingFlow from './components/OnboardingFlow';
@@ -173,6 +173,12 @@ const DUAL_LANGUAGE_STORE = new AsyncStorageDualLanguageStore();
 
 type Tab = 'thisWeek' | 'almanac';
 
+/** Run a close action and report the back press as handled. */
+function closed(close: () => void): true {
+  close();
+  return true;
+}
+
 export default function App() {
   // Device locale by default; a user override from Settings takes precedence (T-123).
   const [localeOverride, setLocaleOverride] = useState<Locale | null>(null);
@@ -279,6 +285,11 @@ export default function App() {
   const [caughtTip, setCaughtTip] = useState<{ species: Species; prime: boolean } | null>(null);
   const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
   const [paywall, setPaywall] = useState(false);
+  const goBackRef = useRef<() => boolean>(() => false);
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => goBackRef.current());
+    return () => sub.remove();
+  }, []);
 
   // Notification taps (T-031): queue the species, then open it once the app can show a card. A
   // cold-start tap arrives before onboarding has finished, so it waits rather than being dropped.
@@ -570,6 +581,38 @@ export default function App() {
       setPaywall(true);
     }
   };
+
+  // Android's system back (T-232). Screens here are state, not a navigation stack, so without this
+  // the back gesture had nothing to pop and left the app from any screen. It closes the topmost
+  // open layer, checked in the same order the render below picks the screen, so back always undoes
+  // what is on screen, and returns false only on the home tab, where leaving the app is right.
+  // Onboarding keeps the default: there is no earlier in-app screen to return to.
+  // Kept in a ref (refreshed after every render) so the one listener always sees current state.
+  const goBack = (): boolean => {
+    if (!onboarded) return false;
+    if (exportJson !== null) return closed(() => setExportJson(null));
+    if (showDelete) return closed(() => setShowDelete(false));
+    if (showCounties) return closed(() => setShowCounties(false));
+    if (showStore) return closed(() => setShowStore(false));
+    if (showFamily) return closed(() => setShowFamily(false));
+    if (showLinkEmail) return closed(() => setShowLinkEmail(false));
+    if (showBadges) return closed(() => setShowBadges(false));
+    if (showImpact) return closed(() => setShowImpact(false));
+    if (showSettings) return closed(() => setShowSettings(false));
+    if (caughtTip) return closed(() => setCaughtTip(null));
+    if (pledge) return closed(() => setPledge(null));
+    if (goCatch && catchRegion !== null && catchSpotSource() !== null && !catching) {
+      return closed(() => setGoCatch(null));
+    }
+    if (catching) return closed(() => setCatching(null));
+    if (selected) return closed(() => (paywall ? setPaywall(false) : setSelected(null)));
+    if (viewCounty) return closed(() => setViewCounty(null));
+    if (tab !== 'thisWeek') return closed(() => setTab('thisWeek'));
+    return false;
+  };
+  useEffect(() => {
+    goBackRef.current = goBack;
+  });
 
   if (!onboardingLoaded || !localeLoaded) return null;
 
