@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { Linking } from 'react-native';
 import SettingsScreen from './SettingsScreen';
+import { PRIVACY_POLICY_URL } from '../lib/legal';
 import { DEFAULT_CONSENT } from '../lib/consent';
 import { createTranslator } from '../lib/i18n';
 
@@ -29,6 +31,14 @@ describe('SettingsScreen', () => {
     await render(<SettingsScreen {...h} />);
     fireEvent.press(screen.getByText(tr('settings.exportData')));
     expect(h.onExportData).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the published privacy policy (T-228)', async () => {
+    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    await render(<SettingsScreen {...renderSettings()} />);
+    fireEvent.press(screen.getByText(tr('settings.privacyPolicy')));
+    expect(openURL).toHaveBeenCalledWith('https://nytta-ai.se/nearby/privacy/');
+    expect(PRIVACY_POLICY_URL).toBe('https://nytta-ai.se/nearby/privacy/');
   });
 });
 

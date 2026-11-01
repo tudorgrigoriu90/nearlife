@@ -3658,9 +3658,11 @@ only.**
     photo's `width: '100%'` resolved to nothing. Yoga lays out the same way on the phone, so this
     is not web-only. The tap target now stretches (`alignSelf: 'stretch'`); a test pins it.
 
-- **T-228 · Privacy policy link in Settings** — *Claude · XS · `TODO` · deps: T-095*
+- **T-228 · Privacy policy link in Settings** — *Claude · XS · `DONE` · deps: T-095*
   - Settings gets a "Privacy policy" row opening https://nytta-ai.se/nearby/privacy/ (Play and
     GDPR transparency expect the policy reachable from inside the app). Test the row and the URL.
+  - ✅ "Privacy policy" / "Integritetspolicy" row under Your data, opening the URL from
+    `lib/legal.ts` (one place for both public legal URLs); a failed open is ignored. Tested.
 
 - **T-229 · Bottom buttons hidden under the Android navigation bar** — *Claude · XS · `DONE` · deps: T-141*
   - Found on the Director's phone (first internal build): "Start exploring", "Find it nearby" and the

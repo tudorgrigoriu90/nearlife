@@ -1,6 +1,7 @@
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { CONSENT_KINDS, type ConsentKind, type ConsentState } from '../lib/consent';
 import { DEFAULT_DUAL_LANGUAGE, type DualLanguageSettings } from '../lib/dualLanguage';
+import { PRIVACY_POLICY_URL } from '../lib/legal';
 import { ALPHA_LOCALES, createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
 import {
   dualDisplayLocales,
@@ -195,6 +196,16 @@ export default function SettingsScreen({
           <Pressable onPress={onExportData} accessibilityRole="button" style={styles.row}>
             <Text style={styles.rowLabel}>{tr('settings.exportData')}</Text>
             <Text style={styles.chevron}>›</Text>
+          </Pressable>
+          {/* The published policy, reachable from inside the app (T-228, GDPR transparency). A
+              failed open (no browser) is ignored rather than crashing Settings. */}
+          <Pressable
+            onPress={() => void Linking.openURL(PRIVACY_POLICY_URL).catch(() => undefined)}
+            accessibilityRole="link"
+            style={[styles.row, styles.rowBorder]}
+          >
+            <Text style={styles.rowLabel}>{tr('settings.privacyPolicy')}</Text>
+            <Text style={styles.chevron}>↗</Text>
           </Pressable>
           {onLinkEmail ? (
             <Pressable

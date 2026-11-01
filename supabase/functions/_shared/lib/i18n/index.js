@@ -163,6 +163,7 @@ export const en = {
     // Your data — export (T-092)
     'settings.yourData': 'Your data',
     'settings.exportData': 'Export my data',
+    'settings.privacyPolicy': 'Privacy policy',
     'export.title': 'Your data',
     'export.hint': 'Everything Nearby holds about you. Select the text to copy it.',
     // Mother-tongue dual display (F13.3 — T-148/T-150/T-151)
@@ -443,6 +444,7 @@ const sv = {
     // Your data — export (T-092)
     'settings.yourData': 'Dina uppgifter',
     'settings.exportData': 'Exportera mina uppgifter',
+    'settings.privacyPolicy': 'Integritetspolicy',
     'export.title': 'Dina uppgifter',
     'export.hint': 'Allt Nearby har om dig. Markera texten för att kopiera den.',
     // Mother-tongue dual display (F13.3 — T-148/T-150/T-151)
