@@ -1245,6 +1245,12 @@ LOCALES: dict[str, LocaleStrings] = {
 }
 
 
+
+# The 20 EU languages the app offers as a second language (T-231), kept in their own module.
+from media.templates_i18n_eu import EU  # noqa: E402
+
+LOCALES.update({loc: LocaleStrings(**fields) for loc, fields in EU.items()})
+
 def strings_for(locale: str) -> LocaleStrings:
     """Raise rather than fall back: serving English to a Somali reader is a silent failure."""
     try:

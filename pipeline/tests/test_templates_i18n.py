@@ -190,3 +190,29 @@ def test_aquatic_composition_has_no_doubled_words_either():
         for a, b in zip(words, words[1:]):
             stripped = a.strip(".,;:!?()")
             assert stripped != b.strip(".,;:!?()") or not stripped, (loc, a)
+
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_every_eu_language_the_app_offers_has_templates():
+    """T-231: the app offers the 24 EU languages as a second language, but the generator had
+    templates only for en, sv and the immigrant roster, so 20 EU languages got content for just the
+    54 curated species. A Romanian reader saw English under a "Română" label on every other card.
+
+    The app's own coverage table (lib/i18n/coverage.ts) is the list: every locale it marks
+    `machine` or `reviewed` must be generated here. Irish and Maltese are `missing` there.
+    """
+    coverage = (ROOT / "lib" / "i18n" / "coverage.ts").read_text(encoding="utf-8")
+    import re
+
+    offered = set(re.findall(r"\b([a-z]{2,3}): '(?:machine|reviewed)'", coverage))
+    assert {"ro", "de", "pl", "fi"} <= offered  # the regex found the table
+    assert offered - set(LOCALES) == set()
+
+
+def test_eu_season_phrases_read_naturally():
+    assert months_phrase([5, 6, 7, 8, 9], "ro") == "din mai până în septembrie"
+    assert months_phrase([5, 6, 7, 8, 9], "de") == "von Mai bis September"
+    assert months_phrase([5, 6, 7, 8, 9], "fr") == "de mai à septembre"
+    assert months_phrase([5, 6, 7, 8, 9], "pl") == "od maja do września"

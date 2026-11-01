@@ -3677,13 +3677,20 @@ only.**
     "Română · Machine-translated" while every field was English, because Romanian has content for
     only the 54 curated species (T-231). The label now shows only when the species has secondary
     content, so English is never passed off as the translation. Tested.
-- **T-231 · Second-language content for the 20 EU languages** — *Claude · M · `TODO` · deps: T-180*
+- **T-231 · Second-language content for the 20 EU languages** — *Claude · M · `IN-PROGRESS` (templates built + tested; content run + load pending) · deps: T-180*
   - `species_content` has 11,937 species for en, sv and the 18 immigrant languages, but only the
     54 curated species for bg, cs, da, de, el, es, et, fi, fr, hr, hu, it, lt, lv, nl, pl, pt, ro,
     sk, sl (ga and mt have none). Cause: `pipeline/media/templates_i18n.py` has no entry for them,
     so `build_content.py` never generates their rows. Fix: add the 20 locales (months in three
     cases, season patterns, give/protect/habitat per taxon, aquatic habitat), regenerate content in
     CI and load it. Facts come from each language's Wikipedia as for every other locale (T-179).
+  - ✅ `pipeline/media/templates_i18n_eu.py`: the 20 locales, registered in `LOCALES`. Season
+    phrases follow each grammar (Polish "od maja do września", Finnish "toukokuusta syyskuuhun",
+    Hungarian "májustól szeptemberig", French "d'avril", Italian "ad agosto"); a broken run of
+    months uses a case-neutral list frame where cases would differ per month. The sentence refers
+    to "the species", so pronouns agree with that word rather than a guessed animal gender. All
+    existing locale checks pass for them (no doubled words, no invisible characters, aquatic hint,
+    every taxon), plus new tests tying the list to the app's coverage table.
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
