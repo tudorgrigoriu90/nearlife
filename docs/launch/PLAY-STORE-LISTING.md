@@ -72,9 +72,9 @@ and Play would keep those line breaks.
 
 - **App category:** Education (alt: Lifestyle). **Not** a kids/Family category — general audience.
 - **Tags** (Store settings → Manage tags): Nature, Education, Outdoor.
-- **Contact details:** the privacy contact email from Step 10; website `https://nytta-ai.se`
+- **Contact details:** email `info@nytta-ai.se`; website `https://nytta-ai.se`
   (optional).
-- **Privacy policy URL:** the published URL from Step 10 (required).
+- **Privacy policy URL:** `https://nytta-ai.se/nearby/privacy/` (required).
 
 ## Graphic assets
 Files are in [`store-assets/`](store-assets/); regenerate with `node scripts/store-assets/render.js`
@@ -108,8 +108,8 @@ tracking or advertising.
 **Security practices:**
 - Data **encrypted in transit**: Yes.
 - Users can **request data deletion**: Yes — in-app "Delete account & data" (plus export).
-- **Delete account URL** (required by Play): the published `delete-account` page (LAUNCH-CHECKLIST
-  step 10). It explains the in-app path and what happens to an account without the app.
+- **Delete account URL** (required by Play): `https://nytta-ai.se/nearby/delete-account/`. It
+  explains the in-app path, deletion by email without the app, and what is deleted and kept.
 - Committed to Play **Families** policy: No (general-audience, not kids-category).
 - Independent security review: No (declare honestly).
 

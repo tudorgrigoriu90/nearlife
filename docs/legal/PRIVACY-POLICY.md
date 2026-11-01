@@ -1,19 +1,19 @@
 # Nearby — Privacy Policy
 
-> **DRAFT (T-095).** Drafted by Claude from [PRIVACY-COMPLIANCE.md](../PRIVACY-COMPLIANCE.md).
-> The first draft was legally reviewed (T-009, 2026-10-31). **The sections marked 🆕 were added
-> afterwards** (purchases, Family, travel, catch spots and the map, retention of customers) and go
-> back to the reviewer before publication. Before it can be used as the Google Play privacy-policy
-> URL, the Director must also fill the **[bracketed placeholders]** (controller identity + contact
-> email) and publish it at a stable public URL (e.g. GitHub Pages). Effective date is set on
-> publication.
+> **PUBLISHED (T-095)** at https://nytta-ai.se/nearby/privacy/ on 2026-11-01, built from this
+> file by `pipeline/legal_site.py` (which drops this note and the 🆕 markers). The first draft was
+> legally reviewed (T-009, 2026-10-31). **The sections marked 🆕 were added afterwards** (purchases,
+> Family, travel, catch spots and the map, retention of customers) and still go back to the
+> reviewer; any change they ask for is republished at the same URL. Drafted by Claude from
+> [PRIVACY-COMPLIANCE.md](../PRIVACY-COMPLIANCE.md).
 
-**Last updated:** [date on publication] · **Effective:** [date on publication]
+**Last updated:** 1 November 2026 · **Effective:** 1 November 2026
 
 ## Who we are
 Nearby ("the app", "we") is a wildlife almanac for exploring the species active around you. The
-data controller is **[legal entity or individual name, address]**. For any privacy question or to
-exercise your rights, contact **[privacy contact email]**.
+data controller is **Tudor Grigoriu**, a sole trader (enskild firma) trading as **Nytta AI**,
+Förmaksvägen 13, Växjö, Sweden. For any privacy question or to exercise your rights, contact
+**info@nytta-ai.se**.
 
 We are based in / operate the service from the EU, and the app launches in Sweden. This policy is
 written to meet the EU General Data Protection Regulation (GDPR).
@@ -120,4 +120,5 @@ We'll update this page and the "Last updated" date when this policy changes; mat
 be surfaced in the app.
 
 ## Contact
-**[privacy contact email]** — or write to **[postal address, if required]**.
+**info@nytta-ai.se** — or write to Tudor Grigoriu (Nytta AI), Förmaksvägen 13, Växjö, Sweden.
+To delete your account without the app, see https://nytta-ai.se/nearby/delete-account/.

@@ -1695,7 +1695,7 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
     covers "anonymous, idle for 200 days but owns a purchase: kept".
 
 ## F10.4 — Legal Artifacts
-- **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · `IN-PROGRESS` (policy updated 2026-10-30; 🆕 passages need the reviewer, then hosting) · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*
+- **T-095 · Privacy policy + in-app consent copy** — *Claude + Director · M · `IN-PROGRESS` (published 2026-11-01 at nytta-ai.se/nearby/privacy/; 🆕 passages still go to the reviewer; in-app link T-228) · deps: T-009, T-088 · [PRIVACY](PRIVACY-COMPLIANCE.md)*
   - ✅ Draft policy `docs/legal/PRIVACY-POLICY.md` written from PRIVACY-COMPLIANCE.md: what's
     collected + legal basis, no-ads/no-sale, location derive-once-and-discard, sub-processors
     (Supabase/PostHog/RevenueCat/Google Play), retention windows, GDPR rights (in-app export +
@@ -1718,6 +1718,17 @@ manual ops ([PRIVACY-COMPLIANCE](PRIVACY-COMPLIANCE.md)). **Blocks public launch
       purchases and Family membership. That is now **T-219**.
   - ⚠️ **Director:** send the 🆕 passages to the legal reviewer. Then fill the brackets and
     publish (unchanged).
+  - ✅ **Published (2026-11-01).** Controller filled in: Tudor Grigoriu, enskild firma trading as
+    Nytta AI, Förmaksvägen 13, Växjö; contact info@nytta-ai.se. The personnummer (an EF's org.nr)
+    is deliberately left off a public page, and a test guards it. Hosted on the Director's
+    existing site instead of a new repo: https://nytta-ai.se/nearby/privacy/ and
+    https://nytta-ai.se/nearby/delete-account/ (the deletion page Play requires, en + sv, from
+    `docs/legal/DELETE-ACCOUNT.md`). `pipeline/legal_site.py` builds both from docs/legal with a
+    small Markdown subset (no new dependency), dropping the draft note and 🆕 review markers;
+    `pipeline/tests/test_legal_site.py` covers it. The deletion page says analytics events are
+    kept (random id, ~365 days), because account deletion does not reach PostHog.
+  - Remaining: the 🆕 passages go back to the legal reviewer (republish on change); the in-app
+    link (T-228).
 - **T-096 · Processor DPAs + EU residency verified** — *Director · M · `DONE` (Director 2026-10-31) · deps: T-009 · [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - Signed DPAs and verified EU residency/SCCs for Supabase, RevenueCat, PostHog.
   - ✅ **Done (Director, 2026-10-31):** DPAs signed and EU residency / SCCs verified for Supabase,
@@ -3646,6 +3657,10 @@ only.**
     tap target sat in a centring wrapper with no width of its own, so it shrank to zero and the
     photo's `width: '100%'` resolved to nothing. Yoga lays out the same way on the phone, so this
     is not web-only. The tap target now stretches (`alignSelf: 'stretch'`); a test pins it.
+
+- **T-228 · Privacy policy link in Settings** — *Claude · XS · `TODO` · deps: T-095*
+  - Settings gets a "Privacy policy" row opening https://nytta-ai.se/nearby/privacy/ (Play and
+    GDPR transparency expect the policy reachable from inside the app). Test the row and the URL.
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in

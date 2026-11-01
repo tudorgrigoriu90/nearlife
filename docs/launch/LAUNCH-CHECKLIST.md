@@ -112,25 +112,27 @@ In app.revenuecat.com, project Nearlife:
 sentry.io → sign up with **EU data storage** → React Native project `nearby` → paste me the
 **DSN** → add it to EAS (`EXPO_PUBLIC_SENTRY_DSN`) → accept Sentry's DPA.
 
-## Step 10 — Privacy policy and the account-deletion page, published (30 min)
-Google Play needs two public web addresses: the **privacy policy** and a **"how to delete your
-account" page**.
-1. Send the 🆕 passages of `docs/legal/PRIVACY-POLICY.md` to your legal reviewer, plus one
-   question: does GDPR Art. 7(1) call for a log of analytics consents?
-2. Tell me your **controller name, address and contact email** for the bracketed fields.
-3. Create a **public** GitHub repository named **`nearby-site`** (github.com → New repository →
-   Public → create). Tell me when it exists. I publish the privacy policy and the deletion page
-   there with GitHub Pages (free), and send you the two URLs.
+## Step 10 — Privacy policy and the account-deletion page ✅ published 2026-11-01
+- Privacy policy: **https://nytta-ai.se/nearby/privacy/**
+- Delete account: **https://nytta-ai.se/nearby/delete-account/** (English + Swedish)
+
+Both live on your nytta-ai.se site (GitHub Pages), built from `docs/legal/` by
+`python pipeline/legal_site.py <nytta-ai checkout>`; never edit them on the site by hand.
+Controller: Tudor Grigoriu (enskild firma, Nytta AI), Förmaksvägen 13, Växjö; contact
+info@nytta-ai.se. The personnummer is deliberately not published.
+- Still to do: send the 🆕 passages of `docs/legal/PRIVACY-POLICY.md` to your legal reviewer, plus
+  one question: does GDPR Art. 7(1) call for a log of analytics consents? Changes are republished
+  at the same URL.
 
 ## Step 11 — Play Console: App content forms (45 min)
 Your app → **Policy and programs → App content**. Answers are in PLAY-STORE-LISTING.md:
-- **Privacy policy:** the URL from Step 10.
+- **Privacy policy:** `https://nytta-ai.se/nearby/privacy/`
 - **App access:** all functionality available without special access (no login wall).
 - **Ads:** No.
 - **Content rating:** questionnaire, expected Everyone / PEGI 3.
 - **Target audience:** 13 and older; not designed for children.
-- **Data safety:** fill the table from PLAY-STORE-LISTING.md, with the **Delete account URL** from
-  Step 10.
+- **Data safety:** fill the table from PLAY-STORE-LISTING.md, with the **Delete account URL**
+  `https://nytta-ai.se/nearby/delete-account/`.
 - **Financial features, health, government, news:** none.
 
 ## Step 12 — Store listing, closed test, then production
