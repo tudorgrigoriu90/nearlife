@@ -28,9 +28,12 @@ from media.templates_i18n import LOCALES  # noqa: E402
 DATA = Path(__file__).resolve().parent / "data"
 OUT = DATA / "vernacular.json"
 SAVE_EVERY = 100
+# The language set an entry was parsed for (T-231). Names in languages the parser didn't know are
+# discarded at parse time, so an entry from a smaller set is incomplete, not done.
+LANGS_ID = ",".join(sorted(LOCALES))
 
 
-def pending_keys(all_keys: list[int], existing: dict) -> list[int]:
+def pending_keys(all_keys: list[int], existing: dict, langs: str = LANGS_ID) -> list[int]:
     """Species not yet fetched. A recorded empty result counts as fetched.
 
     An entry lacking `_realms` is treated as pending even though it has names: it was written
@@ -38,7 +41,10 @@ def pending_keys(all_keys: list[int], existing: dict) -> list[int]:
     earlier permanently without habitat data — invisibly, because the file looks complete. That is
     the characteristic failure of a resumable job whose record shape changes under it.
     """
-    return [k for k in all_keys if "_realms" not in (existing.get(str(k)) or {})]
+    return [
+        k for k in all_keys
+        if "_realms" not in (e := existing.get(str(k)) or {}) or e.get("_langs") != langs
+    ]
 
 
 def merge_existing(existing: dict, fresh: dict) -> dict:
@@ -115,7 +121,7 @@ def main(argv: list[str]) -> int:
             # every shipped species and is already resumable, so habitat rides along.
             names = parse_vernacular_names(client.vernacular_names(key))
             realms = parse_species_profile(client.species_profile(key))
-            fresh[key] = {**names, "_realms": realms}
+            fresh[key] = {**names, "_realms": realms, "_langs": LANGS_ID}
         except Exception as exc:  # one bad species must not end a 40-minute run
             print(f"  ! {key}: {exc}", flush=True)
             continue

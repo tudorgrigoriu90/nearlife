@@ -35,6 +35,27 @@ _LANG_TO_LOCALE: dict[str, str] = {
     "ckb": "ckb",
     "kmr": "kmr", "kur": "kmr",
     "pus": "ps", "ps": "ps",
+    # The 20 EU second languages (T-231). Bibliographic 639-2 codes (rum, ger, fre…) too.
+    "ron": "ro", "rum": "ro", "ro": "ro",
+    "deu": "de", "ger": "de", "de": "de",
+    "fra": "fr", "fre": "fr", "fr": "fr",
+    "spa": "es", "es": "es",
+    "por": "pt", "pt": "pt",
+    "ita": "it", "it": "it",
+    "nld": "nl", "dut": "nl", "nl": "nl",
+    "dan": "da", "da": "da",
+    "fin": "fi", "fi": "fi",
+    "est": "et", "et": "et",
+    "hun": "hu", "hu": "hu",
+    "pol": "pl", "pl": "pl",
+    "ces": "cs", "cze": "cs", "cs": "cs",
+    "slk": "sk", "slo": "sk", "sk": "sk",
+    "slv": "sl", "sl": "sl",
+    "hrv": "hr", "hr": "hr",
+    "bul": "bg", "bg": "bg",
+    "ell": "el", "gre": "el", "el": "el",
+    "lit": "lt", "lt": "lt",
+    "lav": "lv", "lv": "lv",
 }
 
 

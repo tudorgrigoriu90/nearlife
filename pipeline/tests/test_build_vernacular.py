@@ -10,20 +10,22 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from build_vernacular import coverage_report, merge_existing, pending_keys  # noqa: E402
+from build_vernacular import LANGS_ID, coverage_report, merge_existing, pending_keys  # noqa: E402
+from gbif.vernacular import parse_vernacular_names  # noqa: E402
+from media.templates_i18n import LOCALES  # noqa: E402
 
 
 def test_pending_skips_species_already_fetched():
     # Resumability: a re-run must pick up where the last one stopped. A fetched entry carries
     # `_realms` (T-191) — that is what marks it as fully answered, names and habitat both.
-    fetched = {"2": {"sv": "Talgoxe", "_realms": {"freshwater": False}}}
+    fetched = {"2": {"sv": "Talgoxe", "_realms": {"freshwater": False}, "_langs": LANGS_ID}}
     assert pending_keys([1, 2, 3], fetched) == [1, 3]
 
 
 def test_pending_treats_a_recorded_empty_result_as_done():
     # "GBIF has no vernacular name for this species" is an answer, not a gap to retry forever —
     # provided we did ask, which `_realms` records.
-    assert pending_keys([1, 2], {"1": {"_realms": {}}}) == [2]
+    assert pending_keys([1, 2], {"1": {"_realms": {}, "_langs": LANGS_ID}}) == [2]
 
 
 def test_pending_is_everything_on_a_first_run():
@@ -68,9 +70,30 @@ def test_an_entry_from_before_habitat_existed_is_re_fetched():
 
 
 def test_an_entry_with_realms_is_not_re_fetched():
-    assert pending_keys([1], {"1": {"sv": "Talgoxe", "_realms": {"freshwater": False}}}) == []
+    assert pending_keys([1], {"1": {"sv": "Talgoxe", "_realms": {"freshwater": False}, "_langs": LANGS_ID}}) == []
 
 
 def test_a_species_with_no_names_but_a_realm_lookup_counts_as_done():
     # "GBIF holds no name and no profile" is still an answer, as long as we asked for both.
-    assert pending_keys([1], {"1": {"_realms": {}}}) == []
+    assert pending_keys([1], {"1": {"_realms": {}, "_langs": LANGS_ID}}) == []
+
+
+
+def test_an_entry_fetched_for_fewer_languages_is_re_fetched():
+    """T-231 added 20 EU languages; species fetched before that had their EU names thrown away, and
+    the resumable job skipped them as done, so the EU languages got no names at all. An entry
+    records which language set it was parsed for; a different set means fetch again."""
+    old = {"1": {"sv": "Talgoxe", "_realms": {"freshwater": False}, "_langs": "en,sv"}}
+    assert pending_keys([1], old) == [1]
+
+
+def test_every_shipped_language_can_be_recognised_in_gbif_data():
+    payload = {"results": [{"language": code, "vernacularName": f"name-{code}"} for code in (
+        "ron", "deu", "fra", "spa", "por", "ita", "nld", "dan", "fin", "est", "hun", "pol",
+        "ces", "slk", "slv", "hrv", "bul", "ell", "lit", "lav")]}
+    parsed = parse_vernacular_names(payload)
+    assert set(parsed) == {"ro", "de", "fr", "es", "pt", "it", "nl", "da", "fi", "et", "hu", "pl",
+                           "cs", "sk", "sl", "hr", "bg", "el", "lt", "lv"}
+    from gbif.vernacular import _LANG_TO_LOCALE
+
+    assert set(LOCALES) <= set(_LANG_TO_LOCALE.values())

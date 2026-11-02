@@ -3698,6 +3698,12 @@ only.**
     for the species that have it (App flow test added); the cards without it are the T-231 data gap,
     no longer mislabelled since T-230. The content run now also fetches EU-language names
     (vernacular=yes), or EU cards would get text without species names.
+  - Content run done (2026-11-02): every EU locale now has 8,080 catalogue rows; Wikipedia facts
+    5,405 (el) to 6,238 (de), Croatian 831. Names stayed at 54: `gbif/vernacular.py` mapped only
+    the original 18 languages, so GBIF's EU names were dropped at parse time, and the resumable
+    `build_vernacular.py` skipped those species as done. Fixed: the 20 EU languages (639-1/-2/-3
+    codes) are mapped, and each entry records the language set it was parsed for (`_langs`), so a
+    larger set refetches. Names-only run, then a content run, follow.
   - Decided (Director, 2026-11-01): first "keep facts Wikipedia-only", then revised the same day:
     fill missing facts by free offline machine translation (T-235).
 

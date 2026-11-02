@@ -60,8 +60,9 @@ def test_first_name_wins_when_none_is_preferred():
 
 
 def test_languages_we_do_not_ship_are_dropped():
-    got = parse_vernacular_names(_payload({"vernacularName": "Kohlmeise", "language": "deu"}))
-    assert "de" not in got
+    # German used to be the example here; it ships since T-231, so Japanese is now.
+    got = parse_vernacular_names(_payload({"vernacularName": "シジュウカラ", "language": "jpn"}))
+    assert got == {}
 
 
 def test_an_unknown_language_code_is_dropped_not_guessed():
