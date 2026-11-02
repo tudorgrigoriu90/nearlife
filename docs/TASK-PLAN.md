@@ -3679,7 +3679,7 @@ only.**
     "Română · Machine-translated" while every field was English, because Romanian has content for
     only the 54 curated species (T-231). The label now shows only when the species has secondary
     content, so English is never passed off as the translation. Tested.
-- **T-231 · Second-language content for the 20 EU languages** — *Claude · M · `IN-PROGRESS` (templates built + tested; content run + load pending) · deps: T-180*
+- **T-231 · Second-language content for the 20 EU languages** — *Claude · M · `DONE` · deps: T-180*
   - `species_content` has 11,937 species for en, sv and the 18 immigrant languages, but only the
     54 curated species for bg, cs, da, de, el, es, et, fi, fr, hr, hu, it, lt, lv, nl, pl, pt, ro,
     sk, sl (ga and mt have none). Cause: `pipeline/media/templates_i18n.py` has no entry for them,
@@ -3704,6 +3704,11 @@ only.**
     `build_vernacular.py` skipped those species as done. Fixed: the 20 EU languages (639-1/-2/-3
     codes) are mapped, and each entry records the language set it was parsed for (`_langs`), so a
     larger set refetches. Names-only run, then a content run, follow.
+  - ✅ Done (2026-11-02): names-only run, then a content run. Every EU locale has all 8,080 catalogue
+    species with templates; facts (Wikipedia + T-235 translation) 5,405–6,238 per language except
+    Croatian 831 (no Argos model); sourced names now e.g. fi 6,032, de 5,584, nl 5,503, da 5,045,
+    fr 4,872, cs 4,115, pl 3,697, ro 796, el 795 (GBIF's own coverage per language; names are
+    never translated).
   - Decided (Director, 2026-11-01): first "keep facts Wikipedia-only", then revised the same day:
     fill missing facts by free offline machine translation (T-235).
 
