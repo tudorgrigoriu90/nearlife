@@ -3734,7 +3734,7 @@ only.**
     (`SpeciesContent.commonName`, mapped from the DB row); without it, Romanian names loaded by
     T-231 would never have reached the card. Tests for both.
 
-- **T-235 · Machine-translate missing second-language facts ($0, offline)** — *Claude · M · `IN-PROGRESS` (built; runs after the T-231 content load) · deps: T-231*
+- **T-235 · Machine-translate missing second-language facts ($0, offline)** — *Claude · M · `DONE` · deps: T-231*
   - Director's decision (2026-11-01), revising T-179 for facts only: where a language's own
     Wikipedia has no article, translate the English Wikipedia fact (else the Swedish one, routed
     through English) with Argos Translate, an open-source model run on the CI runner. No API, $0.
@@ -3747,7 +3747,11 @@ only.**
     Wikipedia-only facts. Species names are never translated (they would be invented).
   - `.github/workflows/translate-facts.yml`: one job per language, after every successful Data
     pipeline run or by hand; tests pin the rules and keep the matrix equal to `TARGET_LOCALES`.
-  - Remaining: the first run, then record per-language coverage and which languages had no model.
+  - ✅ First run (2026-11-02, after the content load): 27 languages translated (e.g. Romanian 4,747
+    facts, with Wikipedia now 5,597 of 8,080 catalogue species; German 6,238; Arabic 5,233; Persian
+    5,383). Argos has no model for so, am, ti, ckb, kmr, ps, bs, hr, sr: those keep Wikipedia facts
+    only (54–1,094). The ~1,850 species with neither an English nor a Swedish fact stay fact-less in
+    every language. Re-runs after every Data pipeline run fill new gaps.
 
 - **T-236 · Species names start with a capital** — *Claude · XS · `DONE` · deps: T-196*
   - Director's choice (2026-11-01): Swedish sources write names in lower case ("gräsand"), so This
