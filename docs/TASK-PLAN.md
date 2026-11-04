@@ -3796,6 +3796,16 @@ only.**
     ship their own keep rules. Only the Kotlin/Java layer is affected; the JS bundle is Hermes
     bytecode either way. Device check of the next build covers it (purchases, map, crash report).
 
+- **T-240 · Almanac: season filter and name search** — *Claude · S · `DONE` · deps: T-057*
+  - Director's request (2026-11-04): find species faster. Season chips 🌱 Vår / ☀️ Sommar /
+    🍂 Höst / ❄️ Vinter (meteorological seasons, Dec–Feb winter; `isActiveInSeason`) sit next to
+    "Active this month"; picking one clears the other, since both are time windows. They apply to
+    undiscovered cards too: a season reveals nothing.
+  - Name search box (local, English, Latin and any carried names; case- and accent-insensitive,
+    so "grahager" finds "Gråhäger"). Director's choice: it searches **spotted species only**, so
+    typing a name never reveals a "?" card; the empty message says so. Tests in
+    `lib/almanac.test.ts` and the screen test.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

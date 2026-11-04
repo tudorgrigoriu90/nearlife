@@ -64,6 +64,56 @@ describe('AlmanacScreen', () => {
     expect(StyleSheet.flatten(row.props.style)).toMatchObject({ flexGrow: 0, flexShrink: 0 });
   });
 
+  it('narrows the grid to a season (T-240)', async () => {
+    const spring = {
+      ...ONE_PER_CATEGORY[0],
+      id: 'spring-sp',
+      activeMonths: [4] as Species['activeMonths'],
+    };
+    const winter = {
+      ...ONE_PER_CATEGORY[1],
+      id: 'winter-sp',
+      activeMonths: [1] as Species['activeMonths'],
+    };
+    const records = [spring, winter].map((x) => ({
+      speciesId: x.id,
+      spottedAt: '2026-01-01T00:00:00Z',
+      caughtAt: null,
+      helpedAt: null,
+      helpedKind: null,
+      primeBonus: false,
+    }));
+    await render(<AlmanacScreen species={[spring, winter]} records={records} />);
+    await fireEvent.press(screen.getByText(`❄️ ${tr('almanac.season.winter')}`));
+    expect(screen.getByText(winter.commonName)).toBeTruthy();
+    expect(screen.queryByText(spring.commonName)).toBeNull();
+  });
+
+  it('searches spotted species by name, and says when nothing matches (T-240)', async () => {
+    const [a, b] = ONE_PER_CATEGORY;
+    const records = [
+      {
+        speciesId: a.id,
+        spottedAt: '2026-01-01T00:00:00Z',
+        caughtAt: null,
+        helpedAt: null,
+        helpedKind: null,
+        primeBonus: false,
+      },
+    ];
+    await render(<AlmanacScreen species={[a, b]} records={records} />);
+    await fireEvent.changeText(
+      screen.getByPlaceholderText(tr('almanac.search.placeholder')),
+      a.scientificName,
+    );
+    expect(screen.getByText(a.commonName)).toBeTruthy();
+    await fireEvent.changeText(
+      screen.getByPlaceholderText(tr('almanac.search.placeholder')),
+      b.scientificName,
+    );
+    expect(screen.getByText(tr('almanac.search.empty'))).toBeTruthy();
+  });
+
   it('hides the entry points when no handlers are given', async () => {
     await render(<AlmanacScreen species={ONE_PER_CATEGORY} records={[]} />);
     expect(screen.queryByText(new RegExp(tr('nav.badges')))).toBeNull();
@@ -107,8 +157,18 @@ describe('AlmanacScreen', () => {
 
   describe('active-this-month filter (T-057)', () => {
     const swift = KRONOBERG_SPECIES.find((x) => x.id === 'common-swift')!;
-    const summerOnly: Species = { ...swift, id: 'summer', commonName: 'Summer bird', activeMonths: [6, 7] };
-    const winterOnly: Species = { ...swift, id: 'winter', commonName: 'Winter bird', activeMonths: [1] };
+    const summerOnly: Species = {
+      ...swift,
+      id: 'summer',
+      commonName: 'Summer bird',
+      activeMonths: [6, 7],
+    };
+    const winterOnly: Species = {
+      ...swift,
+      id: 'winter',
+      commonName: 'Winter bird',
+      activeMonths: [1],
+    };
 
     it('shows only species active in the current month when switched on', async () => {
       await render(<AlmanacScreen species={[summerOnly, winterOnly]} month={1} />);
@@ -128,7 +188,8 @@ describe('AlmanacScreen', () => {
       const chip = screen.getByRole('button', { name: new RegExp(tr('almanac.filter.activeNow')) });
       await fireEvent.press(chip);
       expect(
-        screen.getByRole('button', { name: new RegExp(tr('almanac.filter.activeNow')) }).props.accessibilityState,
+        screen.getByRole('button', { name: new RegExp(tr('almanac.filter.activeNow')) }).props
+          .accessibilityState,
       ).toEqual({ selected: true });
     });
   });
@@ -136,15 +197,42 @@ describe('AlmanacScreen', () => {
   it('filters to species of one habitat, and back (T-057)', async () => {
     const base = KRONOBERG_SPECIES[0];
     const species = [
-      { ...base, id: 'pike', commonName: 'Pike', category: 'fish' as const, catchHabitats: ['freshwater' as const] },
-      { ...base, id: 'hare', commonName: 'Hare', category: 'mammal' as const, catchHabitats: ['land' as const] },
+      {
+        ...base,
+        id: 'pike',
+        commonName: 'Pike',
+        category: 'fish' as const,
+        catchHabitats: ['freshwater' as const],
+      },
+      {
+        ...base,
+        id: 'hare',
+        commonName: 'Hare',
+        category: 'mammal' as const,
+        catchHabitats: ['land' as const],
+      },
     ];
     const records = [
-      { speciesId: 'pike', spottedAt: 't', caughtAt: null, helpedAt: null, helpedKind: null, primeBonus: false },
-      { speciesId: 'hare', spottedAt: 't', caughtAt: null, helpedAt: null, helpedKind: null, primeBonus: false },
+      {
+        speciesId: 'pike',
+        spottedAt: 't',
+        caughtAt: null,
+        helpedAt: null,
+        helpedKind: null,
+        primeBonus: false,
+      },
+      {
+        speciesId: 'hare',
+        spottedAt: 't',
+        caughtAt: null,
+        helpedAt: null,
+        helpedKind: null,
+        primeBonus: false,
+      },
     ];
     await render(<AlmanacScreen species={species} records={records} locale="en" />);
-    const chip = () => screen.getByRole('button', { name: new RegExp(tr('almanac.filter.freshwater')) });
+    const chip = () =>
+      screen.getByRole('button', { name: new RegExp(tr('almanac.filter.freshwater')) });
     await fireEvent.press(chip());
     expect(screen.queryByText('Hare')).toBeNull();
     expect(screen.getByText('Pike')).toBeTruthy();

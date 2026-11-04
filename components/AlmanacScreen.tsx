@@ -1,11 +1,22 @@
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { almanacEntries, categoryCounts, discoveredCount, type AlmanacEntry } from '../lib/almanac';
 import { progressSummary, type CollectionRecord } from '../lib/collection';
 import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
 import { photoFor } from '../lib/species/media';
 import { commonNameFor } from '../lib/species/localized';
-import { monthOf } from '../lib/season';
+import { monthOf, type Season } from '../lib/season';
+import type { ContentLocale } from '../lib/i18n/contentLocale';
 import { groupOf, type SpeciesGroup } from '../lib/species/group';
 import type { Habitat, Month, Species } from '../lib/species/types';
 import { CATEGORY_EMOJI, GROUP_LABEL_KEY, speciesGlyph } from './speciesVisual';
@@ -111,12 +122,17 @@ export default function AlmanacScreen({
   const [activeNow, setActiveNow] = useState(false);
   // Where to go looking (T-057): the habitats the catch screen sends people to.
   const [habitat, setHabitat] = useState<Habitat | null>(null);
+  // Season and name search (T-240). A season replaces "this month" and vice versa: both are the
+  // same kind of time window, and combining them would only ever narrow to the current month.
+  const [season, setSeason] = useState<Season | null>(null);
+  const [query, setQuery] = useState('');
   const entries = almanacEntries(
     species,
     records,
     category ?? undefined,
     activeNow ? month : undefined,
     habitat ?? undefined,
+    { season: season ?? undefined, query, locale: locale as ContentLocale },
   );
   const counts = categoryCounts(species, records);
   const discovered = discoveredCount(species, records);
@@ -159,6 +175,18 @@ export default function AlmanacScreen({
         </View>
       ) : null}
 
+      <TextInput
+        style={styles.search}
+        value={query}
+        onChangeText={setQuery}
+        placeholder={tr('almanac.search.placeholder')}
+        placeholderTextColor="#7a8a7c"
+        accessibilityLabel={tr('almanac.search.placeholder')}
+        autoCorrect={false}
+        clearButtonMode="while-editing"
+        returnKeyType="search"
+      />
+
       <ScrollView
         testID="almanac-filters"
         horizontal
@@ -169,8 +197,22 @@ export default function AlmanacScreen({
         <Chip
           label={`🗓 ${tr('almanac.filter.activeNow')}`}
           active={activeNow}
-          onPress={() => setActiveNow((on) => !on)}
+          onPress={() => {
+            setActiveNow((on) => !on);
+            setSeason(null);
+          }}
         />
+        {SEASON_CHIPS.map(([key, emoji]) => (
+          <Chip
+            key={key}
+            label={`${emoji} ${tr(`almanac.season.${key}`)}`}
+            active={season === key}
+            onPress={() => {
+              setSeason((current) => (current === key ? null : key));
+              setActiveNow(false);
+            }}
+          />
+        ))}
         {HABITAT_CHIPS.map(([h, emoji, key]) => (
           <Chip
             key={h}
@@ -179,7 +221,11 @@ export default function AlmanacScreen({
             onPress={() => setHabitat((current) => (current === h ? null : h))}
           />
         ))}
-        <Chip label={tr('almanac.filter.all')} active={category === null} onPress={() => setCategory(null)} />
+        <Chip
+          label={tr('almanac.filter.all')}
+          active={category === null}
+          onPress={() => setCategory(null)}
+        />
         {counts.map((c) => (
           <Chip
             key={c.category}
@@ -192,7 +238,7 @@ export default function AlmanacScreen({
 
       <FlatList
         data={entries}
-        key={`${category ?? 'all'}-${activeNow ? 'now' : 'any'}-${habitat ?? 'anywhere'}`}
+        key={`${category ?? 'all'}-${activeNow ? 'now' : (season ?? 'any')}-${habitat ?? 'anywhere'}`}
         keyExtractor={(e) => e.species.id}
         numColumns={3}
         columnWrapperStyle={styles.gridRow}
@@ -200,13 +246,30 @@ export default function AlmanacScreen({
         contentContainerStyle={styles.grid}
         ListEmptyComponent={
           <Text style={styles.empty}>
-            {tr(activeNow ? 'almanac.activeNow.empty' : habitat ? 'almanac.habitat.empty' : 'almanac.empty')}
+            {tr(
+              query.trim()
+                ? 'almanac.search.empty'
+                : activeNow
+                  ? 'almanac.activeNow.empty'
+                  : season
+                    ? 'almanac.season.empty'
+                    : habitat
+                      ? 'almanac.habitat.empty'
+                      : 'almanac.empty',
+            )}
           </Text>
         }
       />
     </View>
   );
 }
+
+const SEASON_CHIPS: readonly (readonly [Season, string])[] = [
+  ['spring', '🌱'],
+  ['summer', '☀️'],
+  ['autumn', '🍂'],
+  ['winter', '❄️'],
+];
 
 const HABITAT_CHIPS: [Habitat, string, TranslationKey][] = [
   ['land', '🌲', 'almanac.filter.land'],
@@ -245,16 +308,46 @@ const styles = StyleSheet.create({
   subtitle: { marginTop: 4, marginBottom: 8, fontSize: 14, color: '#4a5c4d', paddingHorizontal: 4 },
   summaryRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 4, marginBottom: 10 },
   linkRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 4, marginBottom: 10 },
-  linkBtn: { flex: 1, backgroundColor: '#eaf4ea', borderRadius: 10, paddingVertical: 10, alignItems: 'center' },
+  linkBtn: {
+    flex: 1,
+    backgroundColor: '#eaf4ea',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
   linkText: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
-  tierStat: { flex: 1, backgroundColor: '#fff', borderRadius: 10, paddingVertical: 8, alignItems: 'center' },
+  tierStat: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
   tierStatCount: { fontSize: 16, fontWeight: '700', color: '#3a7d44' },
   tierStatLabel: { marginTop: 2, fontSize: 11, color: '#4a5c4d' },
   // The row must not shrink: the grid below takes all remaining height, and Android squeezed the
   // row until the chip labels were cut in half (T-239).
   chipRow: { flexGrow: 0, flexShrink: 0 },
+  search: {
+    marginHorizontal: 4,
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#d4e0d2',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 15,
+    color: '#22331f',
+  },
   chips: { paddingVertical: 4, paddingHorizontal: 4, gap: 8, alignItems: 'center' },
-  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: '#e2ebe0', marginRight: 8 },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#e2ebe0',
+    marginRight: 8,
+  },
   chipActive: { backgroundColor: '#3a7d44' },
   chipText: { fontSize: 13, color: '#3a5a3d' },
   chipTextActive: { color: '#fff', fontWeight: '600' },
@@ -279,5 +372,11 @@ const styles = StyleSheet.create({
   tierOn: { color: '#3a7d44' },
   tierOff: { color: '#cdd8ca' },
   detail: { marginTop: 8, fontSize: 13, color: '#4a5c4d' },
-  empty: { textAlign: 'center', marginTop: 40, fontSize: 14, color: '#7a8a7c', fontStyle: 'italic' },
+  empty: {
+    textAlign: 'center',
+    marginTop: 40,
+    fontSize: 14,
+    color: '#7a8a7c',
+    fontStyle: 'italic',
+  },
 });

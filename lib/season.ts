@@ -41,3 +41,16 @@ export function isActiveInMonth(species: Species, month: Month): boolean {
 export function activeSpecies(species: Species[], month: Month): Species[] {
   return species.filter((s) => isActiveInMonth(s, month));
 }
+
+/** The months of each meteorological season (Dec–Feb is winter), for the Almanac filter (T-240). */
+export const SEASON_MONTHS: Record<Season, Month[]> = {
+  winter: [12, 1, 2],
+  spring: [3, 4, 5],
+  summer: [6, 7, 8],
+  autumn: [9, 10, 11],
+};
+
+/** Active in any month of the season: the same honest season window, never "here right now". */
+export function isActiveInSeason(species: Species, season: Season): boolean {
+  return SEASON_MONTHS[season].some((m) => species.activeMonths.includes(m));
+}

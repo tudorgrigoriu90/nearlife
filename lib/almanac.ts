@@ -1,5 +1,7 @@
 import { tierStateFor, type CollectionRecord, type TierState } from './collection';
-import { isActiveInMonth } from './season';
+import { isActiveInMonth, isActiveInSeason, type Season } from './season';
+import type { ContentLocale } from './i18n/contentLocale';
+import { commonNameFor } from './species/localized';
 import { groupOf, type SpeciesGroup } from './species/group';
 import { habitatsFor } from './catchSpots';
 import type { Habitat, Month, Species } from './species/types';
@@ -42,18 +44,54 @@ export function almanacEntries(
   category?: SpeciesGroup,
   activeIn?: Month,
   habitat?: Habitat,
+  find: AlmanacFind = {},
 ): AlmanacEntry[] {
+  const query = normalise(find.query ?? '');
   const filtered = species.filter(
     (s) =>
       (!category || groupOf(s) === category) &&
       (activeIn === undefined || isActiveInMonth(s, activeIn)) &&
+      (find.season === undefined || isActiveInSeason(s, find.season)) &&
       // The same habitats the catch screen sends people to, defaults included (T-057).
       (habitat === undefined || habitatsFor(s).includes(habitat)),
   );
-  return filtered.map((s) => {
+  return filtered.flatMap((s) => {
     const tier = tierStateFor(records, s.id);
-    return { species: s, tier, discovered: tier.spotted };
+    // Name search covers spotted species only (Director, 2026-11-04): an undiscovered species is
+    // never revealed by typing its name, so the "?" cards keep their mystery.
+    if (query && !(tier.spotted && matchesName(s, query, find.locale ?? 'en'))) return [];
+    return [{ species: s, tier, discovered: tier.spotted }];
   });
+}
+
+/** Season and name search for the Almanac (T-240). */
+export interface AlmanacFind {
+  season?: Season;
+  query?: string;
+  /** The app language, whose name is searched alongside English, Latin and any carried names. */
+  locale?: ContentLocale;
+}
+
+/** Lower case, accents removed (å → a, ö → o), so "grahager" finds "Gråhäger". */
+function normalise(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+/** Whether `query` is part of the species' local, English, Latin or any carried name. */
+export function matchesName(species: Species, query: string, locale: ContentLocale): boolean {
+  const q = normalise(query);
+  if (!q) return true;
+  const names = [
+    commonNameFor(species, locale),
+    species.commonName,
+    species.scientificName,
+    ...Object.values(species.names ?? {}),
+  ];
+  return names.some((n) => typeof n === 'string' && normalise(n).includes(q));
 }
 
 export interface CategoryCount {
@@ -66,10 +104,7 @@ export interface CategoryCount {
  * Per-category totals + how many are discovered, for the filter chips and progress. Only
  * categories present in `species` are returned, in `ALMANAC_CATEGORIES` order.
  */
-export function categoryCounts(
-  species: Species[],
-  records: CollectionRecord[],
-): CategoryCount[] {
+export function categoryCounts(species: Species[], records: CollectionRecord[]): CategoryCount[] {
   return ALMANAC_CATEGORIES.map((category) => {
     const inCategory = species.filter((s) => groupOf(s) === category);
     const discovered = inCategory.filter((s) => tierStateFor(records, s.id).spotted).length;

@@ -1,12 +1,40 @@
-import { almanacEntries, categoryCounts, discoveredCount, ALMANAC_CATEGORIES } from './almanac';
+import {
+  almanacEntries,
+  categoryCounts,
+  discoveredCount,
+  matchesName,
+  ALMANAC_CATEGORIES,
+} from './almanac';
+import { isActiveInSeason } from './season';
 import { KRONOBERG_SPECIES } from './species/kronoberg';
 import type { CollectionRecord } from './collection';
 import type { Species } from './species/types';
 
 const species: Species[] = [
-  { id: 'a-bird', scientificName: 'A a', commonName: 'A', category: 'bird', rarity: 'common', activeMonths: [5] },
-  { id: 'b-bird', scientificName: 'B b', commonName: 'B', category: 'bird', rarity: 'rare', activeMonths: [6] },
-  { id: 'c-plant', scientificName: 'C c', commonName: 'C', category: 'plant', rarity: 'common', activeMonths: [7] },
+  {
+    id: 'a-bird',
+    scientificName: 'A a',
+    commonName: 'A',
+    category: 'bird',
+    rarity: 'common',
+    activeMonths: [5],
+  },
+  {
+    id: 'b-bird',
+    scientificName: 'B b',
+    commonName: 'B',
+    category: 'bird',
+    rarity: 'rare',
+    activeMonths: [6],
+  },
+  {
+    id: 'c-plant',
+    scientificName: 'C c',
+    commonName: 'C',
+    category: 'plant',
+    rarity: 'common',
+    activeMonths: [7],
+  },
 ];
 
 function record(patch: Partial<CollectionRecord> & { speciesId: string }): CollectionRecord {
@@ -86,10 +114,30 @@ describe('discoveredCount', () => {
 });
 
 describe('habitat filter (T-057)', () => {
-  const pike = { ...KRONOBERG_SPECIES[0], id: 'pike', category: 'fish' as const, catchHabitats: ['freshwater' as const] };
-  const duck = { ...KRONOBERG_SPECIES[0], id: 'duck', category: 'bird' as const, catchHabitats: ['land' as const, 'freshwater' as const] };
-  const seal = { ...KRONOBERG_SPECIES[0], id: 'seal', category: 'mammal' as const, catchHabitats: ['coast' as const] };
-  const bundledFish = { ...KRONOBERG_SPECIES[0], id: 'perch', category: 'fish' as const, catchHabitats: undefined };
+  const pike = {
+    ...KRONOBERG_SPECIES[0],
+    id: 'pike',
+    category: 'fish' as const,
+    catchHabitats: ['freshwater' as const],
+  };
+  const duck = {
+    ...KRONOBERG_SPECIES[0],
+    id: 'duck',
+    category: 'bird' as const,
+    catchHabitats: ['land' as const, 'freshwater' as const],
+  };
+  const seal = {
+    ...KRONOBERG_SPECIES[0],
+    id: 'seal',
+    category: 'mammal' as const,
+    catchHabitats: ['coast' as const],
+  };
+  const bundledFish = {
+    ...KRONOBERG_SPECIES[0],
+    id: 'perch',
+    category: 'fish' as const,
+    catchHabitats: undefined,
+  };
 
   it('keeps species that can be met in the chosen habitat', () => {
     const ids = (h: 'land' | 'freshwater' | 'coast') =>
@@ -102,5 +150,92 @@ describe('habitat filter (T-057)', () => {
   it('uses the cautious default for a species without habitat data (fish: water)', () => {
     expect(almanacEntries([bundledFish], [], undefined, undefined, 'land')).toEqual([]);
     expect(almanacEntries([bundledFish], [], undefined, undefined, 'freshwater')).toHaveLength(1);
+  });
+});
+
+describe('season filter (T-240)', () => {
+  const s = (id: string, activeMonths: number[]): Species =>
+    ({
+      id,
+      scientificName: id,
+      commonName: id,
+      category: 'bird',
+      rarity: 'common',
+      activeMonths,
+    }) as Species;
+  const list = [
+    s('winter-only', [1]),
+    s('may', [5]),
+    s('july', [7]),
+    s('october', [10]),
+    s('dec', [12]),
+  ];
+
+  it('keeps species active in any month of the season (meteorological, Dec–Feb is winter)', () => {
+    const ids = (season: Parameters<typeof isActiveInSeason>[1]) =>
+      list.filter((x) => isActiveInSeason(x, season)).map((x) => x.id);
+    expect(ids('winter')).toEqual(['winter-only', 'dec']);
+    expect(ids('spring')).toEqual(['may']);
+    expect(ids('summer')).toEqual(['july']);
+    expect(ids('autumn')).toEqual(['october']);
+  });
+
+  it('applies to undiscovered species too: a season says nothing about what they are', () => {
+    const out = almanacEntries(list, [], undefined, undefined, undefined, { season: 'summer' });
+    expect(out.map((e) => [e.species.id, e.discovered])).toEqual([['july', false]]);
+  });
+});
+
+describe('name search (T-240)', () => {
+  const heron: Species = {
+    id: 'gbif:1',
+    scientificName: 'Ardea cinerea',
+    commonName: 'Grey Heron',
+    category: 'bird',
+    rarity: 'common',
+    activeMonths: [5],
+    names: { sv: 'Gråhäger' },
+  };
+  const jay: Species = {
+    id: 'gbif:2',
+    scientificName: 'Garrulus glandarius',
+    commonName: 'Eurasian Jay',
+    category: 'bird',
+    rarity: 'common',
+    activeMonths: [5],
+    names: { sv: 'Nötskrika' },
+  };
+  const spotted = [record({ speciesId: 'gbif:1', spottedAt: '2026-05-01T00:00:00Z' })];
+
+  it('matches the local, English and Latin names, ignoring case and accents', () => {
+    expect(matchesName(heron, 'gråhä', 'sv')).toBe(true);
+    expect(matchesName(heron, 'GRAHAGER', 'sv')).toBe(true);
+    expect(matchesName(heron, 'heron', 'sv')).toBe(true);
+    expect(matchesName(heron, 'ardea', 'sv')).toBe(true);
+    expect(matchesName(heron, 'skrika', 'sv')).toBe(false);
+  });
+
+  it('only searches species already spotted, so the "?" cards stay a mystery (Director, 2026-11-04)', () => {
+    const out = almanacEntries([heron, jay], spotted, undefined, undefined, undefined, {
+      query: 'a',
+      locale: 'sv',
+    });
+    expect(out.map((e) => e.species.id)).toEqual(['gbif:1']);
+    // Searching for an undiscovered species by name finds nothing rather than revealing it.
+    expect(
+      almanacEntries([heron, jay], spotted, undefined, undefined, undefined, {
+        query: 'nötskrika',
+        locale: 'sv',
+      }),
+    ).toEqual([]);
+  });
+
+  it('a blank query filters nothing', () => {
+    expect(
+      almanacEntries([heron, jay], spotted, undefined, undefined, undefined, {
+        query: '  ',
+        locale: 'sv',
+      }),
+    ).toHaveLength(2);
   });
 });
