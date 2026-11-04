@@ -20,4 +20,15 @@ describe('app.json', () => {
     expect(expo.scheme).toBe('nearby');
     expect(expo.android.package).toBe('com.nearlife.nearby');
   });
+
+  it('shrinks and obfuscates Android release code with R8 (T-238)', () => {
+    // Google Play flagged "DEX code optimisation below threshold, obfuscation 3%": release builds
+    // shipped without R8. Below 25% it may limit the app's visibility and publishing.
+    const entry = expo.plugins.find((p) => Array.isArray(p) && p[0] === 'expo-build-properties');
+    expect(entry).toBeDefined();
+    expect(entry[1].android).toMatchObject({
+      enableMinifyInReleaseBuilds: true,
+      enableShrinkResourcesInReleaseBuilds: true,
+    });
+  });
 });

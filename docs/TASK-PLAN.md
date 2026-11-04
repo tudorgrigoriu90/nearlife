@@ -3787,6 +3787,15 @@ only.**
     height, and Android shrank the row to make room. The row now has `flexGrow: 0, flexShrink: 0`
     (and centred chips); a test pins it. It is the app's only horizontal row.
 
+- **T-238 · R8 code shrinking + obfuscation for Android release builds** — *Claude · XS · `DONE` (reaches Play with the next build) · deps: T-140*
+  - Play Console flagged "DEX code optimisation below threshold — obfuscation 3%" (below 25% may
+    limit visibility and publishing). Release builds shipped without R8. `expo-build-properties`
+    (~57.0.8, the SDK-57 bundled version) now sets `enableMinifyInReleaseBuilds` and
+    `enableShrinkResourcesInReleaseBuilds`; a prebuild check confirmed both land in
+    `android/gradle.properties`. The native libraries (RevenueCat, MapLibre, Sentry, Expo modules)
+    ship their own keep rules. Only the Kotlin/Java layer is affected; the JS bundle is Hermes
+    bytecode either way. Device check of the next build covers it (purchases, map, crash report).
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
