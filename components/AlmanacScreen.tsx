@@ -160,8 +160,10 @@ export default function AlmanacScreen({
       ) : null}
 
       <ScrollView
+        testID="almanac-filters"
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.chipRow}
         contentContainerStyle={styles.chips}
       >
         <Chip
@@ -248,7 +250,10 @@ const styles = StyleSheet.create({
   tierStat: { flex: 1, backgroundColor: '#fff', borderRadius: 10, paddingVertical: 8, alignItems: 'center' },
   tierStatCount: { fontSize: 16, fontWeight: '700', color: '#3a7d44' },
   tierStatLabel: { marginTop: 2, fontSize: 11, color: '#4a5c4d' },
-  chips: { paddingVertical: 4, paddingHorizontal: 4, gap: 8 },
+  // The row must not shrink: the grid below takes all remaining height, and Android squeezed the
+  // row until the chip labels were cut in half (T-239).
+  chipRow: { flexGrow: 0, flexShrink: 0 },
+  chips: { paddingVertical: 4, paddingHorizontal: 4, gap: 8, alignItems: 'center' },
   chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: '#e2ebe0', marginRight: 8 },
   chipActive: { backgroundColor: '#3a7d44' },
   chipText: { fontSize: 13, color: '#3a5a3d' },

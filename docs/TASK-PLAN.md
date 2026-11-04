@@ -3781,6 +3781,12 @@ only.**
     reviewer checks held); the seeded hash matches the code given to the Director.
   - Director: paste the App access text from PLAY-STORE-LISTING.md with the code.
 
+- **T-239 · Almanac filter labels cut in half** — *Claude · XS · `DONE` · deps: T-057*
+  - Found on the Director's phone: the chip row under Märken/Påverkan showed only the top half of
+    its labels. The horizontal ScrollView sits in a column with the grid, which takes all remaining
+    height, and Android shrank the row to make room. The row now has `flexGrow: 0, flexShrink: 0`
+    (and centred chips); a test pins it. It is the app's only horizontal row.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

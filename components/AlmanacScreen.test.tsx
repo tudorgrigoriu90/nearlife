@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import AlmanacScreen from './AlmanacScreen';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import { createTranslator } from '../lib/i18n';
@@ -54,6 +55,14 @@ describe('AlmanacScreen', () => {
     },
     RENDER_TIMEOUT,
   );
+
+  it('keeps the filter row at its full height above the grid (T-239)', async () => {
+    // On the Director's phone the chip labels were cut in half: the horizontal row sits in a column
+    // with the grid, which takes all remaining height, and Android shrank the row to make room.
+    await render(<AlmanacScreen species={ONE_PER_CATEGORY} records={[]} />);
+    const row = screen.getByTestId('almanac-filters');
+    expect(StyleSheet.flatten(row.props.style)).toMatchObject({ flexGrow: 0, flexShrink: 0 });
+  });
 
   it('hides the entry points when no handlers are given', async () => {
     await render(<AlmanacScreen species={ONE_PER_CATEGORY} records={[]} />);
