@@ -6,6 +6,7 @@ module.exports = {
   // behaviour-equivalent for tests and lets workers exit cleanly.
   moduleNameMapper: {
     '^expo-notifications$': '<rootDir>/__mocks__/expo-notifications.js',
+    '^expo-speech$': '<rootDir>/__mocks__/expo-speech.js',
   },
   // Restore a real TextDecoder/TextEncoder before test modules load (T-091) so h3-js' emscripten
   // build can initialize under jest-expo. The preset leaves setupFilesAfterEnv unset, so this adds

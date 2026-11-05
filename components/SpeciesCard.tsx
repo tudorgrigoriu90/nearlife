@@ -16,6 +16,7 @@ import type { SpeciesContent } from '../lib/species/content';
 import type { Species } from '../lib/species/types';
 import DualText from './DualText';
 import SpeciesHero from './SpeciesHero';
+import ReadAloud from './ReadAloud';
 
 // Species card (T-026 · USER-FLOWS §4). The always-free Tier-1 layer: fact, when/how trivia,
 // and the give + protect mission actions (never gated — invariant #2). Below sits the depth-tier
@@ -138,6 +139,24 @@ export default function SpeciesCard({
             <Text style={[styles.mtNotice, { writingDirection: chromeDirection }]}>{mtNotice}</Text>
           ) : null}
           {!spotted ? <Text style={styles.notSpotted}>{tr('card.notSpotted')}</Text> : null}
+          {/* Read aloud (T-244): the second language's name, else its Latin name. */}
+          <ReadAloud
+            locale={locale}
+            name={commonNameFor(species, locale)}
+            content={content ?? null}
+            secondary={
+              secondaryLocale && secondaryContent
+                ? {
+                    locale: secondaryLocale,
+                    name:
+                      secondaryContent.commonName ??
+                      commonNameInLocale(species, secondaryLocale) ??
+                      species.scientificName,
+                    content: secondaryContent,
+                  }
+                : null
+            }
+          />
         </View>
 
         {content ? (

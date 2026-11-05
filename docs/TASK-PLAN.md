@@ -3838,6 +3838,16 @@ only.**
     badges, no collection data. Account deletion now also clears them and the quiz's daily tries
     (the tries were missing from the device reset). Tests: badge rules, store, screen, quiz.
 
+- **T-244 · Read the species card aloud** — *Claude · S · `DONE` (native module: reaches phones with the next build) · deps: T-149*
+  - Director's pick (2026-11-05) from the feature list: for people learning Swedish, hearing how
+    "Nötväcka" is said; also for children and anyone who reads poorly. `expo-speech` (~57.0.1,
+    SDK-57 bundled) uses the phone's own text-to-speech: on the device, offline, $0, nothing sent.
+  - "🔊 Lyssna" on the card reads the name, fact, this-week, give and protect in the app language
+    (sv-SE / en-GB voices); a second button "🔊 <endonym>" reads the second-language version, shown
+    only when the phone has a voice for that language (else it would read Romanian in a Swedish
+    voice). Tapping again stops; closing the card stops. `lib/readAloud.ts` (text, voice tags,
+    voice check) + `components/ReadAloud.tsx`; Jest stub `__mocks__/expo-speech.js`. Tests: 10.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

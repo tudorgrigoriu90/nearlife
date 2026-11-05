@@ -66,6 +66,8 @@ export const en = {
     'tier.helped': 'Helped',
     // Species card (T-026)
     'card.give': 'Give',
+    'card.listen': 'Listen',
+    'card.listenStop': 'Stop',
     'card.protect': 'Protect',
     'card.findNearby': 'Find it nearby',
     'card.depth': 'Depth',
@@ -388,6 +390,8 @@ const sv = {
     'tier.helped': 'Hjälpt',
     // Species card (T-026)
     'card.give': 'Ge',
+    'card.listen': 'Lyssna',
+    'card.listenStop': 'Stoppa',
     'card.protect': 'Skydda',
     'card.findNearby': 'Hitta den i närheten',
     'card.depth': 'Fördjupning',
