@@ -46,7 +46,7 @@ export function almanacEntries(
   habitat?: Habitat,
   find: AlmanacFind = {},
 ): AlmanacEntry[] {
-  const query = normalise(find.query ?? '');
+  const query = normaliseName(find.query ?? '');
   const filtered = species.filter(
     (s) =>
       (!category || groupOf(s) === category) &&
@@ -73,7 +73,7 @@ export interface AlmanacFind {
 }
 
 /** Lower case, accents removed (å → a, ö → o), so "grahager" finds "Gråhäger". */
-function normalise(text: string): string {
+export function normaliseName(text: string): string {
   return text
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -83,7 +83,7 @@ function normalise(text: string): string {
 
 /** Whether `query` is part of the species' local, English, Latin or any carried name. */
 export function matchesName(species: Species, query: string, locale: ContentLocale): boolean {
-  const q = normalise(query);
+  const q = normaliseName(query);
   if (!q) return true;
   const names = [
     commonNameFor(species, locale),
@@ -91,7 +91,7 @@ export function matchesName(species: Species, query: string, locale: ContentLoca
     species.scientificName,
     ...Object.values(species.names ?? {}),
   ];
-  return names.some((n) => typeof n === 'string' && normalise(n).includes(q));
+  return names.some((n) => typeof n === 'string' && normaliseName(n).includes(q));
 }
 
 export interface CategoryCount {

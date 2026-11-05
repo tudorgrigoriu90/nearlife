@@ -3806,6 +3806,21 @@ only.**
     typing a name never reveals a "?" card; the empty message says so. Tests in
     `lib/almanac.test.ts` and the screen test.
 
+- **T-241 · "I saw…" sighting quiz: logic** — *Claude · S · `DONE` · deps: T-240*
+  - Director's feature (2026-11-05): the user names what they saw by its exact name; the app shows
+    four photos (the species + three lookalikes) and a right pick spots it, or praises them if it
+    is already spotted ("Bra jobbat, du kan dina fåglar!"). Director's choices: **exact name, no
+    autocomplete** (a typed name never leaks the county list) and **one try per species per day**.
+  - `lib/sightingQuiz.ts`: `findByExactName` (local/English/Latin/carried names, case and accents
+    ignored, whole name only, so "fågel" finds nothing); `pickLookalikes` (photo required; same
+    genus, then same group active this month, then same group; seeded so a reopened quiz is
+    stable); `quizOptions`; day-keyed attempts (`canAttempt`/`recordAttempt`, older days pruned)
+    persisted on the device. It checks recognition, not presence: Spotted stays honour-based and
+    catching stays location-checked. 6,187 of 8,080 catalogue species have a photo to quiz on.
+- **T-242 · "I saw…" sighting quiz: screens** — *Claude · S · `TODO` · deps: T-241*
+  - Entry from This Week and the Almanac; name entry → photo quiz → result (spotted / praised /
+    the right answer shown); i18n en+sv; Android back; App flow test.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
