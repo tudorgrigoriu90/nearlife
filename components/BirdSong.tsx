@@ -34,7 +34,16 @@ export default function BirdSong({
   return sound ? <SongPlayer key={sound.url} sound={sound} locale={locale} /> : null;
 }
 
-function SongPlayer({ sound, locale }: { sound: SpeciesSound; locale: Locale }) {
+/** The play button + credit. In the song quiz the credit is not a link: the page names the bird. */
+export function SongPlayer({
+  sound,
+  locale,
+  linkCredit = true,
+}: {
+  sound: SpeciesSound;
+  locale: Locale;
+  linkCredit?: boolean;
+}) {
   const tr = createTranslator(locale);
   // The player is released by the hook when the card closes, which also stops the song.
   const player = useAudioPlayer({ uri: sound.url });
@@ -64,8 +73,12 @@ function SongPlayer({ sound, locale }: { sound: SpeciesSound; locale: Locale }) 
       </Pressable>
       <Text
         style={styles.credit}
-        accessibilityRole="link"
-        onPress={() => void Linking.openURL(sound.sourceUrl).catch(() => undefined)}
+        accessibilityRole={linkCredit ? 'link' : 'text'}
+        onPress={
+          linkCredit
+            ? () => void Linking.openURL(sound.sourceUrl).catch(() => undefined)
+            : undefined
+        }
       >
         {soundCredit(sound, tr)}
       </Text>

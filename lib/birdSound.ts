@@ -41,15 +41,35 @@ export function soundCredit(sound: SpeciesSound, tr: ReturnType<typeof createTra
 
 export interface SoundSource {
   soundFor(speciesId: string): Promise<SpeciesSound | undefined>;
+  /** Which of `ids` have a recording (T-247); empty when the answer cannot be had right now. */
+  withSound(ids: string[]): Promise<Set<string>>;
 }
 
 /**
  * A source that asks once per species. Answers, "no recording" included, are kept for the session;
  * a failed request is not, so a card opened offline can still find its song later.
  */
-export function cachedSoundSource(fetchRow: (speciesId: string) => Promise<SoundRow | null>): SoundSource {
+export function cachedSoundSource(
+  fetchRow: (speciesId: string) => Promise<SoundRow | null>,
+  fetchRows: (speciesIds: string[]) => Promise<SoundRow[]> = async () => [],
+): SoundSource {
   const known = new Map<string, SpeciesSound | undefined>();
   return {
+    async withSound(ids) {
+      try {
+        const rows = await fetchRows(ids);
+        const found = new Set<string>();
+        for (const row of rows) {
+          const sound = soundRowToSound(row);
+          if (!sound) continue;
+          known.set(row.species_id, sound);
+          found.add(row.species_id);
+        }
+        return found;
+      } catch {
+        return new Set();
+      }
+    },
     async soundFor(speciesId) {
       if (known.has(speciesId)) return known.get(speciesId);
       try {
@@ -72,19 +92,47 @@ export interface SoundClient {
         column: 'species_id',
         value: string,
       ): { maybeSingle(): PromiseLike<{ data: SoundRow | null; error: unknown }> };
+      in(
+        column: 'species_id',
+        values: string[],
+      ): {
+        not(
+          column: 'url',
+          operator: 'is',
+          value: null,
+        ): PromiseLike<{ data: SoundRow[] | null; error: unknown }>;
+      };
     };
   };
 }
 
 /** `species_sounds` is public-read (migration 0027), so no session is needed. */
 export function supabaseSoundSource(client: SoundClient): SoundSource {
-  return cachedSoundSource(async (speciesId) => {
-    const { data, error } = await client
-      .from('species_sounds')
-      .select('species_id,url,source_url,author,license')
-      .eq('species_id', speciesId)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
-  });
+  return cachedSoundSource(
+    async (speciesId) => {
+      const { data, error } = await client
+        .from('species_sounds')
+        .select('species_id,url,source_url,author,license')
+        .eq('species_id', speciesId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    async (speciesIds) => {
+      // Chunked: a county's birds as one `in (...)` list would make a very long request URL.
+      const rows: SoundRow[] = [];
+      for (let i = 0; i < speciesIds.length; i += SOUND_CHUNK) {
+        const { data, error } = await client
+          .from('species_sounds')
+          .select('species_id,url,source_url,author,license')
+          .in('species_id', speciesIds.slice(i, i + SOUND_CHUNK))
+          .not('url', 'is', null);
+        if (error) throw error;
+        rows.push(...(data ?? []));
+      }
+      return rows;
+    },
+  );
 }
+
+const SOUND_CHUNK = 100;

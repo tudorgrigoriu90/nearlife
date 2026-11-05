@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import type { SoundSource, SpeciesSound } from '../lib/birdSound';
 import { tierStateFor, type CollectionRecord } from '../lib/collection';
 import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
 import type { ContentLocale } from '../lib/i18n/contentLocale';
@@ -14,11 +15,17 @@ import {
 import { groupOf } from '../lib/species/group';
 import { commonNameFor } from '../lib/species/localized';
 import { photoFor } from '../lib/species/media';
+import { songCandidates, songRound } from '../lib/songQuiz';
 import type { Month, Species } from '../lib/species/types';
+import { SongPlayer } from './BirdSong';
 
 // "I saw…" (T-242): name what you saw, pick it out of four photos. The logic, and the Director's
 // rules (exact name only, one try per species per day), live in lib/sightingQuiz (T-241). The
 // choices show photos only: a name under each would give the answer away.
+//
+// "Guess the bird by its song" (T-247): a bird of the county with a recording plays, pick it out
+// of four photos. As many rounds as you like; hearing is not seeing, so a right answer counts as
+// recognised (badges) and never adds to the almanac.
 
 export interface QuizAttemptStore {
   load(): Promise<QuizAttempts>;
@@ -28,7 +35,12 @@ export interface QuizAttemptStore {
 type Step =
   | { kind: 'name'; message: string | null }
   | { kind: 'quiz'; target: Species; options: Species[] }
-  | { kind: 'result'; target: Species; outcome: 'added' | 'praised' | 'wrong' };
+  | { kind: 'song'; target: Species; options: Species[]; sound: SpeciesSound }
+  | {
+      kind: 'result';
+      target: Species;
+      outcome: 'added' | 'praised' | 'wrong' | 'songRight' | 'songWrong';
+    };
 
 export default function SightingQuizScreen({
   locale = 'en',
@@ -41,6 +53,7 @@ export default function SightingQuizScreen({
   onRecognized,
   onOpenSpecies,
   onDone,
+  soundSource,
 }: {
   locale?: Locale;
   /** The species of the user's county, as the Almanac lists them. */
@@ -55,6 +68,8 @@ export default function SightingQuizScreen({
   onRecognized?: (speciesId: string) => void;
   onOpenSpecies?: (species: Species) => void;
   onDone: () => void;
+  /** Bird recordings (T-246). Absent: no song quiz. */
+  soundSource?: SoundSource;
 }) {
   const tr = createTranslator(locale);
   const content = locale as ContentLocale;
@@ -62,6 +77,21 @@ export default function SightingQuizScreen({
   const [step, setStep] = useState<Step>({ kind: 'name', message: null });
   const [attempts, setAttempts] = useState<QuizAttempts>({});
   const nameOf = useMemo(() => (s: Species) => commonNameFor(s, content), [content]);
+  const [songBirds, setSongBirds] = useState<Species[]>([]);
+  const [songRoundNo, setSongRoundNo] = useState(0);
+  const [lastSong, setLastSong] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!soundSource) return;
+    let cancelled = false;
+    const birds = pool.filter((s) => groupOf(s) === 'bird').map((s) => s.id);
+    void soundSource.withSound(birds).then((ids) => {
+      if (!cancelled) setSongBirds(songCandidates(pool, ids, month));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [soundSource, pool, month]);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,6 +123,60 @@ export default function SightingQuizScreen({
       return;
     }
     setStep({ kind: 'quiz', target, options: quizOptions(target, lookalikes, today) });
+  };
+
+  const startSong = async () => {
+    const round = songRound(songBirds, pool, month, `${today}:song:${songRoundNo}`, lastSong);
+    setSongRoundNo((n) => n + 1);
+    const sound = round ? await soundSource?.soundFor(round.target.id) : undefined;
+    if (!round || !sound) {
+      setStep({ kind: 'name', message: tr('quiz.noSong') });
+      return;
+    }
+    setLastSong(round.target.id);
+    setStep({ kind: 'song', target: round.target, options: round.options, sound });
+  };
+
+  const chooseSong = (target: Species, picked: Species) => {
+    const right = picked.id === target.id;
+    if (right) onRecognized?.(target.id);
+    setStep({ kind: 'result', target, outcome: right ? 'songRight' : 'songWrong' });
+  };
+
+  const photoGrid = (options: Species[], onPick: (picked: Species) => void) => (
+    <View style={styles.grid}>
+      {options.map((option) => (
+        <Pressable
+          key={option.id}
+          testID={`quiz-option-${option.id}`}
+          onPress={() => onPick(option)}
+          accessibilityRole="button"
+          style={styles.option}
+        >
+          <Image
+            source={{ uri: photoFor(option)!.url }}
+            style={styles.optionPhoto}
+            resizeMode="cover"
+          />
+        </Pressable>
+      ))}
+    </View>
+  );
+
+  const resultText = (target: Species, outcome: Extract<Step, { kind: 'result' }>['outcome']) => {
+    const name = nameOf(target);
+    switch (outcome) {
+      case 'added':
+        return tr('quiz.added', { name });
+      case 'praised':
+        return tr(`quiz.praise.${groupOf(target)}` as TranslationKey);
+      case 'wrong':
+        return tr('quiz.wrong', { name });
+      case 'songRight':
+        return tr('quiz.songRight', { name });
+      case 'songWrong':
+        return tr('quiz.songWrong', { name });
+    }
   };
 
   const choose = (target: Species, picked: Species) => {
@@ -135,40 +219,48 @@ export default function SightingQuizScreen({
             <Pressable style={styles.cta} onPress={start} accessibilityRole="button">
               <Text style={styles.ctaText}>{tr('quiz.next')}</Text>
             </Pressable>
+            {songBirds.length > 0 ? (
+              <Pressable
+                style={styles.songEntry}
+                onPress={() => void startSong()}
+                accessibilityRole="button"
+              >
+                <Text style={styles.songEntryText}>🐦 {tr('quiz.songEntry')}</Text>
+              </Pressable>
+            ) : null}
           </>
         ) : null}
 
         {step.kind === 'quiz' ? (
           <>
             <Text style={styles.question}>{tr('quiz.question')}</Text>
-            <View style={styles.grid}>
-              {step.options.map((option) => (
-                <Pressable
-                  key={option.id}
-                  testID={`quiz-option-${option.id}`}
-                  onPress={() => choose(step.target, option)}
-                  accessibilityRole="button"
-                  style={styles.option}
-                >
-                  <Image
-                    source={{ uri: photoFor(option)!.url }}
-                    style={styles.optionPhoto}
-                    resizeMode="cover"
-                  />
-                </Pressable>
-              ))}
-            </View>
+            {photoGrid(step.options, (picked) => choose(step.target, picked))}
+          </>
+        ) : null}
+
+        {step.kind === 'song' ? (
+          <>
+            <Text style={styles.question}>{tr('quiz.songQuestion')}</Text>
+            <SongPlayer
+              key={step.sound.url}
+              sound={step.sound}
+              locale={locale}
+              linkCredit={false}
+            />
+            {photoGrid(step.options, (picked) => chooseSong(step.target, picked))}
           </>
         ) : null}
 
         {step.kind === 'result' ? (
           <>
-            <Text style={step.outcome === 'wrong' ? styles.wrong : styles.right}>
-              {step.outcome === 'added'
-                ? tr('quiz.added', { name: nameOf(step.target) })
-                : step.outcome === 'praised'
-                  ? tr(`quiz.praise.${groupOf(step.target)}` as TranslationKey)
-                  : tr('quiz.wrong', { name: nameOf(step.target) })}
+            <Text
+              style={
+                step.outcome === 'wrong' || step.outcome === 'songWrong'
+                  ? styles.wrong
+                  : styles.right
+              }
+            >
+              {resultText(step.target, step.outcome)}
             </Text>
             <Image
               testID="quiz-answer-photo"
@@ -183,6 +275,15 @@ export default function SightingQuizScreen({
                 accessibilityRole="button"
               >
                 <Text style={styles.ctaText}>{tr('quiz.open')}</Text>
+              </Pressable>
+            ) : null}
+            {step.outcome === 'songRight' || step.outcome === 'songWrong' ? (
+              <Pressable
+                style={styles.songEntry}
+                onPress={() => void startSong()}
+                accessibilityRole="button"
+              >
+                <Text style={styles.songEntryText}>🐦 {tr('quiz.songNext')}</Text>
               </Pressable>
             ) : null}
           </>
@@ -246,6 +347,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   ctaText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  songEntry: {
+    marginTop: 12,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#3a7d44',
+    alignItems: 'center',
+  },
+  songEntryText: { fontSize: 16, fontWeight: '700', color: '#3a7d44' },
   doneBtn: { marginTop: 12, paddingVertical: 14, alignItems: 'center' },
   doneText: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
 });

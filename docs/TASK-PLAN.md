@@ -3872,8 +3872,16 @@ only.**
     without one shows no button. Jest stub `__mocks__/expo-audio.js`. Tests: 13.
   - Cost: a play is ~110 KB of Storage egress, so the free 5 GB is ~45k plays a month. The clip
     could be cached on the phone if that ever gets close.
-- **T-247 · Sound quiz in "I saw…"** — *Claude · S · `TODO` · deps: T-246, T-242*
-  - For a bird with a clip: play the song and pick the bird out of four photos.
+- **T-247 · "Guess the bird by its song" in "I saw…"** — *Claude · S · `DONE` · deps: T-246, T-242*
+  - A second button on the "Jag såg…" screen, shown only when the county has birds with a
+    recording. It plays one of them (birds active this month first) and the user picks it out of
+    four bird photos, with the same lookalike picker as the photo quiz. The credit is shown but is
+    not a link here, because the observation page names the bird.
+  - Rounds are unlimited and the same bird never plays twice in a row. Hearing is not seeing:
+    a right answer counts as recognised (T-243 badges) and never adds to the almanac, so the
+    one-try-a-day rule for spotting is untouched.
+  - `lib/songQuiz.ts` (candidates, seeded round); `SoundSource.withSound` reads which county
+    birds have a clip, in chunks of 100, and fills the card cache. Tests: 11.
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in

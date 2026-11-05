@@ -14,7 +14,10 @@ const sound: SpeciesSound = {
   author: 'E. A.',
   sourceUrl: 'https://www.inaturalist.org/observations/2',
 };
-const sourceWith = (s: SpeciesSound | undefined): SoundSource => ({ soundFor: jest.fn(async () => s) });
+const sourceWith = (s: SpeciesSound | undefined): SoundSource => ({
+  soundFor: jest.fn(async () => s),
+  withSound: jest.fn(async () => new Set<string>()),
+});
 const playLabel = `🐦 ${tr('card.song')}`;
 const stopLabel = `⏹ ${tr('card.listenStop')}`;
 

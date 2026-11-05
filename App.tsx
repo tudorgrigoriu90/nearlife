@@ -812,6 +812,7 @@ export default function App() {
           month={monthOf(new Date())}
           today={dayKey(new Date())}
           attemptStore={QUIZ_ATTEMPTS}
+          soundSource={soundSource() ?? undefined}
           onSpotted={(speciesId) => {
             collection.spot(speciesId);
             track('species_spotted', { speciesId, source: 'quiz' });

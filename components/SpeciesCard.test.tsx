@@ -242,6 +242,7 @@ describe('SpeciesCard bird song', () => {
       author: 'E. A.',
       sourceUrl: 'https://www.inaturalist.org/observations/2',
     })),
+    withSound: jest.fn(async () => new Set<string>()),
   };
 
   it('offers the song on a bird card', async () => {

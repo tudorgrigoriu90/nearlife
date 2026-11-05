@@ -73,9 +73,11 @@ describe('supabaseSoundSource', () => {
   const clientWith = (result: { data: SoundRow | null; error: unknown }) => {
     const maybeSingle = jest.fn(async () => result);
     const eq = jest.fn(() => ({ maybeSingle }));
-    const select = jest.fn(() => ({ eq }));
+    const not = jest.fn(async () => ({ data: result.data ? [result.data] : [], error: result.error }));
+    const inFn = jest.fn(() => ({ not }));
+    const select = jest.fn(() => ({ eq, in: inFn }));
     const from = jest.fn(() => ({ select }));
-    return { client: { from }, from, select, eq };
+    return { client: { from }, from, select, eq, inFn };
   };
 
   it('reads the one row for the species from species_sounds', async () => {
@@ -89,5 +91,36 @@ describe('supabaseSoundSource', () => {
   it('treats an error as "not now", not as "no recording"', async () => {
     const fake = clientWith({ data: null, error: new Error('down') });
     expect(await supabaseSoundSource(fake.client).soundFor('gbif:1')).toBeUndefined();
+  });
+});
+
+describe('withSound (T-247)', () => {
+  it('lists the birds with a playable recording and caches them for the card', async () => {
+    const fetchRow = jest.fn();
+    const source = cachedSoundSource(fetchRow, async () => [
+      row,
+      { ...row, species_id: 'gbif:nc', license: 'CC-BY-NC' },
+    ]);
+    expect(await source.withSound(['gbif:1', 'gbif:nc', 'gbif:9'])).toEqual(new Set(['gbif:1']));
+    expect((await source.soundFor('gbif:1'))?.url).toBe(row.url);
+    expect(fetchRow).not.toHaveBeenCalled();
+  });
+
+  it('answers empty when the read fails', async () => {
+    const source = cachedSoundSource(jest.fn(), async () => {
+      throw new Error('offline');
+    });
+    expect(await source.withSound(['gbif:1'])).toEqual(new Set());
+  });
+
+  it('reads Supabase in chunks, recordings only', async () => {
+    const not = jest.fn(async () => ({ data: [row], error: null }));
+    const inFn = jest.fn((_column: string, _ids: string[]) => ({ not }));
+    const client = { from: jest.fn(() => ({ select: jest.fn(() => ({ eq: jest.fn(), in: inFn })) })) };
+    const ids = Array.from({ length: 150 }, (_, i) => `gbif:${i}`);
+    expect(await supabaseSoundSource(client as never).withSound(ids)).toEqual(new Set(['gbif:1']));
+    expect(inFn).toHaveBeenCalledTimes(2);
+    expect(inFn.mock.calls[0][1]).toHaveLength(100);
+    expect(not).toHaveBeenCalledWith('url', 'is', null);
   });
 });
