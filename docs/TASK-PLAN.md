@@ -3848,6 +3848,24 @@ only.**
     voice). Tapping again stops; closing the card stops. `lib/readAloud.ts` (text, voice tags,
     voice check) + `components/ReadAloud.tsx`; Jest stub `__mocks__/expo-speech.js`. Tests: 10.
 
+- **T-245 · Bird sounds: source, clip and host one recording per bird** — *Claude · S · `DONE` (first run: Species sounds workflow) · deps: T-220*
+  - Director's pick (2026-11-05): bird song on the card, then a sound quiz. Coverage check first:
+    iNaturalist has CC0 / CC BY / CC BY-SA recordings for 412 of 515 catalogue birds, every
+    common one included. xeno-canto was rejected: nearly all of it is NC, and API v3 needs a key
+    (DATA-SOURCING-LICENSING §5b).
+  - `media/inat_sounds.py`: the taxon (exact name or synonym), then research-grade observations
+    with a safe sound, most-faved first. The allow-list check runs again after the API filter.
+    ffmpeg cuts the first 20 s to mono 64 kbit/s AAC with a fade (~110 KB).
+  - `build_species_sounds.py` + `.github/workflows/species-sounds.yml` (weekly, resumable):
+    re-hosts the clip at `species-media/sounds/<id>.m4a` and records it in `public.species_sounds`
+    (migration 0027: same shape as species_media; a public read-only table; url null = no safe
+    recording). Tests: 9, including a real ffmpeg cut.
+- **T-246 · "Listen" button on bird cards** — *Claude · S · `TODO` · deps: T-245*
+  - Plays the bird's clip from `species_sounds` with a credit line ("Recording: <name> · <licence>
+    · via iNaturalist · shortened"). Shown only when a clip exists.
+- **T-247 · Sound quiz in "I saw…"** — *Claude · S · `TODO` · deps: T-246, T-242*
+  - For a bird with a clip: play the song and pick the bird out of four photos.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

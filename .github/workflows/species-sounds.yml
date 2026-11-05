@@ -1,0 +1,50 @@
+name: Species sounds
+
+# Gives every catalogue bird a licence-clear recording (CC0 / CC BY / CC BY-SA), cut to a 20 s
+# clip and re-hosted in Supabase Storage (T-245). Resumable like Species photos: each run looks up
+# the birds not yet recorded, most-observed first, until its time budget. ~515 birds at iNaturalist's
+# ~1 request/s is well under one run; afterwards the weekly run only picks up new birds.
+#
+# Secrets: SUPABASE_DB_URL (records), SUPABASE_URL + SUPABASE_SERVICE_KEY (Storage upload).
+
+on:
+  schedule:
+    - cron: "43 3 * * 0" # Sundays 03:43 UTC, after Species photos
+  workflow_dispatch:
+    inputs:
+      max_minutes:
+        description: "Time budget for this run, in minutes"
+        required: false
+        default: "120"
+
+concurrency:
+  group: species-sounds
+  cancel-in-progress: false
+
+jobs:
+  sounds:
+    name: Source bird sounds
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r pipeline/requirements.txt
+
+      - name: Install ffmpeg
+        run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg)
+
+      # The input is free text, so it reaches the shell through env, never `${{ }}` interpolation.
+      - name: Source, clip, re-host and record sounds
+        env:
+          MAX_MINUTES: ${{ inputs.max_minutes }}
+        run: python pipeline/build_species_sounds.py --max-minutes "${MAX_MINUTES:-120}"

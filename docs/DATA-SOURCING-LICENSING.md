@@ -90,6 +90,25 @@ conservation institutions under licenses written for *research and non-commercia
 - **Action:** source from Wikimedia Commons, record attribution, keep images unmodified.
   Verdict: **OK with per-photo attribution; NC/ND excluded.**
 
+### 5b. Bird sounds (T-245, built 2026-11-05)
+- **Source: iNaturalist** research-grade observations with a sound. The same allow-list as for
+  photos applies: exactly `cc0`, `cc-by` and `cc-by-sa`; NC/ND/unlicensed never ship. The API's
+  `sound_license` filter is asked for and the allow-list is checked again in `media/inat_sounds.py`.
+- **Coverage (2026-11-05):** 412 of the 515 catalogue birds (hybrids excluded) have at least one
+  safe recording, 280 have ten or more. Every common Swedish bird is covered. The ~100 without are
+  mostly vagrants, plus a few whose recordings are all NC (rough-legged buzzard, ruff, black stork).
+  Those cards show no Listen button.
+- **Rejected: xeno-canto.** It has the best coverage, but nearly all recordings are CC BY-NC-SA,
+  and API v3 needs a key. Wikimedia Commons sound files were too thin to be worth a second source.
+- **We shorten the recording** (first 20 s, mono, fade-out, AAC) so the app never streams a 20 MB
+  wav. That is an adaptation:
+  - CC-BY allows it if the change is indicated, so the app credits "shortened".
+  - For CC-BY-SA, our clip stays under CC-BY-SA, and the app shows it with that licence.
+  - CC0 has no conditions.
+- **Obligation:** store and display recordist + licence + source (the iNaturalist observation)
+  per clip, in `species_sounds`. Clips are stored in Storage at `species-media/sounds/` (~110 KB
+  each, ~50 MB in all: free tier).
+
 ### 6. County outlines — on-device hometown lookup (T-090)
 - **Source:** Natural Earth admin-1, v5.1.2 — **public domain**, no attribution required.
 - **Not GADM.** The region *ids* are GADM's (GBIF slices occurrences by them), but GADM's licence
