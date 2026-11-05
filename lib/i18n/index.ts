@@ -284,6 +284,8 @@ export const en = {
   'badge.progressOf': '{have} of {count}',
   'badge.spotted': '{count} species spotted',
   'badge.helped': 'Helped {count} species',
+  'badge.recognized': 'Recognised {count} species in the quiz',
+  'badge.recognizedGroup': 'Recognised {count} {category}',
 
   // Impact (T-081)
   'catchSpot.title': 'Catch {species}',
@@ -638,6 +640,8 @@ const sv: Catalog = {
   'badge.progressOf': '{have} av {count}',
   'badge.spotted': '{count} arter sedda',
   'badge.helped': 'Hjälpt {count} arter',
+  'badge.recognized': 'Kände igen {count} arter i quizet',
+  'badge.recognizedGroup': 'Kände igen {count} {category}',
 
   // Impact (T-081)
   'catchSpot.title': 'Fånga {species}',

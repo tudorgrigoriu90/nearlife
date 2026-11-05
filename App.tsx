@@ -56,7 +56,11 @@ import type { ContentLocale } from './lib/i18n/contentLocale';
 import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
 import { SupabaseAuthGateway } from './lib/accountLinking';
 import { SupabaseAccessCodeGateway } from './lib/reviewerAccess';
-import { AsyncStorageQuizAttemptStore, dayKey } from './lib/sightingQuiz';
+import {
+  AsyncStorageQuizAttemptStore,
+  AsyncStorageRecognitionStore,
+  dayKey,
+} from './lib/sightingQuiz';
 import { ensureAnonymousSession, getSupabase } from './lib/supabase';
 import { hasSupabaseConfig } from './lib/supabaseConfig';
 import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib/communityImpact';
@@ -124,6 +128,8 @@ let communitySource: CommunityImpactSource | null | undefined;
 const ENTITLEMENT_STORE = new AsyncStorageEntitlementStore();
 // One-try-a-day record for the "I saw…" quiz (T-242), kept on the device.
 const QUIZ_ATTEMPTS = new AsyncStorageQuizAttemptStore();
+// Species recognised in the quiz, for the badges (T-243).
+const RECOGNIZED_STORE = new AsyncStorageRecognitionStore();
 // Which counties the travel banner has offered (T-218). Counties and times only, never positions.
 const TRAVEL_STORE = new AsyncStorageTravelStore();
 let entitlementSourceInstance: EntitlementSource | null | undefined;
@@ -243,6 +249,16 @@ export default function App() {
   const [showLinkEmail, setShowLinkEmail] = useState(false);
   const [showAccessCode, setShowAccessCode] = useState(false);
   const [showSighting, setShowSighting] = useState(false);
+  const [recognized, setRecognized] = useState<ReadonlySet<string>>(new Set());
+  useEffect(() => {
+    let cancelled = false;
+    void RECOGNIZED_STORE.load().then((ids) => {
+      if (!cancelled) setRecognized(ids);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [showBadges, setShowBadges] = useState(false);
   const [showImpact, setShowImpact] = useState(false);
   const { entitlements, refresh: refreshEntitlements } = useEntitlements({
@@ -584,6 +600,9 @@ export default function App() {
     void HOMETOWN_STORE.clear();
     void ENTITLEMENT_STORE.clear();
     void TRAVEL_STORE.clear();
+    void QUIZ_ATTEMPTS.clear();
+    void RECOGNIZED_STORE.clear();
+    setRecognized(new Set());
     return true;
   };
 
@@ -785,6 +804,13 @@ export default function App() {
             collection.spot(speciesId);
             track('species_spotted', { speciesId, source: 'quiz' });
           }}
+          onRecognized={(speciesId) => {
+            setRecognized((current) => {
+              const next = new Set(current).add(speciesId);
+              void RECOGNIZED_STORE.save(next);
+              return next;
+            });
+          }}
           onOpenSpecies={(species) => {
             setShowSighting(false);
             setSelected(species);
@@ -817,6 +843,7 @@ export default function App() {
           locale={locale}
           species={almanacSpecies}
           records={collection.records}
+          recognized={recognized}
           onDone={() => setShowBadges(false)}
         />
         <StatusBar style="auto" />

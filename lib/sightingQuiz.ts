@@ -133,4 +133,34 @@ export class AsyncStorageQuizAttemptStore {
   async save(attempts: QuizAttempts): Promise<void> {
     await AsyncStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(attempts));
   }
+
+  async clear(): Promise<void> {
+    await AsyncStorage.removeItem(QUIZ_STORAGE_KEY);
+  }
+}
+
+// Species the user picked out correctly (T-243), for the "recognised" badges. Kept on the device
+// like the daily tries: a reinstall loses them, which costs a few badges and no collection data.
+export const RECOGNIZED_STORAGE_KEY = 'nearby.recognized';
+
+export class AsyncStorageRecognitionStore {
+  async load(): Promise<Set<string>> {
+    try {
+      const raw = await AsyncStorage.getItem(RECOGNIZED_STORAGE_KEY);
+      const parsed: unknown = raw ? JSON.parse(raw) : [];
+      return new Set(
+        Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [],
+      );
+    } catch {
+      return new Set();
+    }
+  }
+
+  async save(ids: ReadonlySet<string>): Promise<void> {
+    await AsyncStorage.setItem(RECOGNIZED_STORAGE_KEY, JSON.stringify([...ids]));
+  }
+
+  async clear(): Promise<void> {
+    await AsyncStorage.removeItem(RECOGNIZED_STORAGE_KEY);
+  }
 }

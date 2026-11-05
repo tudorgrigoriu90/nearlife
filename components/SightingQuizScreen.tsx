@@ -38,6 +38,7 @@ export default function SightingQuizScreen({
   today,
   attemptStore,
   onSpotted,
+  onRecognized,
   onOpenSpecies,
   onDone,
 }: {
@@ -50,6 +51,8 @@ export default function SightingQuizScreen({
   today: string;
   attemptStore: QuizAttemptStore;
   onSpotted: (speciesId: string) => void;
+  /** Every correct pick, new or already spotted, for the recognised badges (T-243). */
+  onRecognized?: (speciesId: string) => void;
   onOpenSpecies?: (species: Species) => void;
   onDone: () => void;
 }) {
@@ -98,7 +101,10 @@ export default function SightingQuizScreen({
     void attemptStore.save(next).catch(() => undefined);
     if (picked.id !== target.id) {
       setStep({ kind: 'result', target, outcome: 'wrong' });
-    } else if (tierStateFor(records, target.id).spotted) {
+      return;
+    }
+    onRecognized?.(target.id);
+    if (tierStateFor(records, target.id).spotted) {
       setStep({ kind: 'result', target, outcome: 'praised' });
     } else {
       onSpotted(target.id);

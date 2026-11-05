@@ -26,6 +26,7 @@ export default function BadgesScreen({
   species,
   records = [],
   now,
+  recognized,
   onDone,
 }: {
   locale?: Locale;
@@ -33,10 +34,12 @@ export default function BadgesScreen({
   records?: CollectionRecord[];
   /** Today, for the season opener; injectable for tests. */
   now?: Date;
+  /** Species picked out correctly in the "I saw…" quiz (T-243). */
+  recognized?: ReadonlySet<string>;
   onDone?: () => void;
 }) {
   const tr = createTranslator(locale);
-  const statuses = badgeStatuses(records, species, now ?? new Date());
+  const statuses = badgeStatuses(records, species, now ?? new Date(), recognized);
   const tierIndex = new Map<string, number>();
 
   const label = (b: BadgeStatus): { emoji: string; label: string } => {
@@ -46,10 +49,23 @@ export default function BadgesScreen({
       tierIndex.set(b.group, index + 1);
       return b.all
         ? { emoji: '🏆', label: tr('badge.groupAll', { count: b.count, category }) }
-        : { emoji: `${TIER_MEDALS[Math.min(index, 2)]}${CATEGORY_EMOJI[b.group]}`, label: tr('badge.groupTier', { count: b.count, category }) };
+        : {
+            emoji: `${TIER_MEDALS[Math.min(index, 2)]}${CATEGORY_EMOJI[b.group]}`,
+            label: tr('badge.groupTier', { count: b.count, category }),
+          };
     }
     if (b.kind === 'season-opener') return { emoji: '🌱', label: tr('badge.seasonOpener') };
-    if (b.kind === 'spotted-milestone') return { emoji: '👁', label: tr('badge.spotted', { count: b.count }) };
+    if (b.kind === 'spotted-milestone')
+      return { emoji: '👁', label: tr('badge.spotted', { count: b.count }) };
+    if (b.kind === 'recognized-milestone')
+      return { emoji: '🎯', label: tr('badge.recognized', { count: b.count }) };
+    if (b.kind === 'recognized-group' && b.group) {
+      const category = tr(GROUP_LABEL_KEY[b.group]).toLocaleLowerCase(locale);
+      return {
+        emoji: `🎯${CATEGORY_EMOJI[b.group]}`,
+        label: tr('badge.recognizedGroup', { count: b.count, category }),
+      };
+    }
     return { emoji: '🤝', label: tr('badge.helped', { count: b.count }) };
   };
   const items: BadgeItem[] = statuses.map((b) => ({
@@ -98,11 +114,27 @@ export default function BadgesScreen({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingTop: 56, paddingHorizontal: 16 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+  },
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34' },
   done: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
-  subtitle: { marginTop: 4, marginBottom: 12, fontSize: 14, color: '#4a5c4d', paddingHorizontal: 4 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingBottom: 32 },
+  subtitle: {
+    marginTop: 4,
+    marginBottom: 12,
+    fontSize: 14,
+    color: '#4a5c4d',
+    paddingHorizontal: 4,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingBottom: 32,
+  },
   badge: {
     width: '48%',
     borderRadius: 12,
@@ -115,7 +147,13 @@ const styles = StyleSheet.create({
   badgeLocked: { backgroundColor: '#eef2ec' },
   badgeEmoji: { fontSize: 34 },
   locked: { opacity: 0.5 },
-  badgeLabel: { marginTop: 8, fontSize: 13, fontWeight: '600', color: '#22331f', textAlign: 'center' },
+  badgeLabel: {
+    marginTop: 8,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#22331f',
+    textAlign: 'center',
+  },
   lockedLabel: { color: '#7a8a7c', fontWeight: '500' },
   progress: { marginTop: 4, fontSize: 12, color: '#7a8a7c' },
 });

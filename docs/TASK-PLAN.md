@@ -3827,6 +3827,17 @@ only.**
     message. Photos via `photoFor`, so the curated 54 quiz with their bundled photos. Android back
     closes it. Tests: screen (6), App flow (name → pick → spotted in the Almanac).
 
+- **T-243 · "Recognised" badges from the sighting quiz** — *Claude · S · `DONE` · deps: T-242*
+  - Director (2026-11-05): yes to badges; spotting by tapping in This Week stays as the beginner's
+    way in, the quiz is the way to prove you know a species.
+  - Every correct quiz pick counts, new or already spotted (praise counts too). Overall milestones
+    1/10/25/50/100 recognised; per-group tiers 5/25/100 (only rungs the county list can reach),
+    shown only once the user has recognised something in that group so ten empty ladders don't
+    crowd the Badges screen. Labels en+sv ("Kände igen 10 arter i quizet", "Kände igen 5 fåglar").
+  - Recognitions are kept on the device (`AsyncStorageRecognitionStore`): a reinstall costs a few
+    badges, no collection data. Account deletion now also clears them and the quiz's daily tries
+    (the tries were missing from the device reset). Tests: badge rules, store, screen, quiz.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

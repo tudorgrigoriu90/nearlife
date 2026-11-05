@@ -57,6 +57,7 @@ function setup(over: { records?: CollectionRecord[]; attempts?: QuizAttempts } =
       save: async (a: QuizAttempts) => void saved.push(a),
     },
     onSpotted: jest.fn(),
+    onRecognized: jest.fn(),
     onDone: jest.fn(),
   };
   return { props, saved };
@@ -86,6 +87,7 @@ describe('SightingQuizScreen', () => {
     await fireEvent.press(screen.getByTestId('quiz-option-moose'));
     expect(await screen.findByText(tr('quiz.added', { name: 'Älg' }))).toBeTruthy();
     expect(props.onSpotted).toHaveBeenCalledWith('moose');
+    expect(props.onRecognized).toHaveBeenCalledWith('moose');
     expect(saved.at(-1)).toEqual({ moose: '2026-11-05' });
   });
 
@@ -96,6 +98,7 @@ describe('SightingQuizScreen', () => {
     await fireEvent.press(screen.getByTestId('quiz-option-moose'));
     expect(await screen.findByText(tr('quiz.praise.mammal'))).toBeTruthy();
     expect(props.onSpotted).not.toHaveBeenCalled();
+    expect(props.onRecognized).toHaveBeenCalledWith('moose'); // praise counts towards the badges
   });
 
   it('shows the right photo after a wrong pick and spots nothing', async () => {
@@ -106,6 +109,7 @@ describe('SightingQuizScreen', () => {
     expect(await screen.findByText(tr('quiz.wrong', { name: 'Älg' }))).toBeTruthy();
     expect(screen.getByTestId('quiz-answer-photo')).toBeTruthy();
     expect(props.onSpotted).not.toHaveBeenCalled();
+    expect(props.onRecognized).not.toHaveBeenCalled();
   });
 
   it('allows one try per species per day', async () => {

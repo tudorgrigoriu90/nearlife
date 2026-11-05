@@ -1,5 +1,7 @@
 import {
   QUIZ_STORAGE_KEY,
+  RECOGNIZED_STORAGE_KEY,
+  AsyncStorageRecognitionStore,
   AsyncStorageQuizAttemptStore,
   canAttempt,
   findByExactName,
@@ -123,6 +125,27 @@ describe('one try per species per day (Director, 2026-11-05)', () => {
     await store.save({ moose: '2026-11-05' });
     expect(await store.load()).toEqual({ moose: '2026-11-05' });
     await AsyncStorage.setItem(QUIZ_STORAGE_KEY, 'not json');
+    expect(await store.load()).toEqual({});
+  });
+});
+
+describe('recognised species, kept on the device for the badges (T-243)', () => {
+  it('persists the set, survives a corrupt value, and clears on account deletion', async () => {
+    const AsyncStorage = require('@react-native-async-storage/async-storage');
+    const store = new AsyncStorageRecognitionStore();
+    await store.save(new Set(['moose', 'tit']));
+    expect([...(await store.load())].sort()).toEqual(['moose', 'tit']);
+    await AsyncStorage.setItem(RECOGNIZED_STORAGE_KEY, '{oops');
+    expect((await store.load()).size).toBe(0);
+    await store.save(new Set(['moose']));
+    await store.clear();
+    expect((await store.load()).size).toBe(0);
+  });
+
+  it('the daily-try record clears too', async () => {
+    const store = new AsyncStorageQuizAttemptStore();
+    await store.save({ moose: '2026-11-05' });
+    await store.clear();
     expect(await store.load()).toEqual({});
   });
 });

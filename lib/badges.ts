@@ -12,11 +12,21 @@ import type { Species } from './species/types';
 // at 10/50/150 spotted, and a group small enough to finish (six reptiles) also gets "all of
 // them". The ladder always has a next rung in reach, in any county and at any catalogue size.
 
-export type BadgeKind = 'group-tier' | 'spotted-milestone' | 'helped-milestone' | 'season-opener';
+export type BadgeKind =
+  | 'group-tier'
+  | 'spotted-milestone'
+  | 'helped-milestone'
+  | 'season-opener'
+  | 'recognized-milestone'
+  | 'recognized-group';
 
 export const GROUP_TIERS = [10, 50, 150] as const;
 export const SPOTTED_MILESTONES = [10, 25, 50, 100, 250, 500] as const;
 export const HELPED_MILESTONES = [1, 5, 10] as const;
+// T-243: species picked out correctly in the "I saw…" quiz. Group tiers appear only once the user
+// has recognised something in that group, so ten empty ladders don't crowd the screen.
+export const RECOGNIZED_MILESTONES = [1, 10, 25, 50, 100] as const;
+export const RECOGNIZED_GROUP_TIERS = [5, 25, 100] as const;
 
 export interface BadgeStatus {
   id: string;
@@ -39,7 +49,12 @@ export function groupTiers(total: number): number[] {
   return tiers.filter((t) => t > 0);
 }
 
-export function badgeStatuses(records: CollectionRecord[], species: Species[], now: Date): BadgeStatus[] {
+export function badgeStatuses(
+  records: CollectionRecord[],
+  species: Species[],
+  now: Date,
+  recognized: ReadonlySet<string> = new Set(),
+): BadgeStatus[] {
   const spotted = spottedIds(records);
   const statuses: BadgeStatus[] = [];
 
@@ -64,22 +79,76 @@ export function badgeStatuses(records: CollectionRecord[], species: Species[], n
   }
 
   const season = seasonKeyOf(now);
-  const openedSeason = records.some((r) => r.spottedAt !== null && seasonKeyOf(new Date(r.spottedAt)) === season);
-  statuses.push({ id: `season-${season}`, kind: 'season-opener', count: 1, all: false, progress: openedSeason ? 1 : 0, earned: openedSeason });
+  const openedSeason = records.some(
+    (r) => r.spottedAt !== null && seasonKeyOf(new Date(r.spottedAt)) === season,
+  );
+  statuses.push({
+    id: `season-${season}`,
+    kind: 'season-opener',
+    count: 1,
+    all: false,
+    progress: openedSeason ? 1 : 0,
+    earned: openedSeason,
+  });
 
   for (const count of SPOTTED_MILESTONES) {
-    statuses.push({ id: `spotted-${count}`, kind: 'spotted-milestone', count, all: false, progress: Math.min(spotted.size, count), earned: spotted.size >= count });
+    statuses.push({
+      id: `spotted-${count}`,
+      kind: 'spotted-milestone',
+      count,
+      all: false,
+      progress: Math.min(spotted.size, count),
+      earned: spotted.size >= count,
+    });
   }
   const helped = records.filter((r) => r.helpedAt !== null).length;
   for (const count of HELPED_MILESTONES) {
-    statuses.push({ id: `helped-${count}`, kind: 'helped-milestone', count, all: false, progress: Math.min(helped, count), earned: helped >= count });
+    statuses.push({
+      id: `helped-${count}`,
+      kind: 'helped-milestone',
+      count,
+      all: false,
+      progress: Math.min(helped, count),
+      earned: helped >= count,
+    });
+  }
+
+  for (const count of RECOGNIZED_MILESTONES) {
+    statuses.push({
+      id: `recognized-${count}`,
+      kind: 'recognized-milestone',
+      count,
+      all: false,
+      progress: Math.min(recognized.size, count),
+      earned: recognized.size >= count,
+    });
+  }
+  for (const [group, members] of groups) {
+    const have = members.filter((s) => recognized.has(s.id)).length;
+    if (have === 0) continue;
+    for (const count of RECOGNIZED_GROUP_TIERS.filter((t) => t <= members.length)) {
+      statuses.push({
+        id: `recognized-${group}-${count}`,
+        kind: 'recognized-group',
+        group,
+        count,
+        all: false,
+        progress: Math.min(have, count),
+        earned: have >= count,
+      });
+    }
   }
   return statuses;
 }
 
 /** Ids of the earned badges, in the same stable order (groups → season → spotted → helped). */
-export function earnedBadges(records: CollectionRecord[], species: Species[], now: Date = new Date()): string[] {
-  return badgeStatuses(records, species, now)
+export function earnedBadges(
+  records: CollectionRecord[],
+  species: Species[],
+  now: Date = new Date(),
+  recognized: ReadonlySet<string> = new Set(),
+): string[] {
+  return badgeStatuses(records, species, now, recognized)
     .filter((b) => b.earned)
     .map((b) => b.id);
 }
