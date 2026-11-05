@@ -3,6 +3,7 @@ import { normaliseName } from './almanac';
 import type { ContentLocale } from './i18n/contentLocale';
 import { groupOf } from './species/group';
 import { commonNameFor } from './species/localized';
+import { photoFor } from './species/media';
 import type { Month, Species } from './species/types';
 
 // "I saw…" sighting quiz (T-241). The user names what they saw by its exact name, then picks it out
@@ -70,7 +71,8 @@ export function pickLookalikes(
   seed: string,
 ): Species[] {
   const random = seededRandom(`${seed}:${target.id}`);
-  const candidates = pool.filter((s) => s.id !== target.id && s.photo !== undefined);
+  // photoFor: the bundled photo for the curated 54, else the catalogue one.
+  const candidates = pool.filter((s) => s.id !== target.id && photoFor(s) !== null);
   const group = groupOf(target);
   const genus = genusOf(target);
   const tiers = [

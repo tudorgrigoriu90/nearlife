@@ -11,7 +11,7 @@ export interface AnalyticsEventProps {
   this_week_opened: Record<string, never>;
   notification_delivered: { speciesId: string };
   notification_opened: { speciesId: string };
-  species_spotted: { speciesId: string; source: 'notification' | 'this_week' | 'onboarding' };
+  species_spotted: { speciesId: string; source: 'notification' | 'this_week' | 'onboarding' | 'quiz' };
   catch_attempted: { speciesId: string };
   catch_succeeded: { speciesId: string; grade: 'perfect' | 'good' };
   free_catches_exhausted: Record<string, never>;

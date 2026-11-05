@@ -3817,9 +3817,15 @@ only.**
     stable); `quizOptions`; day-keyed attempts (`canAttempt`/`recordAttempt`, older days pruned)
     persisted on the device. It checks recognition, not presence: Spotted stays honour-based and
     catching stays location-checked. 6,187 of 8,080 catalogue species have a photo to quiz on.
-- **T-242 · "I saw…" sighting quiz: screens** — *Claude · S · `TODO` · deps: T-241*
-  - Entry from This Week and the Almanac; name entry → photo quiz → result (spotted / praised /
-    the right answer shown); i18n en+sv; Android back; App flow test.
+- **T-242 · "I saw…" sighting quiz: screens** — *Claude · S · `DONE` (reaches phones with the next build) · deps: T-241*
+  - "👁 Jag såg…" in This Week's link row and as a button in the Almanac, offered only where the
+    user can collect (home county or an unlocked one), like spotting from This Week.
+  - `SightingQuizScreen`: exact name → four photos with **no names** (a label would give the answer
+    away) → result: new species spotted ("Rätt! … finns nu i din almanacka", analytics source
+    `quiz`), already spotted praised per group ("Bra jobbat, du kan dina fåglar!"), or the right
+    photo shown after a wrong pick. No match, no photo, or today's try used each get their own
+    message. Photos via `photoFor`, so the curated 54 quiz with their bundled photos. Android back
+    closes it. Tests: screen (6), App flow (name → pick → spotted in the Almanac).
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in

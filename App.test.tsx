@@ -171,7 +171,9 @@ describe('App', () => {
       // progress total reflects the loaded catalogue (would be 0 if the async load never resolved).
       // One species is spotted by onboarding, so discovered = 1.
       expect(
-        screen.getByText(tr('almanac.progress', { discovered: 1, total: KRONOBERG_SPECIES.length })),
+        screen.getByText(
+          tr('almanac.progress', { discovered: 1, total: KRONOBERG_SPECIES.length }),
+        ),
       ).toBeTruthy();
     },
     FLOW_TIMEOUT,
@@ -218,7 +220,14 @@ describe('App', () => {
       await act(async () => tapListener?.('moose'));
       expect(screen.queryByText(tr('card.give'))).toBeNull();
       await completeOnboarding({ rendered: true, firstCardOpen: true });
-      expect(await screen.findByText(commonNameFor(KRONOBERG_SPECIES.find((s) => s.id === 'moose')!, 'en'))).toBeTruthy();
+      expect(
+        await screen.findByText(
+          commonNameFor(
+            KRONOBERG_SPECIES.find((s) => s.id === 'moose')!,
+            'en',
+          ),
+        ),
+      ).toBeTruthy();
       expect(screen.getByText(tr('card.give'))).toBeTruthy();
     },
     FLOW_TIMEOUT,
@@ -394,6 +403,30 @@ describe('App', () => {
       await press(commonNameFor(topRow, 'sv'), { exact: false });
       expect(await screen.findByText(sv('card.give'))).toBeTruthy();
       expect(await screen.findByText(/Română/)).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
+  it(
+    '"I saw…": naming a species and picking its photo adds it to the almanac (T-242)',
+    async () => {
+      await completeOnboarding();
+      const target = KRONOBERG_SPECIES.find(
+        (sp) => sp.id !== onboardingStarter.id && sp.id !== topRow.id && sp.category === 'bird',
+      )!;
+      await press(tr('quiz.entry'), { exact: false });
+      await fireEvent.changeText(
+        screen.getByPlaceholderText(tr('quiz.placeholder')),
+        commonNameFor(target, 'en'),
+      );
+      await press(tr('quiz.next'));
+      await fireEvent.press(await screen.findByTestId(`quiz-option-${target.id}`));
+      expect(
+        await screen.findByText(tr('quiz.added', { name: commonNameFor(target, 'en') })),
+      ).toBeTruthy();
+      // Back from the quiz returns to the app, and the species is now spotted in the almanac.
+      expect(await systemBack()).toBe(true);
+      await press(tr('almanac.title'));
+      expect(await screen.findByText(commonNameFor(target, 'en'))).toBeTruthy();
     },
     FLOW_TIMEOUT,
   );

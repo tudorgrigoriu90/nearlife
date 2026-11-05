@@ -14,7 +14,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 );
 
 // T-241: "I saw…" — the user names what they saw exactly, then picks it out from lookalikes.
-const photo = { url: 'u', sourceUrl: 's', license: 'CC-BY' as const, author: 'a' };
+const photo = { url: 'u', sourceUrl: 's', license: 'CC-BY' as const, author: 'a', isPrimary: true };
 const sp = (
   id: string,
   sci: string,

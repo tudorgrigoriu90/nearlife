@@ -99,6 +99,7 @@ export default function ThisWeekScreen({
   onOpenCounties,
   travel,
   onIdentify,
+  onOpenSighting,
 }: {
   locale?: Locale;
   spottedIds?: ReadonlySet<string>;
@@ -112,6 +113,8 @@ export default function ThisWeekScreen({
   travel?: { county: string; onLook: () => void; onDismiss: () => void } | null;
   /** Hand off to Seek by iNaturalist to identify something (T-223). */
   onIdentify?: () => void;
+  /** "I saw…" sighting quiz (T-242). */
+  onOpenSighting?: () => void;
 }) {
   const tr = createTranslator(locale);
   const month = monthOf(new Date());
@@ -123,16 +126,16 @@ export default function ThisWeekScreen({
           detail: item.detail ?? item.species.scientificName,
           isNew: item.isNew,
         }))
-      : thisWeek(KRONOBERG_SPECIES, month, spottedIds ?? new Set()).map((e) => bundledRow(e, locale));
+      : thisWeek(KRONOBERG_SPECIES, month, spottedIds ?? new Set()).map((e) =>
+          bundledRow(e, locale),
+        );
   const count = live !== null ? live.total : rows.length;
   const region = live !== null && regionName ? regionName : tr('region.kronoberg');
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{tr('thisWeek.title')} 🌿</Text>
-      <Text style={styles.subtitle}>
-        {tr('thisWeek.subtitle', { region, count })}
-      </Text>
+      <Text style={styles.subtitle}>{tr('thisWeek.subtitle', { region, count })}</Text>
       {travel ? (
         <View style={styles.travel}>
           <Text style={styles.travelText}>{tr('travel.banner', { county: travel.county })}</Text>
@@ -140,17 +143,34 @@ export default function ThisWeekScreen({
             <Pressable onPress={travel.onLook} accessibilityRole="button" style={styles.travelLook}>
               <Text style={styles.travelLookText}>{tr('travel.look')}</Text>
             </Pressable>
-            <Pressable onPress={travel.onDismiss} accessibilityRole="button" style={styles.travelLater}>
+            <Pressable
+              onPress={travel.onDismiss}
+              accessibilityRole="button"
+              style={styles.travelLater}
+            >
               <Text style={styles.travelLaterText}>{tr('travel.notNow')}</Text>
             </Pressable>
           </View>
         </View>
       ) : null}
-      {onOpenCounties || onIdentify ? (
+      {onOpenCounties || onIdentify || onOpenSighting ? (
         <View style={styles.links}>
           {onOpenCounties ? (
-            <Pressable onPress={onOpenCounties} accessibilityRole="button" style={styles.countiesLink}>
+            <Pressable
+              onPress={onOpenCounties}
+              accessibilityRole="button"
+              style={styles.countiesLink}
+            >
               <Text style={styles.countiesText}>🗺 {tr('counties.title')}</Text>
+            </Pressable>
+          ) : null}
+          {onOpenSighting ? (
+            <Pressable
+              onPress={onOpenSighting}
+              accessibilityRole="button"
+              style={styles.countiesLink}
+            >
+              <Text style={styles.countiesText}>👁 {tr('quiz.entry')}</Text>
             </Pressable>
           ) : null}
           {onIdentify ? (
@@ -187,7 +207,12 @@ const styles = StyleSheet.create({
   travel: { backgroundColor: '#eaf4ea', borderRadius: 12, padding: 12, marginBottom: 12 },
   travelText: { fontSize: 14, lineHeight: 20, color: '#22331f' },
   travelActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  travelLook: { backgroundColor: '#3a7d44', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 14 },
+  travelLook: {
+    backgroundColor: '#3a7d44',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+  },
   travelLookText: { color: '#fff', fontSize: 14, fontWeight: '600' },
   travelLater: { paddingVertical: 8, paddingHorizontal: 8 },
   travelLaterText: { color: '#4a5c4d', fontSize: 14, fontWeight: '600' },
@@ -196,17 +221,47 @@ const styles = StyleSheet.create({
   countiesText: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
   list: { paddingBottom: 24 },
   events: { marginBottom: 8 },
-  eventsTitle: { fontSize: 12, fontWeight: '700', color: '#7a8a7c', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },
-  eventCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#eaf3e6', borderRadius: 12, padding: 12, marginBottom: 8 },
+  eventsTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#7a8a7c',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  eventCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#eaf3e6',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+  },
   eventEmoji: { fontSize: 26, marginRight: 12 },
   eventName: { fontSize: 15, fontWeight: '700', color: '#2f5d34' },
   eventBlurb: { marginTop: 2, fontSize: 13, color: '#4a5c4d' },
-  row: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#d4e0d2' },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#d4e0d2',
+  },
   emoji: { fontSize: 24, marginRight: 12 },
   rowText: { flex: 1 },
   rowHeader: { flexDirection: 'row', alignItems: 'center' },
   name: { fontSize: 16, fontWeight: '600', color: '#22331f' },
-  newBadge: { marginLeft: 8, fontSize: 11, fontWeight: '700', color: '#fff', backgroundColor: '#3a7d44', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden' },
+  newBadge: {
+    marginLeft: 8,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#fff',
+    backgroundColor: '#3a7d44',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
   detail: { marginTop: 2, fontSize: 13, color: '#4a5c4d' },
   footnote: { paddingVertical: 12, fontSize: 12, color: '#7a8a7c', fontStyle: 'italic' },
 });

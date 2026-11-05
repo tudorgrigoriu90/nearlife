@@ -102,6 +102,7 @@ export default function AlmanacScreen({
   onSelectSpecies,
   onOpenBadges,
   onOpenImpact,
+  onOpenSighting,
   month = monthOf(new Date()),
 }: {
   species: Species[];
@@ -112,6 +113,8 @@ export default function AlmanacScreen({
   /** Entry points to the Badges (T-082) / Impact (T-081) screens, shown when provided (T-058). */
   onOpenBadges?: () => void;
   onOpenImpact?: () => void;
+  /** "I saw…" sighting quiz (T-242). */
+  onOpenSighting?: () => void;
   /** The month "Active this month" filters on; injectable for tests. */
   month?: Month;
 }) {
@@ -173,6 +176,12 @@ export default function AlmanacScreen({
             </Pressable>
           ) : null}
         </View>
+      ) : null}
+
+      {onOpenSighting ? (
+        <Pressable onPress={onOpenSighting} accessibilityRole="button" style={styles.sightingBtn}>
+          <Text style={styles.sightingText}>👁 {tr('quiz.entry')}</Text>
+        </Pressable>
       ) : null}
 
       <TextInput
@@ -328,6 +337,15 @@ const styles = StyleSheet.create({
   // The row must not shrink: the grid below takes all remaining height, and Android squeezed the
   // row until the chip labels were cut in half (T-239).
   chipRow: { flexGrow: 0, flexShrink: 0 },
+  sightingBtn: {
+    marginHorizontal: 4,
+    marginBottom: 10,
+    backgroundColor: '#3a7d44',
+    borderRadius: 10,
+    paddingVertical: 11,
+    alignItems: 'center',
+  },
+  sightingText: { fontSize: 15, fontWeight: '700', color: '#fff' },
   search: {
     marginHorizontal: 4,
     marginBottom: 8,

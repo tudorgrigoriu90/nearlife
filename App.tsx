@@ -14,6 +14,7 @@ import DataExportView from './components/DataExportView';
 import DeleteAccountConfirm from './components/DeleteAccountConfirm';
 import LinkEmail from './components/LinkEmail';
 import AccessCodeScreen from './components/AccessCodeScreen';
+import SightingQuizScreen from './components/SightingQuizScreen';
 import BadgesScreen from './components/BadgesScreen';
 import ImpactScreen from './components/ImpactScreen';
 import FamilyScreen from './components/FamilyScreen';
@@ -55,17 +56,31 @@ import type { ContentLocale } from './lib/i18n/contentLocale';
 import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
 import { SupabaseAuthGateway } from './lib/accountLinking';
 import { SupabaseAccessCodeGateway } from './lib/reviewerAccess';
+import { AsyncStorageQuizAttemptStore, dayKey } from './lib/sightingQuiz';
 import { ensureAnonymousSession, getSupabase } from './lib/supabase';
 import { hasSupabaseConfig } from './lib/supabaseConfig';
 import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib/communityImpact';
-import { SupabaseEntitlementSource, type EntitlementClient, type EntitlementSource } from './lib/entitlement';
+import {
+  SupabaseEntitlementSource,
+  type EntitlementClient,
+  type EntitlementSource,
+} from './lib/entitlement';
 import { AsyncStorageEntitlementStore } from './lib/entitlementStore';
 import { AsyncStorageTravelStore } from './lib/travelStore';
-import { SupabaseCatchSpotSource, type CatchSpotClient, type CatchSpotSource } from './lib/catchSpots';
+import {
+  SupabaseCatchSpotSource,
+  type CatchSpotClient,
+  type CatchSpotSource,
+} from './lib/catchSpots';
 import { AsyncStorageCatchSpotStore } from './lib/catchSpotStore';
 import { SupabaseFamilyGateway } from './lib/family';
 import { canCollectIn, regionAccess, type County } from './lib/regionAccess';
-import { RevenueCatPurchaseGateway, loadRevenueCat, revenueCatKey, type PurchaseGateway } from './lib/purchases';
+import {
+  RevenueCatPurchaseGateway,
+  loadRevenueCat,
+  revenueCatKey,
+  type PurchaseGateway,
+} from './lib/purchases';
 import { TrackingPurchaseGateway } from './lib/salesFunnel';
 import {
   buildDataExport,
@@ -107,13 +122,18 @@ let communitySource: CommunityImpactSource | null | undefined;
 // What the user owns, read from the server (T-083/T-217) and cached on the device. Built on first
 // use like the community source.
 const ENTITLEMENT_STORE = new AsyncStorageEntitlementStore();
+// One-try-a-day record for the "I saw…" quiz (T-242), kept on the device.
+const QUIZ_ATTEMPTS = new AsyncStorageQuizAttemptStore();
 // Which counties the travel banner has offered (T-218). Counties and times only, never positions.
 const TRAVEL_STORE = new AsyncStorageTravelStore();
 let entitlementSourceInstance: EntitlementSource | null | undefined;
 function entitlementSource(): EntitlementSource | null {
   if (entitlementSourceInstance === undefined) {
     entitlementSourceInstance = hasSupabaseConfig()
-      ? new SupabaseEntitlementSource(getSupabase() as unknown as EntitlementClient, ensureAnonymousSession)
+      ? new SupabaseEntitlementSource(
+          getSupabase() as unknown as EntitlementClient,
+          ensureAnonymousSession,
+        )
       : null;
   }
   return entitlementSourceInstance;
@@ -136,7 +156,11 @@ function catchSpotSource(): CatchSpotSource | null {
 // react-native-purchases was added, and without it the Store just hides its buy buttons.
 let purchaseGatewayInstance: PurchaseGateway | undefined;
 function purchaseGateway(): PurchaseGateway {
-  purchaseGatewayInstance ??= new RevenueCatPurchaseGateway(loadRevenueCat(), revenueCatKey(), ensureAnonymousSession);
+  purchaseGatewayInstance ??= new RevenueCatPurchaseGateway(
+    loadRevenueCat(),
+    revenueCatKey(),
+    ensureAnonymousSession,
+  );
   return purchaseGatewayInstance;
 }
 
@@ -193,9 +217,10 @@ export default function App() {
   // set (no behaviour change) until a DB-backed repo is injected. Names re-localize in the grid.
   // Selected species' card content, loaded through the repository (T-059). Keyed by species id so a
   // stale result from a previously-open card is never shown against the newly-selected species.
-  const [cardContent, setCardContent] = useState<{ speciesId: string; content: SpeciesContent | null } | null>(
-    null,
-  );
+  const [cardContent, setCardContent] = useState<{
+    speciesId: string;
+    content: SpeciesContent | null;
+  } | null>(null);
   // Mother-tongue dual display (F13.3). The settings live here; the secondary content is loaded
   // through the same repository seam as the primary, keyed by species id AND locale so a stale
   // result can never be painted against the wrong species or a language the user just changed.
@@ -217,6 +242,7 @@ export default function App() {
   const [showDelete, setShowDelete] = useState(false);
   const [showLinkEmail, setShowLinkEmail] = useState(false);
   const [showAccessCode, setShowAccessCode] = useState(false);
+  const [showSighting, setShowSighting] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
   const [showImpact, setShowImpact] = useState(false);
   const { entitlements, refresh: refreshEntitlements } = useEntitlements({
@@ -242,12 +268,18 @@ export default function App() {
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
   const track = useTracker(consent);
   // Crash reports follow the analytics consent, on and off (T-100).
-  const crashReporter = useMemo(() => new CrashReporter(loadSentry(), process.env.EXPO_PUBLIC_SENTRY_DSN ?? ''), []);
+  const crashReporter = useMemo(
+    () => new CrashReporter(loadSentry(), process.env.EXPO_PUBLIC_SENTRY_DSN ?? ''),
+    [],
+  );
   useEffect(() => {
     if (consentLoaded) crashReporter.setConsent(hasConsent(consent, 'analytics'));
   }, [crashReporter, consent, consentLoaded]);
   // Every purchase screen reports the same funnel steps (T-087).
-  const purchases = useMemo(() => new TrackingPurchaseGateway(purchaseGateway(), { track }), [track]);
+  const purchases = useMemo(
+    () => new TrackingPurchaseGateway(purchaseGateway(), { track }),
+    [track],
+  );
   // The Almanac lists the user's county + anything collected outside it (T-208); Badges count over
   // the same list so the two never disagree.
   const { species: almanacSpecies, loading: speciesLoading } = useAlmanacCatalogue(
@@ -273,7 +305,8 @@ export default function App() {
   });
   // Travel (T-218): with location consent, notice another county while the app is open.
   const travel = useTravelOffer({
-    enabled: onboarded && consentLoaded && consent.location && hometown !== null && hasSupabaseConfig(),
+    enabled:
+      onboarded && consentLoaded && consent.location && hometown !== null && hasSupabaseConfig(),
     homeId: hometown?.id ?? null,
     viewingId: viewCounty?.id ?? null,
     getFix: getLocationFixOnce,
@@ -487,7 +520,8 @@ export default function App() {
       })
       .catch(() => {
         // A failed secondary read degrades to the single-language card, never a blank half.
-        if (!cancelled) setSecondaryCardContent({ speciesId, locale: secondaryLocale, content: null });
+        if (!cancelled)
+          setSecondaryCardContent({ speciesId, locale: secondaryLocale, content: null });
       });
     return () => {
       cancelled = true;
@@ -555,7 +589,9 @@ export default function App() {
 
   const seasonKey = seasonKeyOf(new Date());
   // Spotting and catching need the home county or an opened one (T-105); a preview is look-only.
-  const viewingAccess = viewCounty ? regionAccess(viewCounty.id, hometown?.id ?? null, entitlements) : 'home';
+  const viewingAccess = viewCounty
+    ? regionAccess(viewCounty.id, hometown?.id ?? null, entitlements)
+    : 'home';
   const canCollect = canCollectIn(viewingAccess);
   // Derived from the persisted collection (T-200), so a restart cannot reset it; the database
   // trigger is the authority and refuses a 4th catch however this is tampered with. Full Game is
@@ -600,6 +636,7 @@ export default function App() {
     if (showFamily) return closed(() => setShowFamily(false));
     if (showLinkEmail) return closed(() => setShowLinkEmail(false));
     if (showAccessCode) return closed(() => setShowAccessCode(false));
+    if (showSighting) return closed(() => setShowSighting(false));
     if (showBadges) return closed(() => setShowBadges(false));
     if (showImpact) return closed(() => setShowImpact(false));
     if (showSettings) return closed(() => setShowSettings(false));
@@ -734,6 +771,31 @@ export default function App() {
     );
   }
 
+  if (showSighting) {
+    return (
+      <>
+        <SightingQuizScreen
+          locale={locale}
+          pool={almanacSpecies}
+          records={collection.records}
+          month={monthOf(new Date())}
+          today={dayKey(new Date())}
+          attemptStore={QUIZ_ATTEMPTS}
+          onSpotted={(speciesId) => {
+            collection.spot(speciesId);
+            track('species_spotted', { speciesId, source: 'quiz' });
+          }}
+          onOpenSpecies={(species) => {
+            setShowSighting(false);
+            setSelected(species);
+          }}
+          onDone={() => setShowSighting(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (showAccessCode) {
     return (
       <>
@@ -821,7 +883,12 @@ export default function App() {
     // Catch-success delight moment: contextual protect tip, kept clean — no upsell (invariant #4).
     return (
       <>
-        <ProtectTip species={caughtTip.species} prime={caughtTip.prime} locale={locale} onDone={() => setCaughtTip(null)} />
+        <ProtectTip
+          species={caughtTip.species}
+          prime={caughtTip.prime}
+          locale={locale}
+          onDone={() => setCaughtTip(null)}
+        />
         <StatusBar style="auto" />
       </>
     );
@@ -934,7 +1001,8 @@ export default function App() {
                 : tr('catch.remaining', { count: remaining })
           }
         />
-        {paywall ? <FreeCatchSheet
+        {paywall ? (
+          <FreeCatchSheet
             locale={locale}
             onClose={() => setPaywall(false)}
             onOpenStore={
@@ -946,7 +1014,8 @@ export default function App() {
                   }
                 : undefined
             }
-          /> : null}
+          />
+        ) : null}
         <StatusBar style="auto" />
       </View>
     );
@@ -980,7 +1049,10 @@ export default function App() {
             live={thisWeekLive}
             regionName={viewCounty?.name ?? hometown?.name}
             spottedIds={spottedIds(collection.records)}
-            onOpenCounties={hasSupabaseConfig() && hometown ? () => setShowCounties(true) : undefined}
+            onOpenCounties={
+              hasSupabaseConfig() && hometown ? () => setShowCounties(true) : undefined
+            }
+            onOpenSighting={canCollect ? () => setShowSighting(true) : undefined}
             onIdentify={() => {
               track('identify_opened', {});
               void openIdentifier((url) => Linking.openURL(url));
@@ -1010,22 +1082,48 @@ export default function App() {
             onSelectSpecies={setSelected}
             onOpenBadges={() => setShowBadges(true)}
             onOpenImpact={() => setShowImpact(true)}
+            onOpenSighting={canCollect ? () => setShowSighting(true) : undefined}
           />
         )}
       </View>
       <View style={styles.tabBar}>
-        <TabButton label={tr('thisWeek.title')} active={tab === 'thisWeek'} onPress={() => setTab('thisWeek')} />
-        <TabButton label={tr('almanac.title')} active={tab === 'almanac'} onPress={() => setTab('almanac')} />
-        <TabButton label={`⚙ ${tr('nav.settings')}`} active={false} onPress={() => setShowSettings(true)} />
+        <TabButton
+          label={tr('thisWeek.title')}
+          active={tab === 'thisWeek'}
+          onPress={() => setTab('thisWeek')}
+        />
+        <TabButton
+          label={tr('almanac.title')}
+          active={tab === 'almanac'}
+          onPress={() => setTab('almanac')}
+        />
+        <TabButton
+          label={`⚙ ${tr('nav.settings')}`}
+          active={false}
+          onPress={() => setShowSettings(true)}
+        />
       </View>
       <StatusBar style="auto" />
     </View>
   );
 }
 
-function TabButton({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+function TabButton({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
   return (
-    <Pressable onPress={onPress} style={styles.tab} accessibilityRole="button" accessibilityState={{ selected: active }}>
+    <Pressable
+      onPress={onPress}
+      style={styles.tab}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+    >
       <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
     </Pressable>
   );
@@ -1034,7 +1132,12 @@ function TabButton({ label, active, onPress }: { label: string; active: boolean;
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#f4f8f2' },
   screen: { flex: 1 },
-  previewBanner: { backgroundColor: '#fbe9c6', paddingTop: 44, paddingBottom: 8, paddingHorizontal: 16 },
+  previewBanner: {
+    backgroundColor: '#fbe9c6',
+    paddingTop: 44,
+    paddingBottom: 8,
+    paddingHorizontal: 16,
+  },
   previewText: { fontSize: 12, color: '#7a5a1f', textAlign: 'center' },
   previewLink: { marginTop: 4, fontWeight: '700', textDecorationLine: 'underline' },
   tabBar: {
