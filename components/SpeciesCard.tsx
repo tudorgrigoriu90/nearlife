@@ -17,6 +17,9 @@ import type { Species } from '../lib/species/types';
 import DualText from './DualText';
 import SpeciesHero from './SpeciesHero';
 import ReadAloud from './ReadAloud';
+import BirdSong from './BirdSong';
+import type { SoundSource } from '../lib/birdSound';
+import { groupOf } from '../lib/species/group';
 
 // Species card (T-026 · USER-FLOWS §4). The always-free Tier-1 layer: fact, when/how trivia,
 // and the give + protect mission actions (never gated — invariant #2). Below sits the depth-tier
@@ -39,6 +42,7 @@ export default function SpeciesCard({
   onFindNearby,
   onPledge,
   nearbyNote,
+  soundSource,
   onBack,
 }: {
   species: Species;
@@ -58,6 +62,8 @@ export default function SpeciesCard({
   onPledge?: (species: Species, kind: HelpKind) => void;
   /** Small caption under the find-nearby CTA — e.g. the free-catch counter (T-034). */
   nearbyNote?: string;
+  /** Where a bird's recording comes from (T-246). Absent: no song button. */
+  soundSource?: SoundSource;
   onBack?: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -157,6 +163,9 @@ export default function SpeciesCard({
                 : null
             }
           />
+          {soundSource && groupOf(species) === 'bird' ? (
+            <BirdSong speciesId={species.id} locale={locale} source={soundSource} />
+          ) : null}
         </View>
 
         {content ? (

@@ -3860,9 +3860,18 @@ only.**
     re-hosts the clip at `species-media/sounds/<id>.m4a` and records it in `public.species_sounds`
     (migration 0027: same shape as species_media; a public read-only table; url null = no safe
     recording). Tests: 9, including a real ffmpeg cut.
-- **T-246 · "Listen" button on bird cards** — *Claude · S · `TODO` · deps: T-245*
-  - Plays the bird's clip from `species_sounds` with a credit line ("Recording: <name> · <licence>
-    · via iNaturalist · shortened"). Shown only when a clip exists.
+- **T-246 · "Hear its song" on bird cards** — *Claude · S · `DONE` (native module: reaches phones with the next build) · deps: T-245*
+  - `expo-audio` (~57.0.3, SDK-57 bundled; its manifest adds only MODIFY_AUDIO_SETTINGS, no
+    microphone) plays the bird's clip. "🐦 Lyssna på lätet" sits under Read aloud on bird cards
+    only. A tap plays, a second tap stops, and a finished clip rewinds; closing the card stops it.
+    Below it is the credit "Inspelning: <recordist> · <licence> · via iNaturalist · förkortad",
+    which opens the observation.
+  - `lib/birdSound.ts`: the row → sound licence guard, the credit, and a session-cached source over
+    `species_sounds` (one read per bird; "no recording" is cached, while a failed read is not, so
+    a card opened offline finds its song later). Nothing renders until a clip is known, so a bird
+    without one shows no button. Jest stub `__mocks__/expo-audio.js`. Tests: 13.
+  - Cost: a play is ~110 KB of Storage egress, so the free 5 GB is ~45k plays a month. The clip
+    could be cached on the phone if that ever gets close.
 - **T-247 · Sound quiz in "I saw…"** — *Claude · S · `TODO` · deps: T-246, T-242*
   - For a bird with a clip: play the song and pick the bird out of four photos.
 

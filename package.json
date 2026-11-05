@@ -9,6 +9,7 @@
     "@sentry/react-native": "8.31.0",
     "@supabase/supabase-js": "^2.109.0",
     "expo": "~57.0.10",
+    "expo-audio": "~57.0.3",
     "expo-build-properties": "~57.0.8",
     "expo-dev-client": "~57.0.10",
     "expo-localization": "~57.0.1",

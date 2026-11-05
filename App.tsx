@@ -63,6 +63,7 @@ import {
 } from './lib/sightingQuiz';
 import { ensureAnonymousSession, getSupabase } from './lib/supabase';
 import { hasSupabaseConfig } from './lib/supabaseConfig';
+import { supabaseSoundSource, type SoundClient, type SoundSource } from './lib/birdSound';
 import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib/communityImpact';
 import {
   SupabaseEntitlementSource,
@@ -173,6 +174,17 @@ function purchaseGateway(): PurchaseGateway {
 // After a purchase the server learns of it from RevenueCat's webhook, usually within seconds but
 // not instantly, so the app re-reads a few times rather than once.
 const AFTER_PURCHASE_REREAD_MS = [0, 2_000, 6_000, 15_000];
+
+// Bird song (T-246): read from species_sounds on demand and kept for the session.
+let soundSourceInstance: SoundSource | null | undefined;
+function soundSource(): SoundSource | null {
+  if (soundSourceInstance === undefined) {
+    soundSourceInstance = hasSupabaseConfig()
+      ? supabaseSoundSource(getSupabase() as unknown as SoundClient)
+      : null;
+  }
+  return soundSourceInstance;
+}
 
 function communityImpactSource(): CommunityImpactSource | null {
   if (communitySource === undefined) {
@@ -1006,6 +1018,7 @@ export default function App() {
           }
           tier={tierStateFor(collection.records, selected.id)}
           fullGame={freeCatch.fullGame}
+          soundSource={soundSource() ?? undefined}
           onBack={() => setSelected(null)}
           onFindNearby={
             canCollect

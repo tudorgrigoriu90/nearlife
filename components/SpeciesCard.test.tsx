@@ -231,3 +231,30 @@ describe('SpeciesCard — dual language', () => {
     });
   });
 });
+
+// T-246: the song button sits on bird cards only, and only with a recording.
+describe('SpeciesCard bird song', () => {
+  const source = {
+    soundFor: jest.fn(async (id: string) => ({
+      speciesId: id,
+      url: 'https://x/s.m4a',
+      license: 'CC-BY' as const,
+      author: 'E. A.',
+      sourceUrl: 'https://www.inaturalist.org/observations/2',
+    })),
+  };
+
+  it('offers the song on a bird card', async () => {
+    await render(<SpeciesCard species={swift} content={swiftContent} locale="en" soundSource={source} />);
+    expect(await screen.findByText(`🐦 ${tr('card.song')}`)).toBeTruthy();
+    expect(source.soundFor).toHaveBeenCalledWith('common-swift');
+  });
+
+  it('does not ask for a song on a non-bird card', async () => {
+    source.soundFor.mockClear();
+    const plant = KRONOBERG_SPECIES.find((s) => s.category === 'plant')!;
+    await render(<SpeciesCard species={plant} locale="en" soundSource={source} />);
+    expect(screen.queryByText(`🐦 ${tr('card.song')}`)).toBeNull();
+    expect(source.soundFor).not.toHaveBeenCalled();
+  });
+});
