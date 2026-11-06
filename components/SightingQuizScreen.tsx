@@ -54,6 +54,7 @@ export default function SightingQuizScreen({
   onOpenSpecies,
   onDone,
   soundSource,
+  fullGame = false,
 }: {
   locale?: Locale;
   /** The species of the user's county, as the Almanac lists them. */
@@ -70,6 +71,8 @@ export default function SightingQuizScreen({
   onDone: () => void;
   /** Bird recordings (T-246). Absent: no song quiz. */
   soundSource?: SoundSource;
+  /** Bird song is part of the Full Game (T-249): without it the song quiz is not offered. */
+  fullGame?: boolean;
 }) {
   const tr = createTranslator(locale);
   const content = locale as ContentLocale;
@@ -82,7 +85,7 @@ export default function SightingQuizScreen({
   const [lastSong, setLastSong] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!soundSource) return;
+    if (!soundSource || !fullGame) return;
     let cancelled = false;
     const birds = pool.filter((s) => groupOf(s) === 'bird').map((s) => s.id);
     void soundSource.withSound(birds).then((ids) => {
@@ -91,7 +94,7 @@ export default function SightingQuizScreen({
     return () => {
       cancelled = true;
     };
-  }, [soundSource, pool, month]);
+  }, [soundSource, fullGame, pool, month]);
 
   useEffect(() => {
     let cancelled = false;
@@ -219,7 +222,7 @@ export default function SightingQuizScreen({
             <Pressable style={styles.cta} onPress={start} accessibilityRole="button">
               <Text style={styles.ctaText}>{tr('quiz.next')}</Text>
             </Pressable>
-            {songBirds.length > 0 ? (
+            {fullGame && songBirds.length > 0 ? (
               <Pressable
                 style={styles.songEntry}
                 onPress={() => void startSong()}

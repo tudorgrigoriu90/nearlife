@@ -245,8 +245,16 @@ describe('SpeciesCard bird song', () => {
     withSound: jest.fn(async () => new Set<string>()),
   };
 
-  it('offers the song on a bird card', async () => {
-    await render(<SpeciesCard species={swift} content={swiftContent} locale="en" soundSource={source} />);
+  it('offers the song on a bird card with the Full Game', async () => {
+    await render(
+      <SpeciesCard
+        species={swift}
+        content={swiftContent}
+        locale="en"
+        soundSource={source}
+        fullGame
+      />,
+    );
     expect(await screen.findByText(`🐦 ${tr('card.song')}`)).toBeTruthy();
     expect(source.soundFor).toHaveBeenCalledWith('common-swift');
   });
@@ -254,9 +262,26 @@ describe('SpeciesCard bird song', () => {
   it('does not ask for a song on a non-bird card', async () => {
     source.soundFor.mockClear();
     const plant = KRONOBERG_SPECIES.find((s) => s.category === 'plant')!;
-    await render(<SpeciesCard species={plant} locale="en" soundSource={source} />);
+    await render(<SpeciesCard species={plant} locale="en" soundSource={source} fullGame />);
     expect(screen.queryByText(`🐦 ${tr('card.song')}`)).toBeNull();
     expect(source.soundFor).not.toHaveBeenCalled();
+  });
+});
+
+// T-249: bird song is part of the Full Game.
+describe('SpeciesCard bird song without the Full Game', () => {
+  it('shows no song button and does not even ask for the recording', async () => {
+    const soundFor = jest.fn();
+    await render(
+      <SpeciesCard
+        species={swift}
+        content={swiftContent}
+        locale="en"
+        soundSource={{ soundFor, withSound: jest.fn() }}
+      />,
+    );
+    expect(screen.queryByText(`🐦 ${tr('card.song')}`)).toBeNull();
+    expect(soundFor).not.toHaveBeenCalled();
   });
 });
 

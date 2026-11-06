@@ -153,7 +153,9 @@ describe('SightingQuizScreen song quiz', () => {
 
   async function playRound(source: ReturnType<typeof soundSource>) {
     const { props } = setup();
-    await render(<SightingQuizScreen {...props} pool={[...pool, ...birds]} soundSource={source} />);
+    await render(
+      <SightingQuizScreen {...props} pool={[...pool, ...birds]} soundSource={source} fullGame />,
+    );
     await fireEvent.press(await screen.findByText(songEntry));
     expect(await screen.findByText(tr('quiz.songQuestion'))).toBeTruthy();
     const target = source.soundFor.mock.calls[0][0];
@@ -163,7 +165,12 @@ describe('SightingQuizScreen song quiz', () => {
   it('is offered only when the county has birds with recordings', async () => {
     const { props } = setup();
     await render(
-      <SightingQuizScreen {...props} pool={[...pool, ...birds]} soundSource={soundSource([])} />,
+      <SightingQuizScreen
+        {...props}
+        pool={[...pool, ...birds]}
+        soundSource={soundSource([])}
+        fullGame
+      />,
     );
     await screen.findByText(tr('quiz.next'));
     expect(screen.queryByText(songEntry)).toBeNull();
@@ -198,5 +205,14 @@ describe('SightingQuizScreen song quiz', () => {
     await fireEvent.press(screen.getByText(`🐦 ${tr('quiz.songNext')}`));
     expect(await screen.findByText(tr('quiz.songQuestion'))).toBeTruthy();
     expect(source.soundFor.mock.calls[1][0]).not.toBe(target);
+  });
+
+  it('is not offered without the Full Game (T-249)', async () => {
+    const { props } = setup();
+    const source = soundSource(['tit', 'blue', 'robin', 'finch']);
+    await render(<SightingQuizScreen {...props} pool={[...pool, ...birds]} soundSource={source} />);
+    await screen.findByText(tr('quiz.next'));
+    expect(screen.queryByText(songEntry)).toBeNull();
+    expect(source.withSound).not.toHaveBeenCalled();
   });
 });

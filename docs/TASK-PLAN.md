@@ -3888,6 +3888,16 @@ only.**
     card no longer shows the button. `READ_ALOUD_ENABLED` in `lib/readAloud.ts` is the only
     switch; the component, its tests and expo-speech stay, so it can return when the quality does.
 
+- **T-249 · Bird song is part of the Full Game** — *Claude · XS · `DONE` · deps: T-246, T-247*
+  - Director (2026-11-06): bird song only with the Full Game (owned, Family, or a reviewer code;
+    `freeCatch.fullGame`). Without it, the card's song button and the "Guess the bird by its
+    song" entry are absent, and no recording is even requested.
+  - They are hidden, not shown locked: a locked button on a species card would be an upsell on a
+    delight moment (invariant #4). The Store's Full Game line and both Play descriptions now say
+    "unlimited catching and bird songs", so buyers know what they get.
+  - The gate is in the app, as the depth tiers' is: clips are public files of free-licence
+    recordings, so nothing of value is exposed by a determined client.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

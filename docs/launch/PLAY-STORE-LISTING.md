@@ -35,8 +35,8 @@ and Play would keep those line breaks.
   • Hjälpt: enkla sätt att ge tillbaka och skydda naturen, på hedersord, och varför det spelar
     roll.
 
-  Gratis att använda, med 3 gratis fångster varje säsong. Lås upp obegränsat fångande en gång
-  med Hela spelet, dela det med upp till 5 personer med Familj, och öppna andra län när du
+  Gratis att använda, med 3 gratis fångster varje säsong. Lås upp obegränsat fångande och
+  fågelläten en gång med Hela spelet, dela det med upp till 5 personer med Familj, och öppna andra län när du
   reser. Varje arts fakta och tips för att hjälpa och skydda är alltid gratis.
 
   Nearby respekterar dig: ingen reklam någonstans, och din position lämnar aldrig telefonen. Vi
@@ -60,8 +60,8 @@ and Play would keep those line breaks.
     meadow for a butterfly) and land it with a quick, one-thumb skill game.
   • Helped: one-tap, honour-system ways to give back and protect, with the reason it matters.
 
-  Free to use, with 3 free catches every season. Unlock unlimited catching once with the Full
-  Game, share it with up to 5 people with Family, and open other counties when you travel.
+  Free to use, with 3 free catches every season. Unlock unlimited catching and bird songs once
+  with the Full Game, share it with up to 5 people with Family, and open other counties when you travel.
   Every species' facts and help-and-protect tips are always free.
 
   Nearby respects you: no ads anywhere, and your position never leaves your phone. We only keep

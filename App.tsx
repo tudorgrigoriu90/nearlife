@@ -813,6 +813,7 @@ export default function App() {
           today={dayKey(new Date())}
           attemptStore={QUIZ_ATTEMPTS}
           soundSource={soundSource() ?? undefined}
+          fullGame={freeCatch.fullGame}
           onSpotted={(speciesId) => {
             collection.spot(speciesId);
             track('species_spotted', { speciesId, source: 'quiz' });
