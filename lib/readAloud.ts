@@ -4,6 +4,12 @@
 
 import type { SpeciesContent } from './species/content';
 
+/**
+ * Off (Director, 2026-11-06, T-248): the phones' voices read the cards too poorly to ship. The
+ * code stays, so turning this back on is the whole change once the voice quality is acceptable.
+ */
+export const READ_ALOUD_ENABLED = false;
+
 /** Sentence-separated speech for a card: the name, then each text that exists. */
 export function cardSpeech(
   name: string,

@@ -11,6 +11,7 @@ import {
   type ContentLocale,
 } from '../lib/i18n/contentLocale';
 import { commonNameFor, commonNameInLocale } from '../lib/species/localized';
+import { READ_ALOUD_ENABLED } from '../lib/readAloud';
 import { buildShareMessage } from '../lib/shareSpecies';
 import type { SpeciesContent } from '../lib/species/content';
 import type { Species } from '../lib/species/types';
@@ -145,24 +146,27 @@ export default function SpeciesCard({
             <Text style={[styles.mtNotice, { writingDirection: chromeDirection }]}>{mtNotice}</Text>
           ) : null}
           {!spotted ? <Text style={styles.notSpotted}>{tr('card.notSpotted')}</Text> : null}
-          {/* Read aloud (T-244): the second language's name, else its Latin name. */}
-          <ReadAloud
-            locale={locale}
-            name={commonNameFor(species, locale)}
-            content={content ?? null}
-            secondary={
-              secondaryLocale && secondaryContent
-                ? {
-                    locale: secondaryLocale,
-                    name:
-                      secondaryContent.commonName ??
-                      commonNameInLocale(species, secondaryLocale) ??
-                      species.scientificName,
-                    content: secondaryContent,
-                  }
-                : null
-            }
-          />
+          {/* Read aloud (T-244), switched off for now (T-248). The second language's name, else
+              its Latin name. */}
+          {READ_ALOUD_ENABLED ? (
+            <ReadAloud
+              locale={locale}
+              name={commonNameFor(species, locale)}
+              content={content ?? null}
+              secondary={
+                secondaryLocale && secondaryContent
+                  ? {
+                      locale: secondaryLocale,
+                      name:
+                        secondaryContent.commonName ??
+                        commonNameInLocale(species, secondaryLocale) ??
+                        species.scientificName,
+                      content: secondaryContent,
+                    }
+                  : null
+              }
+            />
+          ) : null}
           {soundSource && groupOf(species) === 'bird' ? (
             <BirdSong speciesId={species.id} locale={locale} source={soundSource} />
           ) : null}

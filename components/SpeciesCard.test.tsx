@@ -259,3 +259,11 @@ describe('SpeciesCard bird song', () => {
     expect(source.soundFor).not.toHaveBeenCalled();
   });
 });
+
+// T-248: read aloud is switched off until the phones' voices are good enough.
+describe('SpeciesCard read aloud', () => {
+  it('shows no read-aloud button', async () => {
+    await render(<SpeciesCard species={swift} content={swiftContent} locale="en" />);
+    expect(screen.queryByText(`🔊 ${tr('card.listen')}`)).toBeNull();
+  });
+});

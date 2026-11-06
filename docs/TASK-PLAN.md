@@ -3838,7 +3838,7 @@ only.**
     badges, no collection data. Account deletion now also clears them and the quiz's daily tries
     (the tries were missing from the device reset). Tests: badge rules, store, screen, quiz.
 
-- **T-244 · Read the species card aloud** — *Claude · S · `DONE` (native module: reaches phones with the next build) · deps: T-149*
+- **T-244 · Read the species card aloud** — *Claude · S · `DONE`, switched off by T-248 · deps: T-149*
   - Director's pick (2026-11-05) from the feature list: for people learning Swedish, hearing how
     "Nötväcka" is said; also for children and anyone who reads poorly. `expo-speech` (~57.0.1,
     SDK-57 bundled) uses the phone's own text-to-speech: on the device, offline, $0, nothing sent.
@@ -3882,6 +3882,11 @@ only.**
     one-try-a-day rule for spotting is untouched.
   - `lib/songQuiz.ts` (candidates, seeded round); `SoundSource.withSound` reads which county
     birds have a clip, in chunks of 100, and fills the card cache. Tests: 11.
+
+- **T-248 · Switch off Read aloud** — *Claude · XS · `DONE` · deps: T-244*
+  - Director (2026-11-06): the phones' text-to-speech reads the cards too poorly to ship. The
+    card no longer shows the button. `READ_ALOUD_ENABLED` in `lib/readAloud.ts` is the only
+    switch; the component, its tests and expo-speech stay, so it can return when the quality does.
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
