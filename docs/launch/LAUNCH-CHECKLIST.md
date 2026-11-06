@@ -53,7 +53,9 @@ On your computer, in the project folder:
 7. Same page, **Testers** tab → **Create email list** → add your own Gmail → save → copy the
    **opt-in link** → open it on your Android phone → accept → install Nearby from Play.
 
-## Step 4 — Play Console: the 24 products (30 min; possible only after Step 3)
+## Step 4 — Play Console: the 24 products (30 min; only after the closed test, Step 12.2)
+Play unlocks **Monetize with Play** for a new personal account only once the closed test has
+run (12 testers, 14 days). Steps 5 and 7 can be done before; Steps 6 and 8 need the products.
 **Monetize with Play → Products → One-time products → Create product**, for each:
 - `full_game` · "Full Game" · "Unlimited catching, one payment" · **49 SEK**
 - `family` · "Family" · "The Full Game for up to 5 people" · **99 SEK**
@@ -65,13 +67,17 @@ For each: set the Swedish price (let Google convert other countries) → **Save 
 Product ID is permanent; copy it exactly.
 
 ## Step 5 — Connect RevenueCat to Google Play (20 min; Google can take up to 36 h to accept it)
-1. **console.cloud.google.com** → pick the project **nearby-nearlife** (the Firebase one).
+1. **console.cloud.google.com** → pick the **Firebase project** (the one notifications use).
+   Your project's ID is in **console.firebase.google.com** → your Nearby project → gear →
+   **Project settings → Project ID** (a Firebase project *is* a Google Cloud project). In Cloud
+   Console, open the project picker → **All** tab → search that ID. Not listed? You are signed in
+   with another Google account (switch, top right). Any other Cloud project of yours works too.
 2. **APIs & Services → Library**: enable **Google Play Android Developer API** and **Google Play
    Developer Reporting API**.
 3. **IAM & Admin → Service accounts → Create service account** · name `revenuecat` → roles
    **Pub/Sub Editor** and **Monitoring Viewer** → Done.
 4. Open it → **Keys → Add key → Create new key → JSON** → a file downloads. Keep it private.
-5. Copy the account's email (`revenuecat@nearby-nearlife.iam.gserviceaccount.com`).
+5. Copy the account's email (`revenuecat@<your-project-id>.iam.gserviceaccount.com`).
 6. Play Console (the **All apps** level) → **Users and permissions → Invite new users** → paste the
    email → **App permissions → Add app → Nearby** → tick **View app information and download bulk
    reports**, **View financial data**, **Manage orders and subscriptions** → **Invite user**.

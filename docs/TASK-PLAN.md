@@ -3906,6 +3906,14 @@ only.**
     on the card and the quiz's start screen, not on a collect, catch-success or help moment.
     Birds without a recording still show nothing (an honest lock covers something that exists).
 
+- **T-251 · Launch guide fixes: real Cloud project, products after the closed test** — *Claude · XS · `DONE` · deps: T-097*
+  - The guides named the Google Cloud project "nearby-nearlife", which is a test fixture's
+    placeholder, not the Director's project. They now say how to find the real ID (Firebase →
+    Project settings).
+  - Play keeps **Monetize with Play** closed for a new personal account until the 12-tester,
+    14-day closed test has run (Director, 2026-11-06). Products (Step 4), the RevenueCat import
+    and the test purchase move after it. The service account and the webhook can be done before.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

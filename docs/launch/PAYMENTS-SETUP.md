@@ -121,7 +121,11 @@ You do this on your computer, in the project folder (where you run `npx expo sta
 
 This lets RevenueCat check purchases with Google. It is a one-off setup.
 
-1. Open **console.cloud.google.com** and pick the project **nearby-nearlife** (top bar).
+1. Open **console.cloud.google.com** and pick the **Firebase project** behind notifications (top bar).
+   Your project's ID is in **console.firebase.google.com** → your Nearby project → gear →
+   **Project settings → Project ID** (a Firebase project *is* a Google Cloud project). In Cloud
+   Console, open the project picker → **All** tab → search that ID. Not listed? You are signed in
+   with another Google account (switch, top right). Any other Cloud project of yours works too.
 2. **APIs & Services → Library**: search for and **Enable** both **Google Play Android Developer
    API** and **Google Play Developer Reporting API**.
 3. **IAM & Admin → Service accounts → + Create service account.**
@@ -130,7 +134,7 @@ This lets RevenueCat check purchases with Google. It is a one-off setup.
 4. Click the new service account → **Keys → Add key → Create new key → JSON**. A file downloads.
    Keep it private.
 5. Copy the service account's email. It looks like
-   `revenuecat@nearby-nearlife.iam.gserviceaccount.com`.
+   `revenuecat@<your-project-id>.iam.gserviceaccount.com`.
 6. Play Console → **Users and permissions → Invite new users** → paste that email.
    - Under **App permissions → Add app → Nearby**, tick **View app information and download bulk
      reports**, **View financial data, orders, and cancellation survey responses**, and **Manage
