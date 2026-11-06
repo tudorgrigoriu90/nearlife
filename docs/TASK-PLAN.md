@@ -1828,7 +1828,7 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
       species, organic pull, and demand for identification (T-222's evidence).
     - Guarded by the same drift test (`__tests__/dashboardsDoc.test.js`).
   - **To close:** create it in PostHog, the same way as T-037.
-- **T-100 · Error & pipeline monitoring** — *Claude · S · `IN-PROGRESS` (all built; Sentry project + DSN + next build pending, Director) · deps: T-045, T-064*
+- **T-100 · Error & pipeline monitoring** — *Claude · S · `IN-PROGRESS` (all built; Sentry project + EU DSN created 2026-11-06; EAS variable, DPA and the next build pending, Director) · deps: T-045, T-064*
   - Crash/error reporting on the app; alerting if the data pipeline or notification cron fails.
   - ✅ **Pipeline and cron alerting built (2026-10-30)**: `pipeline/db/health.py` plus
     `.github/workflows/health.yml`, running daily at 05:37 UTC. A red run is the alert, through
@@ -1861,6 +1861,9 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
     - **Director:** create the Sentry project in the EU region and give me the DSN (public), add
       it to EAS, and accept the DPA. Steps: [docs/launch/SENTRY-SETUP.md](launch/SENTRY-SETUP.md).
       The next build then reports.
+    - ✅ **2026-11-06:** project `nearby` in org `tudor-grigoriu`, DSN on `ingest.de.sentry.io`
+      (EU, as the privacy policy says). The DSN lives in EAS and `.env.local`, not in the repo.
+      Remaining: `eas env:create EXPO_PUBLIC_SENTRY_DSN`, accept the DPA, and the next build.
 
 ## F11.3 — Attribution
 - **T-101 · Attribution surfaces** — *Claude · XS · `DONE` (copy live; DOIs when the pipeline lands) · deps: T-045, T-046 · [DATA-SOURCING](DATA-SOURCING-LICENSING.md), [USER-FLOWS §9](USER-FLOWS.md)*
