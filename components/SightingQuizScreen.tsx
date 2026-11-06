@@ -17,7 +17,7 @@ import { commonNameFor } from '../lib/species/localized';
 import { photoFor } from '../lib/species/media';
 import { songCandidates, songRound } from '../lib/songQuiz';
 import type { Month, Species } from '../lib/species/types';
-import { SongPlayer } from './BirdSong';
+import { LockedSong, SongPlayer } from './BirdSong';
 
 // "I saw…" (T-242): name what you saw, pick it out of four photos. The logic, and the Director's
 // rules (exact name only, one try per species per day), live in lib/sightingQuiz (T-241). The
@@ -71,7 +71,7 @@ export default function SightingQuizScreen({
   onDone: () => void;
   /** Bird recordings (T-246). Absent: no song quiz. */
   soundSource?: SoundSource;
-  /** Bird song is part of the Full Game (T-249): without it the song quiz is not offered. */
+  /** Bird song is part of the Full Game (T-249): without it the song quiz is shown disabled (T-250). */
   fullGame?: boolean;
 }) {
   const tr = createTranslator(locale);
@@ -85,7 +85,7 @@ export default function SightingQuizScreen({
   const [lastSong, setLastSong] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!soundSource || !fullGame) return;
+    if (!soundSource) return;
     let cancelled = false;
     const birds = pool.filter((s) => groupOf(s) === 'bird').map((s) => s.id);
     void soundSource.withSound(birds).then((ids) => {
@@ -94,7 +94,7 @@ export default function SightingQuizScreen({
     return () => {
       cancelled = true;
     };
-  }, [soundSource, fullGame, pool, month]);
+  }, [soundSource, pool, month]);
 
   useEffect(() => {
     let cancelled = false;
@@ -222,6 +222,9 @@ export default function SightingQuizScreen({
             <Pressable style={styles.cta} onPress={start} accessibilityRole="button">
               <Text style={styles.ctaText}>{tr('quiz.next')}</Text>
             </Pressable>
+            {!fullGame && songBirds.length > 0 ? (
+              <LockedSong locale={locale} label={`🔒 ${tr('quiz.songEntry')}`} />
+            ) : null}
             {fullGame && songBirds.length > 0 ? (
               <Pressable
                 style={styles.songEntry}

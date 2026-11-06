@@ -3890,13 +3890,21 @@ only.**
 
 - **T-249 · Bird song is part of the Full Game** — *Claude · XS · `DONE` · deps: T-246, T-247*
   - Director (2026-11-06): bird song only with the Full Game (owned, Family, or a reviewer code;
-    `freeCatch.fullGame`). Without it, the card's song button and the "Guess the bird by its
-    song" entry are absent, and no recording is even requested.
-  - They are hidden, not shown locked: a locked button on a species card would be an upsell on a
-    delight moment (invariant #4). The Store's Full Game line and both Play descriptions now say
+    `freeCatch.fullGame`). Without it, neither the card's song button nor the "Guess the bird
+    by its song" entry plays anything.
+  - First hidden; shown disabled instead since T-250. The Store's Full Game line and both Play descriptions now say
     "unlimited catching and bird songs", so buyers know what they get.
   - The gate is in the app, as the depth tiers' is: clips are public files of free-licence
     recordings, so nothing of value is exposed by a determined client.
+
+- **T-250 · Bird song shown disabled without the Full Game** — *Claude · XS · `DONE` · deps: T-249*
+  - Director (2026-11-06) reversed T-249's hiding: keep the buttons, disabled, saying they are for
+    the full product. Without the Full Game, a bird card with a recording shows "🔒 Lyssna på
+    lätet" greyed out with "Ingår i Hela spelet" under it. "Jag såg…" shows "🔒 Gissa fågeln på
+    lätet" the same way. Neither can be tapped, and no audio player is created.
+  - Invariant #4 holds: the note is plain text, not a store link or a purchase prompt, and it sits
+    on the card and the quiz's start screen, not on a collect, catch-success or help moment.
+    Birds without a recording still show nothing (an honest lock covers something that exists).
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in

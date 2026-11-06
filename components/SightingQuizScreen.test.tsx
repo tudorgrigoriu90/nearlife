@@ -207,12 +207,15 @@ describe('SightingQuizScreen song quiz', () => {
     expect(source.soundFor.mock.calls[1][0]).not.toBe(target);
   });
 
-  it('is not offered without the Full Game (T-249)', async () => {
+  it('is shown disabled without the Full Game (T-249, T-250)', async () => {
     const { props } = setup();
     const source = soundSource(['tit', 'blue', 'robin', 'finch']);
     await render(<SightingQuizScreen {...props} pool={[...pool, ...birds]} soundSource={source} />);
-    await screen.findByText(tr('quiz.next'));
+    const locked = await screen.findByText(`🔒 ${tr('quiz.songEntry')}`);
+    expect(screen.getByText(tr('song.fullGameOnly'))).toBeTruthy();
     expect(screen.queryByText(songEntry)).toBeNull();
-    expect(source.withSound).not.toHaveBeenCalled();
+    await fireEvent.press(locked);
+    expect(screen.queryByText(tr('quiz.songQuestion'))).toBeNull();
+    expect(source.soundFor).not.toHaveBeenCalled();
   });
 });

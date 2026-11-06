@@ -63,7 +63,8 @@ export default function SpeciesCard({
   onPledge?: (species: Species, kind: HelpKind) => void;
   /** Small caption under the find-nearby CTA — e.g. the free-catch counter (T-034). */
   nearbyNote?: string;
-  /** Where a bird's recording comes from (T-246). Absent: no song button. Full Game only (T-249). */
+  /** Where a bird's recording comes from (T-246). Absent: no song button. Playable with the Full
+   * Game only; otherwise shown disabled (T-249, T-250). */
   soundSource?: SoundSource;
   onBack?: () => void;
 }) {
@@ -167,8 +168,13 @@ export default function SpeciesCard({
               }
             />
           ) : null}
-          {soundSource && fullGame && groupOf(species) === 'bird' ? (
-            <BirdSong speciesId={species.id} locale={locale} source={soundSource} />
+          {soundSource && groupOf(species) === 'bird' ? (
+            <BirdSong
+              speciesId={species.id}
+              locale={locale}
+              source={soundSource}
+              locked={!fullGame}
+            />
           ) : null}
         </View>
 

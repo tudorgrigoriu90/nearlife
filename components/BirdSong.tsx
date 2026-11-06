@@ -6,16 +6,20 @@ import { createTranslator, type Locale } from '../lib/i18n';
 
 // "Hear its song" (T-246): the bird's shortened recording (T-245), with its credit underneath.
 // Nothing renders until a recording is known to exist, so a bird without one (or offline) shows
-// no button at all rather than one that fails.
+// no button at all rather than one that fails. Without the Full Game the button is shown
+// disabled with a note that it is part of the Full Game (T-250), and no player is created.
 
 export default function BirdSong({
   speciesId,
   locale,
   source,
+  locked = false,
 }: {
   speciesId: string;
   locale: Locale;
   source: SoundSource;
+  /** True without the Full Game (T-250): shown, but cannot be played. */
+  locked?: boolean;
 }) {
   // Keyed by species, so a card reused for another bird never plays the previous one's song.
   const [found, setFound] = useState<{ speciesId: string; sound?: SpeciesSound } | null>(null);
@@ -31,7 +35,29 @@ export default function BirdSong({
   }, [source, speciesId]);
 
   const sound = found?.speciesId === speciesId ? found.sound : undefined;
-  return sound ? <SongPlayer key={sound.url} sound={sound} locale={locale} /> : null;
+  if (!sound) return null;
+  if (locked)
+    return <LockedSong locale={locale} label={`🔒 ${createTranslator(locale)('card.song')}`} />;
+  return <SongPlayer key={sound.url} sound={sound} locale={locale} />;
+}
+
+/** A disabled song button with the Full Game note under it (T-250). Not a store link. */
+export function LockedSong({ locale, label }: { locale: Locale; label: string }) {
+  const tr = createTranslator(locale);
+  return (
+    <View style={styles.wrap}>
+      <Pressable
+        disabled
+        accessibilityRole="button"
+        accessibilityState={{ disabled: true }}
+        accessibilityHint={tr('song.fullGameOnly')}
+        style={[styles.button, styles.buttonLocked]}
+      >
+        <Text style={[styles.buttonText, styles.buttonTextLocked]}>{label}</Text>
+      </Pressable>
+      <Text style={styles.credit}>{tr('song.fullGameOnly')}</Text>
+    </View>
+  );
 }
 
 /** The play button + credit. In the song quiz the credit is not a link: the page names the bird. */
@@ -95,6 +121,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#e5f0e2',
   },
   buttonOn: { backgroundColor: '#cfe5cf' },
+  buttonLocked: { backgroundColor: '#eceeea' },
+  buttonTextLocked: { color: '#8a948b' },
   buttonText: { fontSize: 15, fontWeight: '600', color: '#2f5d34' },
   credit: { marginTop: 4, fontSize: 11, color: '#6b7d6e', textAlign: 'center' },
 });

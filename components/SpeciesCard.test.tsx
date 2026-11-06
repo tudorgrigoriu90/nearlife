@@ -268,10 +268,16 @@ describe('SpeciesCard bird song', () => {
   });
 });
 
-// T-249: bird song is part of the Full Game.
+// T-249/T-250: bird song is part of the Full Game; without it the button is shown disabled.
 describe('SpeciesCard bird song without the Full Game', () => {
-  it('shows no song button and does not even ask for the recording', async () => {
-    const soundFor = jest.fn();
+  it('shows a disabled song button saying it is part of the Full Game', async () => {
+    const soundFor = jest.fn(async (id: string) => ({
+      speciesId: id,
+      url: 'https://x/s.m4a',
+      license: 'CC-BY' as const,
+      author: 'E. A.',
+      sourceUrl: 'https://www.inaturalist.org/observations/2',
+    }));
     await render(
       <SpeciesCard
         species={swift}
@@ -280,8 +286,24 @@ describe('SpeciesCard bird song without the Full Game', () => {
         soundSource={{ soundFor, withSound: jest.fn() }}
       />,
     );
+    const locked = await screen.findByText(`🔒 ${tr('card.song')}`);
+    expect(screen.getByText(tr('song.fullGameOnly'))).toBeTruthy();
     expect(screen.queryByText(`🐦 ${tr('card.song')}`)).toBeNull();
-    expect(soundFor).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: `🔒 ${tr('card.song')}` }).props.accessibilityState).toMatchObject({ disabled: true });
+    await fireEvent.press(locked); // does nothing
+    expect(screen.queryByText(`⏹ ${tr('card.listenStop')}`)).toBeNull();
+  });
+
+  it('shows nothing for a bird without a recording', async () => {
+    await render(
+      <SpeciesCard
+        species={swift}
+        locale="en"
+        soundSource={{ soundFor: jest.fn(async () => undefined), withSound: jest.fn() }}
+      />,
+    );
+    await screen.findByText(swift.scientificName);
+    expect(screen.queryByText(tr('song.fullGameOnly'))).toBeNull();
   });
 });
 
