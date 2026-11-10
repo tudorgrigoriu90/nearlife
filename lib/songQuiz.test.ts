@@ -7,7 +7,7 @@ import type { Species } from './species/types';
 const photo = (id: string) => ({
   speciesId: id,
   url: `https://x/${id}.jpg`,
-  sourceUrl: 's',
+  sourceUrl: `s/${id}`,
   license: 'CC-BY' as const,
   author: 'a',
   isPrimary: true,

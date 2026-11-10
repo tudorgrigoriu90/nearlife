@@ -9,6 +9,7 @@ import {
   quizOptions,
   recordAttempt,
 } from './sightingQuiz';
+import { photoFor } from './species/media';
 import type { Species } from './species/types';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -34,7 +35,9 @@ const sp = (
     rarity: 'common',
     activeMonths: months,
     names: { sv },
-    ...(withPhoto ? { photo: { speciesId: id, ...photo } } : {}),
+    ...(withPhoto
+      ? { photo: { ...photo, speciesId: id, url: `u/${id}`, sourceUrl: `s/${id}` } }
+      : {}),
   }) as Species;
 
 const moose = sp(
@@ -90,6 +93,26 @@ describe('pickLookalikes', () => {
     expect(picks).not.toContain('fox'); // no photo
     expect(picks.slice(0, 2).sort()).toEqual(['red', 'roe']); // active in May first
     expect(picks[2]).toBe('fallow');
+  });
+
+  it('never shows the same picture twice: a species sharing the answer’s photo is left out (T-253)', () => {
+    // Alces americanus has Wikipedia's Alces alces photo; it appeared as a "wrong" moose.
+    const sameFile = (s: Species, of: Species): Species => ({
+      ...s,
+      photo: { ...s.photo!, url: `u/${s.id}`, sourceUrl: photoFor(of)!.sourceUrl },
+    });
+    const americanMoose = sameFile(
+      sp('amoose', 'Alces americanus', 'American Moose', 'Amerikansk älg', 'mammal', [5]),
+      moose,
+    );
+    const roeTwin = sameFile(
+      sp('roe2', 'Capreolus pygargus', 'Siberian Roe', 'Sibiriskt rådjur', 'mammal', [5]),
+      roe,
+    );
+    const picks = pickLookalikes(moose, [...county, americanMoose, roeTwin], 5, 3, 'seed');
+    expect(picks.map((p) => p.id)).not.toContain('amoose');
+    const files = [moose, ...picks].map((p) => photoFor(p)!.sourceUrl);
+    expect(new Set(files).size).toBe(4);
   });
 
   it('is stable for the same seed, so a reopened quiz shows the same choices', () => {

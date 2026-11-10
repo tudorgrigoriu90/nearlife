@@ -84,7 +84,25 @@ export function pickLookalikes(
       (s) => genusOf(s) !== genus && groupOf(s) === group && !s.activeMonths.includes(month),
     ),
   ];
-  return tiers.flatMap((tier) => shuffled(tier, random)).slice(0, count);
+  // One picture per choice (T-253). Some species share a photo file: synonyms, and Wikipedia
+  // pages that redirect (Alces americanus shows Alces alces). A lookalike showing the answer's
+  // photo would be marked wrong while looking right. The original file identifies a picture;
+  // the re-hosted URL differs per species.
+  const seen = new Set([pictureKey(target)]);
+  const picks: Species[] = [];
+  for (const s of tiers.flatMap((tier) => shuffled(tier, random))) {
+    if (picks.length === count) break;
+    const key = pictureKey(s);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    picks.push(s);
+  }
+  return picks;
+}
+
+function pictureKey(s: Species): string {
+  const p = photoFor(s);
+  return p ? p.sourceUrl || p.url : `none:${s.id}`;
 }
 
 /** The four choices in a stable, seed-dependent order. */

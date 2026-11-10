@@ -3932,6 +3932,21 @@ only.**
     catch spots are cached for use outdoors without signal (T-068). That choice lasts until the
     connection is next seen. Tests: 11.
 
+- **T-253 · Quiz: never two options with the same picture** — *Claude · XS · `DONE` · deps: T-241*
+  - Director (2026-11-10): "Jag såg… Älg" showed two identical moose photos, and the right-looking
+    pick was marked wrong. Cause: *Alces americanus* is in the catalogue, and Wikipedia gives it
+    the *Alces alces* photo (`Alaska_moose.jpg`). As a same-genus lookalike it was picked first.
+  - `pickLookalikes` now keeps one choice per original photo file (`sourceUrl`; the re-hosted URL
+    differs per species), starting from the answer's own. This also covers the song quiz. The
+    test fixtures had given every species the same photo, which is how this got through; each
+    fixture now has its own. Live data: 30 photo files are shared by 61 catalogue species.
+- **T-254 · Catalogue: species that only share another's photo or are not Swedish** — *Claude · S · `TODO` · deps: T-253*
+  - Found with T-253: some catalogue entries are synonyms or misfiled records rather than Swedish
+    species (*Alces americanus*; pairs like *Gnaphalium/Omalotheca sylvatica*, *Cicerbita/Lactuca
+    alpina*). Others carry a wrong photo, such as *Bombus norvegicus* showing *Veronica spicata*.
+    Review the 30 shared-photo groups: merge synonyms, drop non-Swedish taxa, and re-source
+    photos that show another species.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
