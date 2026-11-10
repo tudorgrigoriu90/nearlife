@@ -112,7 +112,12 @@ import { gradeFromScore } from './lib/minigame/grade';
 import { monthOf, seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator, type Locale } from './lib/i18n';
-import { createPackSource, createSpeciesRepository } from './lib/speciesRepositoryFactory';
+import {
+  createPackSource,
+  createRepositoryParts,
+  createSpeciesRepository,
+} from './lib/speciesRepositoryFactory';
+import { composeRepository } from './lib/offlineRepository';
 import { ExpoPackFiles } from './lib/packFiles';
 import { useOfflinePack } from './components/useOfflinePack';
 import OfflineSection from './components/OfflineSection';
@@ -126,6 +131,7 @@ import type { Species } from './lib/species/types';
 // repo once the DB is seeded (T-055 content seed). Module-level so its identity is stable.
 // Supabase when configured, bundled data otherwise, with a fallback on failure (T-057).
 const SPECIES_REPO = createSpeciesRepository();
+const REPO_PARTS = createRepositoryParts();
 // The offline county pack (T-256): Full Game owners keep their county on the phone.
 const PACK_SOURCE = createPackSource();
 const PACK_FILES = PACK_SOURCE ? new ExpoPackFiles() : null;
@@ -297,6 +303,38 @@ export default function App() {
     source: entitlementSource(),
     store: ENTITLEMENT_STORE,
   });
+  // Is a second language actually being shown? Re-derived every render because it depends on the
+  // primary locale, which the user can change at any time (isDualActive, T-148).
+  const dualActive = isDualActive(dualLanguage, locale as ContentLocale);
+  const secondaryLocale = dualActive ? dualLanguage.secondaryLocale : null;
+  // The offline county pack (T-256) and, with one saved, play from it (T-257). Full Game only.
+  const homeId = hometown?.id ?? null;
+  const packTarget = useMemo(
+    () => (homeId ? { regionId: homeId, locale, secondaryLocale } : null),
+    [homeId, locale, secondaryLocale],
+  );
+  const offlinePack = useOfflinePack({
+    enabled: entitlements.fullGame,
+    target: packTarget,
+    source: PACK_SOURCE,
+    files: PACK_FILES,
+    online: !connectivity.offline,
+  });
+  const usablePack = entitlements.fullGame ? offlinePack.pack : null;
+  // A new object when the mode changes, so every screen reloads from the right source.
+  const speciesRepo = useMemo(
+    () =>
+      usablePack && REPO_PARTS.online && PACK_FILES
+        ? composeRepository({
+            online: REPO_PARTS.online,
+            bundled: REPO_PARTS.bundled,
+            pack: usablePack,
+            thumbUri: (id) => PACK_FILES.thumbUri(id),
+            offline: connectivity.offline,
+          })
+        : SPECIES_REPO,
+    [usablePack, connectivity.offline],
+  );
   const [showFamily, setShowFamily] = useState(false);
   const [showStore, setShowStore] = useState(false);
   const [showCounties, setShowCounties] = useState(false);
@@ -331,14 +369,14 @@ export default function App() {
   // The Almanac lists the user's county + anything collected outside it (T-208); Badges count over
   // the same list so the two never disagree.
   const { species: almanacSpecies, loading: speciesLoading } = useAlmanacCatalogue(
-    SPECIES_REPO,
+    speciesRepo,
     viewCounty?.id ?? hometown?.id ?? null,
     locale,
     new Set(collection.records.map((r) => r.speciesId)),
   );
   // This Week over the user's own county (T-207); null in preview mode → bundled list.
   const thisWeekLive = useThisWeek(
-    SPECIES_REPO,
+    speciesRepo,
     viewCounty?.id ?? hometown?.id ?? null,
     monthOf(new Date()),
     spottedIds(collection.records),
@@ -386,7 +424,7 @@ export default function App() {
     if (!onboarded || tappedSpeciesId === null) return;
     const speciesId = tappedSpeciesId;
     track('notification_opened', { speciesId });
-    SPECIES_REPO.describeSpecies([speciesId], locale)
+    speciesRepo.describeSpecies([speciesId], locale)
       .then(([summary]) => {
         // A species the catalogue no longer has (removed by a refresh) just opens the app.
         if (summary === undefined) return;
@@ -516,7 +554,7 @@ export default function App() {
     if (!selected) return;
     let cancelled = false;
     const speciesId = selected.id;
-    SPECIES_REPO.getContent(speciesId, locale)
+    speciesRepo.getContent(speciesId, locale)
       .then((content) => {
         if (!cancelled) setCardContent({ speciesId, content });
       })
@@ -526,7 +564,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [selected, locale]);
+  }, [selected, locale, speciesRepo]);
 
   // Rehydrate the dual-display preference (T-148); until it resolves the feature stays off.
   useEffect(() => {
@@ -543,10 +581,6 @@ export default function App() {
     };
   }, []);
 
-  // Is a second language actually being shown? Re-derived every render because it depends on the
-  // primary locale, which the user can change at any time (isDualActive, T-148).
-  const dualActive = isDualActive(dualLanguage, locale as ContentLocale);
-  const secondaryLocale = dualActive ? dualLanguage.secondaryLocale : null;
 
   const updateDualLanguage = (next: DualLanguageSettings) => {
     setDualLanguage(next);
@@ -562,7 +596,7 @@ export default function App() {
     if (!selected || secondaryLocale === null) return;
     let cancelled = false;
     const speciesId = selected.id;
-    SPECIES_REPO.getContentInLocale(speciesId, secondaryLocale)
+    speciesRepo.getContentInLocale(speciesId, secondaryLocale)
       .then((content) => {
         if (!cancelled) setSecondaryCardContent({ speciesId, locale: secondaryLocale, content });
       })
@@ -574,7 +608,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [selected, secondaryLocale]);
+  }, [selected, secondaryLocale, speciesRepo]);
 
   const exportMyData = async () => {
     // The server-side sections (T-219). Without a backend there is nothing held there to export.
@@ -651,18 +685,6 @@ export default function App() {
   // false until the purchase flow exists (T-074).
   // Unlimited catching follows what the server says the user owns (T-083), incl. Family membership.
   const freeCatch = freeCatchStateFrom(collection.records, seasonKey, entitlements.fullGame);
-  const homeId = hometown?.id ?? null;
-  const packTarget = useMemo(
-    () => (homeId ? { regionId: homeId, locale, secondaryLocale } : null),
-    [homeId, locale, secondaryLocale],
-  );
-  const offlinePack = useOfflinePack({
-    enabled: freeCatch.fullGame,
-    target: packTarget,
-    source: PACK_SOURCE,
-    files: PACK_FILES,
-    online: !connectivity.offline,
-  });
   const remaining = remainingFreeCatches(freeCatch, seasonKey);
 
   // Catch entry (T-034): a free user gets 3 catches/season; the 4th attempt shows the gentle
@@ -723,7 +745,8 @@ export default function App() {
   if (!onboardingLoaded || !localeLoaded) return null;
 
   // Offline, the lists load but every card is empty (T-252): say so first, before anything else.
-  if (connectivity.offline && !connectivity.dismissed) {
+  // A Full Game owner with a saved county plays on from it instead (T-257).
+  if (connectivity.offline && !connectivity.dismissed && !usablePack) {
     return (
       <OfflineScreen
         locale={locale}
@@ -963,7 +986,7 @@ export default function App() {
             PACK_FILES ? (
               <OfflineSection
                 locale={locale}
-                fullGame={freeCatch.fullGame}
+                fullGame={entitlements.fullGame}
                 pack={offlinePack.pack}
                 sizeBytes={offlinePack.sizeBytes}
                 progress={offlinePack.progress}
@@ -1125,6 +1148,13 @@ export default function App() {
 
   return (
     <View style={styles.root}>
+      {connectivity.offline && usablePack ? (
+        <View style={styles.previewBanner} accessibilityLiveRegion="polite">
+          <Text style={styles.previewText}>
+            📡 {tr('offline.banner', { date: usablePack.savedAt.slice(0, 10) })}
+          </Text>
+        </View>
+      ) : null}
       {previewMode ? (
         <View style={styles.previewBanner}>
           <Text style={styles.previewText}>{tr('preview.banner')}</Text>

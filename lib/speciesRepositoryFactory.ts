@@ -90,6 +90,14 @@ export function createPackSource(): PackSource | null {
   return new SupabaseSpeciesGateway(createClient(url, publishableKey));
 }
 
+/** The server source and the bundled set, separately: the offline pack sits between them (T-257). */
+export function createRepositoryParts(): { online: SpeciesRepository | null; bundled: SpeciesRepository } {
+  const bundled = new HardcodedSpeciesRepository();
+  if (!hasSupabaseConfig()) return { online: null, bundled };
+  const { url, publishableKey } = getSupabaseConfig();
+  return { online: new SupabaseSpeciesRepository(new SupabaseSpeciesGateway(createClient(url, publishableKey))), bundled };
+}
+
 export function createSpeciesRepository(): SpeciesRepository {
   const bundled = new HardcodedSpeciesRepository();
   if (!hasSupabaseConfig()) return bundled;

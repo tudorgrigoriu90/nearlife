@@ -132,6 +132,11 @@ describe('photoFor', () => {
     expect(photoFor(heath)?.url).toBe('https://example.org/photo.jpg');
   });
 
+  it('prefers a photo saved on the phone, even for a curated species (T-257, offline)', () => {
+    const saved = media({ speciesId: 'common-swift', url: 'file:///offline/thumbs/common-swift.webp' });
+    expect(photoFor({ ...swift, photo: saved })?.url).toBe('file:///offline/thumbs/common-swift.webp');
+  });
+
   it('is null with neither, so the card shows its glyph', () => {
     expect(photoFor({ ...swift, id: 'gbif:1' })).toBeNull();
   });

@@ -46,6 +46,9 @@ export function primaryPhoto(media, speciesId) {
  * else the catalogue photo the database supplied (T-215), else null → category glyph.
  */
 export function photoFor(species) {
+    // A photo saved on the phone (the offline pack, T-257) wins: the curated photos are remote.
+    if (species.photo?.url.startsWith('file:'))
+        return species.photo;
     return primaryPhoto(KRONOBERG_MEDIA_LIST, species.id) ?? species.photo ?? null;
 }
 /**

@@ -3998,7 +3998,20 @@ only.**
     - It refreshes itself when online, once a week, or after a change of county or language. That
       is at most one automatic try per session, so a failure never loops. Deleting the account
       removes the pack. Tests: 18.
-- **T-257 · Offline (3/3): play from the pack** — *Claude · M · `TODO` · deps: T-256*
+- **T-257 · Offline (3/3): play from the pack** — *Claude · M · `DONE` (with T-256: reaches phones with the next build) · deps: T-256*
+  - `lib/offlineRepository.ts`: `PackSpeciesRepository` serves the saved county from the pack's
+    rows through the online converters: the catalogue, presence (This Week), card text (app
+    language → English; the second language exactly) and lists. Photos point at the saved
+    thumbnails; a species without one shows its glyph. Text lookups are indexed, because lists
+    describe thousands of species.
+  - `composeRepository`: offline it uses pack → bundled, and the server is not tried. Online it
+    uses server → pack → bundled, so a server outage also falls back to the saved county. Only
+    with the Full Game. The repository is a new object when the mode changes, so every screen
+    reloads from the right source. Another county offline falls back to the bundled set.
+  - The offline screen (T-252) is skipped for a Full Game owner with a pack. They get a banner,
+    "📡 Offline · spelar från ditt sparade län (<datum>)". Collecting already worked offline
+    (outbox), and so did catch spots (cache), the quiz and badges. `photoFor` prefers a photo
+    saved on the phone over a curated species' remote one. Tests: 9.
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
