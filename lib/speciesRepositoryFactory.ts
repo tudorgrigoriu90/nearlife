@@ -14,6 +14,7 @@ import {
   type SpeciesSummary,
 } from './speciesRepository';
 import { getSupabaseConfig, hasSupabaseConfig } from './supabaseConfig';
+import type { PackSource } from './offlinePack';
 
 export type { SpeciesRepository };
 
@@ -82,6 +83,13 @@ export class FallbackSpeciesRepository implements SpeciesRepository {
  * `.env.local` at all, and `useCollection` already behaves this way (T-165). It keeps the app
  * launchable before anyone has touched Supabase.
  */
+/** The server reads the offline county pack needs (T-256); null without a backend. */
+export function createPackSource(): PackSource | null {
+  if (!hasSupabaseConfig()) return null;
+  const { url, publishableKey } = getSupabaseConfig();
+  return new SupabaseSpeciesGateway(createClient(url, publishableKey));
+}
+
 export function createSpeciesRepository(): SpeciesRepository {
   const bundled = new HardcodedSpeciesRepository();
   if (!hasSupabaseConfig()) return bundled;

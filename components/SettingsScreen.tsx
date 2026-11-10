@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { CONSENT_KINDS, type ConsentKind, type ConsentState } from '../lib/consent';
 import { DEFAULT_DUAL_LANGUAGE, type DualLanguageSettings } from '../lib/dualLanguage';
@@ -40,6 +41,7 @@ export default function SettingsScreen({
   onOpenStore,
   onOpenCounties,
   onDeleteAccount,
+  offlineSection,
   onDone,
 }: {
   locale?: Locale;
@@ -65,6 +67,8 @@ export default function SettingsScreen({
   onOpenCounties?: () => void;
   /** Open the account/data deletion flow (T-093 · GDPR erasure, reachable from Settings). */
   onDeleteAccount?: () => void;
+  /** Settings → Offline (T-256), built by the caller, which owns the pack. */
+  offlineSection?: ReactNode;
   onDone: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -191,6 +195,13 @@ export default function SettingsScreen({
                 </Pressable>
               ) : null}
             </View>
+          </>
+        ) : null}
+
+        {offlineSection ? (
+          <>
+            <Text style={styles.sectionLabel}>{tr('offline.section')}</Text>
+            {offlineSection}
           </>
         ) : null}
 

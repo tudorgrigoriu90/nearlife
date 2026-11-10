@@ -112,7 +112,10 @@ import { gradeFromScore } from './lib/minigame/grade';
 import { monthOf, seasonKeyOf } from './lib/season';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator, type Locale } from './lib/i18n';
-import { createSpeciesRepository } from './lib/speciesRepositoryFactory';
+import { createPackSource, createSpeciesRepository } from './lib/speciesRepositoryFactory';
+import { ExpoPackFiles } from './lib/packFiles';
+import { useOfflinePack } from './components/useOfflinePack';
+import OfflineSection from './components/OfflineSection';
 import type { HelpKind } from './lib/collection';
 import type { SpeciesContent } from './lib/species/content';
 import type { Species } from './lib/species/types';
@@ -123,6 +126,9 @@ import type { Species } from './lib/species/types';
 // repo once the DB is seeded (T-055 content seed). Module-level so its identity is stable.
 // Supabase when configured, bundled data otherwise, with a fallback on failure (T-057).
 const SPECIES_REPO = createSpeciesRepository();
+// The offline county pack (T-256): Full Game owners keep their county on the phone.
+const PACK_SOURCE = createPackSource();
+const PACK_FILES = PACK_SOURCE ? new ExpoPackFiles() : null;
 
 // Community totals source (T-081), built on first use so importing App never creates a client
 // (tests have no Supabase config). null without a backend: the Impact screen keeps its note.
@@ -628,6 +634,8 @@ export default function App() {
     void TRAVEL_STORE.clear();
     void QUIZ_ATTEMPTS.clear();
     void RECOGNIZED_STORE.clear();
+    // The offline pack (T-256) holds no personal data, but a fresh start means an empty phone.
+    PACK_FILES?.clear();
     setRecognized(new Set());
     return true;
   };
@@ -643,6 +651,18 @@ export default function App() {
   // false until the purchase flow exists (T-074).
   // Unlimited catching follows what the server says the user owns (T-083), incl. Family membership.
   const freeCatch = freeCatchStateFrom(collection.records, seasonKey, entitlements.fullGame);
+  const homeId = hometown?.id ?? null;
+  const packTarget = useMemo(
+    () => (homeId ? { regionId: homeId, locale, secondaryLocale } : null),
+    [homeId, locale, secondaryLocale],
+  );
+  const offlinePack = useOfflinePack({
+    enabled: freeCatch.fullGame,
+    target: packTarget,
+    source: PACK_SOURCE,
+    files: PACK_FILES,
+    online: !connectivity.offline,
+  });
   const remaining = remainingFreeCatches(freeCatch, seasonKey);
 
   // Catch entry (T-034): a free user gets 3 catches/season; the 4th attempt shows the gentle
@@ -939,6 +959,20 @@ export default function App() {
           }
           onOpenCounties={hasSupabaseConfig() && hometown ? () => setShowCounties(true) : undefined}
           onDeleteAccount={() => setShowDelete(true)}
+          offlineSection={
+            PACK_FILES ? (
+              <OfflineSection
+                locale={locale}
+                fullGame={freeCatch.fullGame}
+                pack={offlinePack.pack}
+                sizeBytes={offlinePack.sizeBytes}
+                progress={offlinePack.progress}
+                failed={offlinePack.failed}
+                onDownload={offlinePack.download}
+                onRemove={offlinePack.remove}
+              />
+            ) : undefined
+          }
           onDone={() => setShowSettings(false)}
         />
         <StatusBar style="auto" />

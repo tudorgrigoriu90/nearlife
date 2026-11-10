@@ -3977,7 +3977,27 @@ only.**
     (ffmpeg, as for sounds: no image library added) makes `species-media/thumbs/<id>.webp` for
     every photo whose thumbnail is missing or made from an older photo. It runs after the photo
     step of the weekly Species photos workflow. Tests: 4, including a real encode.
-- **T-256 · Offline (2/3): download the county pack** — *Claude · M · `TODO` · deps: T-255*
+- **T-256 · Offline (2/3): download the county pack** — *Claude · M · `DONE` · deps: T-255*
+  - `lib/offlinePack.ts` stores the server's own rows (region catalogue, presence, card text,
+    thumbnail map), so the offline repository (T-257) reuses the online converters. Kept small:
+    - text in the app language, English only where that is missing, and the second language
+      if one is chosen;
+    - 200 px thumbnails, downloaded 4 at a time; a refresh fetches only photos whose source
+      changed.
+    - A failed photo is left out, not fatal. Orphaned files are deleted. The pack file is
+      written last, through a temporary file, so a failure never replaces a whole pack with
+      half of one.
+  - `lib/packFiles.ts` holds it in the app's document directory (`expo-file-system`, which is
+    already part of Expo, so no new native module). `SupabaseSpeciesGateway` gains
+    `fetchFullContent` and `fetchThumbs`.
+  - Settings → Offline (`components/OfflineSection.tsx` + `useOfflinePack`):
+    - with the Full Game: "⬇️ Spara länet för offline (≈15 MB)", progress (text, then photos
+      n of N), "Sparat <datum> · N arter · X MB", **Uppdatera nu** and **Ta bort från
+      telefonen**;
+    - without it: the row is disabled with "Ingår i Hela spelet" (as T-250).
+    - It refreshes itself when online, once a week, or after a change of county or language. That
+      is at most one automatic try per session, so a failure never loops. Deleting the account
+      removes the pack. Tests: 18.
 - **T-257 · Offline (3/3): play from the pack** — *Claude · M · `TODO` · deps: T-256*
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*

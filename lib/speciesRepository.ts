@@ -4,6 +4,7 @@ import { GROUP_BY_TAXON } from './species/group';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Locale } from './i18n';
 import type { ContentLocale } from './i18n/contentLocale';
+import type { ThumbRow } from './offlinePack';
 import { KRONOBERG_SPECIES } from './species/kronoberg';
 import { commonNameFor, contentFor, contentInLocale } from './species/localized';
 import type { SpeciesContent } from './species/content';
@@ -438,6 +439,41 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
             .order('species_id')
             .range(from, to),
         'species_media',
+      ),
+    );
+  }
+
+  /** Full card text for many species at once: the offline pack (T-256). */
+  async fetchFullContent(ids: string[], locales: string[]): Promise<SpeciesContentRow[]> {
+    return readInChunks(ids, (chunk) =>
+      readAllPages<SpeciesContentRow>(
+        (from, to) =>
+          this.client
+            .from('species_content')
+            .select('species_id,locale,common_name,fact,when_how,give,protect')
+            .in('species_id', chunk)
+            .in('locale', locales)
+            .order('species_id')
+            .order('locale')
+            .range(from, to),
+        'species_content',
+      ),
+    );
+  }
+
+  /** The compact photo thumbnails (T-255) for the offline pack. */
+  async fetchThumbs(ids: string[]): Promise<ThumbRow[]> {
+    return readInChunks(ids, (chunk) =>
+      readAllPages<ThumbRow>(
+        (from, to) =>
+          this.client
+            .from('species_media')
+            .select('species_id,thumb_url,thumb_source')
+            .in('species_id', chunk)
+            .not('thumb_url', 'is', null)
+            .order('species_id')
+            .range(from, to),
+        'species_media thumbs',
       ),
     );
   }
