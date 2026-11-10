@@ -3940,12 +3940,33 @@ only.**
     differs per species), starting from the answer's own. This also covers the song quiz. The
     test fixtures had given every species the same photo, which is how this got through; each
     fixture now has its own. Live data: 30 photo files are shared by 61 catalogue species.
-- **T-254 · Catalogue: species that only share another's photo or are not Swedish** — *Claude · S · `TODO` · deps: T-253*
+- **T-254 · Catalogue: species that only share another's photo or are not Swedish** — *Claude · S · `DONE` (migration 0028 applied via db-migrate) · deps: T-253*
   - Found with T-253: some catalogue entries are synonyms or misfiled records rather than Swedish
     species (*Alces americanus*; pairs like *Gnaphalium/Omalotheca sylvatica*, *Cicerbita/Lactuca
     alpina*). Others carry a wrong photo, such as *Bombus norvegicus* showing *Veronica spicata*.
     Review the 30 shared-photo groups: merge synonyms, drop non-Swedish taxa, and re-source
     photos that show another species.
+  - ✅ The review found a worse bug. The 0007 seed matched names with the cross cut off, so
+    `mallard`, `blue-tit` and `whooper-swan` sat on hybrid GBIF keys (*Anas platyrhynchos x
+    crecca*, etc.), with the hybrid's name and its thin presence (mallard: 37 records). The real
+    species came in again as gbif rows, so the almanac had two of each.
+  - Migration 0028 makes three changes:
+    1. It re-attaches the curated rows to the real species and merges the duplicates into them.
+       Presence and recordings move over. Users' collections merge with the earliest date per
+       tier; notification history moves too.
+    2. It takes hybrids, *Alces americanus* and five clear synonyms (*Lactuca alpina*,
+       *Gnaphalium norvegicum* and *G. sylvaticum*, *Hieracium vulgatum*, *Helictotrichon
+       pratense*, *Ruppia spiralis*) out of the catalogue.
+    3. It leaves each shared photo file with one species: a curated one first, then the one the
+       file is named after, then the most widespread. The other 21 species go back to the photo
+       job as misses already tried on Wikipedia, so iNaturalist is asked next.
+  - The rule lives in the loader too: `gbif/noise.py` has `is_hybrid` + `EXCLUDED_TAXA`, each
+    with its reason, so the next load keeps it. A test pins the migration's list to the
+    loader's. The photo job now refuses a file another species already shows (`fresh_photo`).
+    `db/verify.py` adds live checks: no hybrid in the catalogue, no shared photo, and the curated
+    birds sit on the real keys. Tests: 9.
+  - Not kept: distinct species with one shared photo (e.g. *Acanthis flammea* / *hornemanni*)
+    stay as species and just get their own photo.
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in

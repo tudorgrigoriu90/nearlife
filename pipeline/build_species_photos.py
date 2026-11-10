@@ -96,6 +96,19 @@ def second_source_targets(rows: list[tuple], source: str) -> list[dict]:
     return [{"speciesId": r[0], "scientificName": r[1]} for r in pending]
 
 
+def fresh_photo(found: dict | None, used_sources: set[str]) -> dict | None:
+    """The photo, unless another species already shows that file (T-254).
+
+    Wikipedia gives a synonym, a misfiled name or a plant in a bee's article the same lead image
+    (Alces americanus shows Alces alces; Bombus norvegicus's photo is also Veronica spicata's). Two
+    species with one picture look identical in the almanac and in the quiz, so the second one
+    counts as a miss here and goes on to the next source.
+    """
+    if found and found.get("sourceUrl") in used_sources:
+        return None
+    return found
+
+
 def media_row(species_id: str, found: dict | None, url: str | None) -> dict:
     """The species_media row for a lookup — a photo, or a recorded miss (url + licence null)."""
     licence = app_license(found.get("license")) if found else None
@@ -165,6 +178,8 @@ def main() -> int:
         id_by_key = {int(k): i for k, i in cur.fetchall()}
         cur.execute("select species_id from public.species_media")
         done = {r[0] for r in cur.fetchall()}
+        cur.execute("select source_url from public.species_media where source_url is not null")
+        used_sources = {r[0] for r in cur.fetchall()}
         targets = pending_targets(included, id_by_key, done)
         print(f"{len(done)} species already recorded; {len(targets)} to look up", flush=True)
 
@@ -176,7 +191,7 @@ def main() -> int:
             url = None
             found = None
             try:
-                found = client.fetch_image(sp["scientificName"])
+                found = fresh_photo(client.fetch_image(sp["scientificName"]), used_sources)
                 if found and app_license(found.get("license")):
                     img = fetch_with_retry(downloads, found["imageUrl"])
                     path = storage_path(sp["speciesId"])
@@ -187,6 +202,8 @@ def main() -> int:
                 continue
             row = media_row(sp["speciesId"], found, url)
             cur.execute(UPSERT_SQL, row)
+            if row["source_url"]:
+                used_sources.add(row["source_url"])
             photos += row["url"] is not None
             misses += row["url"] is None
             if i % 25 == 0:
@@ -218,7 +235,7 @@ def main() -> int:
             url = None
             found = None
             try:
-                found = inat.fetch_image(sp["scientificName"])
+                found = fresh_photo(inat.fetch_image(sp["scientificName"]), used_sources)
                 if found:
                     img = fetch_with_retry(downloads, found["imageUrl"])
                     path = storage_path(sp["speciesId"])
@@ -229,6 +246,8 @@ def main() -> int:
                 continue
             # found["license"] is already in the app form (CC0 / CC-BY / CC-BY-SA).
             ok = bool(found and url)
+            if ok:
+                used_sources.add(found["sourceUrl"])
             cur.execute(
                 SECOND_SOURCE_SQL,
                 {

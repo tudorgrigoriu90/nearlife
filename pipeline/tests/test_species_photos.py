@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from build_species_photos import (  # noqa: E402
     CURATED_SQL,
     curated_rows,
+    fresh_photo,
     media_row,
     pending_targets,
     public_url,
@@ -110,3 +111,10 @@ def test_a_second_source_hit_is_recorded_with_its_own_attribution():
 
     assert "array_append(sources_tried" in SECOND_SOURCE_SQL
     assert "url is null" in SECOND_SOURCE_SQL  # never replaces a photo already chosen
+
+
+def test_a_photo_another_species_already_shows_is_a_miss():
+    # T-254: Alces americanus got Alces alces's lead image; the quiz showed two identical moose.
+    assert fresh_photo(FOUND, {FOUND["sourceUrl"]}) is None
+    assert fresh_photo(FOUND, {"https://commons.wikimedia.org/wiki/File:Other.jpg"}) == FOUND
+    assert fresh_photo(None, set()) is None

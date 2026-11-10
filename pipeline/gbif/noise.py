@@ -42,6 +42,26 @@ INCLUDE_STATUSES = {"native", "established", "breeding", "resident"}
 EXCLUDE_STATUSES = {"alien", "invasive", "escapee", "vagrant", "domestic", "not-established"}
 
 
+# T-254: names that never ship, however well recorded, each with its reason. A non-Swedish taxon
+# here is GBIF records filed under the wrong name. A synonym here is the second GBIF key for a
+# species the catalogue already has under its accepted name. Both used to show as duplicates with
+# the same Wikipedia photo, which broke the "I saw…" quiz.
+EXCLUDED_TAXA: dict[str, str] = {
+    "Alces americanus": "not Swedish (North American moose; the records are Alces alces)",
+    "Lactuca alpina": "synonym of Cicerbita alpina",
+    "Gnaphalium norvegicum": "synonym of Omalotheca norvegica",
+    "Gnaphalium sylvaticum": "synonym of Omalotheca sylvatica",
+    "Hieracium vulgatum": "synonym of Hieracium lachenalii",
+    "Helictotrichon pratense": "synonym of Helictochloa pratensis",
+    "Ruppia spiralis": "synonym of Ruppia cirrhosa",
+}
+
+
+def is_hybrid(scientific_name: str) -> bool:
+    """`Anas platyrhynchos x crecca`, `Salix ×fragilis`: a cross, not a species to meet."""
+    return " x " in f" {scientific_name.lower()} " or "×" in scientific_name
+
+
 @dataclass(frozen=True)
 class SpeciesSignals:
     scientific_name: str
@@ -66,6 +86,10 @@ def classify(
     Every verdict carries a reason: a species dropped silently cannot be argued with later, and at
     Nordic scale these lists are far too large to re-derive by eye.
     """
+    if is_hybrid(signals.scientific_name):
+        return Verdict(False, "hybrid, not a species")
+    if signals.scientific_name in EXCLUDED_TAXA:
+        return Verdict(False, f"excluded: {EXCLUDED_TAXA[signals.scientific_name]}")
     normalised = (status or "").strip().lower()
     if normalised in EXCLUDE_STATUSES:
         return Verdict(False, f"checklist status '{normalised}'")

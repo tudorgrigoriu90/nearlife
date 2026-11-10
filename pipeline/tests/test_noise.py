@@ -149,3 +149,33 @@ def test_a_thinly_recorded_local_species_is_still_left_out():
 
 def test_the_local_threshold_sits_between_the_noise_bar_and_abundance():
     assert DEFAULT_POLICY.min_occurrences < DEFAULT_POLICY.local_occurrences < DEFAULT_POLICY.abundant_occurrences
+
+
+# T-254: hybrids, non-Swedish taxa and duplicate synonyms never ship, however well recorded.
+def _many(name):
+    return SpeciesSignals(scientific_name=name, occurrences=50_000, counties=21, months=12)
+
+
+def test_hybrids_never_ship():
+    for name in ("Anas platyrhynchos x crecca", "Cyanistes caeruleus x Parus major", "Salix ×fragilis"):
+        verdict = classify(_many(name))
+        assert not verdict.included
+        assert "hybrid" in verdict.reason
+
+
+def test_listed_taxa_never_ship_and_say_why():
+    from gbif.noise import EXCLUDED_TAXA
+
+    assert "Alces americanus" in EXCLUDED_TAXA
+    for name, why in EXCLUDED_TAXA.items():
+        verdict = classify(_many(name))
+        assert not verdict.included
+        assert why in verdict.reason
+
+
+def test_the_kept_name_of_a_synonym_pair_still_ships():
+    from gbif.noise import EXCLUDED_TAXA
+
+    for kept in ("Alces alces", "Cicerbita alpina", "Omalotheca sylvatica", "Hieracium lachenalii"):
+        assert kept not in EXCLUDED_TAXA
+        assert classify(_many(kept)).included

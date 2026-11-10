@@ -83,6 +83,9 @@ EXPECTED: dict[str, str] = {
     "a used-up reviewer code is refused": "ok",
     "an expired reviewer code is refused": "ok",
     "users cannot read the reviewer codes": "permission denied",
+    "no hybrid in the catalogue": "ok",
+    "no two catalogue species share a photo": "ok",
+    "curated birds sit on the real species": "ok",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -472,6 +475,17 @@ def run_catalogue_checks(cur) -> dict[str, str]:
           "select case when count(*) = 0 then 'ok' else 'LEAK: ' || count(*) end "
           "from public.region_catalogue('SWE.9_1', 'en') c join public.species s on s.id = c.id where not s.in_catalogue")
     cur.execute("reset role")
+    # T-254: what the quiz and the almanac rely on.
+    _step(cur, results, "no hybrid in the catalogue",
+          "select case when count(*) = 0 then 'ok' else 'HYBRIDS: ' || string_agg(scientific_name, ', ') end "
+          "from public.species where in_catalogue and (scientific_name ~* '\\sx\\s' or scientific_name like '%%×%%')")
+    _step(cur, results, "no two catalogue species share a photo",
+          "select case when count(*) = 0 then 'ok' else 'SHARED: ' || count(*) end from ("
+          " select m.source_url from public.species_media m join public.species s on s.id = m.species_id"
+          " where s.in_catalogue and m.source_url is not null group by m.source_url having count(*) > 1) d")
+    _step(cur, results, "curated birds sit on the real species",
+          "select case when count(*) = 3 then 'ok' else 'WRONG: ' || count(*) end from public.species "
+          "where (id, gbif_key) in (('mallard', 9761484), ('blue-tit', 2487879), ('whooper-swan', 2498347))")
     return results
 
 
