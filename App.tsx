@@ -62,7 +62,10 @@ import {
   dayKey,
 } from './lib/sightingQuiz';
 import { ensureAnonymousSession, getSupabase } from './lib/supabase';
-import { hasSupabaseConfig } from './lib/supabaseConfig';
+import { getSupabaseConfig, hasSupabaseConfig } from './lib/supabaseConfig';
+import { supabaseProbe, type ConnectivityProbe } from './lib/connectivity';
+import { useConnectivity } from './components/useConnectivity';
+import OfflineScreen from './components/OfflineScreen';
 import { supabaseSoundSource, type SoundClient, type SoundSource } from './lib/birdSound';
 import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib/communityImpact';
 import {
@@ -175,6 +178,16 @@ function purchaseGateway(): PurchaseGateway {
 // not instantly, so the app re-reads a few times rather than once.
 const AFTER_PURCHASE_REREAD_MS = [0, 2_000, 6_000, 15_000];
 
+// Offline notice (T-252): one request to the server says whether the app can work. Null without a
+// backend (tests, a local build without config): never offline then.
+let probeInstance: ConnectivityProbe | null | undefined;
+function connectivityProbe(): ConnectivityProbe | null {
+  if (probeInstance === undefined) {
+    probeInstance = hasSupabaseConfig() ? supabaseProbe(getSupabaseConfig()) : null;
+  }
+  return probeInstance;
+}
+
 // Bird song (T-246): read from species_sounds on demand and kept for the session.
 let soundSourceInstance: SoundSource | null | undefined;
 function soundSource(): SoundSource | null {
@@ -231,6 +244,7 @@ export default function App() {
   const locale = localeOverride ?? detectDeviceLocale();
   const tr = createTranslator(locale);
   const collection = useCollection();
+  const connectivity = useConnectivity(connectivityProbe());
   // Almanac catalogue, loaded async through the repository seam (T-057). Defaults to the bundled
   // set (no behaviour change) until a DB-backed repo is injected. Names re-localize in the grid.
   // Selected species' card content, loaded through the repository (T-059). Keyed by species id so a
@@ -687,6 +701,18 @@ export default function App() {
   });
 
   if (!onboardingLoaded || !localeLoaded) return null;
+
+  // Offline, the lists load but every card is empty (T-252): say so first, before anything else.
+  if (connectivity.offline && !connectivity.dismissed) {
+    return (
+      <OfflineScreen
+        locale={locale}
+        checking={connectivity.checking}
+        onRetry={connectivity.recheck}
+        onContinue={connectivity.dismiss}
+      />
+    );
+  }
 
   if (!onboarded) {
     return (

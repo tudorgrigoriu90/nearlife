@@ -3917,6 +3917,21 @@ only.**
     14-day closed test has run (Director, 2026-11-06). Products (Step 4), the RevenueCat import
     and the test purchase move after it. The service account and the webhook can be done before.
 
+- **T-252 · Offline notice** — *Claude · S · `DONE` · deps: T-129*
+  - Director (2026-11-10): offline, "Denna vecka" still lists species but every card is empty.
+    The app should say up front that it is offline and cannot be used.
+  - `lib/connectivity.ts`: one request to the server (`/auth/v1/health`, 6 s timeout). Any HTTP
+    answer counts as online, and only no answer counts as offline. That asks "can we reach our
+    server?" directly. It also catches Wi-Fi without internet, and it needs no new native module
+    (NetInfo was the alternative, and its answer is less useful).
+  - `components/useConnectivity.ts`: checks at start and on every return to the foreground. While
+    offline it checks every 15 s, so the notice clears by itself. Nothing is polled while online.
+    The first frames never flash the notice.
+  - `components/OfflineScreen.tsx` replaces the app while offline: "📡 Du är offline · Nearby
+    behöver internet…", plus **Försök igen** and **Fortsätt utan nät**. The second exists because
+    catch spots are cached for use outdoors without signal (T-068). That choice lasts until the
+    connection is next seen. Tests: 11.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
