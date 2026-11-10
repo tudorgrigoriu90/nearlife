@@ -28,7 +28,7 @@ jobs:
   photos:
     name: Source species photos
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 355
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -48,3 +48,12 @@ jobs:
         env:
           MAX_MINUTES: ${{ inputs.max_minutes }}
         run: python pipeline/build_species_photos.py --max-minutes "${MAX_MINUTES:-330}"
+
+      # Compact thumbnails for the offline county pack (T-255): new and changed photos only.
+      - name: Install ffmpeg
+        if: always()
+        run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg)
+
+      - name: Make compact thumbnails
+        if: always()
+        run: python pipeline/build_species_thumbs.py --max-minutes 120

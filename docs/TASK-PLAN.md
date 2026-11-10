@@ -3968,6 +3968,18 @@ only.**
   - Not kept: distinct species with one shared photo (e.g. *Acanthis flammea* / *hornemanni*)
     stay as species and just get their own photo.
 
+- **T-255 · Offline (1/3): compact photo thumbnails** — *Claude · S · `DONE` · deps: T-202*
+  - Director (2026-11-10): offline play for Full Game owners, "keep sizing at a minimum, very
+    compacted photos". Measured on a real photo: 240 px WebP ≈ 5.7 KB, **200 px ≈ 4.5 KB**,
+    160 px ≈ 2.9 KB at quality 40. All three were recognisable at card size; 200 px was chosen.
+    A county's ~2,800 photos come to ~12 MB, against 150+ MB for the card photos.
+  - Migration 0029 adds `species_media.thumb_url` + `thumb_source`. `build_species_thumbs.py`
+    (ffmpeg, as for sounds: no image library added) makes `species-media/thumbs/<id>.webp` for
+    every photo whose thumbnail is missing or made from an older photo. It runs after the photo
+    step of the weekly Species photos workflow. Tests: 4, including a real encode.
+- **T-256 · Offline (2/3): download the county pack** — *Claude · M · `TODO` · deps: T-255*
+- **T-257 · Offline (3/3): play from the pack** — *Claude · M · `TODO` · deps: T-256*
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise
