@@ -158,17 +158,17 @@ def load(dsn: str) -> int:
         print(f"{len(names)} catalogue species", flush=True)
         rows = fill_rows(fetch(names))
         cur.execute(
-            "select locale, count(*) filter (where common_name is not null and common_name <> '') "
+            "select c.locale, count(*) filter (where c.common_name is not null and c.common_name <> '') "
             "from public.species_content c join public.species s on s.id = c.species_id and s.in_catalogue "
-            "group by locale"
+            "group by c.locale"
         )
         before = dict(cur.fetchall())
         cur.executemany(FILL_SQL, rows)
         conn.commit()
         cur.execute(
-            "select locale, count(*) filter (where common_name is not null and common_name <> '') "
+            "select c.locale, count(*) filter (where c.common_name is not null and c.common_name <> '') "
             "from public.species_content c join public.species s on s.id = c.species_id and s.in_catalogue "
-            "group by locale order by locale"
+            "group by c.locale order by c.locale"
         )
         print("species with a name, per locale (before → after):")
         for locale, after in cur.fetchall():
