@@ -4013,6 +4013,27 @@ only.**
     (outbox), and so did catch spots (cache), the quiz and badges. `photoFor` prefers a photo
     saved on the phone over a curated species' remote one. Tests: 9.
 
+- **T-258 · Species names from Wikidata where GBIF has none** — *Claude · S · `DONE` · deps: T-188*
+  - Director (2026-11-11): with Romanian as the second language the card text is translated, but
+    the title stays Swedish only ("Öring", not "Öring / Păstrăv"). Cause: names come only from
+    GBIF, which has Romanian for 793 of 7,974 catalogue species (Arabic 1,026, Somali 59). Names
+    are deliberately never machine-translated; a translated name is usually an invented one.
+  - `build_wikidata_names.py` picks, per species and app language, in order of trust: Wikidata's
+    stated common name (P1843), then the title of that language's Wikipedia article, then the
+    label. A candidate that is just the binomial is dropped, and "(…)" is stripped (the
+    `vernacular/sources` rules). Kurmanji is read from `ku`. The query takes one request per 150
+    species, all languages at once: about 3 minutes for the catalogue.
+  - Measured on the whole catalogue (2026-11-11): Wikidata names **93 of the 100**
+    most-recorded species in Romanian, 272 of the top 500. That is +194 Romanian names in all,
+    +976 Arabic, +1,329 Persian, +723 Polish, +632 Ukrainian. Most remaining gaps are moths,
+    beetles and microspecies with no name in that language anywhere.
+  - Two ways in, and neither overwrites a name already there:
+    - `--load` (the monthly Species names workflow) fills empty `species_content.common_name`
+      slots directly;
+    - the data pipeline merges the names into `vernacular.json` before the content build, and
+      a Wikidata outage never fails the run.
+  - Tests: 6.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

@@ -1,0 +1,36 @@
+name: Species names
+
+# Fills species names GBIF lacks from Wikidata, in every app language (T-258), straight into the
+# empty species_content.common_name slots. Names already there are never overwritten. A few
+# minutes. Monthly, since Wikidata keeps growing; also on demand.
+#
+# Secrets: SUPABASE_DB_URL.
+
+on:
+  schedule:
+    - cron: "37 4 3 * *" # the 3rd of each month, 04:37 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: species-names
+  cancel-in-progress: false
+
+jobs:
+  names:
+    name: Fill names from Wikidata
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r pipeline/requirements.txt
+
+      - name: Fill names
+        run: python pipeline/build_wikidata_names.py --load
