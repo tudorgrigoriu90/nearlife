@@ -42,7 +42,12 @@ def wiki_api_for(lang: str) -> str:
     code = re.split(r"[-_]", (lang or "").strip())[0].lower()
     if not _LANG.match(code):
         raise ValueError(f"not a Wikipedia language code: {lang!r}")
-    return f"https://{code}.wikipedia.org/w/api.php"
+    return f"https://{_WIKI_EDITION.get(code, code)}.wikipedia.org/w/api.php"
+
+
+# App locales whose Wikipedia edition has another code (T-260): Kurmanji's is ku.wikipedia.org.
+# kmr.wikipedia.org does not exist, so Kurmanji cards never had a Wikipedia fact.
+_WIKI_EDITION = {"kmr": "ku"}
 
 
 # Width of the thumbnail the app ships. ~40 KB at this size; see docs/DATA-SOURCING-LICENSING.md.

@@ -47,3 +47,8 @@ def test_a_code_that_is_not_a_language_is_refused():
         except ValueError:
             continue
         raise AssertionError(f"expected {bad!r} to be refused")
+
+
+def test_kurmanji_uses_the_ku_edition():
+    # T-260: kmr.wikipedia.org does not exist; Kurmanji Wikipedia is ku.wikipedia.org.
+    assert wiki_api_for("kmr") == "https://ku.wikipedia.org/w/api.php"

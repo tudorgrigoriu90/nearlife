@@ -164,7 +164,11 @@ def main() -> int:
         wiki = WikimediaClient()
         facts_filled = 0
         for locale in LOCALES:
-            facts = wiki.fetch_extracts(sorted(set(alias.values())), locale)
+            try:
+                facts = wiki.fetch_extracts(sorted(set(alias.values())), locale)
+            except Exception as exc:  # one language's failure skips that language, not the run
+                print(f"  ! [{locale}] {exc}", flush=True)
+                continue
             rows = [
                 {"species_id": id_of[name], "locale": locale, "fact": facts[other]}
                 for name, other in alias.items()
