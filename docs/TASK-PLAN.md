@@ -4046,11 +4046,28 @@ only.**
   - `backfill_facts.py` + the Backfill facts workflow ask Wikipedia again only for empty fact
     slots, Swedish and English first, most-recorded species first. They write only empty slots,
     and a rerun resumes. Tests: 5.
-- **T-260 · Species filed under another name: photo, fact and names via synonyms** — *Claude · M · `TODO` · deps: T-259*
+- **T-260 · Species filed under another name: photo, fact and names via synonyms** — *Claude · M · `DONE` (runs in the monthly Species names workflow) · deps: T-259*
   - *Thysselinum palustre* (GBIF's name) is *Peucedanum palustre* on Wikipedia, Wikidata and
     iNaturalist ("kärrsilja"), so its card has no photo, fact or Swedish name. Fix: for species
     still missing these after T-259, take GBIF's synonyms, and use a synonym's Wikidata item that
     has Wikipedia articles for the photo, the fact per language, and the names.
+  - ✅ Measured: 244 catalogue species have no Wikipedia article in any language under their GBIF
+    name. That is 3%: most missing facts were T-259's batch bug, not names. For each, a
+    better-known name is found two ways:
+    - **Wikidata's synonym link** (P1420): the goshawk *Accipiter gentilis* → *Astur gentilis*
+      (104 articles), and the lesser spotted eagle → *Clanga pomarina*.
+    - **GBIF's synonyms**, keeping the one with the most articles: *Thysselinum palustre* →
+      *Peucedanum palustre* (22).
+    - Rejected: Wikidata's GBIF-ID property. The old goshawk item still holds the GBIF number,
+      with zero articles.
+  - `resolve_synonyms.py` fills, through that name and in empty slots only:
+    - facts in every language;
+    - names (the T-258 rules);
+    - the photo: Wikipedia, then iNaturalist, never a file already in use. Each source keeps its
+      own licence handling: iNaturalist's codes are already in the app's form, which the
+      Wikimedia converter would have rejected.
+  - The content loader now coalesces `common_name` as it already did `fact`, so a rebuild keeps
+    filled names. Tests: 6.
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in

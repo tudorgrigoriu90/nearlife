@@ -61,7 +61,8 @@ CONTENT_SQL = (
     "values (%(species_id)s, %(locale)s, %(common_name)s, %(fact)s, %(when_how)s, "
     "%(give)s, %(protect)s, %(always_free)s) "
     "on conflict (species_id, locale) do update set "
-    "common_name=excluded.common_name, fact=coalesce(excluded.fact, public.species_content.fact), "
+    "common_name=coalesce(excluded.common_name, public.species_content.common_name), "
+    "fact=coalesce(excluded.fact, public.species_content.fact), "
     "when_how=excluded.when_how, "
     "give=excluded.give, protect=excluded.protect, always_free=excluded.always_free"
 )

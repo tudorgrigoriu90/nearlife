@@ -4,7 +4,10 @@ name: Species names
 # empty species_content.common_name slots. Names already there are never overwritten. A few
 # minutes. Monthly, since Wikidata keeps growing; also on demand.
 #
-# Secrets: SUPABASE_DB_URL.
+# Then resolves species Wikipedia files under another name (T-260): fact, names and photo through
+# the better-known name, empty slots only.
+#
+# Secrets: SUPABASE_DB_URL, SUPABASE_URL + SUPABASE_SERVICE_KEY (photo upload).
 
 on:
   schedule:
@@ -19,9 +22,11 @@ jobs:
   names:
     name: Fill names from Wikidata
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -34,3 +39,7 @@ jobs:
 
       - name: Fill names
         run: python pipeline/build_wikidata_names.py --load
+
+      - name: Resolve species filed under another name (T-260)
+        if: always()
+        run: python pipeline/resolve_synonyms.py
