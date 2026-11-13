@@ -4080,7 +4080,24 @@ only.**
   - App: `catalogueRowToSpecies` puts `county: { occurrences, monthCounts }` on each catalogue
     species; a malformed list counts as none. The offline pack (T-256) carries it too, since it
     stores catalogue rows. Tests: 6.
-- **T-262 · County numbers (2/3): the "I <län>" section on the card** — *Claude · M · `TODO` · deps: T-261*
+- **T-262 · County numbers (2/3): the "I <län>" section on the card** — *Claude · M · `DONE` · deps: T-261*
+  - `lib/countyStats.ts`, pure and derived only from the county's records (T-261):
+    - **Season:** the months outside the longest run of empty months, which may wrap the year
+      for winter visitors. A month counts from 5% of the busiest, so a stray record does not
+      stretch the season, and 11+ months is "all year".
+    - **Peak:** the busiest month, grown towards its busier neighbour while that neighbour has
+      ≥70% of the peak, at most 3 months.
+    - Birds only: a summer visitor (season within March–October) or a winter visitor
+      (December–February, never June–July). Below 20 records, no season is shown.
+    - **Standing among its own group in the county:** "Nr 4 av 240 fåglar" for the top 30,
+      "Ovanlig här: bara N fynd" for the bottom 30%, otherwise "N fynd".
+  - `components/CountySection.tsx` replaces the card's generic "Denna vecka" line wherever the
+    county is known. It shows a 12-bar month chart (this month highlighted), the season
+    sentence, the visitor line, "Nu är dess bästa tid här" when this month is in the peak, and
+    the standing. A footnote states the source: records show where people looked, not where
+    every animal is (invariant #1). Words are "ses" and "fynd", never "lever" or "blommar".
+  - App: the card's species is looked up in the county catalogue the almanac already holds, so a
+    card opened from This Week gets its numbers too. In Swedish and English. Tests: 17.
 - **T-263 · County numbers (3/3): threatened status from Wikidata** — *Claude · S · `TODO` · deps: T-262*
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*

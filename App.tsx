@@ -110,6 +110,7 @@ import { openIdentifier } from './lib/identify';
 import { CrashReporter, loadSentry } from './lib/crashReporting';
 import { gradeFromScore } from './lib/minigame/grade';
 import { monthOf, seasonKeyOf } from './lib/season';
+import { countyStats } from './lib/countyStats';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator, type Locale } from './lib/i18n';
 import {
@@ -403,6 +404,15 @@ export default function App() {
     },
   });
   const [selected, setSelected] = useState<Species | null>(null);
+  // The open card's species in the county list (T-262): a card opened from This Week carries no
+  // county numbers itself, so it is looked up in the county catalogue the almanac already holds.
+  const countyName = viewCounty?.name ?? hometown?.name ?? null;
+  const cardCounty = useMemo(() => {
+    if (!selected || !countyName) return null;
+    const own = almanacSpecies.find((s) => s.id === selected.id) ?? selected;
+    const stats = countyStats(own, almanacSpecies);
+    return stats ? { name: countyName, stats } : null;
+  }, [selected, countyName, almanacSpecies]);
   const [catching, setCatching] = useState<Species | null>(null);
   const [caughtTip, setCaughtTip] = useState<{ species: Species; prime: boolean } | null>(null);
   const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
@@ -1104,6 +1114,8 @@ export default function App() {
           tier={tierStateFor(collection.records, selected.id)}
           fullGame={freeCatch.fullGame}
           soundSource={soundSource() ?? undefined}
+          county={cardCounty}
+          month={monthOf(new Date())}
           onBack={() => setSelected(null)}
           onFindNearby={
             canCollect

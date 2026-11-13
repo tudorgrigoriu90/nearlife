@@ -18,6 +18,9 @@ import type { Species } from '../lib/species/types';
 import DualText from './DualText';
 import SpeciesHero from './SpeciesHero';
 import ReadAloud from './ReadAloud';
+import CountySection from './CountySection';
+import type { CountyStats } from '../lib/countyStats';
+import type { Month } from '../lib/species/types';
 import BirdSong from './BirdSong';
 import type { SoundSource } from '../lib/birdSound';
 import { groupOf } from '../lib/species/group';
@@ -44,6 +47,8 @@ export default function SpeciesCard({
   onPledge,
   nearbyNote,
   soundSource,
+  county = null,
+  month,
   onBack,
 }: {
   species: Species;
@@ -66,6 +71,10 @@ export default function SpeciesCard({
   /** Where a bird's recording comes from (T-246). Absent: no song button. Playable with the Full
    * Game only; otherwise shown disabled (T-249, T-250). */
   soundSource?: SoundSource;
+  /** The species in the user's county (T-262); replaces the generic "this week" line. */
+  county?: { name: string; stats: CountyStats } | null;
+  /** This month, for the county chart. */
+  month?: Month;
   onBack?: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -185,10 +194,19 @@ export default function SpeciesCard({
               <DualText input={dual(content.fact, secondaryContent?.fact)} style={styles.fact} />
             ) : null}
 
-            <Section
-              title={tr('thisWeek.title')}
-              input={dual(content.whenAndHow, secondaryContent?.whenAndHow)}
-            />
+            {county && month ? (
+              <CountySection
+                locale={locale}
+                countyName={county.name}
+                stats={county.stats}
+                month={month}
+              />
+            ) : (
+              <Section
+                title={tr('thisWeek.title')}
+                input={dual(content.whenAndHow, secondaryContent?.whenAndHow)}
+              />
+            )}
             <Section
               title={tr('card.give')}
               input={dual(content.give, secondaryContent?.give)}
