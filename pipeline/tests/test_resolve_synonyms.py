@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from gbif.supabase_load_content import CONTENT_SQL  # noqa: E402
-from resolve_synonyms import gbif_synonyms, orphans, photo_row, pick_alias  # noqa: E402
+from resolve_synonyms import gbif_synonyms, needs_alias, orphans, photo_row, pick_alias  # noqa: E402
 
 
 def test_a_species_is_an_orphan_when_no_wikipedia_has_an_article_under_its_name():
@@ -51,3 +51,18 @@ def test_a_photo_row_keeps_its_licence_and_credit():
         "author": "Unknown",
         "license": "CC-BY",
     }
+
+
+# T-264: a stub article under its own name must not hide the well-known one.
+def test_a_stub_species_is_looked_up_while_its_card_lacks_a_photo_or_swedish_name():
+    assert needs_alias(0, True, True)  # no article at all: always
+    assert needs_alias(1, False, False)  # kärrsilja: one stub, no photo, no Swedish name
+    assert needs_alias(3, True, False)
+    assert not needs_alias(1, True, True)  # stub, but the card is complete
+    assert not needs_alias(4, False, False)  # well enough known under its own name
+
+
+def test_a_stub_species_takes_a_synonym_only_when_it_is_better_known():
+    assert pick_alias([], [(22, "Peucedanum palustre")], own=1) == "Peucedanum palustre"
+    assert pick_alias([], [(1, "Equally obscure")], own=1) is None
+    assert pick_alias([(2, "Less known")], [(5, "Better known")], own=2) == "Better known"

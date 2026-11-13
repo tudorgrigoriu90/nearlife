@@ -4113,6 +4113,14 @@ only.**
     worldwide: IUCN assesses the global population, and the Swedish Red List is a different
     (and not CC0) source. Tests: 6.
 
+- **T-264 · Synonym lookup also for species with only a stub article** — *Claude · S · `DONE` (applied by the next Species names run) · deps: T-260*
+  - Kärrsilja still had no photo and no Swedish name after T-260. Its own Wikidata item
+    (*Thysselinum palustre*, Q50876385) has one Wikipedia article, so it did not count as an
+    orphan and was skipped. The well-known item, *Peucedanum palustre*, has 22.
+  - Fix: a species is also looked up when its own name has at most 3 articles (`THIN_LINKS`) and
+    its card still lacks a photo or a Swedish name. For these, a synonym is taken only when it has
+    more articles than the species' own name. Only empty slots are filled, as before. Tests: 2.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

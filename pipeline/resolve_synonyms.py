@@ -5,6 +5,10 @@ lookup by name misses: *Thysselinum palustre* (GBIF) is *Peucedanum palustre* ev
 ("kärrsilja"), so its card had no photo, no fact and no Swedish name. 244 catalogue species
 (2026-11-13) have no Wikipedia article in any language under their GBIF name.
 
+Species with only a stub of their own (at most THIN_LINKS articles) are looked up too when their
+card still lacks a photo or a Swedish name (T-264): *Thysselinum palustre* has one article under its
+own item, *Peucedanum palustre* has 22. For them a synonym counts only when it is better known.
+
 For each of them a better-known name is looked for, in this order:
   A. Wikidata's own synonym link: an item that lists this name as its taxon synonym (P1420). The
      goshawk is *Astur gentilis* on Wikidata and Wikipedia, *Accipiter gentilis* at GBIF.
@@ -36,9 +40,17 @@ _P1420_Q = """SELECT ?name ?alias ?n WHERE {
   ?new wikibase:sitelinks ?n . ?new wdt:P225 ?alias }"""
 
 
+THIN_LINKS = 3
+
+
 def orphans(names: list[str], links: dict[str, int]) -> list[str]:
     """Names with no Wikipedia article in any language, in the order given."""
     return [n for n in names if links.get(n, 0) == 0]
+
+
+def needs_alias(links: int, has_photo: bool, has_sv_name: bool) -> bool:
+    """No article under its own name, or only a stub while the card still misses a photo or name."""
+    return links == 0 or (links <= THIN_LINKS and not (has_photo and has_sv_name))
 
 
 def gbif_synonyms(results: list[dict], accepted: str) -> list[str]:
@@ -51,10 +63,13 @@ def gbif_synonyms(results: list[dict], accepted: str) -> list[str]:
     return out
 
 
-def pick_alias(wikidata_links: list[tuple[int, str]], gbif_links: list[tuple[int, str]]) -> str | None:
-    """Wikidata's own synonym link first, else the GBIF synonym with the most articles."""
+def pick_alias(
+    wikidata_links: list[tuple[int, str]], gbif_links: list[tuple[int, str]], own: int = 0
+) -> str | None:
+    """Wikidata's own synonym link first, else the GBIF synonym with the most articles; either
+    must have more articles than the species' own name (`own`)."""
     for candidates in (wikidata_links, gbif_links):
-        best = max((c for c in candidates if c[0] > 0), default=None)
+        best = max((c for c in candidates if c[0] > own), default=None)
         if best:
             return best[1]
     return None
@@ -129,14 +144,20 @@ def main() -> int:
     wd = Wikidata()
     with psycopg.connect(dsn) as conn, conn.cursor() as cur:
         cur.execute(
-            "select s.id, s.scientific_name, s.gbif_key, m.url is not null "
+            "select s.id, s.scientific_name, s.gbif_key, m.url is not null, "
+            "exists(select 1 from public.species_content c where c.species_id = s.id "
+            "and c.locale = 'sv' and c.common_name is not null) "
             "from public.species s left join public.species_media m on m.species_id = s.id "
             "where s.in_catalogue order by s.scientific_name"
         )
         species = cur.fetchall()
-        lost = set(orphans([s[1] for s in species], wd.link_counts([s[1] for s in species])))
-        targets = [s for s in species if s[1] in lost]
-        print(f"{len(targets)} species without a Wikipedia article under their name", flush=True)
+        own_links = wd.link_counts([s[1] for s in species])
+        targets = [s[:4] for s in species if needs_alias(own_links.get(s[1], 0), s[3], s[4])]
+        print(
+            f"{len(targets)} species without a Wikipedia article under their name, or only a stub "
+            "and no photo or Swedish name",
+            flush=True,
+        )
 
         via_wikidata = wd.synonym_links([t[1] for t in targets])
         gbif = requests.Session()
@@ -154,6 +175,7 @@ def main() -> int:
             found = pick_alias(
                 via_wikidata.get(name, []),
                 [(syn_links.get(s, 0), s) for s in gbif_syn.get(name, [])],
+                own=own_links.get(name, 0),
             )
             if found:
                 alias[name] = found
