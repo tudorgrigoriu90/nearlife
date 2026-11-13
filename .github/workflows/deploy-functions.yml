@@ -63,9 +63,9 @@ jobs:
       - name: Deploy
         run: |
           for fn in send-notifications revenuecat-webhook; do
-            supabase functions deploy "$fn" --project-ref "$PROJECT_REF" --no-verify-jwt --use-api
+            supabase functions deploy "$fn" --project-ref "$PROJECT_REF" --no-verify-jwt --use-api --yes
           done
-          supabase functions deploy delete-account --project-ref "$PROJECT_REF" --use-api
+          supabase functions deploy delete-account --project-ref "$PROJECT_REF" --use-api --yes
 
   # T-093: prove account deletion works end to end after every deploy, on a throwaway anonymous
   # account. Only the public publishable key is used (the app ships it); the function itself checks

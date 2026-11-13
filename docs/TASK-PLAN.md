@@ -3290,6 +3290,9 @@ only.**
     (or by hand), regenerates the shared engine copy and fails if it differs from the commit, then
     `supabase functions deploy send-notifications --no-verify-jwt --use-api`. `delete-account` is
     left out on purpose — deploying it is T-093's decision, not a side effect of this workflow.
+  - 🔧 **2026-11-13:** the Supabase CLI (installed as `latest`) began asking to confirm a deploy,
+    and a CI run cannot answer, so the T-262 and T-263 deploys failed with nothing changed. Every
+    deploy command now passes `--yes`.
 - **T-207 · This Week still shows the bundled Kronoberg list** — *Claude · M · `DONE` · deps: T-090, T-078*
   - Found while building T-090: `ThisWeekScreen` renders `KRONOBERG_SPECIES` with the subtitle
     hard-wired to "Kronoberg", and onboarding's first Spotted card picks from the same 54. T-078's
