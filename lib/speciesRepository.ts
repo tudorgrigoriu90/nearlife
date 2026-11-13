@@ -162,6 +162,8 @@ export interface CatalogueRow extends SpeciesRow {
   photo_license?: string | null;
   /** Since T-057; absent from an older function. */
   catch_habitats?: string[] | null;
+  /** Sightings per month in the county, January first (T-261); null until loaded. */
+  month_counts?: number[] | null;
 }
 
 export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Species {
@@ -174,8 +176,11 @@ export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Specie
     license: row.photo_license ?? null,
   });
   const catchHabitats = parseHabitats(row.catch_habitats);
+  const monthCounts =
+    Array.isArray(row.month_counts) && row.month_counts.length === 12 ? row.month_counts : null;
   return {
     ...base,
+    county: { occurrences: row.occurrences, monthCounts },
     ...(row.local_name ? { names: { [locale]: asTitleName(row.local_name, locale) } } : {}),
     ...(photo ? { photo } : {}),
     ...(catchHabitats ? { catchHabitats } : {}),

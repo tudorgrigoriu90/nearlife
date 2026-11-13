@@ -95,10 +95,13 @@ def species_sql(have_names: bool) -> str:
 
 
 PRESENCE_SQL = (
-    "insert into public.species_presence (region_id, species_id, active_months, occurrences) "
-    "values (%(region_id)s, %(species_id)s, %(active_months)s, %(occurrences)s) "
+    "insert into public.species_presence "
+    "(region_id, species_id, active_months, occurrences, month_counts) "
+    "values (%(region_id)s, %(species_id)s, %(active_months)s, %(occurrences)s, %(month_counts)s) "
     "on conflict (region_id, species_id) do update set "
-    "active_months=excluded.active_months, occurrences=excluded.occurrences"
+    "active_months=excluded.active_months, occurrences=excluded.occurrences, "
+    # A presence file from before T-261 has no monthly counts: keep the ones already loaded.
+    "month_counts=coalesce(excluded.month_counts, public.species_presence.month_counts)"
 )
 
 

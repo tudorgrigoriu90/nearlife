@@ -271,6 +271,21 @@ describe('mediaRowToPhoto (T-215)', () => {
     );
     expect(species.catchHabitats).toEqual(['freshwater', 'coast']); // unknown values dropped
   });
+
+  it('carries the county numbers for the card: sightings and sightings per month (T-261)', () => {
+    const months = [0, 0, 0, 2, 38, 20, 4, 0, 0, 0, 0, 0];
+    const species = catalogueRowToSpecies(
+      { id: 'gbif:1', scientific_name: 'A a', common_name: null, local_name: null, category: 'bird', rarity: 'common', active_months: [4, 5, 6, 7], occurrences: 64, month_counts: months },
+      'sv',
+    );
+    expect(species.county).toEqual({ occurrences: 64, monthCounts: months });
+  });
+
+  it('has no monthly counts until the next presence load, and ignores a malformed list', () => {
+    const base = { id: 'gbif:1', scientific_name: 'A a', common_name: null, local_name: null, category: 'bird' as const, rarity: 'common' as const, active_months: [5], occurrences: 9 };
+    expect(catalogueRowToSpecies(base, 'sv').county).toEqual({ occurrences: 9, monthCounts: null });
+    expect(catalogueRowToSpecies({ ...base, month_counts: [1, 2] }, 'sv').county?.monthCounts).toBeNull();
+  });
 });
 
 describe('SupabaseSpeciesGateway.fetchSpecies (T-225)', () => {

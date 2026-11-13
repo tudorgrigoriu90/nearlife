@@ -16,13 +16,18 @@ from typing import Iterable, Iterator
 def build_presence(rows: Iterable[tuple]) -> dict:
     """rows: iterable of (county_gid, month:int, species_key:int, count:int).
 
-    Returns {(county_gid, species_key): {"months": set[int], "occurrences": int}}.
+    Returns {(county_gid, species_key): {"months": set[int], "occurrences": int,
+    "monthCounts": [12 ints, January first]}}. The monthly counts are what the card's county
+    section shows (T-261): when in the year a species is seen there, and when most.
     """
     acc: dict = {}
     for county_gid, month, species_key, count in rows:
-        entry = acc.setdefault((county_gid, species_key), {"months": set(), "occurrences": 0})
+        entry = acc.setdefault(
+            (county_gid, species_key), {"months": set(), "occurrences": 0, "monthCounts": [0] * 12}
+        )
         entry["months"].add(month)
         entry["occurrences"] += count
+        entry["monthCounts"][month - 1] += count
     return acc
 
 
@@ -40,6 +45,8 @@ def presence_records(
             "scientificName": scientific_name_by_key.get(key, str(key)),
             "activeMonths": sorted(entry["months"]),
             "occurrences": entry["occurrences"],
+            # Absent from presence maps built before T-261.
+            "monthCounts": entry.get("monthCounts"),
         }
         for (gid, key), entry in presence.items()
     ]

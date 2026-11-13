@@ -51,4 +51,10 @@ export interface Species {
    * 54 keep their bundled photos (`KRONOBERG_MEDIA`); `photoFor` prefers those.
    */
   photo?: SpeciesMedia;
+  /**
+   * The species in the county it was loaded for (T-261): all its sightings there and the sightings
+   * per month, January first. Only on species from a county catalogue; `monthCounts` is null until
+   * the presence data carries it.
+   */
+  county?: { occurrences: number; monthCounts: number[] | null };
 }

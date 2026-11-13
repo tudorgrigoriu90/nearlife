@@ -94,6 +94,8 @@ def build_rows(
                     "species_id": sid,
                     "active_months": sorted(months),
                     "occurrences": occ,
+                    # Sightings per month, January first (T-261); None from older presence files.
+                    "month_counts": r.get("monthCounts"),
                 }
             )
 

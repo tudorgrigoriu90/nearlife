@@ -4069,6 +4069,20 @@ only.**
   - The content loader now coalesces `common_name` as it already did `fact`, so a rebuild keeps
     filled names. Tests: 6.
 
+- **T-261 · County numbers (1/3): sightings per month, per county** — *Claude · S · `DONE` (data with the next presence load) · deps: T-134*
+  - Director (2026-11-13), option 1: replace the generic "Aktiv i din region året runt" with real
+    county numbers on each card, from free data only. GBIF's facets already arrive per (county,
+    month, species); `gbif/aggregate.py` kept only which months and a total.
+  - It now keeps `monthCounts` (12 ints, January first) through the presence files and the
+    loader into `species_presence.month_counts`. Migration 0030 adds the column (12 or null) and
+    returns it from `region_catalogue`. A presence file from before keeps the loaded counts
+    (coalesce).
+  - App: `catalogueRowToSpecies` puts `county: { occurrences, monthCounts }` on each catalogue
+    species; a malformed list counts as none. The offline pack (T-256) carries it too, since it
+    stores catalogue rows. Tests: 6.
+- **T-262 · County numbers (2/3): the "I <län>" section on the card** — *Claude · M · `TODO` · deps: T-261*
+- **T-263 · County numbers (3/3): threatened status from Wikidata** — *Claude · S · `TODO` · deps: T-262*
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

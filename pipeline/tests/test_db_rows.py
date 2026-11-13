@@ -56,8 +56,20 @@ def test_invertebrate_flag_and_presence_rows():
     species, presence = build_rows(datasets)
     assert species[0]["vertebrate"] is False and species[0]["taxon_group"] == "mollusc"
     assert presence == [
-        {"region_id": "SWE.9_1", "species_id": "gbif:300", "active_months": [6, 7], "occurrences": 12}
+        {
+            "region_id": "SWE.9_1",
+            "species_id": "gbif:300",
+            "active_months": [6, 7],
+            "occurrences": 12,
+            "month_counts": None,
+        }
     ]
+
+
+def test_monthly_counts_reach_the_presence_row():
+    rec = {**_rec("SWE.9_1", 300, "Cepaea nemoralis", [6, 7], 12), "monthCounts": [0] * 5 + [7, 5] + [0] * 5}
+    _, presence = build_rows([("molluscs", [rec])])
+    assert presence[0]["month_counts"] == [0, 0, 0, 0, 0, 7, 5, 0, 0, 0, 0, 0]
 
 
 def test_region_rows_map_all_counties():

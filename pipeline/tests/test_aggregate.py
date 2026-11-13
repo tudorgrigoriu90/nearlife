@@ -16,9 +16,9 @@ def test_build_presence_merges_months_and_counts():
         ("SWE.13_1", 5, 100, 7),  # same species, different county
     ]
     presence = build_presence(rows)
-    assert presence[("SWE.9_1", 100)] == {"months": {5, 6}, "occurrences": 15}
-    assert presence[("SWE.9_1", 200)] == {"months": {5}, "occurrences": 3}
-    assert presence[("SWE.13_1", 100)] == {"months": {5}, "occurrences": 7}
+    assert presence[("SWE.9_1", 100)] == {"months": {5, 6}, "occurrences": 15, "monthCounts": [0, 0, 0, 0, 10, 5, 0, 0, 0, 0, 0, 0]}
+    assert presence[("SWE.9_1", 200)] == {"months": {5}, "occurrences": 3, "monthCounts": [0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0]}
+    assert presence[("SWE.13_1", 100)] == {"months": {5}, "occurrences": 7, "monthCounts": [0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0]}
 
 
 def test_presence_records_flattens_sorts_and_names():
@@ -43,3 +43,16 @@ def test_presence_records_falls_back_when_name_missing():
     records = list(presence_records(presence, {}, {}))
     assert records[0]["countyName"] == "SWE.1_1"  # gid fallback
     assert records[0]["scientificName"] == "999"  # key fallback
+
+
+def test_monthly_counts_are_kept_for_the_county_card():
+    # T-261: the card shows when a species is seen in the county, month by month.
+    presence = build_presence([("SWE.9_1", 4, 100, 2), ("SWE.9_1", 5, 100, 30), ("SWE.9_1", 5, 100, 8)])
+    records = list(presence_records(presence, {}, {}))
+    assert records[0]["monthCounts"] == [0, 0, 0, 2, 38, 0, 0, 0, 0, 0, 0, 0]
+    assert records[0]["occurrences"] == 40
+
+
+def test_records_from_before_monthly_counts_still_flatten():
+    records = list(presence_records({("SWE.9_1", 1): {"months": {5}, "occurrences": 3}}, {}, {}))
+    assert records[0]["monthCounts"] is None
