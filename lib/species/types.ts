@@ -57,4 +57,8 @@ export interface Species {
    * the presence data carries it.
    */
   county?: { occurrences: number; monthCounts: number[] | null };
+  /** IUCN Red List category, worldwide, when near threatened or worse (T-263, from Wikidata). */
+  iucn?: IucnStatus;
 }
+
+export type IucnStatus = 'NT' | 'VU' | 'EN' | 'CR' | 'EW' | 'EX';

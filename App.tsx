@@ -413,6 +413,9 @@ export default function App() {
     const stats = countyStats(own, almanacSpecies);
     return stats ? { name: countyName, stats } : null;
   }, [selected, countyName, almanacSpecies]);
+  const cardThreat = selected
+    ? (almanacSpecies.find((s) => s.id === selected.id) ?? selected).iucn
+    : undefined;
   const [catching, setCatching] = useState<Species | null>(null);
   const [caughtTip, setCaughtTip] = useState<{ species: Species; prime: boolean } | null>(null);
   const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
@@ -1115,6 +1118,7 @@ export default function App() {
           fullGame={freeCatch.fullGame}
           soundSource={soundSource() ?? undefined}
           county={cardCounty}
+          threat={cardThreat}
           month={monthOf(new Date())}
           onBack={() => setSelected(null)}
           onFindNearby={

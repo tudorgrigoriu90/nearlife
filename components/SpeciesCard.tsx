@@ -4,7 +4,7 @@ import { EMPTY_TIER_STATE } from '../lib/collection';
 import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
 import { dualTitle, type DualTextInput } from '../lib/dualLanguageFormat';
 import { isolate, writingDirectionFor } from '../lib/i18n/bidi';
-import { createTranslator, type Locale } from '../lib/i18n';
+import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
 import {
   endonymOf,
   needsMachineTranslationNotice,
@@ -20,7 +20,7 @@ import SpeciesHero from './SpeciesHero';
 import ReadAloud from './ReadAloud';
 import CountySection from './CountySection';
 import type { CountyStats } from '../lib/countyStats';
-import type { Month } from '../lib/species/types';
+import type { IucnStatus, Month } from '../lib/species/types';
 import BirdSong from './BirdSong';
 import type { SoundSource } from '../lib/birdSound';
 import { groupOf } from '../lib/species/group';
@@ -49,6 +49,7 @@ export default function SpeciesCard({
   soundSource,
   county = null,
   month,
+  threat,
   onBack,
 }: {
   species: Species;
@@ -75,6 +76,8 @@ export default function SpeciesCard({
   county?: { name: string; stats: CountyStats } | null;
   /** This month, for the county chart. */
   month?: Month;
+  /** Worldwide IUCN category when near threatened or worse (T-263). */
+  threat?: IucnStatus;
   onBack?: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -152,6 +155,11 @@ export default function SpeciesCard({
           <SpeciesHero species={species} spotted={spotted} />
           <Text style={[styles.name, { writingDirection: chromeDirection }]}>{name}</Text>
           <Text style={styles.scientific}>{species.scientificName}</Text>
+          {threat ? (
+            <Text style={styles.threat} testID="card-threat">
+              ⚠️ {tr(`iucn.${threat}` as TranslationKey)} · {tr('iucn.source')}
+            </Text>
+          ) : null}
           {mtNotice ? (
             <Text style={[styles.mtNotice, { writingDirection: chromeDirection }]}>{mtNotice}</Text>
           ) : null}
@@ -316,6 +324,13 @@ const styles = StyleSheet.create({
   hero: { alignItems: 'center', paddingVertical: 20 },
   name: { marginTop: 8, fontSize: 26, fontWeight: '700', color: '#22331f', textAlign: 'center' },
   scientific: { marginTop: 2, fontSize: 14, fontStyle: 'italic', color: '#6a7c6d' },
+  threat: {
+    marginTop: 6,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#8a4b1f',
+    textAlign: 'center',
+  },
   mtNotice: { marginTop: 6, fontSize: 11, color: '#7a8a7c' },
   notSpotted: { marginTop: 8, fontSize: 12, fontWeight: '700', color: '#7a8a7c', letterSpacing: 1 },
   fact: { fontSize: 17, lineHeight: 24, color: '#2f3d2c', marginBottom: 8 },

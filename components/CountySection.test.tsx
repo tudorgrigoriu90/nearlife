@@ -86,3 +86,19 @@ describe('SpeciesCard with county numbers', () => {
     expect(screen.getByText(content!.whenAndHow)).toBeTruthy();
   });
 });
+
+// T-263: worldwide threat status on the card.
+describe('SpeciesCard threat badge', () => {
+  const swift = KRONOBERG_SPECIES.find((s) => s.id === 'common-swift')!;
+
+  it('shows the worldwide IUCN category under the Latin name', async () => {
+    await render(<SpeciesCard species={swift} locale="sv" threat="VU" />);
+    expect(screen.getByTestId('card-threat').props.children.join('')).toContain('Sårbar i världen');
+    expect(screen.getByText(/IUCN:s rödlista/)).toBeTruthy();
+  });
+
+  it('says nothing for a species that is not threatened', async () => {
+    await render(<SpeciesCard species={swift} locale="sv" />);
+    expect(screen.queryByTestId('card-threat')).toBeNull();
+  });
+});

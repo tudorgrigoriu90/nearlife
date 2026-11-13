@@ -286,6 +286,13 @@ describe('mediaRowToPhoto (T-215)', () => {
     expect(catalogueRowToSpecies(base, 'sv').county).toEqual({ occurrences: 9, monthCounts: null });
     expect(catalogueRowToSpecies({ ...base, month_counts: [1, 2] }, 'sv').county?.monthCounts).toBeNull();
   });
+
+  it('carries a worldwide threat status, and ignores an unknown one (T-263)', () => {
+    const base = { id: 'gbif:1', scientific_name: 'Anguilla anguilla', common_name: null, local_name: null, category: 'fish' as const, rarity: 'common' as const, active_months: [5], occurrences: 9 };
+    expect(catalogueRowToSpecies({ ...base, iucn_status: 'CR' }, 'sv').iucn).toBe('CR');
+    expect(catalogueRowToSpecies({ ...base, iucn_status: 'LC' }, 'sv').iucn).toBeUndefined();
+    expect(catalogueRowToSpecies(base, 'sv').iucn).toBeUndefined();
+  });
 });
 
 describe('SupabaseSpeciesGateway.fetchSpecies (T-225)', () => {

@@ -9,7 +9,7 @@ import { KRONOBERG_SPECIES } from './species/kronoberg';
 import { commonNameFor, contentFor, contentInLocale } from './species/localized';
 import type { SpeciesContent } from './species/content';
 import { isCommercialUseAllowed, type MediaLicense, type SpeciesMedia } from './species/media';
-import type { Month, Rarity, Species, SpeciesCategory } from './species/types';
+import type { IucnStatus, Month, Rarity, Species, SpeciesCategory } from './species/types';
 
 // Species data-access seam (T-057 / T-059). The screens read the catalogue + localized content
 // through this interface instead of importing the hardcoded data directly, so the source can
@@ -164,7 +164,11 @@ export interface CatalogueRow extends SpeciesRow {
   catch_habitats?: string[] | null;
   /** Sightings per month in the county, January first (T-261); null until loaded. */
   month_counts?: number[] | null;
+  /** IUCN category when near threatened or worse (T-263). */
+  iucn_status?: string | null;
 }
+
+const IUCN: readonly string[] = ['NT', 'VU', 'EN', 'CR', 'EW', 'EX'];
 
 export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Species {
   const base = speciesRowToSpecies(row);
@@ -181,6 +185,9 @@ export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Specie
   return {
     ...base,
     county: { occurrences: row.occurrences, monthCounts },
+    ...(row.iucn_status && IUCN.includes(row.iucn_status)
+      ? { iucn: row.iucn_status as IucnStatus }
+      : {}),
     ...(row.local_name ? { names: { [locale]: asTitleName(row.local_name, locale) } } : {}),
     ...(photo ? { photo } : {}),
     ...(catchHabitats ? { catchHabitats } : {}),

@@ -43,3 +43,7 @@ jobs:
       - name: Resolve species filed under another name (T-260)
         if: always()
         run: python pipeline/resolve_synonyms.py
+
+      - name: Worldwide threat status from Wikidata (T-263)
+        if: always()
+        run: python pipeline/build_iucn_status.py

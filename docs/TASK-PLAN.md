@@ -4098,7 +4098,17 @@ only.**
     every animal is (invariant #1). Words are "ses" and "fynd", never "lever" or "blommar".
   - App: the card's species is looked up in the county catalogue the almanac already holds, so a
     card opened from This Week gets its numbers too. In Swedish and English. Tests: 17.
-- **T-263 · County numbers (3/3): threatened status from Wikidata** — *Claude · S · `TODO` · deps: T-262*
+- **T-263 · County numbers (3/3): threatened status from Wikidata** — *Claude · S · `DONE` (filled by the monthly Species names workflow) · deps: T-262*
+  - Wikidata (CC0) holds the IUCN Red List category (P141) for 1,357 catalogue species
+    (2026-11-13): 1,208 least concern, 65 near threatened, 45 vulnerable, 5 critically
+    endangered. Examples: the European eel (CR), the puffin, the cod and the long-tailed duck (VU).
+  - Only near threatened and worse is stored (`species.iucn_status`, migration 0031, returned by
+    `region_catalogue`). Each run resets the rest, so an improved status loses its badge. Where
+    Wikidata lists two categories, the more threatened wins. `build_iucn_status.py` runs in the
+    Species names workflow.
+  - The card shows "⚠️ Sårbar i världen · IUCN:s rödlista" under the Latin name. It is labelled
+    worldwide: IUCN assesses the global population, and the Swedish Red List is a different
+    (and not CC0) source. Tests: 6.
 
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
