@@ -24,10 +24,12 @@ COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 # already attribute. That is better prose than machine translation and costs nothing per species.
 _LANG = re.compile(r"^[a-z]{2,3}$")
 
-# MediaWiki accepts up to 50 titles per query for unauthenticated clients. Batching is what makes a
-# multi-locale content build feasible at all (T-182): 6,824 species x 18 locales is ~123k single
-# requests, and ~2.5k batched ones.
-EXTRACT_BATCH = 50
+# Batching is what makes a multi-locale content build feasible at all (T-182). MediaWiki takes 50
+# titles per query, but TextExtracts returns at most 20 intro extracts per response (`exlimit`
+# max 20 with `exintro`) and hands the rest back as `excontinue`. Asking 50 and ignoring that lost
+# up to 30 facts per batch, about half of all facts (T-259), so batches are 20 and any
+# continuation is followed anyway.
+EXTRACT_BATCH = 20
 
 
 def wiki_api_for(lang: str) -> str:
@@ -201,20 +203,27 @@ class WikimediaClient:
         api = wiki_api_for(lang)
         out: dict[str, str | None] = {}
         for batch in chunked(list(scientific_names), EXTRACT_BATCH):
-            data = self._get(
-                api,
-                {
-                    "action": "query",
-                    "format": "json",
-                    "prop": "extracts",
-                    "exintro": 1,
-                    "explaintext": 1,
-                    "exsentences": 2,
-                    "titles": "|".join(batch),
-                    "redirects": 1,
-                },
-            )
-            out.update(map_extracts(data, batch))
+            params = {
+                "action": "query",
+                "format": "json",
+                "prop": "extracts",
+                "exintro": 1,
+                "explaintext": 1,
+                "exsentences": 2,
+                "titles": "|".join(batch),
+                "redirects": 1,
+            }
+            found: dict[str, str | None] = {}
+            while True:
+                data = self._get(api, params)
+                for name, extract in map_extracts(data, batch).items():
+                    if extract or name not in found:
+                        found[name] = extract
+                more = (data.get("continue") or {}).get("excontinue")
+                if more is None:
+                    break
+                params = {**params, "excontinue": more}
+            out.update(found)
         return out
 
     def fetch_image(self, scientific_name: str) -> dict | None:

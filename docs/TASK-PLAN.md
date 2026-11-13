@@ -4034,6 +4034,24 @@ only.**
       a Wikidata outage never fails the run.
   - Tests: 6.
 
+- **T-259 · Facts lost by the extract batch: fix and backfill** — *Claude · S · `DONE` (backfill running via the Backfill facts workflow) · deps: T-182*
+  - Director (2026-11-13): cards with no fact. The real cause was not the missing articles.
+    Wikipedia returns **at most 20 intro extracts per request** (`exlimit` max 20 with
+    `exintro`), and T-182 batched 50 titles without following `excontinue`. So up to 30 of
+    every 50 species lost their fact, in every language: before the fix, 4,541 of 7,974
+    catalogue species had no English fact. Even the magpie, the house sparrow and the nuthatch
+    had none in Swedish or English. Confirmed live: 30 asked, 20 returned, `excontinue: 20`.
+  - `media/wikimedia.py`: batches of 20, and any continuation is followed. Test: a fake API with
+    the real 20-per-response limit.
+  - `backfill_facts.py` + the Backfill facts workflow ask Wikipedia again only for empty fact
+    slots, Swedish and English first, most-recorded species first. They write only empty slots,
+    and a rerun resumes. Tests: 5.
+- **T-260 · Species filed under another name: photo, fact and names via synonyms** — *Claude · M · `TODO` · deps: T-259*
+  - *Thysselinum palustre* (GBIF's name) is *Peucedanum palustre* on Wikipedia, Wikidata and
+    iNaturalist ("kärrsilja"), so its card has no photo, fact or Swedish name. Fix: for species
+    still missing these after T-259, take GBIF's synonyms, and use a synonym's Wikidata item that
+    has Wikipedia articles for the photo, the fact per language, and the names.
+
 - **T-158 · Shared conformance suite for translated locales** — *Claude · S · `DONE` · deps: T-154*
   - ✅ `lib/species/contentLocales.test.ts` runs one contract over **every** locale registered in
     `CONTENT_BY_LOCALE`, replacing the per-language test file each T-154 language would otherwise

@@ -1,0 +1,41 @@
+name: Backfill facts
+
+# Fills the facts the 50-title extract batch lost (T-259): asks Wikipedia again only for empty
+# fact slots, Swedish and English first. Resumable: a rerun finds only what is still empty.
+#
+# Secrets: SUPABASE_DB_URL.
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_minutes:
+        description: "Time budget, in minutes"
+        required: false
+        default: "330"
+
+concurrency:
+  group: backfill-facts
+  cancel-in-progress: false
+
+jobs:
+  facts:
+    name: Backfill facts
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r pipeline/requirements.txt
+
+      # The input is free text, so it reaches the shell through env, never `${{ }}` interpolation.
+      - name: Backfill
+        env:
+          MAX_MINUTES: ${{ inputs.max_minutes }}
+        run: python pipeline/backfill_facts.py --max-minutes "${MAX_MINUTES:-330}"
