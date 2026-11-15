@@ -4265,6 +4265,73 @@ From the entrepreneur review, tracked so they aren't lost: written go/kill crite
 spring-window qualitative testing (**T-039**), catch-spot density audit (**T-050**),
 notification-independent pull surface (**T-078**), unopened-region waitlist (**T-107**).
 
+## Repository & product review (2026-11)
+A full read of the app, database, Edge Functions, pipeline, workflows and docs, with bugs,
+improvements and feature ideas: **[REVIEW-2026-11.md](REVIEW-2026-11.md)**. The tasks below are the
+confirmed defects that block a tester build or the public launch. The review's other items
+(`B-24` onward, `I-nn`, `F-nn`) stay in that document until the Director promotes them.
+
+- **T-265 · Full repository and product review** — *Claude · M · `DONE` (2026-11-15) · deps: —*
+  - ✅ [REVIEW-2026-11.md](REVIEW-2026-11.md): 58 bugs (7 launch blockers), 35 improvements,
+    27 feature ideas, product observations and a proposed order of work. No code changed.
+  - Evidence: `npm run verify` green (148 suites, 1,746 tests), pipeline 445 tests green; B-01
+    reproduced by running the repository's migrations in an in-memory Postgres; B-02/B-03 checked
+    against RevenueCat's webhook field reference; B-04 measured on `pipeline/data/presence_*.json`.
+  - Not covered: anything needing a phone, the live database, RevenueCat, Play Console or PostHog.
+- **T-266 · Free catches are counted twice by the database** — *Claude · S · `TODO` · deps: T-200 · review B-01*
+  - A PostgREST upsert fires the `BEFORE INSERT` trigger even when the row exists, so
+    spot-then-catch costs 2 of 3, a help pledge or re-tap on a caught species costs 1, and the
+    next catch is refused after the app has shown success.
+  - The trigger counts a catch exactly once for: insert, upsert of a new row, upsert of a spotted
+    row, upsert of an unchanged caught row (0), re-catch in the same season (0).
+  - `verify.py` gains upsert-shaped checks, and the rule runs in CI against a real Postgres.
+  - The app skips writes that change nothing and un-catches only when a *catch* was refused.
+  - Current-season counters are reset once the fix is live.
+- **T-267 · RevenueCat webhook: TRANSFER and products without an entitlement** — *Claude + Director · S · `TODO` · deps: T-217 · review B-02, B-03*
+  - A TRANSFER event (no `entitlement_ids`, no `product_id`) moves every active entitlement from
+    the old accounts to the new one, and household members follow.
+  - A purchase with `entitlement_ids` null or absent is granted from its product id, so county
+    packs and All of Sweden unlock.
+  - Tests use payloads captured from the RevenueCat sandbox (Director: one purchase, one refund,
+    one restore), kept as fixtures.
+- **T-268 · "Active this season" from monthly counts** — *Claude · M · `TODO` · deps: T-261 · review B-04*
+  - A month is active for a species in a county only from a share of its busiest month and a
+    minimum count (the rule `lib/countyStats.ts` already uses), not from a single record.
+  - This Week ranks by this month's records; the notification sender and the Almanac's month and
+    season filters use the same months.
+  - A data test fails if a listed summer migrant is active in January in any county.
+- **T-269 · Account deletion erases the device** — *Claude · S · `TODO` · deps: T-093 · review B-05, B-12*
+  - The collection cache and outbox, language choices, cached catch spots and in-memory state are
+    cleared; RevenueCat and PostHog identities are reset.
+  - A test lists every `nearby.*` storage key and fails when a new one is not erased.
+  - A user with no server account can still wipe the phone.
+- **T-270 · `session_start` reaches analytics** — *Claude · XS · `TODO` · deps: T-035 · review B-06*
+  - Sent once stored consent has loaded and on every return to the foreground (30-minute session
+    window), never before consent.
+  - An App-level test with stored consent asserts delivery.
+- **T-271 · Sign in with a linked email** — *Claude · M · `TODO` · deps: T-133, T-274 · review B-07, B-21*
+  - "I already have an account": email → one-time code → the anonymous session is replaced, the
+    collection is pulled, and RevenueCat is logged in under the restored id.
+  - Closes T-133 and the cross-device half of T-086.
+- **T-272 · Location consent that means what it says** — *Claude · S · `TODO` · deps: T-088, T-090 · review B-08, B-09, B-19*
+  - Granting location in onboarding sets the consent; the Settings switch asks the OS when turned
+    on and stops every location read when turned off.
+  - A user in preview mode can set their home county later, from This Week and from Settings; the
+    catch screen can ask for the permission.
+  - Preview mode is look-only, as its comment says, or the Director records that it is not.
+- **T-273 · Catch tip and pledge confirmation for every species** — *Claude · XS · `TODO` · deps: T-059 · review B-10*
+  - Both screens take their text from the species repository, not the bundled 54.
+- **T-274 · Collection sync: pull, don't block, say so** — *Claude · S · `TODO` · deps: T-165 · review B-11, B-13, I-08*
+  - Sync merges the server copy even when the outbox is empty.
+  - A permanently rejected write is dropped and logged instead of blocking the queue.
+  - A catch the server refuses is explained to the user and counted (`catch_refused`).
+- **T-275 · No Kronoberg stand-ins outside Kronoberg; county data cached on the phone** — *Claude · M · `TODO` · deps: T-057, T-207 · review B-14, B-15, B-16, B-17, B-20*
+  - A failed county read shows the last saved county data or an error with retry, never the
+    bundled Kronoberg list under another county's name.
+  - The onboarding first sighting and the seasonal events come from the user's county.
+  - Catalogue, presence and catch spots are cached per county and refreshed when the server's
+    data version changes, not on every launch.
+
 ## Estimation note
 Sizes here are T-shirt. For per-task story-point estimates, the `sa-toolkit` `/task-estimate`
 command can be run against this list.
