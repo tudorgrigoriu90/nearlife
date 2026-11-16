@@ -257,3 +257,17 @@ describe('OfflineCollectionStore domain rules', () => {
     expect(r.spottedAt).toBe(T1);
   });
 });
+
+describe('OfflineCollectionStore.clear (T-269)', () => {
+  it('empties records and the outbox, in memory and in the cache', async () => {
+    const cache = new InMemoryOfflineCache();
+    const { store } = setup(cache);
+    await store.markCaught('moose', T1, false);
+    await store.clear();
+    expect(await store.list()).toEqual([]);
+    expect(store.pendingCount()).toBe(0);
+    const reloaded = new OfflineCollectionStore(cache, null);
+    await reloaded.hydrate();
+    expect(await reloaded.list()).toEqual([]);
+  });
+});

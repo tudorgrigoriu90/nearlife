@@ -134,6 +134,13 @@ export class OfflineCollectionStore implements CollectionStore {
     });
   }
 
+  /** Forget everything: records, the outbox and the cache (account deletion, T-269). */
+  async clear(): Promise<void> {
+    this.records = new Map();
+    this.pending = [];
+    await this.persist();
+  }
+
   /** Queued writes not yet accepted by the server — lets the UI show "saved, syncing later". */
   pendingCount(): number {
     return this.pending.length;

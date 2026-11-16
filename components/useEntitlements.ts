@@ -17,6 +17,8 @@ export interface UseEntitlementsInput {
 export function useEntitlements({ source, store }: UseEntitlementsInput): {
   entitlements: Entitlements;
   refresh: () => void;
+  /** Back to no entitlements, on the device and in memory (account deletion, T-269). */
+  reset: () => Promise<void>;
 } {
   const [entitlements, setEntitlements] = useState<Entitlements>(NO_ENTITLEMENTS);
   const mounted = useRef(true);
@@ -53,5 +55,10 @@ export function useEntitlements({ source, store }: UseEntitlementsInput): {
     };
   }, [store, refresh]);
 
-  return { entitlements, refresh };
+  const reset = useCallback(async () => {
+    setEntitlements(NO_ENTITLEMENTS);
+    await store.clear().catch(() => undefined);
+  }, [store]);
+
+  return { entitlements, refresh, reset };
 }

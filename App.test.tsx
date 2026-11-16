@@ -274,6 +274,32 @@ describe('App', () => {
   );
 
   it(
+    'erases the collection and every other device setting with the account (T-269)',
+    async () => {
+      await completeOnboarding(); // spots the starter species
+      await press(commonNameFor(topRow, 'en')); // opens and spots a second one
+      await systemBack();
+      await press(tr('nav.settings'), { exact: false });
+      await press(tr('lang.sv'));
+      const sv = createTranslator('sv');
+      expect(await AsyncStorage.getItem('nearby.collection.v1')).not.toBeNull();
+      await press(sv('settings.deleteAccount'));
+      await press(sv('delete.confirm'));
+      // Back to first run in the device language, not the deleted user's choice.
+      expect(await screen.findByText(tr('onboarding.welcome.title'))).toBeTruthy();
+      const left = (await AsyncStorage.getAllKeys()).filter((k) => k.startsWith('nearby.'));
+      expect(left).toEqual([]);
+      // Re-onboard: the new account starts empty, so its first write holds only the new starter.
+      await completeOnboarding({ rendered: true });
+      const saved = JSON.parse((await AsyncStorage.getItem('nearby.collection.v1')) ?? '{}');
+      expect(saved.records.map((r: { speciesId: string }) => r.speciesId)).toEqual([
+        onboardingStarter.id,
+      ]);
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
     'keeps the language chosen in Settings across a restart (T-211)',
     async () => {
       await completeOnboarding();

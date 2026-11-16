@@ -4351,11 +4351,24 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ `verify.py`: "no summer migrant is active in winter" (live).
   - Remaining: the presence reload (data pipeline, SWE, content skip), then the live check and the
     regenerated presence files committed with a data test over them.
-- **T-269 · Account deletion erases the device** — *Claude · S · `TODO` · deps: T-093 · review B-05, B-12*
+- **T-269 · Account deletion erases the device** — *Claude · S · `DONE` · deps: T-093 · review B-05, B-12, B-52 (device part)*
   - The collection cache and outbox, language choices, cached catch spots and in-memory state are
     cleared; RevenueCat and PostHog identities are reset.
   - A test lists every `nearby.*` storage key and fails when a new one is not erased.
   - A user with no server account can still wipe the phone.
+  - ✅ `lib/deviceErase.ts` removes every AsyncStorage key under `nearby.` and `sb-` (the
+    Supabase session); `__tests__/storageKeys.test.js` fails if a storage-key constant is declared
+    under any other prefix. `App.eraseDevice()` also clears the collection (new
+    `OfflineCollectionStore.clear`, `useCollection.reset`), the entitlements
+    (`useEntitlements.reset`), the offline pack and the PostHog identity
+    (`resetAnalyticsIdentity`), and resets the view county, tab, consent, age lock, language
+    override and second language in memory.
+  - ✅ With no backend configured or no signed-in account, "Delete permanently" wipes the phone and
+    returns to onboarding. A server failure still shows the retryable error and keeps everything.
+  - ✅ Tests: App-level (a second spotted species and the Swedish choice are gone; re-onboarding
+    starts with only the new starter), store clear, hook reset, PostHog reset, key prefixes.
+  - RevenueCat log-out on deletion belongs with the identity fix (T-271, B-21); the processors'
+    retention statement in the privacy policy is B-52's server part (Stage 2).
 - **T-270 · `session_start` reaches analytics** — *Claude · XS · `TODO` · deps: T-035 · review B-06*
   - Sent once stored consent has loaded and on every return to the foreground (30-minute session
     window), never before consent.

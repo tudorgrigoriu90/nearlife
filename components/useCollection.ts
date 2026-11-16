@@ -3,10 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import type { CollectionRecord, HelpKind } from '../lib/collection';
 import type { CollectionStore } from '../lib/collectionStore';
-import {
-  AsyncStorageOfflineCache,
-  OfflineCollectionStore,
-} from '../lib/offlineCollectionStore';
+import { AsyncStorageOfflineCache, OfflineCollectionStore } from '../lib/offlineCollectionStore';
 import { ensureAnonymousSession, getSupabase } from '../lib/supabase';
 import { hasSupabaseConfig } from '../lib/supabaseConfig';
 import { SupabaseCollectionGateway, SupabaseCollectionStore } from '../lib/supabaseCollectionStore';
@@ -27,6 +24,8 @@ export interface Collection {
   spot: (speciesId: string) => void;
   markCaught: (speciesId: string, primeBonus: boolean) => void;
   help: (speciesId: string, kind: HelpKind) => void;
+  /** Forget the collection on this device (account deletion, T-269). */
+  reset: () => Promise<void>;
 }
 
 function createRemote(): CollectionStore | null {
@@ -111,5 +110,10 @@ export function useCollection(): Collection {
     [getStore, refresh],
   );
 
-  return { records, spot, markCaught, help };
+  const reset = useCallback(async () => {
+    await getStore().clear();
+    setRecords([]);
+  }, [getStore]);
+
+  return { records, spot, markCaught, help, reset };
 }

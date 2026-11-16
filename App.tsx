@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -63,6 +64,8 @@ import {
 } from './lib/sightingQuiz';
 import { ensureAnonymousSession, getSupabase } from './lib/supabase';
 import { getSupabaseConfig, hasSupabaseConfig } from './lib/supabaseConfig';
+import { eraseDeviceStorage } from './lib/deviceErase';
+import { resetAnalyticsIdentity } from './lib/posthog';
 import { supabaseProbe, type ConnectivityProbe } from './lib/connectivity';
 import { useConnectivity } from './components/useConnectivity';
 import OfflineScreen from './components/OfflineScreen';
@@ -301,7 +304,11 @@ export default function App() {
   }, []);
   const [showBadges, setShowBadges] = useState(false);
   const [showImpact, setShowImpact] = useState(false);
-  const { entitlements, refresh: refreshEntitlements } = useEntitlements({
+  const {
+    entitlements,
+    refresh: refreshEntitlements,
+    reset: resetEntitlements,
+  } = useEntitlements({
     source: entitlementSource(),
     store: ENTITLEMENT_STORE,
   });
@@ -666,33 +673,43 @@ export default function App() {
     setExportJson(exportToJson(bundle));
   };
 
-  // GDPR erasure (T-093): invoke the server-side delete, then return to a fresh, signed-out state.
-  // Returns whether it succeeded so the confirm screen can show a retryable error on failure.
+  // GDPR erasure (T-093): invoke the server-side delete, then erase the device and return to a
+  // fresh first run. Returns whether it succeeded so the confirm screen can show a retryable error.
+  // With no server account (no backend configured, or never signed in) there is nothing to erase
+  // remotely, and the device is still wiped (T-269 · review B-05).
   const confirmDeleteAccount = async (): Promise<boolean> => {
-    try {
-      const result = await deleteAccount(new SupabaseDeletionGateway(getSupabase()));
-      if (!result.ok) return false;
-    } catch {
-      return false;
+    if (hasSupabaseConfig()) {
+      try {
+        const result = await deleteAccount(new SupabaseDeletionGateway(getSupabase()));
+        if (!result.ok && result.reason !== 'not-signed-in') return false;
+      } catch {
+        return false;
+      }
     }
+    await eraseDevice();
+    return true;
+  };
+
+  // Everything the phone holds, on disk and in memory (T-269 · review B-05, B-12, B-52): the next
+  // person to open the app starts exactly as on a new install.
+  const eraseDevice = async () => {
+    await collection.reset();
+    await resetEntitlements();
+    resetAnalyticsIdentity();
+    PACK_FILES?.clear(); // the offline pack holds no personal data, but a fresh start is empty
+    await eraseDeviceStorage(AsyncStorage);
     setShowDelete(false);
     setShowSettings(false);
     setSelected(null);
+    setViewCounty(null);
+    setTab('thisWeek');
     setConsentState(DEFAULT_CONSENT);
-    void CONSENT_STORE.save(DEFAULT_CONSENT);
-    setOnboarded(false); // back to first-run — the account is gone
-    // Erasure covers what the device holds too: the next person to open the app starts fresh.
+    setAnalyticsLocked(false);
+    setLocaleOverride(null);
+    setDualLanguage(DEFAULT_DUAL_LANGUAGE);
     setHometown(null);
-    void ONBOARDING_STORE.clear();
-    void HOMETOWN_STORE.clear();
-    void ENTITLEMENT_STORE.clear();
-    void TRAVEL_STORE.clear();
-    void QUIZ_ATTEMPTS.clear();
-    void RECOGNIZED_STORE.clear();
-    // The offline pack (T-256) holds no personal data, but a fresh start means an empty phone.
-    PACK_FILES?.clear();
     setRecognized(new Set());
-    return true;
+    setOnboarded(false);
   };
 
   const seasonKey = seasonKeyOf(new Date());

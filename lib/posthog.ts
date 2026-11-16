@@ -16,6 +16,14 @@ import { getPostHogConfig } from './posthogConfig';
 
 let client: PostHog | null = null;
 
+/**
+ * Forget this device's analytics identity (account deletion, T-269 · review B-52): the next
+ * account's events must not continue the deleted person. Only touches a client already created.
+ */
+export function resetAnalyticsIdentity(): void {
+  client?.reset();
+}
+
 export function getPostHogClient(): PostHog {
   if (client === null) {
     const { apiKey, host } = getPostHogConfig();

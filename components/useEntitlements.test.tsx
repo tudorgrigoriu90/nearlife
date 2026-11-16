@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { Pressable, Text } from 'react-native';
 import { NO_ENTITLEMENTS, resolveEntitlements, type Entitlements } from '../lib/entitlement';
 import { InMemoryEntitlementStore } from '../lib/entitlementStore';
 import { useEntitlements } from './useEntitlements';
@@ -45,5 +45,23 @@ describe('useEntitlements', () => {
   it('runs on the cache alone without a backend', async () => {
     await render(<Host source={null} store={new InMemoryEntitlementStore()} />);
     expect(screen.getByTestId(TID)).toHaveTextContent('locked');
+  });
+
+  // T-269 · review B-12: a deleted Full Game owner must not keep unlimited catching.
+  it('reset forgets the entitlements in memory and in the store', async () => {
+    const store = new InMemoryEntitlementStore(resolveEntitlements(['full_game']));
+    function Resettable() {
+      const { entitlements, reset } = useEntitlements({ source: null, store });
+      return (
+        <Pressable onPress={() => void reset()}>
+          <Text testID={TID}>{entitlements.fullGame ? 'unlocked' : 'locked'}</Text>
+        </Pressable>
+      );
+    }
+    await render(<Resettable />);
+    await waitFor(() => expect(screen.getByTestId(TID)).toHaveTextContent('unlocked'));
+    await act(async () => fireEvent.press(screen.getByTestId(TID)));
+    expect(screen.getByTestId(TID)).toHaveTextContent('locked');
+    await expect(store.load()).resolves.toEqual(NO_ENTITLEMENTS);
   });
 });
