@@ -150,7 +150,7 @@ Deno.serve(async (req: Request) => {
         // a species the noise filter rejects is never sent as "active in your region".
         db
           .from('species_presence')
-          .select('species_id, active_months, occurrences, species!inner(in_catalogue)')
+          .select('species_id, active_months, occurrences, month_counts, species!inner(in_catalogue)')
           .eq('region_id', region)
           .eq('species.in_catalogue', true)
           .order('species_id')
@@ -162,6 +162,7 @@ Deno.serve(async (req: Request) => {
           speciesId: r.species_id as string,
           activeMonths: r.active_months as number[],
           occurrences: r.occurrences as number,
+          monthCounts: (r.month_counts as number[] | null) ?? null,
         })),
       );
     }

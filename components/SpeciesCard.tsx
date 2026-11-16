@@ -44,6 +44,7 @@ export default function SpeciesCard({
   tier = EMPTY_TIER_STATE,
   fullGame = false,
   onFindNearby,
+  backAround,
   onPledge,
   nearbyNote,
   soundSource,
@@ -65,6 +66,11 @@ export default function SpeciesCard({
   /** Full Game entitlement unlocks all depth tiers immediately (T-060). */
   fullGame?: boolean;
   onFindNearby?: (species: Species) => void;
+  /**
+   * Set when the species is out of season in the county (T-268 · review B-26): the month it is
+   * usually back. The card then offers no catch and says when instead.
+   */
+  backAround?: Month | null;
   /** Pledge a give/protect action → Helped tier (T-076). */
   onPledge?: (species: Species, kind: HelpKind) => void;
   /** Small caption under the find-nearby CTA — e.g. the free-catch counter (T-034). */
@@ -260,7 +266,13 @@ export default function SpeciesCard({
         </View>
       </ScrollView>
 
-      {onFindNearby ? (
+      {backAround ? (
+        <View style={styles.ctaWrap}>
+          <Text style={styles.nearbyNote}>
+            {tr('card.backAround', { month: tr('county.months').split('|')[backAround - 1] })}
+          </Text>
+        </View>
+      ) : onFindNearby ? (
         <View style={styles.ctaWrap}>
           <Pressable
             onPress={() => onFindNearby(species)}

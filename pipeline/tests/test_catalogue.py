@@ -84,3 +84,12 @@ def test_summary_reports_both_species_and_observation_share():
 
 def test_an_empty_dataset_summarises_without_dividing_by_zero():
     assert catalogue_summary(build_catalogue([]))["includedObservationPct"] == 0.0
+
+
+def test_the_noise_filter_counts_every_recorded_month_not_only_active_ones():
+    # T-268: active months became a season threshold; the filter's breadth signal stays "months with
+    # any record", so tightening the season does not quietly shrink the catalogue.
+    rec = {**_rec("SWE.9_1", 3, "Apus apus", [6], 500), "recordedMonths": [4, 5, 6, 7, 8, 9]}
+    entry = build_catalogue([("birds", [rec])])
+    verdicts = entry["included"] + entry["excluded"]
+    assert verdicts[0]["months"] == [4, 5, 6, 7, 8, 9]

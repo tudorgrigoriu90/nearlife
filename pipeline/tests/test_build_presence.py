@@ -30,7 +30,7 @@ class FakeClient:
     def resolve_taxon_key(self, name):
         return 212
 
-    def species_facet(self, gid, taxon_key, month, facet_limit=300):
+    def species_facet(self, gid, taxon_key, month, facet_limit=300, offset=0):
         self.asked.append(gid)
         return [(5231190, 40)], False
 
@@ -70,3 +70,46 @@ def test_meta_counts_the_regions_actually_used():
     client = FakeClient()
     payload = build_for_taxon(client, TAXON, NOR)
     assert payload["meta"]["counties"] == 2
+
+
+class CappedClient(FakeClient):
+    """Every county-month holds 25 species; a page returns at most `facet_limit` of them."""
+
+    SPECIES = [(1000 + i, 100 - i) for i in range(25)]
+
+    def __init__(self, pages_available=10):
+        super().__init__()
+        self.offsets = []
+        self.pages_available = pages_available
+
+    def species_facet(self, gid, taxon_key, month, facet_limit=300, offset=0):
+        self.asked.append(gid)
+        self.offsets.append(offset)
+        if offset // facet_limit >= self.pages_available:
+            return [], False
+        page = self.SPECIES[offset : offset + facet_limit]
+        return page, len(page) >= facet_limit
+
+    def scientific_name(self, key):
+        return f"Species {key}"
+
+
+# T-268 · review B-65: a capped facet dropped the species below the cap from the busiest months,
+# leaving a false summer gap in their monthly counts.
+def test_a_capped_facet_is_paged_until_a_page_is_not_full():
+    client = CappedClient()
+    payload = build_for_taxon(client, TAXON, NOR[:1])
+    assert sorted(set(client.offsets)) == [0, 10, 20]
+    assert payload["meta"]["facetTruncations"] == 0
+    species = {r["speciesKey"] for r in payload["records"]}
+    assert len(species) == 25
+    tail = next(r for r in payload["records"] if r["speciesKey"] == 1024)
+    assert tail["monthCounts"] == [76] * 12
+
+
+def test_a_facet_still_capped_after_the_page_limit_fails_the_taxon():
+    import pytest
+
+    client = CappedClient()
+    with pytest.raises(RuntimeError, match="capped"):
+        build_for_taxon(client, {**TAXON, "maxFacetPages": 2}, NOR[:1])

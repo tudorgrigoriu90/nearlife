@@ -14,6 +14,11 @@ abort the rest. The outcome is compared with EXPECTED; any mismatch exits non-ze
 import json
 import os
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from gbif.aggregate import SUMMER_MIGRANTS  # noqa: E402
 
 # step -> expected outcome: "ok", or a substring of the error the database must raise.
 EXPECTED: dict[str, str] = {
@@ -93,6 +98,7 @@ EXPECTED: dict[str, str] = {
     "no hybrid in the catalogue": "ok",
     "no two catalogue species share a photo": "ok",
     "curated birds sit on the real species": "ok",
+    "no summer migrant is active in winter": "ok",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -545,6 +551,12 @@ def run_catalogue_checks(cur) -> dict[str, str]:
     _step(cur, results, "curated birds sit on the real species",
           "select case when count(*) = 3 then 'ok' else 'WRONG: ' || count(*) end from public.species "
           "where (id, gbif_key) in (('mallard', 9761484), ('blue-tit', 2487879), ('whooper-swan', 2498347))")
+    # T-268 · review B-04: a stray winter record no longer makes a summer migrant "active".
+    _step(cur, results, "no summer migrant is active in winter",
+          "select case when count(*) = 0 then 'ok' else 'WINTER: ' || string_agg(s.scientific_name || ' ' "
+          "|| p.region_id, ', ') end from public.species_presence p join public.species s on s.id = p.species_id "
+          "where s.scientific_name = any(%s) and p.active_months && array[12, 1, 2]::smallint[]",
+          (list(SUMMER_MIGRANTS),))
     return results
 
 

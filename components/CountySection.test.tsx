@@ -102,3 +102,21 @@ describe('SpeciesCard threat badge', () => {
     expect(screen.queryByTestId('card-threat')).toBeNull();
   });
 });
+
+// T-268 · review B-26: season is a real catch constraint (GDD §6). Out of season the card offers no
+// catch and says when the species is usually back.
+describe('SpeciesCard out of season', () => {
+  const swift = KRONOBERG_SPECIES.find((s) => s.id === 'common-swift')!;
+
+  it('replaces the catch button with the month it is usually back', async () => {
+    const onFind = jest.fn();
+    await render(<SpeciesCard species={swift} locale="sv" onFindNearby={onFind} backAround={5} />);
+    expect(screen.queryByText(`${sv('card.findNearby')} →`)).toBeNull();
+    expect(screen.getByText('Brukar synas här igen från maj.')).toBeTruthy();
+  });
+
+  it('keeps the catch button in season', async () => {
+    await render(<SpeciesCard species={swift} locale="sv" onFindNearby={jest.fn()} />);
+    expect(screen.getByText(`${sv('card.findNearby')} →`)).toBeTruthy();
+  });
+});

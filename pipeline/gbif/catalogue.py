@@ -29,7 +29,7 @@ def build_catalogue(datasets: list[tuple[str, list[dict]]]) -> dict:
             name = r["scientificName"]
             occ[name] += r["occurrences"]
             counties[name].add(r["county"])
-            months[name].update(r.get("activeMonths", []))
+            months[name].update(r.get("recordedMonths", r.get("activeMonths", [])))
             keys[name] = r["speciesKey"]
             taxa.setdefault(name, taxon)
 

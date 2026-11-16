@@ -123,6 +123,16 @@ Runs server-side on a schedule (`pg_cron` → Edge Function). For each due user:
    are computed from (opened / collected are app-side funnel events).
 ```
 
+**What "active" means (T-268).** A month is active for a species in a county when GBIF holds at
+least 3 records of it there in that month **and** at least 5% of its busiest month there
+(`gbif/aggregate.py` `MIN_ACTIVE_RECORDS`, `ACTIVE_SHARE`; the 5% is the card chart's
+`PRESENT_SHARE`). Counting any single record made the swift "active" in January in every county.
+The same months gate catching (`lib/catchSeason.ts`: out of season the card says when it is
+usually back). Candidates are weighted, and This Week ordered, by **this month's** records
+(`species_presence.month_counts`), not the all-year total. Species facets are paged past GBIF's cap
+so a peak month is never cut short, and a run with a capped facet or a summer migrant active in
+winter fails.
+
 **Tuning levers:** cadence (per day), cell resolution (granularity vs. data density),
 rarity_flavor curve, active-window strictness. All should be config, not hardcoded, so the
 fake-it prototype can tune the *feel* without redeploys.

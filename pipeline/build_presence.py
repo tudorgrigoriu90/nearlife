@@ -31,7 +31,7 @@ try:
 except (AttributeError, ValueError):
     pass
 
-from gbif.aggregate import build_presence, presence_records
+from gbif.aggregate import build_presence, migrants_active_in_winter, presence_records
 from gbif.aggregate_genus import aggregate_genus
 from gbif.client import ALLOWED_LICENSES, GbifClient
 from gbif.counties import SWEDISH_COUNTIES, parse_subdivisions
@@ -40,10 +40,32 @@ from gbif.taxa import TARGET_TAXA
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
 
+# Pages fetched per county-month before a facet counts as capped. 20 × the facet limit is far more
+# species than any Swedish county records in a month for one taxon.
+MAX_FACET_PAGES = 20
+
+
+def facet_all(client, gid: str, taxon_key: int, month: int, limit: int, max_pages: int):
+    """Every species recorded in a county-month, paging past GBIF's facet cap (T-268 · review B-65).
+
+    A single capped query used to drop every species below the cap from the busiest months, so a
+    less-recorded insect or plant had zero records in its peak and a false gap in its season.
+    Returns (pairs, capped): capped is True only when the page limit ran out with pages left.
+    """
+    pairs: list[tuple[int, int]] = []
+    for page in range(max_pages):
+        got, full = client.species_facet(gid, taxon_key, month, limit, offset=page * limit)
+        pairs.extend(got)
+        if not full:
+            return pairs, False
+    return pairs, True
+
+
 def build_for_taxon(client: GbifClient, taxon: dict, regions: list) -> dict:
     key = taxon["key"]
     names = taxon["names"]
     facet_limit = taxon.get("facetLimit", 300)
+    max_pages = taxon.get("maxFacetPages", MAX_FACET_PAGES)
     min_occ = taxon.get("minOccurrences", 0)
 
     # Resolve each source name to a taxonKey; skip (with a log) any GBIF can't match exactly.
@@ -64,13 +86,19 @@ def build_for_taxon(client: GbifClient, taxon: dict, regions: list) -> dict:
     for county in regions:
         for month in range(1, 13):
             for taxon_key in taxon_keys:
-                pairs, truncated = client.species_facet(county["gid"], taxon_key, month, facet_limit)
-                if truncated:
+                pairs, capped = facet_all(client, county["gid"], taxon_key, month, facet_limit, max_pages)
+                if capped:
                     truncations += 1
                 for species_key, count in pairs:
                     rows.append((county["gid"], month, species_key, count))
         print(f"  {county['name']:16s} cumulative rows: {len(rows)}", flush=True)
 
+    if truncations:
+        # A capped facet leaves false gaps in monthly counts, and active months now come from
+        # those counts: fail the taxon rather than ship a wrong season (T-268 · review B-65).
+        raise RuntimeError(
+            f"{truncations} (county, month) facets still capped after {max_pages} pages of {facet_limit}"
+        )
     presence = build_presence(rows)
     # Drop the long tail of rarities (per county) so we keep encounterable species.
     if min_occ > 0:
@@ -86,12 +114,13 @@ def build_for_taxon(client: GbifClient, taxon: dict, regions: list) -> dict:
     # describes what actually ships rather than GBIF's microspecies split.
     records = aggregate_genus(records)
 
-    if truncations:
-        print(
-            f"  WARNING: {truncations} (county,month) facets hit the cap - rarest species beyond "
-            f"the top {facet_limit} dropped (refine with the bulk download later).",
-            flush=True,
-        )
+    # Report the season rule's effect (T-268 · review B-04) and fail on a migrant active in winter.
+    winter = migrants_active_in_winter(records)
+    if winter:
+        raise RuntimeError("summer migrants active in winter: " + "; ".join(winter))
+    big = [r for r in records if r["occurrences"] >= 1000]
+    all_year = sum(1 for r in big if len(r["activeMonths"]) == 12)
+    print(f"  {all_year} of {len(big)} rows with >= 1000 records are active all 12 months", flush=True)
     return {
         "meta": {
             "taxon": key,
@@ -105,6 +134,7 @@ def build_for_taxon(client: GbifClient, taxon: dict, regions: list) -> dict:
             "distinctSpecies": len(species_keys),
             "records": len(records),
             "facetTruncations": truncations,
+            "activeAllYearShare": round(all_year / len(big), 3) if big else None,
             "note": (
                 "Observation-based presence proxy (occurrence != true presence; TSD §7). "
                 "CC0/CC-BY records only; encounterable core (top-N by records, minOccurrences "

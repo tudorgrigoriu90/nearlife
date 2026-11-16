@@ -18,6 +18,9 @@ GENUS_AGGREGATES: dict[str, str] = {
 }
 
 
+from gbif.aggregate import active_months, recorded_months
+
+
 def aggregate_genus(records: list[dict], aggregates: dict[str, str] = GENUS_AGGREGATES) -> list[dict]:
     """Merge configured genera per county, summing occurrences and unioning active months.
 
@@ -54,11 +57,27 @@ def aggregate_genus(records: list[dict], aggregates: dict[str, str] = GENUS_AGGR
                 "speciesKey": target_keys[genus],
                 "scientificName": aggregates[genus],
                 "activeMonths": sorted(set(r["activeMonths"])),
+                "recordedMonths": sorted(set(r.get("recordedMonths", r["activeMonths"]))),
                 "occurrences": r["occurrences"],
+                "monthCounts": list(r["monthCounts"]) if r.get("monthCounts") else None,
             }
         else:
             entry["occurrences"] += r["occurrences"]
             entry["activeMonths"] = sorted(set(entry["activeMonths"]) | set(r["activeMonths"]))
+            entry["recordedMonths"] = sorted(
+                set(entry["recordedMonths"]) | set(r.get("recordedMonths", r["activeMonths"]))
+            )
+            if entry["monthCounts"] and r.get("monthCounts"):
+                entry["monthCounts"] = [a + b for a, b in zip(entry["monthCounts"], r["monthCounts"])]
+            else:
+                entry["monthCounts"] = None
+
+    # Active months are a threshold on counts, so a merged genus decides on its summed counts
+    # (T-268): two microspecies each below the threshold can make an active month together.
+    for entry in merged.values():
+        if entry["monthCounts"]:
+            entry["activeMonths"] = active_months(entry["monthCounts"])
+            entry["recordedMonths"] = recorded_months(entry["monthCounts"])
 
     out = passthrough + list(merged.values())
     out.sort(key=lambda r: (r["county"], -r["occurrences"], r["scientificName"]))

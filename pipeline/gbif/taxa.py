@@ -8,7 +8,8 @@ those are expressed as unions of the names that DO resolve.
 
 Scale reality: "all fauna + flora" literally is tens of thousands of species (mostly obscure
 insects and vascular plants). Two knobs keep the big groups to the *encounterable* core:
-  - facetLimit: species (ordered by record count) kept per county-month; hitting it is logged.
+  - facetLimit: the page size of the per-county-month species facet; a full page is paged on
+    (T-268), and a facet still full after maxFacetPages pages fails the taxon.
   - minOccurrences: drop (county, species) below this many records (the one-off vagrant tail).
 Truly-complete rare-species coverage needs the bulk GBIF Occurrence Download API later.
 """

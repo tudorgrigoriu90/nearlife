@@ -14,6 +14,17 @@ export function isActiveThisMonth(entry: RegionPresence, month: Month): boolean 
   return entry.activeMonths.includes(month);
 }
 
+/**
+ * How often the species is recorded in `month` here: that month's count where monthly counts are
+ * known (T-261), else the all-year total. Ranks This Week and weights notifications (T-268), so a
+ * species barely recorded this month is not put first by its summer total.
+ */
+export function recordsInMonth(entry: RegionPresence, month?: Month): number {
+  const counts = entry.monthCounts;
+  if (month !== undefined && counts && counts.length === 12) return counts[month - 1];
+  return entry.occurrences;
+}
+
 /** Candidate set: active this month AND not already in the user's collection (dedupe). */
 export function candidatesForMonth(
   presence: RegionPresence[],

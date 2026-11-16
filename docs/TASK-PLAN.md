@@ -4328,12 +4328,29 @@ document until it is started, when it takes the next free `T-###`.
   - Claude: the bodies become fixtures under `lib/__fixtures__/revenuecat/`, and
     `revenuecatEvents.test.ts` plans each one (a county pack with its real `entitlement_ids`,
     a TRANSFER with its real fields).
-- **T-268 · "Active this season" from monthly counts** — *Claude · M · `TODO` · deps: T-261 · review B-04*
+- **T-268 · "Active this season" from monthly counts** — *Claude · M · `IN-PROGRESS` (code pushed; done when the Swedish presence reload and the live check pass) · deps: T-261 · review B-04, B-26, B-65*
   - A month is active for a species in a county only from a share of its busiest month and a
     minimum count (the rule `lib/countyStats.ts` already uses), not from a single record.
   - This Week ranks by this month's records; the notification sender and the Almanac's month and
     season filters use the same months.
   - A data test fails if a listed summer migrant is active in January in any county.
+  - ✅ B-65: `build_presence.facet_all` pages each county-month facet (`facetOffset`) until a page
+    is not full (GBIF holds 3,000+ insect species for Kronoberg in July); a facet still full after
+    20 pages fails the taxon.
+  - ✅ B-04: `gbif/aggregate.active_months` (≥ 3 records and ≥ 5% of the busiest month);
+    `recordedMonths` keeps every month with a record for the T-136 noise filter, so the catalogue
+    is not shrunk by the new rule; merged genera decide on summed counts. The run fails if any of
+    10 summer migrants is active in December–February and logs the share of big rows active all
+    year. `rebuild_when_how.py` rewrites the template season sentence in every locale from the
+    reloaded months (new data-pipeline step); hand-written sentences are left alone.
+  - ✅ This Week orders by this month's records, and the sender weights by them
+    (`recordsInMonth`; `month_counts` now read by the app and the Edge Function).
+  - ✅ B-26: `lib/catchSeason.ts` wires T-079's gate. Out of season the card shows "Usually seen
+    here again from {month}." instead of the catch button, and `attemptCatch` refuses. A species
+    with no active month is not gated (no month to name).
+  - ✅ `verify.py`: "no summer migrant is active in winter" (live).
+  - Remaining: the presence reload (data pipeline, SWE, content skip), then the live check and the
+    regenerated presence files committed with a data test over them.
 - **T-269 · Account deletion erases the device** — *Claude · S · `TODO` · deps: T-093 · review B-05, B-12*
   - The collection cache and outbox, language choices, cached catch spots and in-memory state are
     cleared; RevenueCat and PostHog identities are reset.

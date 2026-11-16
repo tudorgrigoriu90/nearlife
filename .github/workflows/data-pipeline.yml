@@ -175,6 +175,12 @@ jobs:
         working-directory: pipeline
         run: python -m gbif.supabase_load_content
 
+      # The card's season sentence from the months just loaded (T-268): template-made sentences
+      # only, every locale, no network. Runs whether or not content was regenerated.
+      - name: Rewrite season sentences from the new months (T-268)
+        if: ${{ !cancelled() && env.SUPABASE_DB_URL != '' }}
+        run: python pipeline/rebuild_when_how.py
+
       - name: Upload curated photos to Supabase Storage (T-119)
         if: ${{ !cancelled() && env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_KEY != '' }}
         run: python pipeline/media/supabase_upload.py

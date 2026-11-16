@@ -1,8 +1,4 @@
-import {
-  pickWeightedPresence,
-  presenceWeight,
-  selectFromPresence,
-} from './presenceNotification';
+import { pickWeightedPresence, presenceWeight, selectFromPresence } from './presenceNotification';
 import type { RegionPresence } from './speciesRepository';
 
 const common: RegionPresence = { speciesId: 'common', activeMonths: [6], occurrences: 100_000 };
@@ -47,5 +43,24 @@ describe('selectFromPresence', () => {
 
   it('returns null when nothing is active and uncollected', () => {
     expect(selectFromPresence([common], 6, new Set(['common']), () => 0)).toBeNull();
+  });
+});
+
+// T-268 · review B-04: weight by this month's records when they are known.
+describe('presenceWeight in a month', () => {
+  const counts = [0, 0, 0, 0, 9, 999, 0, 0, 0, 0, 0, 0];
+  const entry = { speciesId: 'x', activeMonths: [5, 6], occurrences: 1008, monthCounts: counts };
+
+  it("uses the month's records, not the all-year total", () => {
+    expect(presenceWeight(entry, undefined, 5)).toBeCloseTo(1 + 1, 6); // log10(10)
+    expect(presenceWeight(entry, undefined, 6)).toBeCloseTo(1 + 3, 6); // log10(1000)
+  });
+
+  it('uses the all-year total without a month or monthly counts', () => {
+    expect(presenceWeight(entry)).toBeCloseTo(1 + Math.log10(1009), 6);
+    expect(presenceWeight({ ...entry, monthCounts: null }, undefined, 5)).toBeCloseTo(
+      1 + Math.log10(1009),
+      6,
+    );
   });
 });

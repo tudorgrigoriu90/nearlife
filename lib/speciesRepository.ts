@@ -28,6 +28,8 @@ export interface RegionPresence {
   speciesId: string;
   activeMonths: number[];
   occurrences: number;
+  /** Records per month, January first (T-261); absent where not loaded. */
+  monthCounts?: number[] | null;
 }
 
 export interface SpeciesRepository {
@@ -216,6 +218,8 @@ export interface PresenceRow {
   species_id: string;
   active_months: number[];
   occurrences: number;
+  /** Absent in an offline pack saved before T-268. */
+  month_counts?: number[] | null;
 }
 
 export function presenceRowToPresence(row: PresenceRow): RegionPresence {
@@ -223,6 +227,7 @@ export function presenceRowToPresence(row: PresenceRow): RegionPresence {
     speciesId: row.species_id,
     activeMonths: [...row.active_months].sort((a, b) => a - b),
     occurrences: row.occurrences,
+    ...(row.month_counts ? { monthCounts: row.month_counts } : {}),
   };
 }
 
@@ -407,7 +412,7 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
       (from, to) =>
         this.client
           .from('species_presence')
-          .select('species_id,active_months,occurrences')
+          .select('species_id,active_months,occurrences,month_counts')
           .eq('region_id', regionId)
           .order('species_id')
           .range(from, to),

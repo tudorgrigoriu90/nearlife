@@ -71,7 +71,7 @@ class GbifClient:
         return self._get(f"/species/{species_key}/speciesProfiles", {"limit": 100})
 
     def species_facet(
-        self, gadm_gid: str, taxon_key: int, month: int, facet_limit: int = 300
+        self, gadm_gid: str, taxon_key: int, month: int, facet_limit: int = 300, offset: int = 0
     ) -> tuple[list[tuple[int, int]], bool]:
         """Species recorded in a region in a given month → [(speciesKey, count)], truncated?
 
@@ -87,6 +87,7 @@ class GbifClient:
             ("limit", 0),
             ("facet", "speciesKey"),
             ("facetLimit", facet_limit),
+            ("facetOffset", offset),
         ]
         for lic in ALLOWED_LICENSES:
             params.append(("license", lic))
@@ -94,7 +95,7 @@ class GbifClient:
         facets = data.get("facets") or []
         counts = facets[0]["counts"] if facets else []
         pairs = [(int(c["name"]), int(c["count"])) for c in counts]
-        truncated = len(counts) >= facet_limit  # hit the cap → some rarer species dropped
+        truncated = len(counts) >= facet_limit  # a full page → there may be more (page on)
         return pairs, truncated
 
     def scientific_name(self, species_key: int) -> str:

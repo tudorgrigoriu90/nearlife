@@ -110,6 +110,7 @@ import { openIdentifier } from './lib/identify';
 import { CrashReporter, loadSentry } from './lib/crashReporting';
 import { gradeFromScore } from './lib/minigame/grade';
 import { monthOf, seasonKeyOf } from './lib/season';
+import { catchSeason } from './lib/catchSeason';
 import { countyStats } from './lib/countyStats';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
 import { createTranslator, type Locale } from './lib/i18n';
@@ -416,6 +417,13 @@ export default function App() {
   const cardThreat = selected
     ? (almanacSpecies.find((s) => s.id === selected.id) ?? selected).iucn
     : undefined;
+  // The season gate (T-268 · review B-26), on the species' active months in the viewed county.
+  const seasonOf = (species: Species) =>
+    catchSeason(
+      (almanacSpecies.find((s) => s.id === species.id) ?? species).activeMonths,
+      monthOf(new Date()),
+    );
+  const cardSeason = selected ? seasonOf(selected) : null;
   const [catching, setCatching] = useState<Species | null>(null);
   const [caughtTip, setCaughtTip] = useState<{ species: Species; prime: boolean } | null>(null);
   const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
@@ -711,6 +719,8 @@ export default function App() {
   };
 
   const attemptCatch = (species: Species) => {
+    // The card offers no catch out of season; this also stops a catch-spot route left open.
+    if (!seasonOf(species).open) return;
     if (canCatch(freeCatch, seasonKey)) {
       track('catch_attempted', { speciesId: species.id });
       setCatching(species);
@@ -1120,6 +1130,7 @@ export default function App() {
           county={cardCounty}
           threat={cardThreat}
           month={monthOf(new Date())}
+          backAround={cardSeason && !cardSeason.open ? cardSeason.backAround : null}
           onBack={() => setSelected(null)}
           onFindNearby={
             canCollect

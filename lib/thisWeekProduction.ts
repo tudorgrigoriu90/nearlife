@@ -1,4 +1,4 @@
-import { isActiveThisMonth } from './presence';
+import { isActiveThisMonth, recordsInMonth } from './presence';
 import type { Month } from './species/types';
 import type { RegionPresence } from './speciesRepository';
 
@@ -9,7 +9,8 @@ import type { RegionPresence } from './speciesRepository';
 // handle — location off and a quiet week — as first-class result variants so the UI never has to
 // infer them from an empty array.
 //
-// Ordering: not-yet-collected first (flagged NEW), then MOST-observed first. T-078 originally put
+// Ordering: not-yet-collected first (flagged NEW), then most recorded THIS MONTH (T-268: the
+// all-year total put the swift first in October), then MOST-observed first. T-078 originally put
 // rarer first to avoid "all sparrows", which suited a curated 54. Wired to a real county (T-207)
 // it meant the top of a ~2,000-species list was species recorded once or twice — mostly without a
 // common name, and the least likely things a person could go and find. Observation count is the
@@ -47,6 +48,7 @@ export function thisWeekFromPresence(
     .map((entry, index) => ({
       speciesId: entry.speciesId,
       occurrences: entry.occurrences,
+      thisMonth: recordsInMonth(entry, month),
       isNew: !collectedIds.has(entry.speciesId),
       index,
     }));
@@ -55,6 +57,7 @@ export function thisWeekFromPresence(
 
   active.sort((a, b) => {
     if (a.isNew !== b.isNew) return a.isNew ? -1 : 1; // new first
+    if (a.thisMonth !== b.thisMonth) return b.thisMonth - a.thisMonth; // most recorded this month
     if (a.occurrences !== b.occurrences) return b.occurrences - a.occurrences; // most-observed first
     return a.index - b.index; // stable tie-break
   });

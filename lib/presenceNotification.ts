@@ -1,4 +1,4 @@
-import { candidatesForMonth } from './presence';
+import { candidatesForMonth, recordsInMonth } from './presence';
 import type { Rng } from './notification';
 import { DEFAULT_TUNING, type NotificationTuning } from './tuning';
 import type { Month } from './species/types';
@@ -20,9 +20,11 @@ import type { RegionPresence } from './speciesRepository';
 export function presenceWeight(
   entry: RegionPresence,
   tuning: NotificationTuning = DEFAULT_TUNING,
+  month?: Month,
 ): number {
   const { base, scale } = tuning.presenceWeight;
-  return base + scale * Math.log10(1 + Math.max(0, entry.occurrences));
+  // This month's records where known (T-268): a summer total must not weight an October send.
+  return base + scale * Math.log10(1 + Math.max(0, recordsInMonth(entry, month)));
 }
 
 /** Sample one presence row from the weighted candidate list; null if empty. */
@@ -30,13 +32,14 @@ export function pickWeightedPresence(
   candidates: RegionPresence[],
   rng: Rng,
   tuning: NotificationTuning = DEFAULT_TUNING,
+  month?: Month,
 ): RegionPresence | null {
   if (candidates.length === 0) return null;
-  const total = candidates.reduce((sum, e) => sum + presenceWeight(e, tuning), 0);
+  const total = candidates.reduce((sum, e) => sum + presenceWeight(e, tuning, month), 0);
   if (total <= 0) return null;
   let target = rng() * total;
   for (const entry of candidates) {
-    target -= presenceWeight(entry, tuning);
+    target -= presenceWeight(entry, tuning, month);
     if (target < 0) return entry;
   }
   return candidates[candidates.length - 1]; // float-rounding fallback
@@ -50,5 +53,10 @@ export function selectFromPresence(
   rng: Rng = Math.random,
   tuning: NotificationTuning = DEFAULT_TUNING,
 ): RegionPresence | null {
-  return pickWeightedPresence(candidatesForMonth(presence, month, collectedIds), rng, tuning);
+  return pickWeightedPresence(
+    candidatesForMonth(presence, month, collectedIds),
+    rng,
+    tuning,
+    month,
+  );
 }

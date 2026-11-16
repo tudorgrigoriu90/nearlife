@@ -12,6 +12,55 @@ subset. Copy must stay honest ("active in your region this season").
 
 from typing import Iterable, Iterator
 
+# A month is active for a species in a county only when it is really recorded then (T-268 · review
+# B-04): at least this share of its busiest month there (the card's PRESENT_SHARE,
+# lib/countyStats.ts) and at least this many records. One stray record used to make a month active,
+# so the swift was "active in your region" in January in every county.
+ACTIVE_SHARE = 0.05
+MIN_ACTIVE_RECORDS = 3
+
+# Birds that are not in Sweden in winter. If one of them is active in December, January or February
+# in any county, the rule above is broken (the guard the pipeline and verify.py run).
+SUMMER_MIGRANTS = (
+    "Apus apus",
+    "Hirundo rustica",
+    "Cuculus canorus",
+    "Delichon urbicum",
+    "Pandion haliaetus",
+    "Riparia riparia",
+    "Oriolus oriolus",
+    "Ficedula hypoleuca",
+    "Phylloscopus trochilus",
+    "Sylvia borin",
+)
+WINTER_MONTHS = (12, 1, 2)
+
+
+def active_months(month_counts: list[int]) -> list[int]:
+    """The 1-indexed months a species counts as active, from its 12 monthly counts."""
+    busiest = max(month_counts, default=0)
+    return [
+        i + 1
+        for i, c in enumerate(month_counts)
+        if c >= MIN_ACTIVE_RECORDS and c >= busiest * ACTIVE_SHARE
+    ]
+
+
+def recorded_months(month_counts: list[int]) -> list[int]:
+    """Every month with any record: the noise filter's breadth signal (T-136), not a season."""
+    return [i + 1 for i, c in enumerate(month_counts) if c > 0]
+
+
+def migrants_active_in_winter(records: Iterable[dict]) -> list[str]:
+    """Summer migrants with a winter month among their active months, as readable lines."""
+    out = []
+    for r in records:
+        if r["scientificName"] in SUMMER_MIGRANTS:
+            winter = [m for m in r["activeMonths"] if m in WINTER_MONTHS]
+            if winter:
+                out.append(f"{r['scientificName']} in {r['county']}: {winter}")
+    return out
+
 
 def build_presence(rows: Iterable[tuple]) -> dict:
     """rows: iterable of (county_gid, month:int, species_key:int, count:int).
@@ -37,18 +86,20 @@ def presence_records(
     scientific_name_by_key: dict,
 ) -> Iterator[dict]:
     """Flatten the presence map into serialisable records, sorted by county then prevalence."""
-    records = [
-        {
-            "county": gid,
-            "countyName": county_name_by_gid.get(gid, gid),
-            "speciesKey": key,
-            "scientificName": scientific_name_by_key.get(key, str(key)),
-            "activeMonths": sorted(entry["months"]),
-            "occurrences": entry["occurrences"],
-            # Absent from presence maps built before T-261.
-            "monthCounts": entry.get("monthCounts"),
-        }
-        for (gid, key), entry in presence.items()
-    ]
+    records = []
+    for (gid, key), entry in presence.items():
+        counts = entry.get("monthCounts")  # absent from presence maps built before T-261
+        records.append(
+            {
+                "county": gid,
+                "countyName": county_name_by_gid.get(gid, gid),
+                "speciesKey": key,
+                "scientificName": scientific_name_by_key.get(key, str(key)),
+                "activeMonths": active_months(counts) if counts else sorted(entry["months"]),
+                "recordedMonths": recorded_months(counts) if counts else sorted(entry["months"]),
+                "occurrences": entry["occurrences"],
+                "monthCounts": counts,
+            }
+        )
     records.sort(key=lambda r: (r["county"], -r["occurrences"]))
     return iter(records)
