@@ -4266,14 +4266,21 @@ spring-window qualitative testing (**T-039**), catch-spot density audit (**T-050
 notification-independent pull surface (**T-078**), unopened-region waitlist (**T-107**).
 
 ## Repository & product review (2026-11)
-A full read of the app, database, Edge Functions, pipeline, workflows and docs, with bugs,
+A review of the app, database, Edge Functions, pipeline, workflows and docs, with bugs,
 improvements and feature ideas: **[REVIEW-2026-11.md](REVIEW-2026-11.md)**. The tasks below are the
-confirmed defects that block a tester build or the public launch. The review's other items
-(`B-24` onward, `I-nn`, `F-nn`) stay in that document until the Director promotes them.
+confirmed defects that block a tester build or the public launch. Every other item in the review
+(each bug whose Task column is a dash, and every `I-nn`, `F-nn` and `P-nn`) stays in that
+document until it is started, when it takes the next free `T-###`.
 
-- **T-265 · Full repository and product review** — *Claude · M · `DONE` (2026-11-15) · deps: —*
-  - ✅ [REVIEW-2026-11.md](REVIEW-2026-11.md): 58 bugs (7 launch blockers), 35 improvements,
-    27 feature ideas, product observations and a proposed order of work. No code changed.
+- **T-265 · Full repository and product review** — *Claude · M · `DONE` (2026-11-15, revision 2 2026-11-16) · deps: —*
+  - ✅ [REVIEW-2026-11.md](REVIEW-2026-11.md): 69 bugs (5 critical, 20 high, 23 medium, 21 low;
+    12 to fix before testers), 35 improvements, 27 features, 9 product observations and an order
+    of work. No code changed.
+  - Revision 2 (Director: "leave nothing to personal interpretation"): every bug has a fixed
+    record (where, now, should, see it, affected, change, done when); 11 findings added
+    (B-59 to B-69); B-26 and B-35 corrected; an exact statement of which files were read in full,
+    in part, or not at all; every `file:line` citation and every quotation checked against the
+    files.
   - Evidence: `npm run verify` green (148 suites, 1,746 tests), pipeline 445 tests green; B-01
     reproduced by running the repository's migrations in an in-memory Postgres; B-02/B-03 checked
     against RevenueCat's webhook field reference; B-04 measured on `pipeline/data/presence_*.json`.
@@ -4331,6 +4338,24 @@ confirmed defects that block a tester build or the public launch. The review's o
   - The onboarding first sighting and the seasonal events come from the user's county.
   - Catalogue, presence and catch spots are cached per county and refreshed when the server's
     data version changes, not on every launch.
+- **T-276 · Credit Wikipedia text on the card** — *Claude · S · `TODO` · deps: T-179 · review B-59*
+  - Species facts are Wikipedia text (CC BY-SA 4.0) and machine translations of it, shown with no
+    source, licence or link anywhere in the app.
+  - `species_content` records each fact's article URL and whether it was machine-translated;
+    the content loader, the backfill and `translate_facts.py` fill them.
+  - Under every fact the card shows "Text: Wikipedia · CC BY-SA 4.0" (or "Machine-translated from
+    Wikipedia · CC BY-SA 4.0") linking to the article; a test fails if a fact renders without it.
+  - Settings → Data attribution lists Wikipedia, Wikidata, iNaturalist and Natural Earth beside
+    GBIF and OpenStreetMap; DATA-SOURCING-LICENSING.md gains a "Wikipedia text" section.
+- **T-277 · Minigames that can be won, measured where the finger is** — *Claude + Director · S · `TODO` · deps: T-069, T-071, T-073 · review B-60, B-62*
+  - No minigame counts time or input before the player's first touch ("Tap to start").
+  - The insect game counts breaks only after the first touch; tolerance and allowed breaks are
+    set from a phone test (starting point 44 px and 25 breaks), and the target is drawn above
+    the finger.
+  - Every child of the insect and plant stages has `pointerEvents="none"`, so touch positions
+    are relative to the stage (test).
+  - Director: a first-time player wins the insect game in at least 3 of 5 attempts on a
+    mid-range Android phone; the result is recorded here.
 
 ## Estimation note
 Sizes here are T-shirt. For per-task story-point estimates, the `sa-toolkit` `/task-estimate`

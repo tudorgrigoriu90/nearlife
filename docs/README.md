@@ -17,7 +17,7 @@ avoid duplication.
 | [VALIDATION-CRITERIA.md](VALIDATION-CRITERIA.md) | **Go/kill:** pre-registered numeric + qualitative thresholds for the Kronoberg validation test (GDD §9) | Draft — pending Director approval (T-036) |
 | [DATA-SOURCING-LICENSING.md](DATA-SOURCING-LICENSING.md) | **Go/no-go:** API licensing for commercial use | Draft — needs legal verification |
 | [PRIVACY-COMPLIANCE.md](PRIVACY-COMPLIANCE.md) | **Go/no-go:** GDPR, location, kids (no ads ship — resolved) | Draft — needs legal verification |
-| [REVIEW-2026-11.md](REVIEW-2026-11.md) | Full repository and product review: bugs, improvements, feature ideas, order of work (T-265) | Snapshot, 2026-11-15 |
+| [REVIEW-2026-11.md](REVIEW-2026-11.md) | Full repository and product review: bugs, improvements, features, product observations, order of work (T-265) | Revision 2, 2026-11-16 |
 
 ## Governing principles
 1. **Cost ≈ $0** at MVP scale — free tiers only (see TSD for the honest cost floor).
