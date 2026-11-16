@@ -4369,10 +4369,15 @@ document until it is started, when it takes the next free `T-###`.
     starts with only the new starter), store clear, hook reset, PostHog reset, key prefixes.
   - RevenueCat log-out on deletion belongs with the identity fix (T-271, B-21); the processors'
     retention statement in the privacy policy is B-52's server part (Stage 2).
-- **T-270 · `session_start` reaches analytics** — *Claude · XS · `TODO` · deps: T-035 · review B-06*
+- **T-270 · `session_start` reaches analytics** — *Claude · XS · `DONE` · deps: T-035 · review B-06*
   - Sent once stored consent has loaded and on every return to the foreground (30-minute session
     window), never before consent.
   - An App-level test with stored consent asserts delivery.
+  - ✅ `components/useSessionStart.ts`: sent when stored consent has loaded and allows
+    analytics, and on a return to the foreground more than 30 minutes after the last one
+    (`SESSION_GAP_MS`); never without consent. `this_week_opened` waits for the stored consent
+    too. Tests: the hook (3) and `AppSession.test.tsx`, which goes through the real consent gate
+    and PostHog tracker (red on the old code: 0 sessions).
 - **T-271 · Sign in with a linked email** — *Claude · M · `TODO` · deps: T-133, T-274 · review B-07, B-21*
   - "I already have an account": email → one-time code → the anonymous session is replaced, the
     collection is pulled, and RevenueCat is logged in under the restored id.

@@ -65,6 +65,7 @@ import {
 import { ensureAnonymousSession, getSupabase } from './lib/supabase';
 import { getSupabaseConfig, hasSupabaseConfig } from './lib/supabaseConfig';
 import { eraseDeviceStorage } from './lib/deviceErase';
+import { useSessionStart } from './components/useSessionStart';
 import { resetAnalyticsIdentity } from './lib/posthog';
 import { supabaseProbe, type ConnectivityProbe } from './lib/connectivity';
 import { useConnectivity } from './components/useConnectivity';
@@ -504,12 +505,9 @@ export default function App() {
     applyConsent(kind, value);
   };
 
-  // Validation-funnel instrumentation (T-035): session start, and This Week opened whenever the
-  // user is on that tab (covers both the initial view and switching back to it). `track` is
-  // stable across renders (useTracker), so this fires once per mount despite the dependency.
-  useEffect(() => {
-    track('session_start', {});
-  }, [track]);
+  // Validation-funnel instrumentation (T-035): session start once stored consent is known (T-270),
+  // and This Week opened whenever the user is on that tab.
+  useSessionStart(track, consent, consentLoaded);
 
   // Rehydrate the language choice (T-211). The store never rejects; null means follow the device.
   useEffect(() => {
@@ -571,10 +569,11 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (onboarded && tab === 'thisWeek' && !showSettings && exportJson === null) {
+    // Held until stored consent has loaded (T-270): before that the gate would drop it.
+    if (consentLoaded && onboarded && tab === 'thisWeek' && !showSettings && exportJson === null) {
       track('this_week_opened', {});
     }
-  }, [onboarded, tab, showSettings, exportJson, track]);
+  }, [consentLoaded, onboarded, tab, showSettings, exportJson, track]);
 
   // Load the selected species' Tier-1 content through the repository (T-059). Fires when a card
   // opens or the locale changes; the id-keyed result guards against showing a stale species' card.
