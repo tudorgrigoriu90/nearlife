@@ -117,10 +117,12 @@ export class OfflineCollectionStore implements CollectionStore {
   }
 
   async markCaught(speciesId: string, at: string, primeBonus: boolean): Promise<CollectionRecord> {
-    return this.write(
-      applyCaught(this.records.get(speciesId) ?? null, speciesId, at, primeBonus),
-      { kind: 'caught', speciesId, at, primeBonus },
-    );
+    return this.write(applyCaught(this.records.get(speciesId) ?? null, speciesId, at, primeBonus), {
+      kind: 'caught',
+      speciesId,
+      at,
+      primeBonus,
+    });
   }
 
   async markHelped(speciesId: string, kind: HelpKind, at: string): Promise<CollectionRecord> {
@@ -161,11 +163,12 @@ export class OfflineCollectionStore implements CollectionStore {
           try {
             await this.deliver(op);
           } catch (error) {
-            // The one permanent rejection (T-200): the server will never accept this catch, so
-            // retrying would block every write queued behind it forever. Drop it and take the
-            // species back to spotted — the device must not keep a catch the server refused.
+            // The one permanent rejection (T-200): the server will never accept this write, so
+            // retrying would block every write queued behind it forever. Drop it. Only a refused
+            // *catch* takes the species back to spotted (T-266): a refused pledge or spot says
+            // nothing about a catch the server already holds.
             if (!(error instanceof CatchRefusedError)) throw error;
-            this.uncatch(op.speciesId);
+            if (op.kind === 'caught') this.uncatch(op.speciesId);
           }
           delivered.push(op);
         }
@@ -199,6 +202,10 @@ export class OfflineCollectionStore implements CollectionStore {
   }
 
   private async write(record: CollectionRecord, op: PendingOp): Promise<CollectionRecord> {
+    // A tap that changes nothing (spotting a species already spotted, pledging the same help
+    // again) is not sent: every send is an upsert the server's catch rule has to judge (T-266).
+    const current = this.records.get(record.speciesId);
+    if (current && sameRecord(current, record)) return current;
     this.records.set(record.speciesId, record);
     this.pending.push(op);
     await this.persist();
@@ -220,4 +227,14 @@ export class OfflineCollectionStore implements CollectionStore {
       // A full or unavailable disk must not turn a catch into a crash.
     }
   }
+}
+
+function sameRecord(a: CollectionRecord, b: CollectionRecord): boolean {
+  return (
+    a.spottedAt === b.spottedAt &&
+    a.caughtAt === b.caughtAt &&
+    a.helpedAt === b.helpedAt &&
+    a.helpedKind === b.helpedKind &&
+    a.primeBonus === b.primeBonus
+  );
 }

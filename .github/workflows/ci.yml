@@ -15,6 +15,19 @@ jobs:
   verify:
     name: Verify (lint + typecheck + test)
     runs-on: ubuntu-latest
+    # A throwaway Postgres for the database-rule tests (pipeline/tests/pg_harness.py, T-266): the
+    # free-catch trigger and other rules are tested against the repository's own migrations.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nearby_test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: nearby_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nearby_test" --health-interval 5s --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -42,6 +55,8 @@ jobs:
 
       - name: Run pipeline checks (lint + test)
         if: hashFiles('pipeline/requirements.txt') != ''
+        env:
+          NEARBY_PG_TEST_URL: postgresql://nearby_test:test@localhost:5432/nearby_test
         run: |
           pip install -r pipeline/requirements.txt
           python -m pytest pipeline -q

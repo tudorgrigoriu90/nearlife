@@ -10,12 +10,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 MIGRATION = ROOT / "supabase" / "migrations" / "20261029000001_free_catch_enforcement.sql"
+# The latest definition of the trigger function (T-266 redefined it).
+LATEST = max(
+    (p for p in (ROOT / "supabase" / "migrations").glob("*.sql")
+     if "function public.enforce_free_catch()" in p.read_text(encoding="utf-8")),
+    key=lambda p: p.name,
+)
 APP = ROOT / "lib" / "freeCatch.ts"
 
 
 def test_the_database_limit_equals_the_app_constant():
     app = re.search(r"FREE_CATCHES_PER_SEASON = (\d+)", APP.read_text(encoding="utf-8"))
-    sql = re.search(r"if used >= (\d+) then", MIGRATION.read_text(encoding="utf-8"))
+    sql = re.search(r"if used >= (\d+) then", LATEST.read_text(encoding="utf-8"))
     assert app and sql, "constant or trigger check not found — update this test with the code"
     assert int(app.group(1)) == int(sql.group(1))
 

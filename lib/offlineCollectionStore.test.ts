@@ -1,5 +1,9 @@
 import type { CollectionRecord } from './collection';
-import { CatchRefusedError, InMemoryCollectionStore, type CollectionStore } from './collectionStore';
+import {
+  CatchRefusedError,
+  InMemoryCollectionStore,
+  type CollectionStore,
+} from './collectionStore';
 import {
   InMemoryOfflineCache,
   OfflineCollectionStore,
@@ -23,8 +27,11 @@ class FlakyRemote implements CollectionStore {
     this.calls += 1;
     if (!this.online) throw new Error('offline');
   }
+  /** Reads fail while writes succeed, so a test sees the device state before the server merge. */
+  listFails = false;
   async list() {
     this.guard();
+    if (this.listFails) throw new Error('read failed');
     return this.inner.list();
   }
   async get(id: string) {
@@ -42,8 +49,11 @@ class FlakyRemote implements CollectionStore {
     if (this.refuse.has(id)) throw new CatchRefusedError(id);
     return this.inner.markCaught(id, at, prime);
   }
+  /** Species whose help pledge the "server" refuses as a catch (the double count of review B-01). */
+  refuseHelp = new Set<string>();
   async markHelped(id: string, kind: 'give' | 'protect', at: string) {
     this.guard();
+    if (this.refuseHelp.has(id)) throw new CatchRefusedError(id);
     return this.inner.markHelped(id, kind, at);
   }
 }
@@ -195,12 +205,41 @@ describe('OfflineCollectionStore when the server refuses a catch', () => {
     expect((await remote.inner.get('moose'))?.spottedAt).toBe(T2); // the queue kept moving
   });
 
+  // T-266 · review B-01: only a refused *catch* takes the catch back.
+  it('a refused help pledge is dropped without un-catching the species', async () => {
+    const { store, remote } = setup();
+    remote.online = true;
+    await store.markCaught('red-fox', T1, false);
+    await store.sync();
+    remote.refuseHelp.add('red-fox');
+    remote.listFails = true;
+    await store.markHelped('red-fox', 'give', T2);
+    await store.sync();
+    expect((await store.get('red-fox'))?.caughtAt).toBe(T1);
+    expect(store.pendingCount()).toBe(0);
+  });
+
   it('still treats an ordinary failure as retryable', async () => {
     const { store } = setup();
     await store.markCaught('red-fox', T1, false);
     await store.sync(); // offline
     expect(store.pendingCount()).toBe(1);
     expect((await store.get('red-fox'))?.caughtAt).toBe(T1);
+  });
+});
+
+describe('OfflineCollectionStore sends only writes that change something (T-266)', () => {
+  it('tapping an already-spotted species queues and sends nothing', async () => {
+    const { store, remote } = setup();
+    remote.online = true;
+    await store.markSpotted('moose', T1);
+    await store.sync();
+    const calls = remote.calls;
+    const again = await store.markSpotted('moose', T2);
+    await store.sync();
+    expect(again.spottedAt).toBe(T1);
+    expect(store.pendingCount()).toBe(0);
+    expect(remote.calls).toBe(calls);
   });
 });
 

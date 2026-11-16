@@ -4285,7 +4285,7 @@ document until it is started, when it takes the next free `T-###`.
     reproduced by running the repository's migrations in an in-memory Postgres; B-02/B-03 checked
     against RevenueCat's webhook field reference; B-04 measured on `pipeline/data/presence_*.json`.
   - Not covered: anything needing a phone, the live database, RevenueCat, Play Console or PostHog.
-- **T-266 · Free catches are counted twice by the database** — *Claude · S · `TODO` · deps: T-200 · review B-01*
+- **T-266 · Free catches are counted twice by the database** — *Claude · S · `DONE` (migration 0032 applied by the DB migrate workflow) · deps: T-200 · review B-01*
   - A PostgREST upsert fires the `BEFORE INSERT` trigger even when the row exists, so
     spot-then-catch costs 2 of 3, a help pledge or re-tap on a caught species costs 1, and the
     next catch is refused after the app has shown success.
@@ -4294,6 +4294,17 @@ document until it is started, when it takes the next free `T-###`.
   - `verify.py` gains upsert-shaped checks, and the rule runs in CI against a real Postgres.
   - The app skips writes that change nothing and un-catches only when a *catch* was refused.
   - Current-season counters are reset once the fix is live.
+  - ✅ Migration `20261116000001_free_catch_count_once.sql`: the INSERT firing returns early for a
+    row that already exists (checked after the profile lock, so two racing upserts of one new
+    species count once), and this season's counters are recomputed from this season's caught rows.
+  - ✅ `pipeline/tests/pg_harness.py` + `test_free_catch_pg.py` run the app's exact upsert against
+    the repository's migrations in a real Postgres (6 tests; CI now starts a Postgres 16 service and
+    sets `NEARBY_PG_TEST_URL`; without it they skip locally). Reproduced first: spot-then-catch
+    gave 2.
+  - ✅ `verify.py` writes with the upsert and reads the counter after spotting, the first catch,
+    a re-send and a pledge (`used=0/1/1/1`), then refuses the 4th species.
+  - ✅ `OfflineCollectionStore` sends no write that leaves the record unchanged, and un-catches
+    only when the refused write was a catch (2 tests).
 - **T-267 · RevenueCat webhook: TRANSFER and products without an entitlement** — *Claude + Director · S · `TODO` · deps: T-217 · review B-02, B-03*
   - A TRANSFER event (no `entitlement_ids`, no `product_id`) moves every active entitlement from
     the old accounts to the new one, and household members follow.

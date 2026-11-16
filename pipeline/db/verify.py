@@ -17,11 +17,17 @@ import sys
 
 # step -> expected outcome: "ok", or a substring of the error the database must raise.
 EXPECTED: dict[str, str] = {
+    "spot before catching (upsert)": "ok",
+    "counter after spotting": "used=0",
     "catch 1": "ok",
+    "counter after the first catch": "used=1",
+    "re-send the caught row": "ok",
+    "counter after re-sending": "used=1",
     "catch 2": "ok",
     "catch 3": "ok",
     "catch 4 (over the free allowance)": "free_catch_limit",
     "pledge help on a caught species": "ok",
+    "counter after the pledge": "used=1",
     "user grants themselves the Full Game": "permission denied",
     "user resets their own catch counter": "permission denied",
     "app-style home_region upsert": "ok",
@@ -92,6 +98,11 @@ EXPECTED: dict[str, str] = {
 EXACT = {"ok", "kept", "deleted"}
 
 
+def is_exact(expected: str) -> bool:
+    """Outcomes compared whole: fixed words, dates and season keys, and counter readings."""
+    return expected in EXACT or "-" in expected or expected.startswith("used=")
+
+
 def evaluate(results: dict[str, str]) -> list[str]:
     """Human-readable failures; empty means every rule held."""
     failures = []
@@ -99,7 +110,7 @@ def evaluate(results: dict[str, str]) -> list[str]:
         got = results.get(step)
         if got is None:
             failures.append(f"{step}: did not run")
-        elif expected in EXACT or "-" in expected:
+        elif is_exact(expected):
             if got != expected:
                 failures.append(f"{step}: expected {expected!r}, got {got!r}")
         elif expected not in got:
@@ -135,21 +146,40 @@ def run_free_catch_checks(cur) -> dict[str, str]:
         "select set_config('request.jwt.claims', %s, true)",
         (json.dumps({"sub": user_id, "role": "authenticated"}),),
     )
-    for i in range(1, 5):
-        name = f"catch {i}" if i < 4 else "catch 4 (over the free allowance)"
+    # Every write is the upsert the app sends (T-266 · review B-01): Postgres fires the INSERT
+    # trigger for it even when the row exists, so the counter is checked after each step.
+    def upsert(name: str, species: str, caught: bool, helped: bool = False) -> None:
         _step(
             cur, results, name,
-            "insert into public.collection (user_id, species_id, spotted_at, caught_at) "
-            "values (%s, %s, now(), now())",
-            (user_id, f"zz-verify-{i}"),
+            "insert into public.collection (user_id, species_id, spotted_at, caught_at, helped_at, "
+            "helped_kind, prime_bonus) values (%s, %s, '2026-01-01T00:00:00Z', "
+            "case when %s then '2026-01-01T00:00:00Z'::timestamptz end, "
+            "case when %s then now() end, case when %s then 'give' end, false) "
+            "on conflict (user_id, species_id) do update set spotted_at = excluded.spotted_at, "
+            "caught_at = excluded.caught_at, helped_at = excluded.helped_at, "
+            "helped_kind = excluded.helped_kind, prime_bonus = excluded.prime_bonus",
+            (user_id, species, caught, helped, helped),
         )
-    # A PostgREST upsert resends every column, caught_at included — must not count as a catch.
-    _step(
-        cur, results, "pledge help on a caught species",
-        "update public.collection set helped_at = now(), helped_kind = 'give', caught_at = caught_at "
-        "where user_id = %s and species_id = 'zz-verify-1'",
-        (user_id,),
-    )
+
+    def counter(name: str) -> None:
+        _step(
+            cur, results, name,
+            "select 'used=' || coalesce((select free_catches_used from public.profiles "
+            "where user_id = %s), 0)",
+            (user_id,),
+        )
+
+    upsert("spot before catching (upsert)", "zz-verify-1", caught=False)
+    counter("counter after spotting")
+    upsert("catch 1", "zz-verify-1", caught=True)
+    counter("counter after the first catch")
+    upsert("re-send the caught row", "zz-verify-1", caught=True)
+    counter("counter after re-sending")
+    upsert("pledge help on a caught species", "zz-verify-1", caught=True, helped=True)
+    counter("counter after the pledge")
+    upsert("catch 2", "zz-verify-2", caught=True)
+    upsert("catch 3", "zz-verify-3", caught=True)
+    upsert("catch 4 (over the free allowance)", "zz-verify-4", caught=True)
     _step(cur, results, "user grants themselves the Full Game",
           "update public.profiles set full_game = true where user_id = %s", (user_id,))
     _step(cur, results, "user resets their own catch counter",

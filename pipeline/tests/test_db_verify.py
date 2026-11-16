@@ -5,12 +5,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from db.verify import EXACT, EXPECTED, evaluate  # noqa: E402
+from db.verify import EXPECTED, evaluate, is_exact  # noqa: E402
 
 
 def passing() -> dict[str, str]:
     return {
-        step: (expected if expected in EXACT or "-" in expected else f'ERROR: {expected} for table x')
+        step: (expected if is_exact(expected) else f'ERROR: {expected} for table x')
         for step, expected in EXPECTED.items()
     }
 
@@ -25,6 +25,13 @@ def test_a_fourth_catch_that_succeeds_is_a_failure():
     assert evaluate(results) == [
         "catch 4 (over the free allowance): expected an error containing 'free_catch_limit', got 'ok'"
     ]
+
+
+def test_a_catch_counted_twice_is_a_failure():
+    # T-266 · review B-01: the upsert of a spotted row once raised the counter by 2.
+    results = passing()
+    results["counter after the first catch"] = "used=2"
+    assert evaluate(results) == ["counter after the first catch: expected 'used=1', got 'used=2'"]
 
 
 def test_a_refused_legitimate_write_is_a_failure():
