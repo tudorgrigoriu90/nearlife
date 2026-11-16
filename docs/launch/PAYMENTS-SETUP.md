@@ -190,7 +190,13 @@ This is how a purchase reaches the database and unlocks the app.
 3. **Settings → Full Game & Family** → you should see both products with 49 kr / 99 kr → **Buy**
    the Full Game → pick the **test card** → confirm.
 4. Within a few seconds it shows **✓ Unlocked**, and catches are unlimited.
-5. Tell Claude. I'll check the database row the webhook wrote and mark the purchase tasks done.
+5. Also buy one **county pack** the same way, then test a **restore into a new account**: clear
+   the app's storage (Android Settings → Apps → Nearby → Storage → Clear storage), open it, finish
+   onboarding, then **Settings → Restore purchases**. Everything you bought should unlock again.
+6. Tell Claude. I'll check the rows the webhook wrote and keep each event's JSON as a test
+   fixture (T-278). To copy an event: RevenueCat dashboard → **Customers** → the test customer →
+   **Customer history** → the event → **Webhook** → copy the request body. It contains only test
+   ids, never the secret.
 
 If something doesn't match what's written here, send a screenshot. Never include the JSON file or
 the secret in it.

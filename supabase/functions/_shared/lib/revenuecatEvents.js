@@ -14,7 +14,13 @@
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** RevenueCat entitlement identifiers this app understands. Anything else is dropped. */
 const KNOWN = /^(full_game|family|all_regions|region_SWE_\d+_1)$/;
-const GRANT = new Set(['INITIAL_PURCHASE', 'NON_RENEWING_PURCHASE', 'RENEWAL', 'UNCANCELLATION', 'PRODUCT_CHANGE']);
+const GRANT = new Set([
+    'INITIAL_PURCHASE',
+    'NON_RENEWING_PURCHASE',
+    'RENEWAL',
+    'UNCANCELLATION',
+    'PRODUCT_CHANGE',
+]);
 const REVOKE = new Set(['CANCELLATION', 'EXPIRATION']);
 /** The entitlement id for one county pack: `SWE.9_1` → `region_SWE_9_1` (no dots in RC ids). */
 export function regionEntitlement(regionId) {
@@ -41,7 +47,9 @@ function productEntitlement(productId) {
     return KNOWN.test(productId) ? productId : null;
 }
 function uuids(value) {
-    return Array.isArray(value) ? value.filter((v) => typeof v === 'string' && UUID.test(v)) : [];
+    return Array.isArray(value)
+        ? value.filter((v) => typeof v === 'string' && UUID.test(v))
+        : [];
 }
 export function planEntitlementChanges(body) {
     const ev = body?.event;
@@ -58,12 +66,27 @@ export function planEntitlementChanges(body) {
     if (typeof ev.event_timestamp_ms !== 'number' || !Number.isFinite(ev.event_timestamp_ms)) {
         return { kind: 'ignore', reason: 'no timestamp' };
     }
-    if (!Array.isArray(ev.entitlement_ids))
-        return { kind: 'ignore', reason: 'no entitlement list' };
+    // A TRANSFER (a restore into another account) names only the two sets of app user ids: no
+    // entitlement list, product or app_user_id (T-267 · review B-02). What moves is whatever the
+    // old accounts hold, which only the database knows.
+    if (type === 'TRANSFER') {
+        const from = uuids(ev.transferred_from);
+        const to = uuids(ev.transferred_to);
+        if (from.length === 0 || to.length === 0) {
+            return { kind: 'ignore', reason: 'transfer between unknown ids' };
+        }
+        return { kind: 'transfer', from, to, atMs: ev.event_timestamp_ms, eventId: ev.id };
+    }
+    // RevenueCat sends `entitlement_ids: null` for a product attached to no entitlement, which is how
+    // the county packs and All of Sweden are set up (T-267 · review B-03): the product id decides.
+    if (ev.entitlement_ids != null && !Array.isArray(ev.entitlement_ids)) {
+        return { kind: 'ignore', reason: 'malformed entitlement list' };
+    }
+    const listed = Array.isArray(ev.entitlement_ids) ? ev.entitlement_ids : [];
     const fromProduct = productEntitlement(ev.product_id);
     const entitlements = [
         ...new Set([
-            ...ev.entitlement_ids.filter((e) => typeof e === 'string' && KNOWN.test(e)),
+            ...listed.filter((e) => typeof e === 'string' && KNOWN.test(e)),
             ...(fromProduct ? [fromProduct] : []),
         ]),
     ];
@@ -75,10 +98,6 @@ export function planEntitlementChanges(body) {
         eventId: ev.id,
     };
     const forUsers = (users, active) => users.flatMap((userId) => entitlements.map((entitlement) => ({ userId, entitlement, active, ...base })));
-    if (type === 'TRANSFER') {
-        const changes = [...forUsers(uuids(ev.transferred_from), false), ...forUsers(uuids(ev.transferred_to), true)];
-        return changes.length > 0 ? { kind: 'apply', changes } : { kind: 'ignore', reason: 'transfer between unknown ids' };
-    }
     // An anonymous RevenueCat id ($RCAnonymousID:…) means the SDK was used before it knew the
     // Supabase user. Nothing in the database can own that purchase; the restore after sign-in
     // re-sends it under the real id.

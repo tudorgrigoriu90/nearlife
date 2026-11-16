@@ -55,6 +55,7 @@ EXPECTED: dict[str, str] = {
     "purchase grants the Full Game": "ok",
     "an older event arriving late changes nothing": "ok",
     "with the Full Game a 4th catch is accepted": "ok",
+    "a transfer moves the purchases to the new account": "ok",
     "refund revokes the Full Game": "ok",
     "Family also grants the Full Game": "ok",
     "a purchase for a deleted account is skipped": "ok",
@@ -332,6 +333,34 @@ def run_entitlement_checks(cur) -> dict[str, str]:
     _step(cur, results, "a purchase for a deleted account is skipped",
           "select case when public.set_entitlement(gen_random_uuid(), 'full_game', true, now(), 'p', 'evt') "
           "= 'unknown_user' then 'ok' else 'wrong' end")
+
+    # T-267 · review B-02: a restore into a new account (RevenueCat TRANSFER) moves the purchases.
+    def new_account() -> str:
+        cur.execute(
+            "insert into auth.users (id, instance_id, aud, role, is_anonymous, created_at, updated_at) "
+            "values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', "
+            "'authenticated', true, now(), now()) returning id"
+        )
+        return str(cur.fetchone()[0])
+
+    old, new = new_account(), new_account()
+    for ent, product in (("full_game", "full_game"), ("region_SWE_9_1", "region_swe_9")):
+        cur.execute("select public.set_entitlement(%s, %s, true, now(), %s, 'evt-buy')", (old, ent, product))
+    cur.execute(
+        "select public.transfer_entitlements(%s::uuid[], %s::uuid[], now() + interval '1 minute', 'evt-t')",
+        ([old], [new]),
+    )
+    _step(
+        cur, results, "a transfer moves the purchases to the new account",
+        "select case when "
+        "(select count(*) from public.entitlements where user_id = %s and active) = 0 "
+        "and (select array_agg(entitlement order by entitlement) from public.entitlements "
+        "     where user_id = %s and active) = array['full_game', 'region_SWE_9_1'] "
+        "and not (select full_game from public.profiles where user_id = %s) "
+        "and (select full_game from public.profiles where user_id = %s) "
+        "then 'ok' else 'wrong' end",
+        (old, new, old, new),
+    )
 
     cur.execute("set local role authenticated")
     cur.execute("select set_config('request.jwt.claims', %s, true)",

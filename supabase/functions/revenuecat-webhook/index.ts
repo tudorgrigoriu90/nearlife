@@ -42,6 +42,17 @@ Deno.serve(async (req: Request) => {
   if (plan.kind === 'ignore') return json({ ignored: plan.reason });
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey());
+  if (plan.kind === 'transfer') {
+    // A restore into another account (T-267): the database moves what the old accounts own.
+    const { data, error } = await db.rpc('transfer_entitlements', {
+      p_from: plan.from,
+      p_to: plan.to,
+      p_at: new Date(plan.atMs).toISOString(),
+      p_event: plan.eventId,
+    });
+    if (error) return json({ error: `transfer_entitlements failed: ${error.message}` }, 500);
+    return json({ transferred: data });
+  }
   const outcomes: string[] = [];
   for (const c of plan.changes) {
     const { data, error } = await db.rpc('set_entitlement', {

@@ -4305,13 +4305,29 @@ document until it is started, when it takes the next free `T-###`.
     a re-send and a pledge (`used=0/1/1/1`), then refuses the 4th species.
   - ✅ `OfflineCollectionStore` sends no write that leaves the record unchanged, and un-catches
     only when the refused write was a catch (2 tests).
-- **T-267 · RevenueCat webhook: TRANSFER and products without an entitlement** — *Claude + Director · S · `TODO` · deps: T-217 · review B-02, B-03*
+- **T-267 · RevenueCat webhook: TRANSFER and products without an entitlement** — *Claude · S · `DONE` (migration 0033; the sandbox fixtures moved to T-278) · deps: T-217 · review B-02, B-03*
   - A TRANSFER event (no `entitlement_ids`, no `product_id`) moves every active entitlement from
     the old accounts to the new one, and household members follow.
   - A purchase with `entitlement_ids` null or absent is granted from its product id, so county
     packs and All of Sweden unlock.
   - Tests use payloads captured from the RevenueCat sandbox (Director: one purchase, one refund,
     one restore), kept as fixtures.
+  - ✅ `planEntitlementChanges` handles TRANSFER before any entitlement check and returns a
+    `transfer` plan (from/to Supabase ids only); `entitlement_ids` null or absent is an empty list,
+    so the product id decides; a non-list value is still ignored as malformed (3 tests).
+  - ✅ Migration `20261116000002_transfer_entitlements.sql`: `transfer_entitlements(from, to, at,
+    event)`, service role only. Every active store entitlement of the old accounts is revoked
+    there and granted to the new one through `set_entitlement`; a reviewer-code grant stays; a
+    Family owner's household moves with them; nothing is revoked when no destination account
+    exists. Tested against a real Postgres (`test_transfer_pg.py`, 6 tests) and by a `verify.py`
+    check (full_game + region_SWE_9_1 move from A to B, `profiles.full_game` follows).
+  - ✅ The Edge Function calls it for a transfer plan. The captured sandbox payloads are T-278.
+- **T-278 · RevenueCat sandbox payloads as test fixtures** — *Director + Claude · XS · `BLOCKED` (needs the Play products, after the closed test) · deps: T-267 · review I-13*
+  - Director: one test purchase of the Full Game, one of a county pack, one refund and one restore
+    into a new account (PAYMENTS-SETUP Part I), and the request body of each webhook event.
+  - Claude: the bodies become fixtures under `lib/__fixtures__/revenuecat/`, and
+    `revenuecatEvents.test.ts` plans each one (a county pack with its real `entitlement_ids`,
+    a TRANSFER with its real fields).
 - **T-268 · "Active this season" from monthly counts** — *Claude · M · `TODO` · deps: T-261 · review B-04*
   - A month is active for a species in a county only from a share of its busiest month and a
     minimum count (the rule `lib/countyStats.ts` already uses), not from a single record.
