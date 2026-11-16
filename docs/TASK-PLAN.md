@@ -4388,8 +4388,11 @@ document until it is started, when it takes the next free `T-###`.
   - A user in preview mode can set their home county later, from This Week and from Settings; the
     catch screen can ask for the permission.
   - Preview mode is look-only, as its comment says, or the Director records that it is not.
-- **T-273 · Catch tip and pledge confirmation for every species** — *Claude · XS · `TODO` · deps: T-059 · review B-10*
+- **T-273 · Catch tip and pledge confirmation for every species** — *Claude · XS · `DONE` · deps: T-059 · review B-10*
   - Both screens take their text from the species repository, not the bundled 54.
+  - ✅ `ProtectTip` and `PledgeConfirm` take the content the card loaded (`content` prop; App
+    passes it when it belongs to the same species); the bundled lookup stays the fallback. Tests
+    render both with a `gbif:` species and assert its protect and give text.
 - **T-274 · Collection sync: pull, don't block, say so** — *Claude · S · `TODO` · deps: T-165 · review B-11, B-13, I-08*
   - Sync merges the server copy even when the outbox is empty.
   - A permanently rejected write is dropped and logged instead of blocking the queue.

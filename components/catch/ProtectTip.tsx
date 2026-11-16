@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../../lib/i18n';
 import { commonNameFor, contentFor } from '../../lib/species/localized';
+import type { SpeciesContent } from '../../lib/species/content';
 import type { Species } from '../../lib/species/types';
 
 // Catch-success "killer moment" (T-034 → T-074): the contextual protect tip shown right after a
@@ -12,17 +13,23 @@ export default function ProtectTip({
   species,
   locale = 'en',
   prime = false,
+  content: loaded,
   onDone,
 }: {
   species: Species;
   locale?: Locale;
   /** Caught inside its active season (lib/primeBonus): a quiet extra line, never a reward to buy. */
   prime?: boolean;
+  /**
+   * The content the card loaded for this species (T-273 · review B-10). Catalogue species have no
+   * bundled content, so without it the screen had no tip; the bundled set is the fallback.
+   */
+  content?: SpeciesContent | null;
   onDone: () => void;
 }) {
   const tr = createTranslator(locale);
   const name = commonNameFor(species, locale);
-  const content = contentFor(species.id, locale);
+  const content = loaded ?? contentFor(species.id, locale);
 
   return (
     <View style={styles.container}>
@@ -45,12 +52,37 @@ export default function ProtectTip({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f8f2', paddingHorizontal: 24, paddingTop: 96, paddingBottom: 40 },
+  container: {
+    flex: 1,
+    backgroundColor: '#f4f8f2',
+    paddingHorizontal: 24,
+    paddingTop: 96,
+    paddingBottom: 40,
+  },
   content: { flex: 1, justifyContent: 'center' },
-  badge: { fontSize: 22, fontWeight: '800', color: '#2f7d4f', textAlign: 'center', marginBottom: 24 },
-  prime: { marginTop: -16, marginBottom: 24, fontSize: 15, fontWeight: '600', color: '#8a6d1f', textAlign: 'center' },
+  badge: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#2f7d4f',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  prime: {
+    marginTop: -16,
+    marginBottom: 24,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#8a6d1f',
+    textAlign: 'center',
+  },
   tipCard: { backgroundColor: '#fff', borderRadius: 16, padding: 20 },
-  tipLabel: { fontSize: 12, fontWeight: '700', letterSpacing: 1, color: '#2f5d8a', textTransform: 'uppercase' },
+  tipLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: '#2f5d8a',
+    textTransform: 'uppercase',
+  },
   tipBody: { marginTop: 8, fontSize: 16, lineHeight: 23, color: '#2f3d2c' },
   law: { marginTop: 16, fontSize: 12, color: '#7a8a7c', fontStyle: 'italic' },
   cta: { paddingVertical: 16, borderRadius: 14, backgroundColor: '#3a7d44', alignItems: 'center' },

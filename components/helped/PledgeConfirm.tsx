@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { HelpKind } from '../../lib/collection';
 import { createTranslator, type Locale } from '../../lib/i18n';
 import { commonNameFor, contentFor } from '../../lib/species/localized';
+import type { SpeciesContent } from '../../lib/species/content';
 import type { Species } from '../../lib/species/types';
 
 // Helped-tier pledge confirmation (T-076 · GDD §5, USER-FLOWS §7). The Helped tier is a light,
@@ -13,16 +14,22 @@ export default function PledgeConfirm({
   species,
   kind,
   locale = 'en',
+  content: loaded,
   onDone,
 }: {
   species: Species;
   kind: HelpKind;
   locale?: Locale;
+  /**
+   * The content the card loaded for this species (T-273 · review B-10). Catalogue species have no
+   * bundled content, so without it the screen had no tip; the bundled set is the fallback.
+   */
+  content?: SpeciesContent | null;
   onDone: () => void;
 }) {
   const tr = createTranslator(locale);
   const name = commonNameFor(species, locale);
-  const content = contentFor(species.id, locale);
+  const content = loaded ?? contentFor(species.id, locale);
   const action = kind === 'give' ? content?.give : content?.protect;
 
   return (
@@ -42,7 +49,13 @@ export default function PledgeConfirm({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f8f2', paddingHorizontal: 28, paddingTop: 96, paddingBottom: 40 },
+  container: {
+    flex: 1,
+    backgroundColor: '#f4f8f2',
+    paddingHorizontal: 28,
+    paddingTop: 96,
+    paddingBottom: 40,
+  },
   content: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   emoji: { fontSize: 64, marginBottom: 16 },
   title: { fontSize: 24, fontWeight: '800', color: '#2f7d4f', textAlign: 'center' },

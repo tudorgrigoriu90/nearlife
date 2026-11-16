@@ -433,6 +433,10 @@ export default function App() {
     );
   const cardSeason = selected ? seasonOf(selected) : null;
   const [catching, setCatching] = useState<Species | null>(null);
+  // The content the card loaded, for the screens that follow it (catch tip, pledge; T-273): a
+  // catalogue species has no bundled content to fall back on.
+  const loadedContentFor = (species: Species) =>
+    cardContent?.speciesId === species.id ? cardContent.content : null;
   const [caughtTip, setCaughtTip] = useState<{ species: Species; prime: boolean } | null>(null);
   const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
   const [paywall, setPaywall] = useState(false);
@@ -1048,6 +1052,7 @@ export default function App() {
       <>
         <ProtectTip
           species={caughtTip.species}
+          content={loadedContentFor(caughtTip.species)}
           prime={caughtTip.prime}
           locale={locale}
           onDone={() => setCaughtTip(null)}
@@ -1063,6 +1068,7 @@ export default function App() {
       <>
         <PledgeConfirm
           species={pledge.species}
+          content={loadedContentFor(pledge.species)}
           kind={pledge.kind}
           locale={locale}
           onDone={() => setPledge(null)}
