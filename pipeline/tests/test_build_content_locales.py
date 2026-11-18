@@ -163,3 +163,13 @@ def test_the_realms_key_is_not_mistaken_for_a_locale_name():
     vern = {"1": {"sv": "Utter", "_realms": {"freshwater": True}}}
     rows = build_localized(SPECIES, "mammal", wiki, ["sv"], vern)
     assert rows[0]["commonName"] == "Utter"
+
+
+# T-279: content only for catalogue species that have none yet (the ~2,000 the facet cap hid), so
+# the run fits in GitHub's six hours instead of regenerating every species.
+def test_only_missing_keeps_the_species_without_content():
+    from build_content import only_keys
+
+    species = [{"speciesKey": 1}, {"speciesKey": 2}, {"speciesKey": 3}]
+    assert only_keys(species, {2, 3}) == [{"speciesKey": 2}, {"speciesKey": 3}]
+    assert only_keys(species, None) == species

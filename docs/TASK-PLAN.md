@@ -4359,13 +4359,16 @@ document until it is started, when it takes the next free `T-###`.
     winter).
   - Paging recovered species the cap had dropped: the catalogue is now **10,078** species (99.75%
     of observations), up from 8,064, mostly insects and plants. Their content is T-279.
-- **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `TODO` · deps: T-268*
+- **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
     season, give, protect), names (GBIF + Wikidata), photo and thumbnail, translated facts, and
     bird song where a bird is new.
   - Done when every `in_catalogue` species has a content row in every locale, and the share with a
     photo and a Swedish name is reported against the previous catalogue's.
+  - ✅ Data pipeline `content_scope=missing` (`build_content.py --missing`): content only for
+    catalogue species with no content row, so the run fits in six hours. Then: names (GBIF +
+    Wikidata), photos and thumbnails, translated facts, bird song.
 - **T-269 · Account deletion erases the device** — *Claude · S · `DONE` · deps: T-093 · review B-05, B-12, B-52 (device part)*
   - The collection cache and outbox, language choices, cached catch spots and in-memory state are
     cleared; RevenueCat and PostHog identities are reset.

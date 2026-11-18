@@ -124,10 +124,37 @@ def load_vernacular() -> dict:
     return json.loads(path.read_text(encoding="utf-8")).get("names", {})
 
 
-def build(presence_path: Path, client: WikimediaClient, locales: list[str] | None = None) -> dict:
+def only_keys(species: list[dict], keys: set[int] | None) -> list[dict]:
+    """The species whose GBIF key is in `keys`; all of them when `keys` is None."""
+    return species if keys is None else [sp for sp in species if sp["speciesKey"] in keys]
+
+
+MISSING_SQL = (
+    "select s.gbif_key from public.species s where s.in_catalogue and s.gbif_key is not null "
+    "and not exists (select 1 from public.species_content c where c.species_id = s.id)"
+)
+
+
+def missing_keys() -> set[int]:
+    """Catalogue species with no content row at all (T-279), read from the database."""
+    import os
+
+    import psycopg
+
+    with psycopg.connect(os.environ["SUPABASE_DB_URL"]) as conn, conn.cursor() as cur:
+        cur.execute(MISSING_SQL)
+        return {int(r[0]) for r in cur.fetchall()}
+
+
+def build(
+    presence_path: Path,
+    client: WikimediaClient,
+    locales: list[str] | None = None,
+    keys: set[int] | None = None,
+) -> dict:
     taxon = taxon_of(presence_path)
     locales = locales or list(LOCALES)
-    species = distinct_species(json.loads(presence_path.read_text(encoding="utf-8")))
+    species = only_keys(distinct_species(json.loads(presence_path.read_text(encoding="utf-8"))), keys)
     print(f"  {len(species)} species x {len(locales)} locales", flush=True)
 
     content = build_localized(species, taxon, client, locales, load_vernacular())
@@ -159,6 +186,11 @@ def main(argv: list[str]) -> int:
     if not argv:
         print(__doc__)
         return 2
+    keys = None
+    if argv[0] == "--missing":  # T-279: only catalogue species with no content yet
+        keys = missing_keys()
+        print(f"{len(keys)} catalogue species have no content", flush=True)
+        argv = ["--all"]
     if argv[0] == "--all":
         targets = sorted(DATA.glob("presence_*.json"))
     else:
@@ -170,7 +202,9 @@ def main(argv: list[str]) -> int:
         if not path.exists():
             print(f"no such file: {path}")
             return 2
-        payload = build(path, client)
+        payload = build(path, client, keys=keys)
+        if keys is not None and not payload["content"]:
+            continue
         out = DATA / f"content_{payload['meta']['taxon']}.json"
         out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         m = payload["meta"]

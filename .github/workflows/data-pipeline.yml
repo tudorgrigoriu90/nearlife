@@ -38,7 +38,7 @@ on:
         required: false
         default: ""
       content_scope:
-        description: "Content generation scope: 'all' (~12k species, ~hours), a single presence file name, or 'skip'"
+        description: "Content generation scope: 'all' (~15k species, ~hours), 'missing' (catalogue species without content), a single presence file name, or 'skip'"
         required: false
         default: "all"
 
@@ -131,6 +131,8 @@ jobs:
         run: |
           if [ "${CONTENT_SCOPE:-all}" = "all" ]; then
             python pipeline/build_content.py --all
+          elif [ "$CONTENT_SCOPE" = "missing" ]; then
+            python pipeline/build_content.py --missing
           else
             python pipeline/build_content.py "pipeline/data/$CONTENT_SCOPE"
           fi
