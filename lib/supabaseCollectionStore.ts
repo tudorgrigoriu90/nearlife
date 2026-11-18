@@ -6,6 +6,8 @@ import {
   applySpotted,
   CatchRefusedError,
   FREE_CATCH_LIMIT_MARKER,
+  isPermanentRejection,
+  RejectedWriteError,
   type CollectionStore,
 } from './collectionStore';
 
@@ -131,6 +133,9 @@ export class SupabaseCollectionGateway implements CollectionGateway {
       .from('collection')
       .upsert(row, { onConflict: 'user_id,species_id' });
     if (error?.message?.includes(FREE_CATCH_LIMIT_MARKER)) throw new CatchRefusedError(row.species_id);
+    if (error && isPermanentRejection(error.code)) {
+      throw new RejectedWriteError(row.species_id, error.code);
+    }
     if (error) throw new Error(`collection upsert failed: ${error.message}`);
   }
 }

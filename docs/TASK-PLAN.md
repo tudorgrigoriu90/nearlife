@@ -4411,10 +4411,16 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ `ProtectTip` and `PledgeConfirm` take the content the card loaded (`content` prop; App
     passes it when it belongs to the same species); the bundled lookup stays the fallback. Tests
     render both with a `gbif:` species and assert its protect and give text.
-- **T-274 · Collection sync: pull, don't block, say so** — *Claude · S · `TODO` · deps: T-165 · review B-11, B-13, I-08*
+- **T-274 · Collection sync: pull, don't block, say so** — *Claude · S · `DONE` · deps: T-165 · review B-11, B-13, I-08*
   - Sync merges the server copy even when the outbox is empty.
   - A permanently rejected write is dropped and logged instead of blocking the queue.
   - A catch the server refuses is explained to the user and counted (`catch_refused`).
+  - ✅ `drain()` merges the server copy even with an empty outbox; a failed read keeps local
+    records. `RejectedWriteError` (SQLSTATE classes 22/23/42 from the upsert) drops the write with
+    a warning instead of blocking the queue. A refused catch is reported once
+    (`takeRefusedCatches` → `useCollection.refusedCatches`); the App names the species in the
+    out-of-catches sheet ("{name} could not be saved"), never on the catch screens, and tracks
+    `catch_refused` once (listed in DASHBOARDS.md). Tests: 4 store, 1 sheet.
 - **T-275 · No Kronoberg stand-ins outside Kronoberg; county data cached on the phone** — *Claude · M · `TODO` · deps: T-057, T-207 · review B-14, B-15, B-16, B-17, B-20*
   - A failed county read shows the last saved county data or an error with retry, never the
     bundled Kronoberg list under another county's name.

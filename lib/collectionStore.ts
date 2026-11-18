@@ -19,6 +19,26 @@ export class CatchRefusedError extends Error {
   }
 }
 
+/**
+ * A write the server will never accept as sent: a check, constraint or permission error (Postgres
+ * SQLSTATE classes 22, 23 and 42). Retrying it would block every write queued behind it, so the
+ * outbox drops it and logs it (T-274 · review I-08).
+ */
+export class RejectedWriteError extends Error {
+  constructor(
+    readonly speciesId: string,
+    readonly code: string,
+  ) {
+    super(`collection write for ${speciesId} rejected (${code})`);
+    this.name = 'RejectedWriteError';
+  }
+}
+
+/** SQLSTATE classes that mean "this write is wrong", not "try again later". */
+export function isPermanentRejection(code: string | undefined | null): boolean {
+  return typeof code === 'string' && /^(22|23|42)/.test(code);
+}
+
 /** The marker the trigger raises (`raise exception 'free_catch_limit'`). */
 export const FREE_CATCH_LIMIT_MARKER = 'free_catch_limit';
 

@@ -4,6 +4,7 @@ import {
   applyHelped,
   applySpotted,
   CatchRefusedError,
+  RejectedWriteError,
   type CollectionStore,
 } from './collectionStore';
 import { mergeLists } from './collectionMerge';
@@ -75,6 +76,8 @@ export class OfflineCollectionStore implements CollectionStore {
   private records = new Map<string, CollectionRecord>();
   private pending: PendingOp[] = [];
   private syncChain: Promise<void> = Promise.resolve();
+  /** Catches the server refused since the app last asked (T-274 · review B-13). */
+  private refusedCatches: string[] = [];
 
   constructor(
     private readonly cache: OfflineCache,
@@ -141,6 +144,13 @@ export class OfflineCollectionStore implements CollectionStore {
     await this.persist();
   }
 
+  /** The catches the server refused since the last call, each once, for the app to explain. */
+  takeRefusedCatches(): string[] {
+    const out = this.refusedCatches;
+    this.refusedCatches = [];
+    return out;
+  }
+
   /** Queued writes not yet accepted by the server — lets the UI show "saved, syncing later". */
   pendingCount(): number {
     return this.pending.length;
@@ -161,7 +171,9 @@ export class OfflineCollectionStore implements CollectionStore {
   }
 
   private async drain(): Promise<void> {
-    if (!this.remote || this.pending.length === 0) return;
+    // The merge runs even with nothing to send (T-274 · review B-11): a catch made on another phone
+    // or a restored account reaches this one only through it.
+    if (!this.remote) return;
     try {
       const queue = [...this.pending];
       const delivered: PendingOp[] = [];
@@ -174,8 +186,16 @@ export class OfflineCollectionStore implements CollectionStore {
             // retrying would block every write queued behind it forever. Drop it. Only a refused
             // *catch* takes the species back to spotted (T-266): a refused pledge or spot says
             // nothing about a catch the server already holds.
-            if (!(error instanceof CatchRefusedError)) throw error;
-            if (op.kind === 'caught') this.uncatch(op.speciesId);
+            if (error instanceof RejectedWriteError) {
+              console.warn('collection write dropped', error.message);
+            } else if (error instanceof CatchRefusedError) {
+              if (op.kind === 'caught') {
+                this.uncatch(op.speciesId);
+                this.refusedCatches.push(op.speciesId);
+              }
+            } else {
+              throw error;
+            }
           }
           delivered.push(op);
         }

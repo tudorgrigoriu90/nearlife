@@ -24,6 +24,10 @@ export interface Collection {
   spot: (speciesId: string) => void;
   markCaught: (speciesId: string, primeBonus: boolean) => void;
   help: (speciesId: string, kind: HelpKind) => void;
+  /** Catches the server refused, oldest first, until the app has explained them (T-274). */
+  refusedCatches: string[];
+  /** The app has shown the notice for this refused catch. */
+  clearRefusedCatch: (speciesId: string) => void;
   /** Forget the collection on this device (account deletion, T-269). */
   reset: () => Promise<void>;
 }
@@ -49,9 +53,18 @@ export function useCollection(): Collection {
 
   const [records, setRecords] = useState<CollectionRecord[]>([]);
 
+  const [refusedCatches, setRefusedCatches] = useState<string[]>([]);
+
   const refresh = useCallback(async () => {
-    setRecords(await getStore().list());
+    const store = getStore();
+    setRecords(await store.list());
+    const refused = store.takeRefusedCatches();
+    if (refused.length > 0) setRefusedCatches((prev) => [...prev, ...refused]);
   }, [getStore]);
+
+  const clearRefusedCatch = useCallback((speciesId: string) => {
+    setRefusedCatches((prev) => prev.filter((id) => id !== speciesId));
+  }, []);
 
   // Load the on-device collection first so the UI is correct before any network work, then let the
   // outbox drain whatever last session could not deliver.
@@ -115,5 +128,5 @@ export function useCollection(): Collection {
     setRecords([]);
   }, [getStore]);
 
-  return { records, spot, markCaught, help, reset };
+  return { records, spot, markCaught, help, reset, refusedCatches, clearRefusedCatch };
 }

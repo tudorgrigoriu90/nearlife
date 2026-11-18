@@ -12,3 +12,13 @@ describe('FreeCatchSheet', () => {
     expect(screen.getByText(tr('paywall.freeMission'))).toBeTruthy();
   });
 });
+
+// T-274 · review B-13: a catch the server refused is explained, with the same choices.
+describe('FreeCatchSheet for a refused catch', () => {
+  it('names the species that could not be saved', async () => {
+    await render(<FreeCatchSheet onClose={() => {}} refusedName="Red fox" />);
+    expect(screen.getByText(tr('catch.refused.title', { name: 'Red fox' }))).toBeTruthy();
+    expect(screen.getByText(tr('catch.refused.body'))).toBeTruthy();
+    expect(screen.getByText(tr('paywall.noAds'))).toBeTruthy();
+  });
+});

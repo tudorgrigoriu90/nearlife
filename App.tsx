@@ -476,6 +476,55 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboarded, tappedSpeciesId]);
 
+  // A catch the server refused is explained once, away from the catch screens (T-274 · review
+  // B-13): the success moment stays clean (invariant #4), and the notice comes on the next screen.
+  const [refusedNotice, setRefusedNotice] = useState<{ id: string; name: string } | null>(null);
+  const refusedTracked = useRef(new Set<string>());
+  const nextRefused = collection.refusedCatches[0];
+  useEffect(() => {
+    if (!nextRefused || refusedNotice) return;
+    if (!refusedTracked.current.has(nextRefused)) {
+      refusedTracked.current.add(nextRefused);
+      track('catch_refused', { speciesId: nextRefused });
+    }
+    let cancelled = false;
+    speciesRepo
+      .describeSpecies([nextRefused], locale)
+      .then(([summary]) => summary?.species)
+      .catch(() => undefined)
+      .then((species) => {
+        if (cancelled) return;
+        const name = species ? commonNameFor(species, locale) : nextRefused;
+        setRefusedNotice({ id: nextRefused, name });
+      });
+    return () => {
+      cancelled = true;
+    };
+    // speciesRepo/locale/track are read when a refusal arrives; it is shown once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nextRefused, refusedNotice]);
+  const closeRefused = () => {
+    if (refusedNotice) collection.clearRefusedCatch(refusedNotice.id);
+    setRefusedNotice(null);
+  };
+  const refusedSheet =
+    refusedNotice && !paywall ? (
+      <FreeCatchSheet
+        locale={locale}
+        refusedName={refusedNotice.name}
+        onClose={closeRefused}
+        onOpenStore={
+          hasSupabaseConfig()
+            ? () => {
+                closeRefused();
+                track('store_opened', { source: 'paywall' });
+                setShowStore(true);
+              }
+            : undefined
+        }
+      />
+    ) : null;
+
   // Latest consent for handlers that resume after an OS dialog — the closure's copy may be stale.
   const consentRef = useRef(consent);
   useEffect(() => {
@@ -1190,6 +1239,7 @@ export default function App() {
             }
           />
         ) : null}
+        {refusedSheet}
         <StatusBar style="auto" />
       </View>
     );
@@ -1284,6 +1334,7 @@ export default function App() {
           onPress={() => setShowSettings(true)}
         />
       </View>
+      {refusedSheet}
       <StatusBar style="auto" />
     </View>
   );

@@ -2,6 +2,7 @@ import type { CollectionRecord } from './collection';
 import {
   CatchRefusedError,
   InMemoryCollectionStore,
+  RejectedWriteError,
   type CollectionStore,
 } from './collectionStore';
 import {
@@ -38,8 +39,13 @@ class FlakyRemote implements CollectionStore {
     this.guard();
     return this.inner.get(id);
   }
+  /** Species whose writes the "server" rejects for good (a check or permission error). */
+  rejectForGood = new Set<string>();
+  writes = 0;
   async markSpotted(id: string, at: string) {
     this.guard();
+    this.writes += 1;
+    if (this.rejectForGood.has(id)) throw new RejectedWriteError(id, '23514');
     return this.inner.markSpotted(id, at);
   }
   /** Species the "server" refuses to record as caught (T-200's free-catch trigger). */
@@ -234,12 +240,12 @@ describe('OfflineCollectionStore sends only writes that change something (T-266)
     remote.online = true;
     await store.markSpotted('moose', T1);
     await store.sync();
-    const calls = remote.calls;
+    const writes = remote.writes;
     const again = await store.markSpotted('moose', T2);
     await store.sync();
     expect(again.spottedAt).toBe(T1);
     expect(store.pendingCount()).toBe(0);
-    expect(remote.calls).toBe(calls);
+    expect(remote.writes).toBe(writes);
   });
 });
 
@@ -269,5 +275,48 @@ describe('OfflineCollectionStore.clear (T-269)', () => {
     const reloaded = new OfflineCollectionStore(cache, null);
     await reloaded.hydrate();
     expect(await reloaded.list()).toEqual([]);
+  });
+});
+
+// T-274 · review B-11, B-13, I-08.
+describe('OfflineCollectionStore sync with the server copy', () => {
+  it('pulls the server copy even when nothing is queued', async () => {
+    const { store, remote } = setup();
+    remote.online = true;
+    await remote.inner.markCaught('moose', T1, false); // e.g. caught on another phone
+    await store.sync();
+    expect((await store.get('moose'))?.caughtAt).toBe(T1);
+  });
+
+  it('a failed read leaves local records as they are', async () => {
+    const { store, remote } = setup();
+    await store.markSpotted('fox', T1);
+    remote.online = true;
+    remote.listFails = true;
+    await store.sync();
+    expect((await store.get('fox'))?.spottedAt).toBe(T1);
+  });
+});
+
+describe('OfflineCollectionStore reports what the server refused', () => {
+  it('a refused catch is reported once, for the app to explain', async () => {
+    const { store, remote } = setup();
+    await store.markCaught('red-fox', T1, false);
+    remote.refuse.add('red-fox');
+    remote.online = true;
+    await store.sync();
+    expect(store.takeRefusedCatches()).toEqual(['red-fox']);
+    expect(store.takeRefusedCatches()).toEqual([]);
+  });
+
+  it('a write the server rejects for good is dropped, and the queue moves on', async () => {
+    const { store, remote } = setup();
+    await store.markSpotted('bad-id', T1);
+    await store.markSpotted('moose', T2);
+    remote.rejectForGood.add('bad-id');
+    remote.online = true;
+    await store.sync();
+    expect(store.pendingCount()).toBe(0);
+    expect((await remote.inner.get('moose'))?.spottedAt).toBe(T2);
   });
 });

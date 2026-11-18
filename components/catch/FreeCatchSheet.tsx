@@ -10,8 +10,14 @@ export default function FreeCatchSheet({
   locale = 'en',
   onClose,
   onOpenStore,
+  refusedName,
 }: {
   locale?: Locale;
+  /**
+   * Set when the server refused a catch the phone had recorded (T-274 · review B-13): the sheet
+   * then says which one could not be saved, instead of the generic "out of free catches".
+   */
+  refusedName?: string;
   onClose: () => void;
   /** Open the Store; without one (no purchases in this build) the sheet only informs. */
   onOpenStore?: () => void;
@@ -20,8 +26,12 @@ export default function FreeCatchSheet({
   return (
     <View style={styles.backdrop}>
       <View style={styles.sheet}>
-        <Text style={styles.title}>{tr('paywall.title')}</Text>
-        <Text style={styles.body}>{tr('paywall.body')}</Text>
+        <Text style={styles.title}>
+          {refusedName ? tr('catch.refused.title', { name: refusedName }) : tr('paywall.title')}
+        </Text>
+        <Text style={styles.body}>
+          {refusedName ? tr('catch.refused.body') : tr('paywall.body')}
+        </Text>
         <Text style={styles.reassure}>{tr('paywall.freeMission')}</Text>
         <Text style={styles.reassure}>{tr('paywall.noAds')}</Text>
         {onOpenStore ? (

@@ -22,7 +22,7 @@ The two primary metrics in [VALIDATION-CRITERIA.md](../VALIDATION-CRITERIA.md), 
 context.
 
 **Events used:** `session_start`, `species_spotted`, `notification_opened`, `this_week_opened`,
-`catch_attempted`, `catch_succeeded`
+`catch_attempted`, `catch_succeeded`, `catch_refused`
 
 | Insight | Type | Set-up |
 |---|---|---|
@@ -31,6 +31,7 @@ context.
 | **Notification open rate** | Trends | `notification_opened`, total count per day. Divide by sends, which are counted in the database, not PostHog (see the note below). Go ≥ 25% sustained. |
 | **Non-notification pull** | Trends, formula | A = `this_week_opened` (total), B = `notification_opened` (total). Formula `A / (A + B)`. Go ≥ 25%. |
 | **Catch taste** | Trends, unique users | `catch_succeeded` unique users ÷ `session_start` unique users, same period. Go ≥ 40%. |
+| **Refused catches** | Trends | `catch_refused`, total per week. A catch the phone recorded and the server refused (T-274). Should stay near zero; a rise means the phone's free-catch count and the server's disagree. |
 
 **Notification sends** come from the database, because the server sends pushes and PostHog
 never sees them. Supabase → SQL editor:

@@ -13,6 +13,8 @@ export interface AnalyticsEventProps {
   notification_opened: { speciesId: string };
   species_spotted: { speciesId: string; source: 'notification' | 'this_week' | 'onboarding' | 'quiz' };
   catch_attempted: { speciesId: string };
+  /** The server refused a catch the phone had recorded (T-274 · review B-13). */
+  catch_refused: { speciesId: string };
   catch_succeeded: { speciesId: string; grade: 'perfect' | 'good' };
   free_catches_exhausted: Record<string, never>;
   paywall_shown: Record<string, never>;
