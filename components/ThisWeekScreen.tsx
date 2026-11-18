@@ -1,4 +1,4 @@
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { monthOf } from '../lib/season';
 import { thisWeek, type ThisWeekEntry } from '../lib/thisWeek';
@@ -7,6 +7,7 @@ import { commonNameFor, contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import type { Species } from '../lib/species/types';
 import type { LiveThisWeek } from '../lib/thisWeekLive';
+import { BUNDLED_REGION_ID } from '../lib/speciesRepository';
 import { groupOf } from '../lib/species/group';
 import { CATEGORY_EMOJI } from './speciesVisual';
 import { LIVE_EVENT_META } from './liveEventVisual';
@@ -68,8 +69,16 @@ function bundledRow(entry: ThisWeekEntry, locale: Locale): RowData {
 // Live-events strip (T-080): the real seasonal moments genuinely under way this month, rendered
 // only when there are any (nothing shows out of season). Honest by construction — the windows come
 // from the tested core (lib/liveEvents.ts). Scrolls with the list as its header.
-function EventsHeader({ locale, tr }: { locale: Locale; tr: ReturnType<typeof createTranslator> }) {
-  const events = activeEvents(new Date()).filter((e) => LIVE_EVENT_META[e.id]);
+function EventsHeader({
+  tr,
+  countyId,
+}: {
+  locale: Locale;
+  tr: ReturnType<typeof createTranslator>;
+  /** The county the list is for; events are shown only for counties they are known for (B-17). */
+  countyId: string;
+}) {
+  const events = activeEvents(countyId, new Date()).filter((e) => LIVE_EVENT_META[e.id]);
   if (events.length === 0) return null;
   return (
     <View style={styles.events}>
@@ -95,6 +104,9 @@ export default function ThisWeekScreen({
   spottedIds,
   onSelectSpecies,
   live = null,
+  status,
+  onRetry,
+  regionId,
   regionName,
   onOpenCounties,
   travel,
@@ -106,6 +118,14 @@ export default function ThisWeekScreen({
   onSelectSpecies?: (species: Species) => void;
   /** The user's county list (T-207); null → the bundled preview list. */
   live?: LiveThisWeek | null;
+  /**
+   * T-275 · review B-15: `preview` (no home county) shows the bundled Kronoberg list; `loading`
+   * and `error` never do. Defaults to `ready` with `live`, else `preview`.
+   */
+  status?: 'preview' | 'loading' | 'error' | 'ready';
+  onRetry?: () => void;
+  /** The county shown, for its seasonal events (B-17); the preview is Kronoberg. */
+  regionId?: string;
   regionName?: string;
   /** Show the Counties screen (T-105): look around, or open, another county. */
   onOpenCounties?: () => void;
@@ -118,24 +138,32 @@ export default function ThisWeekScreen({
 }) {
   const tr = createTranslator(locale);
   const month = monthOf(new Date());
+  const mode = status ?? (live !== null ? 'ready' : 'preview');
   const rows: RowData[] =
-    live !== null
+    mode === 'ready' && live !== null
       ? live.items.map((item) => ({
           species: item.species,
           name: item.commonName,
           detail: item.detail ?? item.species.scientificName,
           isNew: item.isNew,
         }))
-      : thisWeek(KRONOBERG_SPECIES, month, spottedIds ?? new Set()).map((e) =>
-          bundledRow(e, locale),
-        );
-  const count = live !== null ? live.total : rows.length;
-  const region = live !== null && regionName ? regionName : tr('region.kronoberg');
+      : mode === 'preview'
+        ? thisWeek(KRONOBERG_SPECIES, month, spottedIds ?? new Set()).map((e) =>
+            bundledRow(e, locale),
+          )
+        : [];
+  const count = mode === 'ready' && live !== null ? live.total : rows.length;
+  const region = mode !== 'preview' && regionName ? regionName : tr('region.kronoberg');
+  const eventsCounty = mode === 'preview' ? BUNDLED_REGION_ID : (regionId ?? '');
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{tr('thisWeek.title')} 🌿</Text>
-      <Text style={styles.subtitle}>{tr('thisWeek.subtitle', { region, count })}</Text>
+      {mode === 'loading' || mode === 'error' ? (
+        <Text style={styles.subtitle}>{region}</Text>
+      ) : (
+        <Text style={styles.subtitle}>{tr('thisWeek.subtitle', { region, count })}</Text>
+      )}
       {travel ? (
         <View style={styles.travel}>
           <Text style={styles.travelText}>{tr('travel.banner', { county: travel.county })}</Text>
@@ -185,15 +213,32 @@ export default function ThisWeekScreen({
           ) : null}
         </View>
       ) : null}
+      {mode === 'loading' ? (
+        <ActivityIndicator testID="thisweek-loading" style={styles.loading} color="#3a7d44" />
+      ) : null}
+      {mode === 'error' ? (
+        <View style={styles.loadError}>
+          <Text style={styles.detail}>{tr('thisWeek.loadError')}</Text>
+          {onRetry ? (
+            <Pressable onPress={onRetry} accessibilityRole="button" style={styles.countiesLink}>
+              <Text style={styles.countiesText}>{tr('thisWeek.retry')}</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
       <FlatList
         data={rows}
         keyExtractor={(r) => r.species.id}
         renderItem={({ item }) => (
           <Row row={item} newLabel={tr('thisWeek.new')} onSelect={onSelectSpecies} />
         )}
-        ListHeaderComponent={<EventsHeader locale={locale} tr={tr} />}
+        ListHeaderComponent={<EventsHeader locale={locale} tr={tr} countyId={eventsCounty} />}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.detail}>{tr('thisWeek.empty')}</Text>}
+        ListEmptyComponent={
+          mode === 'loading' || mode === 'error' ? null : (
+            <Text style={styles.detail}>{tr('thisWeek.empty')}</Text>
+          )
+        }
       />
       <Text style={styles.footnote}>{tr('thisWeek.honesty')}</Text>
     </View>
@@ -201,6 +246,8 @@ export default function ThisWeekScreen({
 }
 
 const styles = StyleSheet.create({
+  loading: { marginTop: 32 },
+  loadError: { marginTop: 24, alignItems: 'center', gap: 12 },
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingTop: 64, paddingHorizontal: 20 },
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34' },
   subtitle: { marginTop: 4, marginBottom: 16, fontSize: 14, color: '#4a5c4d' },

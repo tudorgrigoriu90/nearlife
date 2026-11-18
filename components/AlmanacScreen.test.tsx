@@ -241,3 +241,14 @@ describe('AlmanacScreen', () => {
     expect(screen.getByText('Hare')).toBeTruthy();
   });
 });
+
+// T-275 · review B-14: a county that could not be loaded says so, with a retry.
+describe('AlmanacScreen when the county could not be loaded', () => {
+  it('shows the error and retries', async () => {
+    const onRetry = jest.fn();
+    await render(<AlmanacScreen species={[]} locale="en" error onRetry={onRetry} />);
+    expect(screen.getByText(tr('thisWeek.loadError'))).toBeTruthy();
+    await fireEvent.press(screen.getByText(tr('thisWeek.retry')));
+    expect(onRetry).toHaveBeenCalled();
+  });
+});

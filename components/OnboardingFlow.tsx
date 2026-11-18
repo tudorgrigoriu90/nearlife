@@ -14,6 +14,8 @@ import {
 import { monthOf } from '../lib/season';
 import { contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
+import type { SpeciesContent } from '../lib/species/content';
+import type { Species } from '../lib/species/types';
 import { thisWeek } from '../lib/thisWeek';
 import AgeGateStep from './onboarding/AgeGateStep';
 import OnboardingScaffold from './onboarding/OnboardingScaffold';
@@ -43,12 +45,16 @@ const HOMETOWN_STORE = new AsyncStorageHometownStore();
 /** Real device path: the locked hometown, else one fix resolved on-device and locked in. */
 const deriveFromDevice = () => deriveHometown(getLocationFixOnce, HOMETOWN_STORE);
 
+/** How long the county starter may take before the bundled one is used (T-275). */
+const STARTER_WAIT_MS = 3000;
+
 export default function OnboardingFlow({
   locale = 'en',
   onFirstSpotted,
   onComplete,
   resolveHome = deriveFromDevice,
   onSignIn,
+  starterFor,
 }: {
   locale?: Locale;
   /** "I already have an account" on the welcome screen (T-271); absent without a backend. */
@@ -57,6 +63,13 @@ export default function OnboardingFlow({
   onComplete: (result: OnboardingResult) => void;
   /** Seam for tests; production uses the device location + locked store. */
   resolveHome?: () => Promise<HometownLookup>;
+  /**
+   * The first sighting from the confirmed county (T-275 · review B-16): its most recorded species
+   * this month, with a photo and a name. Null or a failure within 3 s → the bundled starter.
+   */
+  starterFor?: (
+    regionId: string,
+  ) => Promise<{ species: Species; content: SpeciesContent | null } | null>;
 }) {
   const tr = createTranslator(locale);
   const [step, setStep] = useState<OnboardingStep>(FIRST_STEP);
@@ -70,10 +83,35 @@ export default function OnboardingFlow({
 
   // The starter species: the most interesting active-this-week species (tested thisWeek logic),
   // falling back to the first seed species in a quiet week so onboarding always has a payoff.
-  const starter = useMemo(() => {
+  const bundledStarter = useMemo(() => {
     const active = thisWeek(KRONOBERG_SPECIES, monthOf(new Date()), new Set());
     return active[0]?.species ?? KRONOBERG_SPECIES[0];
   }, []);
+  const [countyStarter, setCountyStarter] = useState<{
+    species: Species;
+    content: SpeciesContent | null;
+  } | null>(null);
+  const homeId = hometown?.id ?? null;
+  useEffect(() => {
+    if (!homeId || !starterFor) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<null>((resolve) => {
+      timer = setTimeout(() => resolve(null), STARTER_WAIT_MS);
+    });
+    void Promise.race([starterFor(homeId).catch(() => null), timeout]).then((found) => {
+      clearTimeout(timer);
+      if (!cancelled && found) setCountyStarter(found);
+    });
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [homeId, starterFor]);
+  const starter = countyStarter?.species ?? bundledStarter;
+  const starterContent = countyStarter
+    ? countyStarter.content
+    : (contentFor(bundledStarter.id, locale) ?? null);
 
   const advance = () => setStep((s) => stepAfter(s));
 
@@ -206,7 +244,7 @@ export default function OnboardingFlow({
           </View>
           <SpeciesCard
             species={starter}
-            content={contentFor(starter.id, locale) ?? null}
+            content={starterContent}
             locale={locale}
             tier={{ spotted: true, caught: false, helped: false }}
           />

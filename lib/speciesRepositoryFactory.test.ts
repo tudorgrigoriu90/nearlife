@@ -93,3 +93,20 @@ describe('FallbackSpeciesRepository', () => {
     await expect(repo.listSpecies('en')).rejects.toThrow(/bundled unavailable/);
   });
 });
+
+// T-275 · review B-14: the bundled set is Kronoberg's; it never stands in for another county.
+describe('the bundled set answers only for Kronoberg', () => {
+  const { HardcodedSpeciesRepository } = jest.requireActual('./speciesRepository');
+  const bundled = new HardcodedSpeciesRepository();
+
+  it('serves Kronoberg', async () => {
+    expect((await bundled.regionPresence('SWE.9_1')).length).toBeGreaterThan(0);
+    expect((await bundled.regionCatalogue('SWE.9_1', 'en')).length).toBeGreaterThan(0);
+  });
+
+  it('a failed read for Norrbotten never yields bundled species', async () => {
+    const repo = new FallbackSpeciesRepository(new Stub('server', true), bundled);
+    await expect(repo.regionPresence('SWE.10_1')).rejects.toThrow();
+    await expect(repo.regionCatalogue('SWE.10_1', 'sv')).rejects.toThrow();
+  });
+});

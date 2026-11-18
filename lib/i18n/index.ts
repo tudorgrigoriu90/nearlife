@@ -26,6 +26,8 @@ export const en = {
   'thisWeek.title': 'This week',
   'thisWeek.subtitle': '{region} · {count} species active in your area this season',
   'thisWeek.new': 'NEW',
+  'thisWeek.loadError': 'This county’s species could not be loaded. Check your connection.',
+  'thisWeek.retry': 'Try again',
   'thisWeek.empty': 'A quiet week — winter is resting season here.',
   'thisWeek.honesty': 'Active this season, never “here right now”.',
 
@@ -467,6 +469,8 @@ const sv: Catalog = {
   'thisWeek.title': 'Denna vecka',
   'thisWeek.subtitle': '{region} · {count} arter aktiva i ditt område den här säsongen',
   'thisWeek.new': 'NY',
+  'thisWeek.loadError': 'Länets arter kunde inte laddas. Kontrollera anslutningen.',
+  'thisWeek.retry': 'Försök igen',
   'thisWeek.empty': 'En lugn vecka – vintern är vilosäsong här.',
   'thisWeek.honesty': 'Aktiv den här säsongen, aldrig ”här just nu”.',
 

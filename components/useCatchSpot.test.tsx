@@ -75,3 +75,30 @@ describe('useCatchSpot', () => {
     await waitFor(() => expect(screen.getByTestId(TID)).toHaveTextContent('too-far:n2'));
   });
 });
+
+// T-275 · review B-20: a county's spots change rarely; downloaded once, they serve 30 days.
+describe('catch spots kept on the phone', () => {
+  it('opening the catch screen twice in a day downloads the spots once', async () => {
+    const store = new InMemoryCatchSpotStore();
+    const src = source([LAKE, HILL]);
+    const input = { species: pike, regionId: 'SWE.9_1', source: src, store, getFix: async () => FAR };
+    const first = await render(<Host {...input} />);
+    await waitFor(() => expect(screen.getByTestId(TID)).toHaveTextContent('too-far:n1'));
+    await first.unmount();
+    seq += 1;
+    TID = `c-${seq}`;
+    await render(<Host {...input} />);
+    await waitFor(() => expect(screen.getByTestId(TID)).toHaveTextContent('too-far:n1'));
+    expect(src.forRegion).toHaveBeenCalledTimes(1);
+  });
+
+  it('downloads again once the saved spots are older than 30 days', async () => {
+    const store = new InMemoryCatchSpotStore();
+    await store.save('SWE.9_1', [HILL], Date.now() - 31 * 24 * 3600_000);
+    const src = source([LAKE, HILL]);
+    await render(
+      <Host species={pike} regionId="SWE.9_1" source={src} store={store} getFix={async () => FAR} />,
+    );
+    await waitFor(() => expect(src.forRegion).toHaveBeenCalledTimes(1));
+  });
+});

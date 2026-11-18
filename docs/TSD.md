@@ -133,6 +133,15 @@ usually back). Candidates are weighted, and This Week ordered, by **this month's
 so a peak month is never cut short, and a run with a capped facet or a summer migrant active in
 winter fails.
 
+**County data on the phone (T-275).** Measured 2026-11-18 for Kronoberg (3,311 species): presence
+407 KB raw / 59 KB gzipped, catalogue (`region_catalogue`, Swedish) 1.85 MB raw / 270 KB gzipped,
+so about 330 KB per county per launch before the cache. The app now keeps each county's presence
+and catalogue (per language) in its cache directory with the server's data version
+(`public.data_version()`, bumped by a statement trigger on every species table, migration 0035);
+a launch with unchanged data costs the version request only. Offline, the saved county is shown;
+with nothing saved, This Week and the Almanac say so with a retry. The bundled Kronoberg set answers
+for Kronoberg only. Catch spots are kept 30 days.
+
 **Tuning levers:** cadence (per day), cell resolution (granularity vs. data density),
 rarity_flavor curve, active-window strictness. All should be config, not hardcoded, so the
 fake-it prototype can tune the *feel* without redeploys.

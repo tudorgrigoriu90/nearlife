@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { catchSpotView, habitatsFor, type CatchSpot, type CatchSpotSource, type CatchSpotView } from '../lib/catchSpots';
-import type { CatchSpotStore } from '../lib/catchSpotStore';
+import { SPOTS_MAX_AGE_MS, type CatchSpotStore } from '../lib/catchSpotStore';
 import type { LatLng } from '../lib/proximity';
 import type { SpeciesCategory } from '../lib/species/types';
 
@@ -31,22 +31,23 @@ export function useCatchSpot({ species, regionId, source, store, getFix }: UseCa
 
   useEffect(() => {
     let live = true;
-    void store.load(regionId).then((cached) => {
-      if (live && cached) setSpots((current) => current ?? cached);
-    });
-    source
-      .forRegion(regionId)
-      .then((fresh) => {
-        if (!live) return;
-        setSpots(fresh);
-        void store.save(regionId, fresh);
-      })
-      // Offline: the cached spots stand, or the screen says it is still finding them.
-      .catch(() => {
-        void store.load(regionId).then((cached) => {
-          if (live) setSpots((current) => current ?? cached ?? []);
+    void store.loadSaved(regionId).then((saved) => {
+      if (!live) return;
+      if (saved) setSpots((current) => current ?? saved.spots);
+      // Spots downloaded within 30 days serve as they are (T-275 · review B-20).
+      if (saved && Date.now() - saved.savedAt < SPOTS_MAX_AGE_MS) return;
+      source
+        .forRegion(regionId)
+        .then((fresh) => {
+          if (!live) return;
+          setSpots(fresh);
+          void store.save(regionId, fresh);
+        })
+        // Offline: the saved spots stand, or the screen says it is still finding them.
+        .catch(() => {
+          if (live) setSpots((current) => current ?? saved?.spots ?? []);
         });
-      });
+    });
     source
       .habitatsOf(species.id)
       .then((own) => {

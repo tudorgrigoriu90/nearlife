@@ -40,3 +40,23 @@ describe('ThisWeekScreen', () => {
     expect(screen.queryByText(`📷 ${tr('identify.cta')}`)).toBeNull();
   });
 });
+
+// T-275 · review B-15: with a home county the bundled Kronoberg list is never shown; while the
+// county loads there is a loading state, and a failed load says so with a retry.
+describe('ThisWeekScreen with a county', () => {
+  it('shows a loading state, not the Kronoberg list, while the county loads', async () => {
+    await render(<ThisWeekScreen locale="en" status="loading" regionName="Norrbotten" />);
+    expect(screen.queryByText(tr('region.kronoberg'), { exact: false })).toBeNull();
+    expect(screen.getByTestId('thisweek-loading')).toBeTruthy();
+  });
+
+  it('a failed load offers a retry', async () => {
+    const onRetry = jest.fn();
+    await render(
+      <ThisWeekScreen locale="en" status="error" regionName="Norrbotten" onRetry={onRetry} />,
+    );
+    expect(screen.getByText(tr('thisWeek.loadError'))).toBeTruthy();
+    await fireEvent.press(screen.getByText(tr('thisWeek.retry')));
+    expect(onRetry).toHaveBeenCalled();
+  });
+});

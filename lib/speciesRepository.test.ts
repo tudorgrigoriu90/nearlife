@@ -31,8 +31,9 @@ describe('HardcodedSpeciesRepository', () => {
     expect(await repo.getContent('no-such-species', 'en')).toBeNull();
   });
 
-  it('stands in its bundled set for any county catalogue', async () => {
-    expect((await repo.regionCatalogue('SWE.13_1', 'sv')).length).toBeGreaterThan(50);
+  it('serves its bundled set as Kronoberg, and no other county (T-275 · review B-14)', async () => {
+    expect((await repo.regionCatalogue('SWE.9_1', 'sv')).length).toBeGreaterThan(50);
+    await expect(repo.regionCatalogue('SWE.13_1', 'sv')).rejects.toThrow();
   });
 
   it('describes requested species in order, localized, skipping unknown ids', async () => {

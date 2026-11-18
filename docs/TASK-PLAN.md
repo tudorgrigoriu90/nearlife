@@ -4429,12 +4429,28 @@ document until it is started, when it takes the next free `T-###`.
     (`takeRefusedCatches` → `useCollection.refusedCatches`); the App names the species in the
     out-of-catches sheet ("{name} could not be saved"), never on the catch screens, and tracks
     `catch_refused` once (listed in DASHBOARDS.md). Tests: 4 store, 1 sheet.
-- **T-275 · No Kronoberg stand-ins outside Kronoberg; county data cached on the phone** — *Claude · M · `TODO` · deps: T-057, T-207 · review B-14, B-15, B-16, B-17, B-20*
+- **T-275 · No Kronoberg stand-ins outside Kronoberg; county data cached on the phone** — *Claude · M · `DONE` (migration 0035 applied with this push) · deps: T-057, T-207 · review B-14, B-15, B-16, B-17, B-20*
   - A failed county read shows the last saved county data or an error with retry, never the
     bundled Kronoberg list under another county's name.
   - The onboarding first sighting and the seasonal events come from the user's county.
   - Catalogue, presence and catch spots are cached per county and refreshed when the server's
     data version changes, not on every launch.
+  - ✅ B-14: the bundled set answers `regionPresence`/`regionCatalogue` for `SWE.9_1` only; any
+    other county's failed read is an error (offline pack included).
+  - ✅ B-20: `CachingSpeciesRepository` (lib/countyCache.ts, files in the cache directory) keeps
+    each county's presence and catalogue per language with the server's data version; one
+    version request per session; offline it serves what is saved. `public.data_version()` and a
+    statement trigger on species, presence, content, media and regions (migration 0035, tested
+    in a real Postgres). Measured: ~330 KB compressed per county per launch before (TSD §4).
+    Catch spots younger than 30 days are not downloaded again. Account deletion clears the cache.
+  - ✅ B-15: This Week has explicit `preview` / `loading` / `error` / `ready` states; the bundled
+    list only in preview, a spinner while loading, and a message with "Try again" on failure. The
+    Almanac has the same error state.
+  - ✅ B-16: the onboarding first sighting is the county's most recorded species this month with a
+    photo and a name (`pickCountyStarter`), bundled only in preview or after 3 s.
+  - ✅ B-17: each seasonal event names its counties; `activeEvents(county, date)`; Norrbotten in
+    November has no first frost. Tests: 25 across the pieces.
+  - Still a network read on each launch: `describeSpecies` for the ~50 This Week rows shown (small).
 - **T-276 · Credit Wikipedia text on the card** — *Claude · S · `IN-PROGRESS` (code pushed; done when migration 0034 is applied, the backfill has run and the live check passes) · deps: T-179 · review B-59*
   - Species facts are Wikipedia text (CC BY-SA 4.0) and machine translations of it, shown with no
     source, licence or link anywhere in the app.

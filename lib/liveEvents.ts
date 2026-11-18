@@ -8,15 +8,22 @@ import type { Month } from './species/types';
 
 export interface LiveEvent {
   id: string;
-  /** Months the event is genuinely under way in the region. */
+  /** Months the event is genuinely under way in `counties`. */
   months: Month[];
+  /**
+   * The counties these months are true for (T-275 · review B-17). The first frost and the swifts'
+   * arrival come weeks apart in Kronoberg and Norrbotten; an event is shown nowhere else.
+   */
+  counties: string[];
 }
 
+const KRONOBERG = 'SWE.9_1';
+
 export const KRONOBERG_EVENTS: LiveEvent[] = [
-  { id: 'first-swift-of-spring', months: [5] },
-  { id: 'salmon-run', months: [9, 10] },
-  { id: 'mushroom-bloom', months: [8, 9, 10] },
-  { id: 'first-frost', months: [11] },
+  { id: 'first-swift-of-spring', months: [5], counties: [KRONOBERG] },
+  { id: 'salmon-run', months: [9, 10], counties: [KRONOBERG] },
+  { id: 'mushroom-bloom', months: [8, 9, 10], counties: [KRONOBERG] },
+  { id: 'first-frost', months: [11], counties: [KRONOBERG] },
 ];
 
 /** Whether an event is under way on `date`. */
@@ -24,7 +31,11 @@ export function isEventActive(event: LiveEvent, date: Date): boolean {
   return event.months.includes(monthOf(date));
 }
 
-/** The events under way on `date`, in definition order. */
-export function activeEvents(date: Date, events: LiveEvent[] = KRONOBERG_EVENTS): LiveEvent[] {
-  return events.filter((event) => isEventActive(event, date));
+/** The events under way in `countyId` on `date`, in definition order. */
+export function activeEvents(
+  countyId: string,
+  date: Date,
+  events: LiveEvent[] = KRONOBERG_EVENTS,
+): LiveEvent[] {
+  return events.filter((event) => event.counties.includes(countyId) && isEventActive(event, date));
 }

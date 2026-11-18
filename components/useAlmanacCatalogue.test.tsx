@@ -50,11 +50,13 @@ describe('useAlmanacCatalogue', () => {
     expect(r.regionCatalogue).toHaveBeenCalledTimes(1);
   });
 
-  it('shows an empty Almanac instead of spinning forever when the read fails', async () => {
+  it('says the county could not be loaded instead of spinning forever (T-275)', async () => {
     await render(
       <Host repo={repo({ regionCatalogue: async () => Promise.reject(new Error('offline')) })} regionId="SWE.13_1" />,
     );
-    await waitFor(() => expect(latest).toEqual({ species: [], loading: false }));
+    await waitFor(() =>
+      expect(latest).toEqual({ species: [], loading: false, error: true, retry: expect.any(Function) }),
+    );
   });
 
   it('keeps the county list when the extras lookup fails', async () => {

@@ -79,13 +79,16 @@ export class HardcodedSpeciesRepository implements SpeciesRepository {
     return contentInLocale(speciesId, locale) ?? null;
   }
 
-  // The bundled set is Kronoberg-only; presence is each species' curated active window.
-  async regionPresence(_regionId: string): Promise<RegionPresence[]> {
+  // The bundled set is Kronoberg's (presence = each species' curated active window). It answers
+  // for Kronoberg only (T-275 · review B-14): shown under another county's name, 54 Kronoberg
+  // species would be "active in your area" where they may not live (invariant #1).
+  async regionPresence(regionId: string): Promise<RegionPresence[]> {
+    bundledCounty(regionId);
     return this.species.map((s) => ({ speciesId: s.id, activeMonths: s.activeMonths, occurrences: 0 }));
   }
 
-  // The bundled set stands in for every county, as `regionPresence` does above.
-  async regionCatalogue(_regionId: string, _locale: Locale): Promise<Species[]> {
+  async regionCatalogue(regionId: string, _locale: Locale): Promise<Species[]> {
+    bundledCounty(regionId);
     return [...this.species];
   }
 
@@ -223,6 +226,15 @@ export interface PresenceRow {
   occurrences: number;
   /** Absent in an offline pack saved before T-268. */
   month_counts?: number[] | null;
+}
+
+/** The one county the bundled set describes. */
+export const BUNDLED_REGION_ID = 'SWE.9_1';
+
+function bundledCounty(regionId: string): void {
+  if (regionId !== BUNDLED_REGION_ID) {
+    throw new Error(`the bundled set has no data for ${regionId}`);
+  }
 }
 
 export function presenceRowToPresence(row: PresenceRow): RegionPresence {
@@ -389,6 +401,13 @@ async function readInChunks<T>(ids: string[], read: (chunk: string[]) => Promise
 /** supabase-js adapter for `SpeciesGateway` (reads are public via RLS). */
 export class SupabaseSpeciesGateway implements SpeciesGateway {
   constructor(private readonly client: SupabaseClient) {}
+
+  /** The species data version the phone's county cache is checked against (T-275). */
+  async fetchDataVersion(): Promise<string> {
+    const { data, error } = await this.client.rpc('data_version');
+    if (error) throw new Error(`data_version failed: ${error.message}`);
+    return String(data ?? '');
+  }
 
   async fetchSpecies(): Promise<SpeciesRow[]> {
     const { data, error } = await this.client

@@ -66,8 +66,10 @@ import {
 import { ensureAnonymousSession, getSupabase } from './lib/supabase';
 import { getSupabaseConfig, hasSupabaseConfig } from './lib/supabaseConfig';
 import { eraseDeviceStorage } from './lib/deviceErase';
+import { ExpoCacheFiles } from './lib/countyCacheFiles';
 import { SupabaseSignInGateway } from './lib/accountSignIn';
 import { fixIfConsented } from './lib/locationAccess';
+import { pickCountyStarter } from './lib/countyStarter';
 import SignIn from './components/SignIn';
 import { useSessionStart } from './components/useSessionStart';
 import { resetAnalyticsIdentity } from './lib/posthog';
@@ -125,7 +127,7 @@ import { createTranslator, type Locale, type TranslationKey } from './lib/i18n';
 import {
   createPackSource,
   createRepositoryParts,
-  createSpeciesRepository,
+  FallbackSpeciesRepository,
 } from './lib/speciesRepositoryFactory';
 import { composeRepository } from './lib/offlineRepository';
 import { ExpoPackFiles } from './lib/packFiles';
@@ -140,8 +142,13 @@ import type { Species } from './lib/species/types';
 // default is the bundled Kronoberg set the app runs on today; the source swaps to a Supabase-backed
 // repo once the DB is seeded (T-055 content seed). Module-level so its identity is stable.
 // Supabase when configured, bundled data otherwise, with a fallback on failure (T-057).
-const SPECIES_REPO = createSpeciesRepository();
-const REPO_PARTS = createRepositoryParts();
+// Each county's data is kept on the phone and re-read only when the server's version changes
+// (T-275); one cached source serves both the plain and the offline-pack compositions.
+const COUNTY_CACHE = hasSupabaseConfig() ? new ExpoCacheFiles() : undefined;
+const REPO_PARTS = createRepositoryParts(COUNTY_CACHE);
+const SPECIES_REPO = REPO_PARTS.online
+  ? new FallbackSpeciesRepository(REPO_PARTS.online, REPO_PARTS.bundled)
+  : REPO_PARTS.bundled;
 // The offline county pack (T-256): Full Game owners keep their county on the phone.
 const PACK_SOURCE = createPackSource();
 const PACK_FILES = PACK_SOURCE ? new ExpoPackFiles() : null;
@@ -383,7 +390,12 @@ export default function App() {
   );
   // The Almanac lists the user's county + anything collected outside it (T-208); Badges count over
   // the same list so the two never disagree.
-  const { species: almanacSpecies, loading: speciesLoading } = useAlmanacCatalogue(
+  const {
+    species: almanacSpecies,
+    loading: speciesLoading,
+    error: almanacError,
+    retry: retryAlmanac,
+  } = useAlmanacCatalogue(
     speciesRepo,
     viewCounty?.id ?? hometown?.id ?? null,
     locale,
@@ -790,6 +802,18 @@ export default function App() {
     return true;
   };
 
+  // The onboarding first sighting from the confirmed county (T-275 · review B-16).
+  const countyStarterFor = useCallback(
+    async (regionId: string) =>
+      pickCountyStarter(
+        await speciesRepo.regionPresence(regionId),
+        monthOf(new Date()),
+        (ids) => speciesRepo.describeSpecies(ids, locale),
+        (id) => speciesRepo.getContent(id, locale),
+      ),
+    [speciesRepo, locale],
+  );
+
   // Signed in to an account with a linked email (T-271 · review B-07): the session is now that
   // account's, so the phone drops the collection it had and pulls the account's, and re-reads what
   // the account owns. RevenueCat follows the new id at the next purchase or restore (B-21).
@@ -808,6 +832,7 @@ export default function App() {
     await resetEntitlements();
     resetAnalyticsIdentity();
     PACK_FILES?.clear(); // the offline pack holds no personal data, but a fresh start is empty
+    void COUNTY_CACHE?.clear().catch(() => undefined);
     await eraseDeviceStorage(AsyncStorage);
     setShowDelete(false);
     setShowSettings(false);
@@ -930,6 +955,7 @@ export default function App() {
       <OnboardingFlow
         locale={locale}
         onSignIn={hasSupabaseConfig() ? () => setShowSignIn(true) : undefined}
+        starterFor={hasSupabaseConfig() ? countyStarterFor : undefined}
         onFirstSpotted={(speciesId) => {
           collection.spot(speciesId);
           track('species_spotted', { speciesId, source: 'onboarding' });
@@ -1368,7 +1394,10 @@ export default function App() {
         {tab === 'thisWeek' ? (
           <ThisWeekScreen
             locale={locale}
-            live={thisWeekLive}
+            live={thisWeekLive.live}
+            status={thisWeekLive.status}
+            onRetry={thisWeekLive.retry}
+            regionId={viewCounty?.id ?? hometown?.id}
             regionName={viewCounty?.name ?? hometown?.name}
             spottedIds={spottedIds(collection.records)}
             onOpenCounties={
@@ -1399,6 +1428,8 @@ export default function App() {
           <AlmanacScreen
             species={almanacSpecies}
             loading={speciesLoading}
+            error={almanacError}
+            onRetry={retryAlmanac}
             records={collection.records}
             locale={locale}
             onSelectSpecies={setSelected}

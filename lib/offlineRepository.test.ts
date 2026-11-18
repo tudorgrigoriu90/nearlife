@@ -103,8 +103,8 @@ describe('composeRepository', () => {
     expect(failing.regionCatalogue).toHaveBeenCalled();
   });
 
-  it('another county offline falls back to the bundled species', async () => {
+  it('another county offline has no data rather than Kronoberg stand-ins (T-275 · B-14)', async () => {
     const r = composeRepository({ online: failing, bundled, pack, thumbUri: uri, offline: true });
-    expect((await r.regionCatalogue('SWE.1_1', 'sv')).length).toBeGreaterThan(0);
+    await expect(r.regionCatalogue('SWE.1_1', 'sv')).rejects.toThrow();
   });
 });

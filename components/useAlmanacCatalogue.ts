@@ -11,6 +11,9 @@ import type { SpeciesRepository } from '../lib/speciesRepository';
 export interface AlmanacCatalogue {
   species: Species[];
   loading: boolean;
+  /** The county could not be read and nothing is saved on the phone (T-275 · review B-14). */
+  error: boolean;
+  retry: () => void;
 }
 
 export function useAlmanacCatalogue(
@@ -19,9 +22,12 @@ export function useAlmanacCatalogue(
   locale: Locale,
   collectedIds: ReadonlySet<string>,
 ): AlmanacCatalogue {
-  const [base, setBase] = useState<{ key: string; species: Species[] } | null>(null);
+  const [base, setBase] = useState<{ key: string; species: Species[]; failed?: boolean } | null>(
+    null,
+  );
+  const [attempt, setAttempt] = useState(0);
   const [extras, setExtras] = useState<Species[]>([]);
-  const baseKey = `${regionId ?? 'preview'}|${locale}`;
+  const baseKey = `${regionId ?? 'preview'}|${locale}|${attempt}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -32,7 +38,7 @@ export function useAlmanacCatalogue(
       // A failed read shows an empty (not loading-forever) Almanac; the repository has already
       // fallen back to bundled data where it could, and logged why.
       .catch(() => {
-        if (!cancelled) setBase({ key: baseKey, species: [] });
+        if (!cancelled) setBase({ key: baseKey, species: [], failed: true });
       });
     return () => {
       cancelled = true;
@@ -57,7 +63,14 @@ export function useAlmanacCatalogue(
     };
   }, [repo, current, collectedKey, locale]);
 
+  const retry = () => setAttempt((n) => n + 1);
+  if (base?.key === baseKey && base.failed) return { species: [], loading: false, error: true, retry };
   return current === null
-    ? { species: [], loading: true }
-    : { species: [...current, ...extras.filter((e) => !current.some((s) => s.id === e.id))], loading: false };
+    ? { species: [], loading: true, error: false, retry }
+    : {
+        species: [...current, ...extras.filter((e) => !current.some((s) => s.id === e.id))],
+        loading: false,
+        error: false,
+        retry,
+      };
 }

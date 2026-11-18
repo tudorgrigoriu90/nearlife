@@ -20,8 +20,14 @@ function repo(overrides: Partial<SpeciesRepository> = {}): SpeciesRepository {
 }
 
 let latest: LiveThisWeek | null = null;
+let status: string | null = null;
+let retry: (() => void) | null = null;
 const record = (value: LiveThisWeek | null) => {
   latest = value;
+};
+const recordState = (state: { status: string; retry: () => void }) => {
+  status = state.status;
+  retry = state.retry;
 };
 
 function Host(props: {
@@ -31,12 +37,16 @@ function Host(props: {
   onValue?: (value: LiveThisWeek | null) => void;
 }) {
   const { onValue = record } = props;
-  onValue(useThisWeek(props.repo, props.regionId, 6, new Set(props.spotted ?? []), 'sv'));
+  const state = useThisWeek(props.repo, props.regionId, 6, new Set(props.spotted ?? []), 'sv');
+  recordState(state);
+  onValue(state.live);
   return <Text>host</Text>;
 }
 
 beforeEach(() => {
   latest = null;
+  status = null;
+  retry = null;
 });
 
 describe('useThisWeek', () => {
@@ -51,6 +61,7 @@ describe('useThisWeek', () => {
     await render(<Host repo={r} regionId={null} />);
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(latest).toBeNull();
+    expect(status).toBe('preview');
     expect(r.regionPresence).not.toHaveBeenCalled();
   });
 
@@ -63,7 +74,7 @@ describe('useThisWeek', () => {
     expect(r.regionPresence).toHaveBeenCalledTimes(1);
   });
 
-  it('logs and keeps the preview when presence cannot load', async () => {
+  it('a failed load is an error with a retry, never the preview (T-275 · B-15)', async () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     await render(
       <Host
@@ -73,6 +84,7 @@ describe('useThisWeek', () => {
     );
     await waitFor(() => expect(warn).toHaveBeenCalledWith('this week presence failed', expect.any(Error)));
     expect(latest).toBeNull();
+    await waitFor(() => expect(status).toBe('error'));
     warn.mockRestore();
   });
 
@@ -82,6 +94,24 @@ describe('useThisWeek', () => {
       <Host repo={repo({ describeSpecies: async () => Promise.reject(new Error('x')) })} regionId="SWE.13_1" />,
     );
     await waitFor(() => expect(warn).toHaveBeenCalledWith('this week describe failed', expect.any(Error)));
+    warn.mockRestore();
+  });
+
+  it('is loading until the county arrives, and a retry asks again', async () => {
+    let calls = 0;
+    const r = repo({
+      regionPresence: async () => {
+        calls += 1;
+        if (calls === 1) throw new Error('offline');
+        return [{ speciesId: 'pike', activeMonths: [6], occurrences: 9 }];
+      },
+    });
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    await render(<Host repo={r} regionId="SWE.13_1" />);
+    await waitFor(() => expect(status).toBe('error'));
+    const { act } = jest.requireActual('@testing-library/react-native');
+    await act(async () => retry?.());
+    await waitFor(() => expect(status).toBe('ready'));
     warn.mockRestore();
   });
 });

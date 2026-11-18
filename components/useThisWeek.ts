@@ -9,14 +9,23 @@ import { liveThisWeek, type LiveThisWeek } from '../lib/thisWeekLive';
 // until there is something to show — and stays null with no hometown, in which case the screen
 // keeps its bundled preview list.
 
+export interface ThisWeekState {
+  live: LiveThisWeek | null;
+  /** T-275 · review B-15: the screen shows the bundled list only in `preview`. */
+  status: 'preview' | 'loading' | 'error' | 'ready';
+  retry: () => void;
+}
+
 export function useThisWeek(
   repo: SpeciesRepository,
   regionId: string | null,
   month: Month,
   spottedIds: ReadonlySet<string>,
   locale: Locale,
-): LiveThisWeek | null {
+): ThisWeekState {
   const [presence, setPresence] = useState<{ regionId: string; rows: RegionPresence[] } | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const [live, setLive] = useState<LiveThisWeek | null>(null);
 
   useEffect(() => {
@@ -27,13 +36,16 @@ export function useThisWeek(
       .then((rows) => {
         if (!cancelled) setPresence({ regionId, rows });
       })
-      // The repository already fell back to bundled data if it could; a total failure keeps the
-      // preview list rather than an empty screen.
-      .catch((e: unknown) => console.warn('this week presence failed', e));
+      // No saved copy and no server: the screen says so and offers a retry (T-275), never another
+      // county's species.
+      .catch((e: unknown) => {
+        console.warn('this week presence failed', e);
+        if (!cancelled) setFailed(`${regionId}#${attempt}`);
+      });
     return () => {
       cancelled = true;
     };
-  }, [repo, regionId]);
+  }, [repo, regionId, attempt]);
 
   // A Set's identity changes on every render; key the effect on its contents instead.
   const spottedKey = [...spottedIds].sort().join(',');
@@ -53,5 +65,9 @@ export function useThisWeek(
     };
   }, [repo, presence, regionId, month, spottedKey, locale]);
 
-  return regionId === null || presence?.regionId !== regionId ? null : live;
+  const retry = () => setAttempt((n) => n + 1);
+  if (regionId === null) return { live: null, status: 'preview', retry };
+  if (presence?.regionId === regionId && live !== null) return { live, status: 'ready', retry };
+  if (failed === `${regionId}#${attempt}`) return { live: null, status: 'error', retry };
+  return { live: null, status: 'loading', retry };
 }

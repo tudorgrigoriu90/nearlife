@@ -101,3 +101,52 @@ describe('OnboardingFlow', () => {
     expect(await screen.findByText(tr('onboarding.notif.cta'))).toBeTruthy();
   });
 });
+
+// T-275 · review B-16: the first sighting comes from the county just confirmed.
+describe('the first sighting', () => {
+  const pike = {
+    id: 'gbif:2346633',
+    scientificName: 'Esox lucius',
+    commonName: 'Pike',
+    category: 'fish',
+    rarity: 'common',
+    activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  } as never;
+
+  it('is the county starter when there is a home county', async () => {
+    const onFirstSpotted = jest.fn();
+    await render(
+      <OnboardingFlow
+        locale="en"
+        onComplete={() => {}}
+        onFirstSpotted={onFirstSpotted}
+        resolveHome={async () => ({ region: SKANE })}
+        starterFor={async (regionId) => (regionId === 'SWE.13_1' ? { species: pike, content: null } : null)}
+      />,
+    );
+    await throughLocation();
+    await press(tr('onboarding.hometown.cta', { region: 'Skåne' }));
+    await press(tr('onboarding.notif.cta'));
+    await screen.findByText(tr('onboarding.firstSpotted.cta'));
+    expect(onFirstSpotted).toHaveBeenCalledWith('gbif:2346633');
+  });
+
+  it('in preview mode uses the bundled starter', async () => {
+    const onFirstSpotted = jest.fn();
+    const starterFor = jest.fn(async () => null);
+    await render(
+      <OnboardingFlow
+        locale="en"
+        onComplete={() => {}}
+        onFirstSpotted={onFirstSpotted}
+        resolveHome={async () => ({ region: null, reason: 'no-fix' })}
+        starterFor={starterFor}
+      />,
+    );
+    await throughLocation();
+    await press(tr('onboarding.notif.cta'));
+    await screen.findByText(tr('onboarding.firstSpotted.cta'));
+    expect(starterFor).not.toHaveBeenCalled();
+    expect(onFirstSpotted.mock.calls[0][0]).not.toMatch(/^gbif:/);
+  });
+});

@@ -15,6 +15,7 @@ import {
 } from './speciesRepository';
 import { getSupabaseConfig, hasSupabaseConfig } from './supabaseConfig';
 import type { PackSource } from './offlinePack';
+import { CachingSpeciesRepository, type CacheFiles } from './countyCache';
 
 export type { SpeciesRepository };
 
@@ -91,20 +92,28 @@ export function createPackSource(): PackSource | null {
 }
 
 /** The server source and the bundled set, separately: the offline pack sits between them (T-257). */
-export function createRepositoryParts(): { online: SpeciesRepository | null; bundled: SpeciesRepository } {
-  const bundled = new HardcodedSpeciesRepository();
-  if (!hasSupabaseConfig()) return { online: null, bundled };
+/**
+ * The server source, with each county's presence and catalogue kept on the phone and re-read only
+ * when the server's data version changes (T-275 · review B-20). Without `cache` (tests), uncached.
+ */
+function onlineRepository(cache?: CacheFiles): SpeciesRepository {
   const { url, publishableKey } = getSupabaseConfig();
-  return { online: new SupabaseSpeciesRepository(new SupabaseSpeciesGateway(createClient(url, publishableKey))), bundled };
+  const gateway = new SupabaseSpeciesGateway(createClient(url, publishableKey));
+  const server = new SupabaseSpeciesRepository(gateway);
+  return cache ? new CachingSpeciesRepository(server, cache, () => gateway.fetchDataVersion()) : server;
 }
 
-export function createSpeciesRepository(): SpeciesRepository {
+export function createRepositoryParts(cache?: CacheFiles): {
+  online: SpeciesRepository | null;
+  bundled: SpeciesRepository;
+} {
+  const bundled = new HardcodedSpeciesRepository();
+  if (!hasSupabaseConfig()) return { online: null, bundled };
+  return { online: onlineRepository(cache), bundled };
+}
+
+export function createSpeciesRepository(cache?: CacheFiles): SpeciesRepository {
   const bundled = new HardcodedSpeciesRepository();
   if (!hasSupabaseConfig()) return bundled;
-  const { url, publishableKey } = getSupabaseConfig();
-  const client = createClient(url, publishableKey);
-  return new FallbackSpeciesRepository(
-    new SupabaseSpeciesRepository(new SupabaseSpeciesGateway(client)),
-    bundled,
-  );
+  return new FallbackSpeciesRepository(onlineRepository(cache), bundled);
 }

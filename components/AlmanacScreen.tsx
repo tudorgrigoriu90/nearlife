@@ -99,6 +99,8 @@ export default function AlmanacScreen({
   records = [],
   locale = 'en',
   loading = false,
+  error = false,
+  onRetry,
   onSelectSpecies,
   onOpenBadges,
   onOpenImpact,
@@ -109,6 +111,9 @@ export default function AlmanacScreen({
   records?: CollectionRecord[];
   locale?: Locale;
   loading?: boolean;
+  /** The county could not be loaded and nothing is saved (T-275 · review B-14). */
+  error?: boolean;
+  onRetry?: () => void;
   onSelectSpecies?: (species: Species) => void;
   /** Entry points to the Badges (T-082) / Impact (T-081) screens, shown when provided (T-058). */
   onOpenBadges?: () => void;
@@ -140,6 +145,19 @@ export default function AlmanacScreen({
   const counts = categoryCounts(species, records);
   const discovered = discoveredCount(species, records);
   const summary = progressSummary(records);
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.detail}>{tr('thisWeek.loadError')}</Text>
+        {onRetry ? (
+          <Pressable onPress={onRetry} accessibilityRole="button">
+            <Text style={styles.retry}>{tr('thisWeek.retry')}</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    );
+  }
 
   if (loading) {
     return (
@@ -311,6 +329,7 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
 }
 
 const styles = StyleSheet.create({
+  retry: { marginTop: 12, fontSize: 15, fontWeight: '700', color: '#3a7d44' },
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingTop: 64, paddingHorizontal: 16 },
   centered: { alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34', paddingHorizontal: 4 },
