@@ -59,6 +59,7 @@ export default function FrameMinigame({
       onCancel={onCancel}
     >
       <View
+        testID="frame-stage"
         style={styles.stage}
         onStartShouldSetResponder={() => true}
         onMoveShouldSetResponder={() => true}
@@ -66,11 +67,13 @@ export default function FrameMinigame({
         onResponderMove={move}
       >
         {DECOYS.map((d, i) => (
-          <Text key={i} style={[styles.subject, { left: d.x - 15, top: d.y - 15 }]}>
+          <Text key={i} pointerEvents="none" style={[styles.subject, { left: d.x - 15, top: d.y - 15 }]}>
             {d.glyph}
           </Text>
         ))}
-        <Text style={[styles.subject, { left: SUBJECT.x - 15, top: SUBJECT.y - 15 }]}>{SUBJECT.glyph}</Text>
+        <Text pointerEvents="none" style={[styles.subject, { left: SUBJECT.x - 15, top: SUBJECT.y - 15 }]}>
+          {SUBJECT.glyph}
+        </Text>
         <View style={[styles.reticle, { left: reticle.x - RETICLE / 2, top: reticle.y - RETICLE / 2 }]} pointerEvents="none" />
       </View>
       <Pressable style={styles.capture} onPress={capture} accessibilityRole="button">

@@ -10,7 +10,10 @@ export interface TraceConfig {
   allowedBreaks: number;
 }
 
-export const DEFAULT_TRACE: TraceConfig = { tolerancePx: 28, allowedBreaks: 6 };
+// T-277 · review B-60: 28 px / 6 breaks left 0.36 s of slack in a 10 s game; no first-time player
+// won. 44 px is a fingertip; 25 breaks are 15% of the ~166 samples. Starting values, to be
+// confirmed by the Director's phone test (T-277).
+export const DEFAULT_TRACE: TraceConfig = { tolerancePx: 44, allowedBreaks: 25 };
 
 export interface TraceResult {
   breaks: number;

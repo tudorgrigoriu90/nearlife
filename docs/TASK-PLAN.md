@@ -4440,7 +4440,7 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ `FactCredit` on the card (and for the second-language fact); Settings lists Wikipedia,
     Wikidata, photos (Commons/iNaturalist) and Natural Earth; licensing doc §7–8; `verify.py`
     "every catalogue fact has its Wikipedia source". Tests: 8 pipeline, 3 card.
-- **T-277 · Minigames that can be won, measured where the finger is** — *Claude + Director · S · `TODO` · deps: T-069, T-071, T-073 · review B-60, B-62*
+- **T-277 · Minigames that can be won, measured where the finger is** — *Claude + Director · S · `IN-PROGRESS` (code done; waiting for the Director's phone test) · deps: T-069, T-071, T-073 · review B-60, B-62*
   - No minigame counts time or input before the player's first touch ("Tap to start").
   - The insect game counts breaks only after the first touch; tolerance and allowed breaks are
     set from a phone test (starting point 44 px and 25 breaks), and the target is drawn above
@@ -4449,6 +4449,13 @@ document until it is started, when it takes the next free `T-###`.
     are relative to the stage (test).
   - Director: a first-time player wins the insect game in at least 3 of 5 attempts on a
     mid-range Android phone; the result is recorded here.
+  - ✅ `CatchMinigame` shows the game's instruction with "Tap to start"; the game and its clock
+    mount only after the tap. Trace's clock starts at the first touch on the stage and records
+    nothing before it; `DEFAULT_TRACE` is 44 px / 25 breaks (15% of samples); the point to follow
+    is a ring and the butterfly is drawn 40 px above it. Every child of the Trace and Frame stages
+    has `pointerEvents="none"`. Tests: start gate, first-touch clock, stage children, defaults.
+  - Director: play the insect game 5 times on a mid-range Android phone (new build) and record
+    the wins here; Claude retunes the two constants if fewer than 3.
 
 ## Estimation note
 Sizes here are T-shirt. For per-task story-point estimates, the `sa-toolkit` `/task-estimate`

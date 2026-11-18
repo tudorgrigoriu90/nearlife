@@ -52,7 +52,11 @@ describe('minigame interaction → result', () => {
   it('insect trace: the trace window resolves a result', async () => {
     const onComplete = jest.fn();
     await render(<TraceMinigame onComplete={onComplete} />);
-    await advance(10000);
+    // The clock starts at the first touch (T-277).
+    await fireEvent(screen.getByTestId('trace-stage'), 'responderGrant', {
+      nativeEvent: { locationX: 144, locationY: 144 },
+    });
+    await advance(10500);
     await continueOut(onComplete);
   });
 

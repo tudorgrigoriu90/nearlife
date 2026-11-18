@@ -166,6 +166,7 @@ export const en = {
     'minigame.fail': 'It got away',
     'minigame.continue': 'Continue',
     'minigame.cancel': 'Not now',
+    'minigame.tapToStart': 'Tap to start',
     // Bird — timing (T-033/T-069)
     'minigame.bird.instruction': 'Tap when the shrinking ring lines up with the target — that’s the dive.',
     'minigame.bird.hint': 'Tap anywhere',
@@ -550,6 +551,7 @@ const sv = {
     'minigame.fail': 'Den kom undan',
     'minigame.continue': 'Fortsätt',
     'minigame.cancel': 'Inte nu',
+    'minigame.tapToStart': 'Tryck för att börja',
     // Bird — timing (T-033/T-069)
     'minigame.bird.instruction': 'Tryck när den krympande ringen möter målet – det är dyket.',
     'minigame.bird.hint': 'Tryck var som helst',
