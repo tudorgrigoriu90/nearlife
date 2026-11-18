@@ -4381,6 +4381,15 @@ document until it is started, when it takes the next free `T-###`.
   - Recommendation: withhold all three on the restricted path until a parental gate exists; the
     pull surface, collection and mission content stay fully usable.
 
+- **T-282 · The sender sends once, reads every row; sandbox purchases are a setting** — *Claude · S · `DONE` (Director: LAUNCH-CHECKLIST Step 12.4 at launch) · deps: T-064, T-217 · review B-22, B-23, B-54*
+  - ✅ B-22: `sendLogged` (lib/pushDispatch.ts) writes the `notification_log` row before sending;
+    a failed insert stops the run (500) with nothing sent, and the row is removed only when no
+    device took the message. `health.py` fails when a user got two notifications on one
+    Stockholm day. Tests: 3 + 1.
+  - ✅ B-23: every paged read in `send-notifications` is ordered on a unique key (`readIn` takes
+    the key columns); `__tests__/senderOrder.test.js` fails on an unordered one.
+  - ✅ B-54: sandbox events count unless `REVENUECAT_ACCEPT_SANDBOX` is `false` (set at launch).
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

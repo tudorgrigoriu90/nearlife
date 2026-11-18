@@ -6,7 +6,8 @@ Things that fail silently, each of which the app would only show as "nothing hap
   * the notification Edge Function answers pg_net with errors (the cron run still "succeeds",
     because pg_net only queues the call);
   * the retention cron stopped (personal data would outlive its stated window, PRIVACY §3);
-  * a Swedish county has no visible catch spots (catching there degrades to "unmapped").
+  * a Swedish county has no visible catch spots (catching there degrades to "unmapped");
+  * a user got two notifications on one day (the cadence log is failing, T-282).
 
 Any problem fails the run, and GitHub emails the repository owner about a failed scheduled
 workflow. That email is the alert: no extra service, no cost (invariant #7).
@@ -40,6 +41,8 @@ class Facts:
     http_statuses: list[int | None]  # pg_net responses kept by the database (about 6 hours)
     counties: set[str]  # Swedish counties with species presence
     counties_with_spots: set[str]  # counties with at least one visible (unflagged) catch spot
+    # Users sent more than one notification on one Stockholm calendar day (T-282 · review B-22).
+    users_notified_twice: list[str] = ()  # type: ignore[assignment]
 
 
 def problems(f: Facts) -> list[str]:
@@ -61,6 +64,11 @@ def problems(f: Facts) -> list[str]:
 
     if not f.counties:
         found.append("no Swedish county has species presence")
+    if f.users_notified_twice:
+        found.append(
+            f"{len(f.users_notified_twice)} user(s) got more than one notification on one day "
+            "(the cadence log is failing)"
+        )
     missing = sorted(f.counties - f.counties_with_spots)
     if missing:
         found.append(f"no visible catch spots in {len(missing)} county(ies): {', '.join(missing)}")
@@ -86,7 +94,13 @@ def gather(cur, now: datetime) -> Facts:
     counties = {r[0] for r in cur.fetchall()}
     cur.execute("select distinct region_id from public.catch_spots where cardinality(flags) = 0")
     with_spots = {r[0] for r in cur.fetchall()}
-    return Facts(now, jobs, statuses, counties, with_spots)
+    cur.execute(
+        "select user_id::text from public.notification_log "
+        "where sent_at > now() - interval '7 days' "
+        "group by user_id, (sent_at at time zone 'Europe/Stockholm')::date having count(*) > 1"
+    )
+    twice = sorted({r[0] for r in cur.fetchall()})
+    return Facts(now, jobs, statuses, counties, with_spots, twice)
 
 
 def main() -> int:

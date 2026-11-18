@@ -72,9 +72,17 @@ function uuids(value: unknown): string[] {
     : [];
 }
 
-export function planEntitlementChanges(body: unknown): EntitlementPlan {
+export function planEntitlementChanges(
+  body: unknown,
+  options: { acceptSandbox?: boolean } = {},
+): EntitlementPlan {
   const ev = (body as { event?: Record<string, unknown> } | null)?.event;
   if (!ev || typeof ev !== 'object') return { kind: 'ignore', reason: 'no event' };
+  // A Play licence tester's purchase is free; it unlocks the real database only while the server
+  // is set to accept sandbox events (REVENUECAT_ACCEPT_SANDBOX, T-282 · review B-54).
+  if (ev.environment === 'SANDBOX' && options.acceptSandbox === false) {
+    return { kind: 'ignore', reason: 'sandbox event' };
+  }
   const type = ev.type;
   if (typeof type !== 'string') return { kind: 'ignore', reason: 'no type' };
   if (!GRANT.has(type) && !REVOKE.has(type) && type !== 'TRANSFER') {

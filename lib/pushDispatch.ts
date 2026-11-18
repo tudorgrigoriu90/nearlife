@@ -237,3 +237,20 @@ export function isDeadTokenResponse(status: number, body: string): boolean {
     return false;
   }
 }
+
+/**
+ * Send one notification so that the cadence log can never miss it (T-282 · review B-22). The
+ * daily cap and the 20-hour gap are computed from `notification_log`; a send whose row failed to
+ * insert would be repeated every hour. So the row is written first (a failure stops the run before
+ * anything is sent), and removed only when no device took the message.
+ */
+export async function sendLogged<Id>(ops: {
+  reserve: () => Promise<Id>;
+  release: (id: Id) => Promise<void>;
+  deliver: () => Promise<boolean>;
+}): Promise<'sent' | 'undelivered'> {
+  const id = await ops.reserve();
+  if (await ops.deliver()) return 'sent';
+  await ops.release(id);
+  return 'undelivered';
+}

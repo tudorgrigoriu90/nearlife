@@ -67,3 +67,10 @@ def test_a_county_without_catch_spots_is_a_problem():
 
 def test_no_counties_at_all_is_a_problem():
     assert any("no Swedish county" in p for p in problems(healthy(counties=set(), counties_with_spots=set())))
+
+
+# T-282 · review B-22: one notification per user per Stockholm day.
+def test_two_notifications_to_one_user_on_one_day_is_a_problem():
+    f = healthy(users_notified_twice=["0e08dc15-1111-4222-8333-444455556666"])
+    assert any("more than one notification" in p for p in problems(f))
+    assert problems(healthy()) == []

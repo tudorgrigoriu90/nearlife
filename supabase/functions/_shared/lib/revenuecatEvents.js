@@ -51,10 +51,15 @@ function uuids(value) {
         ? value.filter((v) => typeof v === 'string' && UUID.test(v))
         : [];
 }
-export function planEntitlementChanges(body) {
+export function planEntitlementChanges(body, options = {}) {
     const ev = body?.event;
     if (!ev || typeof ev !== 'object')
         return { kind: 'ignore', reason: 'no event' };
+    // A Play licence tester's purchase is free; it unlocks the real database only while the server
+    // is set to accept sandbox events (REVENUECAT_ACCEPT_SANDBOX, T-282 · review B-54).
+    if (ev.environment === 'SANDBOX' && options.acceptSandbox === false) {
+        return { kind: 'ignore', reason: 'sandbox event' };
+    }
     const type = ev.type;
     if (typeof type !== 'string')
         return { kind: 'ignore', reason: 'no type' };

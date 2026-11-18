@@ -218,3 +218,21 @@ describe('revenueCatErasure', () => {
     expect(revenueCatErasure(USER, false, undefined)).toBeNull();
   });
 });
+
+// T-282 · review B-54: a licence tester's free sandbox purchase only counts while the server is
+// set to accept sandbox events (until launch).
+describe('sandbox events', () => {
+  it('are applied when accepted', () => {
+    expect(planEntitlementChanges(event({ environment: 'SANDBOX' }), { acceptSandbox: true }).kind).toBe(
+      'apply',
+    );
+  });
+
+  it('are ignored otherwise; production events always count', () => {
+    expect(planEntitlementChanges(event({ environment: 'SANDBOX' }), { acceptSandbox: false })).toEqual({
+      kind: 'ignore',
+      reason: 'sandbox event',
+    });
+    expect(planEntitlementChanges(event({}), { acceptSandbox: false }).kind).toBe('apply');
+  });
+});

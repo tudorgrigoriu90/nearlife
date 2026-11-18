@@ -25,6 +25,7 @@ import {
   planSends,
   pushCopy,
   pushLocale,
+  sendLogged,
 } from '../_shared/lib/pushDispatch.js';
 import {
   GOOGLE_TOKEN_URL,
@@ -68,7 +69,18 @@ async function readAll(build: (from: number, to: number) => PromiseLike<{ data: 
   }
 }
 
-async function readIn(db: SupabaseClient, table: string, columns: string, column: string, ids: string[], extra?: (q: any) => any) {
+// Every paged read is ordered on a unique key (T-282 · review B-23): without a total order,
+// PostgREST may repeat or skip rows across pages, so a device could be skipped or a collected
+// species missed by the dedupe. `order` names the key columns.
+async function readIn(
+  db: SupabaseClient,
+  table: string,
+  columns: string,
+  column: string,
+  ids: string[],
+  order: string[],
+  extra?: (q: any) => any,
+) {
   const rows: Row[] = [];
   for (let i = 0; i < ids.length; i += IN_CHUNK) {
     const chunk = ids.slice(i, i + IN_CHUNK);
@@ -76,6 +88,7 @@ async function readIn(db: SupabaseClient, table: string, columns: string, column
       ...(await readAll((from, to) => {
         let q = db.from(table).select(columns).in(column, chunk);
         if (extra) q = extra(q);
+        for (const key of order) q = q.order(key);
         return q.range(from, to);
       })),
     );
@@ -113,18 +126,20 @@ Deno.serve(async (req: Request) => {
     const deviceRows = await readAll((from, to) => {
       let q = db.from('push_devices').select('user_id, token, platform, locale, updated_at');
       if (opts.testUserId) q = q.eq('user_id', opts.testUserId);
-      return q.range(from, to);
+      return q.order('user_id').order('token').range(from, to);
     });
     const userIds = [...new Set(deviceRows.map((r) => r.user_id as string))];
     if (userIds.length === 0) return json({ users: 0, sent: 0, skipped: {} });
 
-    const profiles = await readIn(db, 'profiles', 'user_id, home_region', 'user_id', userIds);
-    const collected = await readIn(db, 'collection', 'user_id, species_id', 'user_id', userIds);
+    const profiles = await readIn(db, 'profiles', 'user_id, home_region', 'user_id', userIds, ['user_id']);
+    const collected = await readIn(db, 'collection', 'user_id, species_id', 'user_id', userIds, ['id']);
     // Two days covers both cadence caps (≥20 h interval, one per local day).
     const since = new Date(nowMs - 48 * 3_600_000).toISOString();
     const log = opts.testUserId
       ? []
-      : await readIn(db, 'notification_log', 'user_id, sent_at', 'user_id', userIds, (q) => q.gte('sent_at', since));
+      : await readIn(db, 'notification_log', 'user_id, sent_at', 'user_id', userIds, ['id'], (q) =>
+          q.gte('sent_at', since),
+        );
 
     const regionOf = new Map(profiles.map((p) => [p.user_id as string, (p.home_region as string | null) ?? null]));
     const users = userIds.map((userId) => ({
@@ -174,11 +189,14 @@ Deno.serve(async (req: Request) => {
 
     // 3) Names for the chosen species, in each device's language.
     const speciesIds = [...new Set(plan.sends.map((s) => s.speciesId))];
-    const species = await readIn(db, 'species', 'id, common_name, scientific_name', 'id', speciesIds);
-    const localized = await readIn(db, 'species_content', 'species_id, locale, common_name', 'species_id', speciesIds);
+    const species = await readIn(db, 'species', 'id, common_name, scientific_name', 'id', speciesIds, ['id']);
+    const localized = await readIn(db, 'species_content', 'species_id, locale, common_name', 'species_id', speciesIds, [
+      'species_id',
+      'locale',
+    ]);
     // Catalogue photos (T-215): the bundled 54 keep their hand-checked photo; everyone else gets
     // the one species_media holds, if any. A missing photo just sends a text notification.
-    const media = await readIn(db, 'species_media', 'species_id, url', 'species_id', speciesIds, (q) =>
+    const media = await readIn(db, 'species_media', 'species_id, url', 'species_id', speciesIds, ['species_id'], (q) =>
       q.not('url', 'is', null),
     );
     const photoUrlFor = (speciesId: string) =>
@@ -199,8 +217,9 @@ Deno.serve(async (req: Request) => {
     let deadTokens = 0;
     const errors: string[] = [];
     for (const send of plan.sends) {
-      let delivered = false;
       const imageUrl = photoUrlFor(send.speciesId);
+      const deliverAll = async (): Promise<boolean> => {
+      let delivered = false;
       for (const device of send.devices) {
         const locale = pushLocale(device.locale);
         const res = await fetch(fcmSendUrl(account.project_id), {
@@ -228,13 +247,31 @@ Deno.serve(async (req: Request) => {
           if (errors.length < 5) errors.push(`${res.status}: ${body.slice(0, 300)}`);
         }
       }
-      if (delivered) {
-        sent += 1;
-        // The smoke test is not a real send — logging it would eat the user's daily notification.
-        if (!opts.testUserId) {
-          await db.from('notification_log').insert({ user_id: send.userId, species_id: send.speciesId });
-        }
+      return delivered;
+      };
+      // The smoke test is not a real send — logging it would eat the user's daily notification.
+      if (opts.testUserId) {
+        if (await deliverAll()) sent += 1;
+        continue;
       }
+      // The log row first (T-282 · review B-22): a failed insert stops the run (500) before any
+      // send, so the cadence caps can never miss a delivered notification.
+      const outcome = await sendLogged({
+        reserve: async () => {
+          const { data, error } = await db
+            .from('notification_log')
+            .insert({ user_id: send.userId, species_id: send.speciesId })
+            .select('id')
+            .single();
+          if (error || !data) throw new Error(`notification_log insert failed: ${error?.message ?? 'no row'}`);
+          return data.id as number;
+        },
+        release: async (id) => {
+          await db.from('notification_log').delete().eq('id', id);
+        },
+        deliver: deliverAll,
+      });
+      if (outcome === 'sent') sent += 1;
     }
 
     return json({ users: users.length, planned: plan.sends.length, sent, failed, deadTokens, skipped: plan.skipped, errors });

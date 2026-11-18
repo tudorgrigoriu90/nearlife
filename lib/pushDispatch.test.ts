@@ -11,6 +11,7 @@ import {
   pushLocale,
   type PushDevice,
   type UserSnapshot,
+  sendLogged,
 } from './pushDispatch';
 import type { RegionPresence } from './speciesRepository';
 
@@ -188,5 +189,50 @@ describe('isDeadTokenResponse', () => {
     expect(isDeadTokenResponse(400, fcmError('INVALID_ARGUMENT', 'Invalid value at message.android.priority'))).toBe(false);
     expect(isDeadTokenResponse(503, fcmError('UNAVAILABLE', 'try later'))).toBe(false);
     expect(isDeadTokenResponse(500, '<html>oops</html>')).toBe(false);
+  });
+});
+
+// T-282 · review B-22: the cadence caps read notification_log, so a send whose log row could not
+// be written would be repeated every hour. The row is reserved first, and released only when no
+// device took the message.
+describe('sendLogged', () => {
+  it('reserves the log row before delivering, and keeps it when delivered', async () => {
+    const order: string[] = [];
+    const result = await sendLogged({
+      reserve: async () => {
+        order.push('reserve');
+        return 7;
+      },
+      release: async () => {
+        order.push('release');
+      },
+      deliver: async () => {
+        order.push('deliver');
+        return true;
+      },
+    });
+    expect(result).toBe('sent');
+    expect(order).toEqual(['reserve', 'deliver']);
+  });
+
+  it('a failed reservation sends nothing and stops the run', async () => {
+    const deliver = jest.fn(async () => true);
+    await expect(
+      sendLogged({
+        reserve: async () => {
+          throw new Error('insert failed');
+        },
+        release: async () => undefined,
+        deliver,
+      }),
+    ).rejects.toThrow('insert failed');
+    expect(deliver).not.toHaveBeenCalled();
+  });
+
+  it('no device took it: the row is released, so the next run may try again', async () => {
+    const release = jest.fn(async () => undefined);
+    const result = await sendLogged({ reserve: async () => 3, release, deliver: async () => false });
+    expect(result).toBe('undelivered');
+    expect(release).toHaveBeenCalledWith(3);
   });
 });

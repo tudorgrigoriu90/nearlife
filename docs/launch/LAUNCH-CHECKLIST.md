@@ -166,6 +166,10 @@ Your app → **Policy and programs → App content**. Answers are in PLAY-STORE-
    testers** (emails) and run it for **14 days**. This is required for personal developer
    accounts before production. The Kronoberg testers (T-038) can be these people.
 3. After 14 days: **Production → Create new release** → submit for review (T-098).
+4. On the day production goes live: Supabase → **Edge Functions → Secrets** → add
+   `REVENUECAT_ACCEPT_SANDBOX` = `false`. From then on a licence tester's free test purchase no
+   longer unlocks anything in the real database (T-282). Until then it does, which is what makes
+   your own test purchases work.
 
 ---
 

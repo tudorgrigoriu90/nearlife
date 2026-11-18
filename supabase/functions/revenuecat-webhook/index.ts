@@ -38,7 +38,10 @@ Deno.serve(async (req: Request) => {
   }
 
   const body = await req.json().catch(() => null);
-  const plan = planEntitlementChanges(body);
+  // Sandbox (licence-tester) purchases count until launch; set the secret to false after (B-54).
+  const plan = planEntitlementChanges(body, {
+    acceptSandbox: Deno.env.get('REVENUECAT_ACCEPT_SANDBOX') !== 'false',
+  });
   if (plan.kind === 'ignore') return json({ ignored: plan.reason });
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey());
