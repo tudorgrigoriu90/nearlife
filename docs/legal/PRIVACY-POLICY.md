@@ -85,20 +85,29 @@ appropriate safeguards (Standard Contractual Clauses) for any transfer outside t
   records in our database are deleted with it. Google Play and RevenueCat keep their own
   transaction records as their law and terms require. Deleting your account does not cancel a
   purchase or trigger a refund, so you can restore the purchase into a new account.
+  If you never bought anything, deleting your account also deletes the (empty) customer record
+  RevenueCat holds for it.
 - 🆕 **Family:** a member's link to a household lasts until they leave, are removed, or delete
   their account. If the owner deletes their account, the household and its unlock end for
   everyone in it.
 - **Notification history** (which species we sent you, used to limit how often we notify):
   ~30 days.
-- **Analytics:** ~365 days.
+- **Analytics:** ~365 days. Analytics events carry a random id that is not linked to your account;
+  deleting your account resets that id on your phone, so later use is never joined to it. Because
+  the id is not tied to your account we cannot pick out your past events, and they expire after
+  365 days.
 - **Your collection:** until you delete your account or the account expires as above.
 
 ## Your rights
 Under the GDPR you can **access**, **export**, **correct**, **delete**, and **restrict** your data,
 and **withdraw consent**. The app provides **"Export my data"** and **"Delete account & data"**
 directly in Settings. 🆕 The export holds everything we keep for your account: home region,
-consent choices, collection, purchase records and, if you're in a Family, your role and dates. An
-owner's export shows when members joined, not who they are. You also have the right to lodge a complaint with your supervisory authority
+consent choices, collection, purchase records and, if you're in a Family, your role and dates; your
+account's free-catch counter and creation date, the notifications sent to you, the phones
+registered for notifications (shown by the last 6 characters of their token), and reviewer-code
+use. It also holds what the app keeps on your phone: quiz attempts, recognised species, the
+county-visit log, your language choices and the age path. An owner's export shows when members
+joined, not who they are. You can share or save the export as a file. You also have the right to lodge a complaint with your supervisory authority
 — in Sweden, the **Integritetsskyddsmyndigheten (IMY)**.
 
 ## Children and families

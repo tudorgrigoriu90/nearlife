@@ -127,6 +127,14 @@ linked email. Supabase's default sign-in email has only a link, so add the code:
 3. Test: link an email in Settings, clear the app's storage, open it → **I already have an
    account** → enter the email → the code arrives → enter it → your collection is back.
 
+## Step 9c — RevenueCat secret key for account deletion (5 min, T-280)
+Deleting an account also deletes its RevenueCat customer when it never bought anything. That
+needs RevenueCat's **secret** key on the server only:
+1. RevenueCat → **Project settings → API keys → + New secret API key** (v1), name it
+   "delete-account". Copy it. **Don't send it to me.**
+2. Supabase → **Edge Functions → Secrets → Add new secret**: name `REVENUECAT_SECRET_KEY`, paste.
+Without it, deletion still works; only the empty RevenueCat customer stays.
+
 ## Step 10 — Privacy policy and the account-deletion page ✅ published 2026-11-01
 - Privacy policy: **https://nytta-ai.se/nearby/privacy/**
 - Delete account: **https://nytta-ai.se/nearby/delete-account/** (English + Swedish)

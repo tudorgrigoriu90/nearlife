@@ -13,6 +13,7 @@
 // Targets the Deno Edge runtime, not the app bundle; excluded from the app's eslint/tsconfig.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { revenueCatErasure } from '../_shared/lib/revenuecatEvents.js';
 
 function json(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -39,9 +40,25 @@ Deno.serve(async (req: Request) => {
   const user = data?.user;
   if (userErr || !user) return json({ error: 'not authenticated' }, 401);
 
+  // Whether they ever bought anything, read before the cascade erases the records (T-280).
+  const { count } = await admin
+    .from('entitlements')
+    .select('user_id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .neq('product_id', 'reviewer_code');
+
   // 2) Delete exactly that user. Irreversible; the cascades erase their rows.
   const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
   if (delErr) return json({ error: delErr.message }, 500);
+
+  // 3) A RevenueCat customer that never bought anything goes too (T-280 · review B-52). With
+  // purchases, Google and RevenueCat keep the records so the purchase can be restored (privacy
+  // policy). Best effort: the account is already gone, so a failure here is logged, not returned.
+  const erase = revenueCatErasure(user.id, (count ?? 0) > 0, Deno.env.get('REVENUECAT_SECRET_KEY'));
+  if (erase) {
+    const res = await fetch(erase.url, { method: 'DELETE', headers: erase.headers }).catch(() => null);
+    if (!res || (!res.ok && res.status !== 404)) console.warn('revenuecat customer not deleted', res?.status);
+  }
 
   return json({ ok: true }, 200);
 });

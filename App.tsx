@@ -108,6 +108,7 @@ import {
   type ExportClient,
   type ExportHousehold,
   type PurchaseRecord,
+  type ServerExport,
 } from './lib/dataExport';
 import type { Region } from './lib/hometown';
 import { AsyncStorageHometownStore, deriveHometown } from './lib/hometownStore';
@@ -752,18 +753,18 @@ export default function App() {
 
   const exportMyData = async () => {
     // The server-side sections (T-219). Without a backend there is nothing held there to export.
-    const unavailable: ('purchases' | 'household')[] = [];
+    const unavailable: ('purchases' | 'household' | 'server')[] = [];
     let purchases: PurchaseRecord[] = [];
     let household: ExportHousehold | null = null;
+    let server: ServerExport | null = null;
     if (hasSupabaseConfig()) {
       const client = getSupabase();
-      [purchases, household] = await Promise.all([
-        new SupabaseExportSource(client as unknown as ExportClient, ensureAnonymousSession)
-          .purchases()
-          .catch(() => {
-            unavailable.push('purchases');
-            return [];
-          }),
+      const source = new SupabaseExportSource(client as unknown as ExportClient, ensureAnonymousSession);
+      [purchases, household, server] = await Promise.all([
+        source.purchases().catch(() => {
+          unavailable.push('purchases');
+          return [];
+        }),
         new SupabaseFamilyGateway(client)
           .mine()
           .then(householdForExport)
@@ -771,8 +772,30 @@ export default function App() {
             unavailable.push('household');
             return null;
           }),
+        source.server().catch(() => {
+          unavailable.push('server');
+          return null;
+        }),
       ]);
     }
+    // What the phone keeps besides the collection and consent (T-280 · review B-18).
+    const [quizAttempts, recognizedIds, travelLog, onboardingRecord] = await Promise.all([
+      QUIZ_ATTEMPTS.load().catch(() => null),
+      RECOGNIZED_STORE.load().catch(() => new Set<string>()),
+      TRAVEL_STORE.load().catch(() => null),
+      ONBOARDING_STORE.load().catch(() => null),
+    ]);
+    const device = {
+      quizAttempts,
+      recognized: [...recognizedIds].sort(),
+      travel: travelLog,
+      languages: {
+        app: localeOverride,
+        secondLanguage: dualLanguage.secondaryLocale ?? null,
+        secondLanguageOn: dualLanguage.enabled,
+      },
+      agePath: onboardingRecord?.agePath ?? null,
+    };
     const bundle = buildDataExport({
       exportedAt: new Date().toISOString(),
       profile: { homeRegion: hometown?.id ?? null },
@@ -780,6 +803,8 @@ export default function App() {
       collection: collection.records,
       purchases,
       household,
+      server,
+      device,
       unavailable,
     });
     setExportJson(exportToJson(bundle));

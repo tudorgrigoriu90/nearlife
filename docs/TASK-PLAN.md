@@ -4359,6 +4359,28 @@ document until it is started, when it takes the next free `T-###`.
     winter).
   - Paging recovered species the cap had dropped: the catalogue is now **10,078** species (99.75%
     of observations), up from 8,064, mostly insects and plants. Their content is T-279.
+- **T-280 · The export holds everything; deletion reaches the processors** — *Claude · S · `DONE` (Director: RevenueCat secret key, LAUNCH-CHECKLIST Step 9c; republish the privacy page) · deps: T-092, T-093 · review B-18, B-52, I-20*
+  - ✅ Migration `20261118000003_my_data_export.sql`: `my_data_export()` returns, for the
+    signed-in user only, the account counters and creation date, the notification history, the
+    push devices (token by its last 6 characters) and reviewer-code redemptions (tested in a real
+    Postgres, including that another user's notifications stay out).
+  - ✅ Export format `nearby.export.v3` adds those sections and the phone's own: quiz attempts,
+    recognised species, travel log, language choices, age path; a server section that could not
+    be read is listed under `unavailable` ('server'). The export screen has "Share or save as a
+    file" (I-20). The privacy policy lists the contents.
+  - ✅ B-52: `delete-account` deletes the RevenueCat customer when the account never bought
+    anything (`revenueCatErasure`, needs `REVENUECAT_SECRET_KEY`); the policy says so, and that
+    analytics ids are not linked to accounts, are reset on deletion and expire in 365 days.
+- **T-281 · Under-13 users: what the restricted path withholds** — *Director + Claude · S · `BLOCKED` (legal decision) · deps: T-089 · review B-53*
+  - Today the age gate only withholds analytics; an under-13 user can still turn on notifications
+    (a device token is stored), link an email and buy. GDPR Art. 8 needs parental consent for
+    consent-based processing of a child's data.
+  - Director + legal reviewer decide, for each of push registration, email linking and purchases:
+    withheld, or allowed behind a parental gate; recorded in PRIVACY-COMPLIANCE.md. Claude then
+    implements it in `applyConsentChange`, Settings and the Store, with a test per item.
+  - Recommendation: withhold all three on the restricted path until a parental gate exists; the
+    pull surface, collection and mission content stay fully usable.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

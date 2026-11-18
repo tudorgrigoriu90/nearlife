@@ -13,7 +13,42 @@ import type { Household } from './family';
 // export lists when members joined but not their account ids: those ids identify other people's
 // accounts, and the owner's right of access does not reach them.
 
-export const EXPORT_FORMAT = 'nearby.export.v2';
+// v3 (T-280 · review B-18) adds everything else kept about the user: from the server, the
+// account counters, the notification history, the push devices (token by its last 6 characters)
+// and reviewer-code redemptions (`public.my_data_export()`); from the phone, quiz attempts,
+// recognised species, the travel log, language choices and the age path.
+export const EXPORT_FORMAT = 'nearby.export.v3';
+
+/** What `public.my_data_export()` returns. */
+export interface ServerExport {
+  account: {
+    homeRegion: string | null;
+    freeCatchesUsed: number;
+    freeCatchSeason: string | null;
+    fullGame: boolean;
+    createdAt: string;
+  } | null;
+  notifications: { speciesId: string; sentAt: string }[];
+  devices: {
+    platform: string;
+    locale: string | null;
+    tokenEnd: string;
+    registeredAt: string;
+    updatedAt: string;
+  }[];
+  reviewerCodes: { redeemedAt: string }[];
+}
+
+/** What the phone keeps besides the collection and consent. */
+export interface DeviceExport {
+  quizAttempts: unknown;
+  recognized: string[];
+  travel: unknown;
+  languages: { app: string | null; secondLanguage: string | null; secondLanguageOn: boolean };
+  agePath: string | null;
+}
+
+type Unavailable = 'purchases' | 'household' | 'server';
 
 export interface ExportProfile {
   homeRegion: string | null;
@@ -45,11 +80,16 @@ export interface DataExport {
   collection: CollectionRecord[];
   purchases: PurchaseRecord[];
   household: ExportHousehold | null;
+  account: ServerExport['account'];
+  notifications: ServerExport['notifications'];
+  devices: ServerExport['devices'];
+  reviewerCodes: ServerExport['reviewerCodes'];
+  device: DeviceExport;
   /**
    * Sections the server could not be asked for (offline): named, so an empty list there is never
    * mistaken for "we hold nothing". Absent when the bundle is complete.
    */
-  unavailable?: ('purchases' | 'household')[];
+  unavailable?: Unavailable[];
 }
 
 export function householdForExport(h: Household | null): ExportHousehold | null {
@@ -71,7 +111,9 @@ export function buildDataExport(input: {
   collection: CollectionRecord[];
   purchases?: PurchaseRecord[];
   household?: ExportHousehold | null;
-  unavailable?: ('purchases' | 'household')[];
+  server?: ServerExport | null;
+  device?: DeviceExport;
+  unavailable?: Unavailable[];
 }): DataExport {
   return {
     ...(input.unavailable && input.unavailable.length > 0 ? { unavailable: [...input.unavailable] } : {}),
@@ -87,6 +129,17 @@ export function buildDataExport(input: {
       .map((p) => ({ ...p }))
       .sort((a, b) => a.entitlement.localeCompare(b.entitlement)),
     household: input.household ? { ...input.household, memberJoinDates: [...input.household.memberJoinDates] } : null,
+    account: input.server?.account ?? null,
+    notifications: [...(input.server?.notifications ?? [])],
+    devices: [...(input.server?.devices ?? [])],
+    reviewerCodes: [...(input.server?.reviewerCodes ?? [])],
+    device: input.device ?? {
+      quizAttempts: null,
+      recognized: [],
+      travel: null,
+      languages: { app: null, secondLanguage: null, secondLanguageOn: false },
+      agePath: null,
+    },
   };
 }
 
@@ -97,6 +150,7 @@ export interface ExportClient {
   from(table: 'entitlements'): {
     select(columns: string): { eq(column: string, value: unknown): PromiseLike<Result> };
   };
+  rpc?(fn: 'my_data_export'): PromiseLike<Result>;
 }
 
 export class SupabaseExportSource {
@@ -104,6 +158,21 @@ export class SupabaseExportSource {
     private readonly client: ExportClient,
     private readonly ensureUser: () => Promise<string>,
   ) {}
+
+  /** Everything else the server keeps about the user, in one call (T-280). */
+  async server(): Promise<ServerExport> {
+    await this.ensureUser();
+    if (!this.client.rpc) throw new Error('no rpc');
+    const { data, error } = await this.client.rpc('my_data_export');
+    if (error) throw new Error(`export read failed: ${error.message}`);
+    const d = (data ?? {}) as Partial<ServerExport>;
+    return {
+      account: d.account ?? null,
+      notifications: Array.isArray(d.notifications) ? d.notifications : [],
+      devices: Array.isArray(d.devices) ? d.devices : [],
+      reviewerCodes: Array.isArray(d.reviewerCodes) ? d.reviewerCodes : [],
+    };
+  }
 
   /** Every purchase record of the user; RLS limits the read to their own rows. */
   async purchases(): Promise<PurchaseRecord[]> {

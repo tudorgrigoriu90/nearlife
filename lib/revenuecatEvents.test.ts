@@ -2,6 +2,7 @@ import {
   planEntitlementChanges,
   regionEntitlement,
   regionProductId,
+  revenueCatErasure,
   secretMatches,
 } from './revenuecatEvents';
 
@@ -199,5 +200,21 @@ describe('regionProductId', () => {
   it('names the Play product for a county', () => {
     expect(regionProductId('SWE.9_1')).toBe('region_swe_9');
     expect(regionProductId('SWE.21_1')).toBe('region_swe_21');
+  });
+});
+
+// T-280 · review B-52: deleting an account also deletes its RevenueCat customer when it never
+// bought anything; with purchases, Google and RevenueCat keep the records (privacy policy).
+describe('revenueCatErasure', () => {
+  it('names the customer to delete when there were no purchases and a key is set', () => {
+    expect(revenueCatErasure(USER, false, 'sk_x')).toEqual({
+      url: `https://api.revenuecat.com/v1/subscribers/${USER}`,
+      headers: { Authorization: 'Bearer sk_x' },
+    });
+  });
+
+  it('keeps a customer who bought something, and does nothing without a key', () => {
+    expect(revenueCatErasure(USER, true, 'sk_x')).toBeNull();
+    expect(revenueCatErasure(USER, false, undefined)).toBeNull();
   });
 });

@@ -142,3 +142,52 @@ describe('SupabaseExportSource (T-219)', () => {
     ]);
   });
 });
+
+// T-280 · review B-18: the export holds everything kept about the user, on the server and on the
+// phone; a section the server could not be asked for is named as unavailable.
+describe('data export v3', () => {
+  const server = {
+    account: { homeRegion: 'SWE.9_1', freeCatchesUsed: 2, freeCatchSeason: '2026-autumn', fullGame: false, createdAt: '2026-11-01T00:00:00Z' },
+    notifications: [{ speciesId: 'gbif:1', sentAt: '2026-11-02T09:00:00Z' }],
+    devices: [{ platform: 'android', locale: 'sv', tokenEnd: '123456', registeredAt: 'x', updatedAt: 'y' }],
+    reviewerCodes: [],
+  };
+  const device = {
+    quizAttempts: { '2026-11-18': 2 },
+    recognized: ['moose'],
+    travel: { offeredAt: {} },
+    languages: { app: 'sv', secondLanguage: 'ro', secondLanguageOn: true },
+    agePath: 'full',
+  };
+
+  it('carries the server sections and the phone sections', () => {
+    const out = buildDataExport({
+      exportedAt: 't',
+      profile: { homeRegion: 'SWE.9_1' },
+      consent: { location: true, notifications: true, analytics: false },
+      collection: [],
+      server,
+      device,
+    });
+    expect(out.format).toBe('nearby.export.v3');
+    expect(out.account?.freeCatchesUsed).toBe(2);
+    expect(out.notifications).toEqual(server.notifications);
+    expect(out.devices[0].tokenEnd).toBe('123456');
+    expect(out.device.recognized).toEqual(['moose']);
+    expect(out.device.languages.secondLanguage).toBe('ro');
+  });
+
+  it('names the server sections it could not read', () => {
+    const out = buildDataExport({
+      exportedAt: 't',
+      profile: { homeRegion: null },
+      consent: { location: false, notifications: false, analytics: false },
+      collection: [],
+      server: null,
+      device,
+      unavailable: ['server'],
+    });
+    expect(out.unavailable).toEqual(['server']);
+    expect(out.notifications).toEqual([]);
+  });
+});

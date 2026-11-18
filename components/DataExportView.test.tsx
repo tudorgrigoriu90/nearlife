@@ -18,3 +18,16 @@ describe('DataExportView', () => {
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 });
+
+// T-280 · review I-20: the export can leave the phone as a file the user keeps.
+describe('DataExportView sharing', () => {
+  it('shares the export', async () => {
+    const { Share } = jest.requireActual('react-native');
+    const share = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' });
+    await render(<DataExportView json='{"format":"nearby.export.v3"}' locale="en" onDone={() => {}} />);
+    await fireEvent.press(screen.getByText(tr('export.share')));
+    expect(share).toHaveBeenCalledWith(
+      expect.objectContaining({ message: '{"format":"nearby.export.v3"}' }),
+    );
+  });
+});

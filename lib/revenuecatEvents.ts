@@ -142,3 +142,21 @@ export function secretMatches(header: string | null, secret: string | undefined)
   for (let i = 0; i < expected.length; i++) diff |= header.charCodeAt(i) ^ expected.charCodeAt(i);
   return diff === 0;
 }
+
+/**
+ * The RevenueCat customer to delete with an account (T-280 · review B-52), or null. Only one that
+ * never bought anything: a purchase's records stay with Google Play and RevenueCat, as the privacy
+ * policy says, so it can be restored into a new account. Needs the secret API key (`sk_…`), which
+ * lives only in the Edge Function's secrets, never in the app.
+ */
+export function revenueCatErasure(
+  userId: string,
+  hasPurchases: boolean,
+  secretKey: string | undefined,
+): { url: string; headers: Record<string, string> } | null {
+  if (hasPurchases || !secretKey || !UUID.test(userId)) return null;
+  return {
+    url: `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(userId)}`,
+    headers: { Authorization: `Bearer ${secretKey}` },
+  };
+}

@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
 
 // Data export view (T-092 · PRIVACY §2, GDPR right to access). Shows the user's full data bundle
@@ -24,6 +24,16 @@ export default function DataExportView({
         </Pressable>
       </View>
       <Text style={styles.hint}>{tr('export.hint')}</Text>
+      {/* Share / Save (T-280 · review I-20): Android's share sheet saves to Files or Drive too. */}
+      <Pressable
+        onPress={() =>
+          void Share.share({ title: 'nearby-export.json', message: json }).catch(() => undefined)
+        }
+        accessibilityRole="button"
+        style={styles.share}
+      >
+        <Text style={styles.shareText}>{tr('export.share')}</Text>
+      </Pressable>
       <ScrollView style={styles.jsonWrap} contentContainerStyle={styles.jsonContent}>
         <Text style={styles.json} selectable>
           {json}
@@ -39,6 +49,14 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: '700', color: '#2f5d34' },
   done: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
   hint: { marginTop: 6, marginBottom: 12, fontSize: 13, color: '#7a8a7c' },
+  share: {
+    marginBottom: 12,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#3a7d44',
+    alignItems: 'center',
+  },
+  shareText: { fontSize: 15, fontWeight: '700', color: '#fff' },
   jsonWrap: { flex: 1, backgroundColor: '#0e1f14', borderRadius: 12, marginBottom: 24 },
   jsonContent: { padding: 14 },
   json: { fontSize: 12, color: '#cfe6d1', fontFamily: 'monospace', lineHeight: 17 },

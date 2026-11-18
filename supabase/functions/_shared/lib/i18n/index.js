@@ -272,6 +272,7 @@ export const en = {
     'access.failed': 'Couldn’t check the code. Check your connection and try again.',
     'export.title': 'Your data',
     'export.hint': 'Everything Nearby holds about you. Select the text to copy it.',
+    'export.share': 'Share or save as a file',
     // Mother-tongue dual display (F13.3 — T-148/T-150/T-151)
     'dual.title': 'Second language',
     'dual.toggle': 'Show a second language',
@@ -676,6 +677,7 @@ const sv = {
     'access.failed': 'Kunde inte kontrollera koden. Kontrollera anslutningen och försök igen.',
     'export.title': 'Dina uppgifter',
     'export.hint': 'Allt Nearby har om dig. Markera texten för att kopiera den.',
+    'export.share': 'Dela eller spara som fil',
     // Mother-tongue dual display (F13.3 — T-148/T-150/T-151)
     'dual.title': 'Andra språk',
     'dual.toggle': 'Visa ett andra språk',
