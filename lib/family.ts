@@ -75,6 +75,8 @@ export interface FamilyGateway {
   join(code: string): Promise<void>;
   leave(): Promise<void>;
   remove(memberId: string): Promise<void>;
+  /** A new invite code; the old one stops working (owner only, T-286 · review B-50). */
+  rotateCode(): Promise<string>;
 }
 
 /** The slice of the supabase-js client this needs, so tests can fake it. */
@@ -111,5 +113,9 @@ export class SupabaseFamilyGateway implements FamilyGateway {
 
   async remove(memberId: string) {
     await this.call('remove_household_member', { member: memberId });
+  }
+
+  async rotateCode(): Promise<string> {
+    return String(await this.call('rotate_household_code'));
   }
 }

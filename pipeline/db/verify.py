@@ -99,6 +99,9 @@ EXPECTED: dict[str, str] = {
     "no two catalogue species share a photo": "ok",
     "curated birds sit on the real species": "ok",
     "no summer migrant is active in winter": "ok",
+    "a collection row for an unknown species is refused": "violates foreign key",
+    "after a removal the old code is refused": "household_not_found",
+    "after a removal the code has changed": "ok",
     "every catalogue fact has its Wikipedia source": "ok",
 }
 
@@ -124,6 +127,15 @@ def evaluate(results: dict[str, str]) -> list[str]:
         elif expected not in got:
             failures.append(f"{step}: expected an error containing {expected!r}, got {got!r}")
     return failures
+
+
+def real_species(cur, n: int) -> list[str]:
+    """Real species ids for test rows: a collection row must name a species (T-286 · review B-48)."""
+    cur.execute("select id from public.species order by id limit %s", (n,))
+    ids = [r[0] for r in cur.fetchall()]
+    if len(ids) < n:
+        raise SystemExit(f"verify needs {n} species in public.species, found {len(ids)}")
+    return ids
 
 
 def _step(cur, results: dict[str, str], name: str, sql: str, params=()) -> None:
@@ -177,17 +189,22 @@ def run_free_catch_checks(cur) -> dict[str, str]:
             (user_id,),
         )
 
-    upsert("spot before catching (upsert)", "zz-verify-1", caught=False)
+    s1, s2, s3, s4 = real_species(cur, 4)
+    upsert("spot before catching (upsert)", s1, caught=False)
     counter("counter after spotting")
-    upsert("catch 1", "zz-verify-1", caught=True)
+    upsert("catch 1", s1, caught=True)
     counter("counter after the first catch")
-    upsert("re-send the caught row", "zz-verify-1", caught=True)
+    upsert("re-send the caught row", s1, caught=True)
     counter("counter after re-sending")
-    upsert("pledge help on a caught species", "zz-verify-1", caught=True, helped=True)
+    upsert("pledge help on a caught species", s1, caught=True, helped=True)
     counter("counter after the pledge")
-    upsert("catch 2", "zz-verify-2", caught=True)
-    upsert("catch 3", "zz-verify-3", caught=True)
-    upsert("catch 4 (over the free allowance)", "zz-verify-4", caught=True)
+    upsert("catch 2", s2, caught=True)
+    upsert("catch 3", s3, caught=True)
+    upsert("catch 4 (over the free allowance)", s4, caught=True)
+    # T-286 · review B-48: a collection row names a real species.
+    _step(cur, results, "a collection row for an unknown species is refused",
+          "insert into public.collection (user_id, species_id, spotted_at) values (%s, %s, now())",
+          (user_id, "x" * 200))
     _step(cur, results, "user grants themselves the Full Game",
           "update public.profiles set full_game = true where user_id = %s", (user_id,))
     _step(cur, results, "user resets their own catch counter",
@@ -235,8 +252,8 @@ def run_retention_checks(cur) -> dict[str, str]:
           "insert into auth.sessions (id, user_id, created_at, updated_at, refreshed_at) "
           f"values (gen_random_uuid(), %s, {old}, {old}, now() at time zone 'UTC')", (refreshed,))
     _step(cur, results, "setup: collection write today",
-          "insert into public.collection (user_id, species_id, spotted_at) values (%s, 'zz-verify-r', now())",
-          (collecting,))
+          "insert into public.collection (user_id, species_id, spotted_at) values (%s, %s, now())",
+          (collecting, real_species(cur, 1)[0]))
     _step(cur, results, "setup: notification log",
           "insert into public.notification_log (user_id, species_id, sent_at) values "
           "(%s, 'zz-verify-old', now() - interval '40 days'), (%s, 'zz-verify-new', now() - interval '1 day')",
@@ -277,8 +294,8 @@ def run_community_impact_checks(cur) -> dict[str, str]:
     # statement, so a one-statement version would never see the new pledge.
     cur.execute(
         "insert into public.collection (user_id, species_id, spotted_at, helped_at, helped_kind) "
-        "values (%s, 'zz-verify-help', now(), now(), 'give')",
-        (helper,),
+        "values (%s, %s, now(), now(), 'give')",
+        (helper, real_species(cur, 1)[0]),
     )
     _step(
         cur, results, "community totals count a pledge made today",
@@ -325,14 +342,15 @@ def run_entitlement_checks(cur) -> dict[str, str]:
     grant("purchase grants the Full Game", "full_game", True, "now()", "applied", True)
     grant("an older event arriving late changes nothing", "full_game", False,
           "now() - interval '1 hour'", "stale", True)
-    for i in range(1, 4):
+    paid = real_species(cur, 4)
+    for sid in paid[:3]:
         cur.execute(
             "insert into public.collection (user_id, species_id, spotted_at, caught_at) values (%s, %s, now(), now())",
-            (buyer, f"zz-verify-paid-{i}"),
+            (buyer, sid),
         )
     _step(cur, results, "with the Full Game a 4th catch is accepted",
           "insert into public.collection (user_id, species_id, spotted_at, caught_at) "
-          "values (%s, 'zz-verify-paid-4', now(), now())", (buyer,))
+          "values (%s, %s, now(), now())", (buyer, paid[3]))
     grant("refund revokes the Full Game", "full_game", False,
           "now() + interval '1 second'", "applied", False)
     grant("Family also grants the Full Game", "family", True,
@@ -451,6 +469,15 @@ def run_household_checks(cur) -> dict[str, str]:
     cur.execute("select public.remove_household_member(%s)", (m3,))
     as_user(None)
     results["the owner removes a member, who loses the Full Game"] = "ok" if not owns(m3) else "still unlocked"
+    # T-286 · review B-50: a removal rotates the code, so the removed member cannot rejoin with it.
+    cur.execute("select invite_code from public.households where owner_id = %s", (owner,))
+    new_code = cur.fetchone()[0]
+    as_user(m3)
+    _step(cur, results, "after a removal the old code is refused",
+          "select public.join_household(%s)", (code,))
+    as_user(None)
+    results["after a removal the code has changed"] = "ok" if new_code != code else "same code"
+    code = new_code
 
     as_user(m4)
     cur.execute("select public.leave_household()")

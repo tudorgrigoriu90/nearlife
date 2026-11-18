@@ -4413,6 +4413,14 @@ document until it is started, when it takes the next free `T-###`.
     two minutes. Tests: 2.
   - ✅ B-40: a rejected notification permission call counts as "no" and onboarding advances. Test: 1.
 
+- **T-286 · Server limits: real species, bounded rows, a code that changes** — *Claude · S · `DONE` (migration 0037 applied with this push) · deps: T-056, T-102 · review B-48, B-50*
+  - ✅ B-48: `collection.species_id` references `species(id)` (on update and delete cascade; no
+    orphans live, checked first) and an account holds at most 20,000 rows (`collection_full`).
+  - ✅ B-50: `rotate_household_code()` (owner only) and `remove_household_member` rotates it; the
+    Family screen has "New code". `verify.py` uses real species ids for its rows and checks an
+    unknown species is refused, and that after a removal the old code is refused and the code
+    changed. Tests: 3 in a real Postgres, 1 screen.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

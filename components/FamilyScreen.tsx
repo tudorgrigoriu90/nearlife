@@ -139,6 +139,16 @@ export default function FamilyScreen({
                 <Text style={styles.primaryText}>{tr('family.owner.share')}</Text>
               </Pressable>
             ) : null}
+            {household.inviteCode ? (
+              <Pressable
+                onPress={() => void run(() => gateway.rotateCode())}
+                disabled={busy}
+                accessibilityRole="button"
+                style={styles.secondary}
+              >
+                <Text style={styles.secondaryText}>{tr('family.owner.newCode')}</Text>
+              </Pressable>
+            ) : null}
             <Text style={styles.label}>{tr('family.owner.people', { people: household.people, ...MAX })}</Text>
             {household.members.map((m) => (
               <View key={m.id} style={styles.memberRow}>

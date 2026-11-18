@@ -13,6 +13,7 @@ function gateway(over: Partial<FamilyGateway> = {}, household: Household | null 
     join: jest.fn().mockResolvedValue(undefined),
     leave: jest.fn().mockResolvedValue(undefined),
     remove: jest.fn().mockResolvedValue(undefined),
+    rotateCode: jest.fn().mockResolvedValue('WXYZ6789'),
     ...over,
   };
 }
@@ -95,5 +96,16 @@ describe('FamilyScreen', () => {
     const gw = gateway({}, { role: 'member', since: null, people: 2, active: false, inviteCode: null, members: [] });
     await render(<FamilyScreen locale="en" gateway={gw} ownsFamily={false} />);
     await waitFor(() => expect(screen.getByText(tr('family.inactive'))).toBeTruthy());
+  });
+});
+
+
+// T-286 · review B-50: the owner can replace the code, e.g. after it was forwarded.
+describe('FamilyScreen new code', () => {
+  it('the owner can make a new invite code', async () => {
+    const gw = gateway({}, owner);
+    await render(<FamilyScreen locale="en" gateway={gw} ownsFamily onDone={() => {}} />);
+    await fireEvent.press(await screen.findByText(tr('family.owner.newCode')));
+    await waitFor(() => expect(gw.rotateCode).toHaveBeenCalled());
   });
 });
