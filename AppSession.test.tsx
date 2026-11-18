@@ -22,6 +22,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 );
 jest.mock('./lib/permissions', () => ({
   requestLocationPermission: jest.fn(async () => 'granted'),
+  requestLocationAccess: jest.fn(async () => 'granted'),
   getLocationFixOnce: jest.fn(async () => ({ latitude: 56.879, longitude: 14.806 })),
   requestNotificationPermission: jest.fn(async () => 'granted'),
   getDevicePushToken: jest.fn(async () => null),

@@ -18,6 +18,7 @@ export default function CatchSpotRoute({
   locale,
   onCatch,
   onBack,
+  allowLocation,
 }: {
   species: Species;
   speciesName: string;
@@ -28,6 +29,8 @@ export default function CatchSpotRoute({
   locale: Locale;
   onCatch: () => void;
   onBack: () => void;
+  /** Request location access; resolves true when granted (T-272). */
+  allowLocation?: () => Promise<boolean>;
 }) {
   const { view, checkAgain, suitable, fix, pick } = useCatchSpot({ species, regionId, source, store, getFix });
   return (
@@ -38,6 +41,14 @@ export default function CatchSpotRoute({
       onCatch={onCatch}
       onCheckAgain={checkAgain}
       onBack={onBack}
+      onAllowLocation={
+        allowLocation
+          ? () =>
+              void allowLocation().then((granted) => {
+                if (granted) checkAgain();
+              })
+          : undefined
+      }
       map={<SpotMap user={fix} spots={suitable} targetId={view?.spot?.id ?? null} onPick={pick} />}
     />
   );

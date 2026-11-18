@@ -40,6 +40,7 @@ export default function CatchSpotScreen({
   onCheckAgain,
   onBack,
   map,
+  onAllowLocation,
 }: {
   locale?: Locale;
   speciesName: string;
@@ -48,6 +49,8 @@ export default function CatchSpotScreen({
   onCatch: () => void;
   onCheckAgain: () => void;
   onBack?: () => void;
+  /** Ask for location access when there is no position (T-272 · review B-09). */
+  onAllowLocation?: () => void;
   /** The map (T-067), when this build has one; the screen works the same without it. */
   map?: ReactNode;
 }) {
@@ -92,6 +95,11 @@ export default function CatchSpotScreen({
             </>
           ) : null}
           {view.state === 'gps-off' ? <Text style={styles.body}>{tr('catchSpot.gpsOff')}</Text> : null}
+          {view.state === 'gps-off' && onAllowLocation ? (
+            <Pressable onPress={onAllowLocation} accessibilityRole="button" style={styles.catch}>
+              <Text style={styles.catchText}>{tr('catchSpot.allowLocation')}</Text>
+            </Pressable>
+          ) : null}
           {view.distanceM !== null && view.state === 'too-far' ? (
             <Text style={styles.distance}>{tr('catchSpot.distance', { distance: formatDistance(view.distanceM) })}</Text>
           ) : null}

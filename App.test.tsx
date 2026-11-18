@@ -2,7 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { BackHandler } from 'react-native';
 import App from './App';
-import { requestNotificationPermission } from './lib/permissions';
+import {
+  getLocationFixOnce,
+  requestLocationAccess,
+  requestLocationPermission,
+  requestNotificationPermission,
+} from './lib/permissions';
 import { CONSENT_STORAGE_KEY } from './lib/consentStore';
 import { HOMETOWN_STORAGE_KEY } from './lib/hometownStore';
 import { ONBOARDING_STORAGE_KEY } from './lib/onboardingStore';
@@ -26,6 +31,7 @@ beforeEach(async () => {
 // Onboarding asks the OS for permissions; mock to a deterministic "granted" so the flow is drivable.
 jest.mock('./lib/permissions', () => ({
   requestLocationPermission: jest.fn(async () => 'granted'),
+  requestLocationAccess: jest.fn(async () => 'granted'),
   getLocationFixOnce: jest.fn(async () => ({ latitude: 56.879, longitude: 14.806 })), // Växjö
   requestNotificationPermission: jest.fn(async () => 'granted'),
   getDevicePushToken: jest.fn(async () => null),
@@ -295,6 +301,70 @@ describe('App', () => {
       expect(saved.records.map((r: { speciesId: string }) => r.speciesId)).toEqual([
         onboardingStarter.id,
       ]);
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'allowing location in onboarding turns the Location switch on (T-272)',
+    async () => {
+      await completeOnboarding();
+      await press(tr('nav.settings'), { exact: false });
+      expect(screen.getAllByRole('switch')[0].props.value).toBe(true);
+      const stored = JSON.parse((await AsyncStorage.getItem(CONSENT_STORAGE_KEY)) ?? '{}');
+      expect(stored.location).toBe(true);
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'the Location switch asks the OS when turned on and stays off when refused (T-272)',
+    async () => {
+      await completeOnboarding();
+      await press(tr('nav.settings'), { exact: false });
+      const locationSwitch = () => screen.getAllByRole('switch')[0];
+      await fireEvent(locationSwitch(), 'valueChange', false);
+      expect(locationSwitch().props.value).toBe(false);
+      (requestLocationAccess as jest.Mock).mockResolvedValueOnce('denied');
+      await fireEvent(locationSwitch(), 'valueChange', true);
+      await act(async () => {});
+      expect(requestLocationAccess).toHaveBeenCalled();
+      expect(locationSwitch().props.value).toBe(false);
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'preview mode: a This Week tap does not spot, and the banner sets the home county (T-272)',
+    async () => {
+      (requestLocationPermission as jest.Mock).mockResolvedValueOnce('denied');
+      await render(<App />);
+      await press(tr('onboarding.welcome.cta'));
+      await fireEvent.changeText(
+        await screen.findByPlaceholderText(tr('onboarding.age.placeholder')),
+        ADULT_BIRTH_YEAR,
+      );
+      await press(tr('onboarding.age.cta'));
+      await press(tr('onboarding.location.cta')); // denied → no county to confirm
+      await press(tr('onboarding.notif.cta'));
+      await press(tr('onboarding.firstSpotted.cta'));
+      expect(await screen.findByText(tr('preview.banner'))).toBeTruthy();
+      // Look-only: the card opens, and the sighting is not recorded.
+      const before = await AsyncStorage.getItem('nearby.collection.v1');
+      await press(commonNameFor(topRow, 'en'));
+      expect(await screen.findByText(`${tr('preview.setHomeToPlay')} →`)).toBeTruthy();
+      expect(await AsyncStorage.getItem('nearby.collection.v1')).toBe(before);
+      await systemBack();
+      // One tap on the banner: permission, a fix in Växjö, Kronoberg becomes home.
+      (requestLocationAccess as jest.Mock).mockResolvedValueOnce('granted');
+      (getLocationFixOnce as jest.Mock).mockResolvedValueOnce({
+        latitude: 56.879,
+        longitude: 14.806,
+      });
+      await press(`${tr('preview.setHome')} →`);
+      await screen.findByText(tr('thisWeek.honesty'));
+      expect(screen.queryByText(tr('preview.banner'))).toBeNull();
+      expect(await AsyncStorage.getItem(HOMETOWN_STORAGE_KEY)).not.toBeNull();
     },
     FLOW_TIMEOUT,
   );

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AlmanacScreen from './components/AlmanacScreen';
@@ -32,6 +32,7 @@ import { useThisWeek } from './components/useThisWeek';
 import { useAlmanacCatalogue } from './components/useAlmanacCatalogue';
 import {
   onNotificationTap,
+  requestLocationAccess,
   requestNotificationPermission,
   showNotificationsInForeground,
   getLocationFixOnce,
@@ -66,6 +67,7 @@ import { ensureAnonymousSession, getSupabase } from './lib/supabase';
 import { getSupabaseConfig, hasSupabaseConfig } from './lib/supabaseConfig';
 import { eraseDeviceStorage } from './lib/deviceErase';
 import { SupabaseSignInGateway } from './lib/accountSignIn';
+import { fixIfConsented } from './lib/locationAccess';
 import SignIn from './components/SignIn';
 import { useSessionStart } from './components/useSessionStart';
 import { resetAnalyticsIdentity } from './lib/posthog';
@@ -106,7 +108,7 @@ import {
   type PurchaseRecord,
 } from './lib/dataExport';
 import type { Region } from './lib/hometown';
-import { AsyncStorageHometownStore } from './lib/hometownStore';
+import { AsyncStorageHometownStore, deriveHometown } from './lib/hometownStore';
 import { AsyncStorageOnboardingStore } from './lib/onboardingStore';
 import { AsyncStorageLocaleStore } from './lib/localeStore';
 import { spottedIds, tierStateFor } from './lib/collection';
@@ -119,7 +121,7 @@ import { monthOf, seasonKeyOf } from './lib/season';
 import { catchSeason } from './lib/catchSeason';
 import { countyStats } from './lib/countyStats';
 import { detectDeviceLocale } from './lib/i18n/deviceLocale';
-import { createTranslator, type Locale } from './lib/i18n';
+import { createTranslator, type Locale, type TranslationKey } from './lib/i18n';
 import {
   createPackSource,
   createRepositoryParts,
@@ -548,7 +550,50 @@ export default function App() {
     void CONSENT_STORE.save(next);
   };
 
+  // Location follows the switch (T-272 · review B-08): every read goes through this.
+  const consentedFix = useCallback(
+    () => fixIfConsented(() => consentRef.current.location, getLocationFixOnce)(),
+    [],
+  );
+
+  // Ask the OS for location; a "no" only the system settings can lift opens them (B-09).
+  const allowLocation = async (): Promise<boolean> => {
+    const outcome = await requestLocationAccess();
+    if (outcome === 'granted') {
+      applyConsent('location', true);
+      return true;
+    }
+    if (outcome === 'blocked') void Linking.openSettings().catch(() => undefined);
+    return false;
+  };
+
+  // From preview mode to a home county (T-272 · review B-09): the permission, one fix, the county
+  // locked in, as onboarding does. Says why when it cannot.
+  const [homeLookupNote, setHomeLookupNote] = useState<TranslationKey | null>(null);
+  const setHomeCounty = async () => {
+    if (!(await allowLocation())) {
+      setHomeLookupNote('preview.denied');
+      return;
+    }
+    const lookup = await deriveHometown(getLocationFixOnce, HOMETOWN_STORE).catch(
+      () => ({ region: null, reason: 'no-fix' }) as const,
+    );
+    if (lookup.region) {
+      setHometown(lookup.region);
+      setHomeLookupNote(null);
+    } else {
+      setHomeLookupNote(lookup.reason === 'outside-sweden' ? 'onboarding.outside.body' : 'preview.noFix');
+    }
+  };
+
   const toggleConsent = (kind: ConsentKind, value: boolean) => {
+    // Turning location on asks the OS, and finds the home county if there is none yet (T-272).
+    if (kind === 'location' && value) {
+      void allowLocation().then((granted) => {
+        if (granted && hometown === null) void setHomeCounty();
+      });
+      return;
+    }
     // Turning notifications on must also get the OS permission (T-213). Recording consent without
     // it registers the device for pushes the phone then silently drops — the user believes they
     // opted in and nothing ever arrives. Already granted returns at once, with no dialog.
@@ -783,7 +828,8 @@ export default function App() {
   const viewingAccess = viewCounty
     ? regionAccess(viewCounty.id, hometown?.id ?? null, entitlements)
     : 'home';
-  const canCollect = canCollectIn(viewingAccess);
+  // Preview mode (no home county, no opened county) is look-only (T-272 · review B-19).
+  const canCollect = (hometown !== null || viewCounty !== null) && canCollectIn(viewingAccess);
   // Derived from the persisted collection (T-200), so a restart cannot reset it; the database
   // trigger is the authority and refuses a 4th catch however this is tampered with. Full Game is
   // false until the purchase flow exists (T-074).
@@ -888,13 +934,15 @@ export default function App() {
           collection.spot(speciesId);
           track('species_spotted', { speciesId, source: 'onboarding' });
         }}
-        onComplete={({ agePath, notificationOutcome, hometown: home }) => {
+        onComplete={({ agePath, notificationOutcome, locationOutcome, hometown: home }) => {
           // A locked hometown from an earlier session stands even if location is denied this time.
           if (home !== null) setHometown(home);
           void ONBOARDING_STORE.save({ agePath });
           setAnalyticsLocked(agePath === 'restricted');
           // "Turn on nudges" + an OS grant is the notification opt-in (T-201).
           if (notificationOutcome === 'granted') applyConsent('notifications', true);
+          // Allowing location in onboarding is the location opt-in (T-272 · review B-08).
+          if (locationOutcome === 'granted') applyConsent('location', true);
           setOnboarded(true);
         }}
       />
@@ -1093,6 +1141,7 @@ export default function App() {
           onExportData={() => void exportMyData()}
           onLinkEmail={() => setShowLinkEmail(true)}
           onSignIn={hasSupabaseConfig() ? () => setShowSignIn(true) : undefined}
+          onSetHomeCounty={hometown === null ? () => void setHomeCounty() : undefined}
           onOpenAccessCode={hasSupabaseConfig() ? () => setShowAccessCode(true) : undefined}
           // Family needs the backend: households live in Supabase (T-102).
           onOpenFamily={hasSupabaseConfig() ? () => setShowFamily(true) : undefined}
@@ -1169,7 +1218,8 @@ export default function App() {
           regionId={catchRegion}
           source={catchSpotSource()!}
           store={CATCH_SPOT_STORE}
-          getFix={getLocationFixOnce}
+          getFix={consentedFix}
+          allowLocation={allowLocation}
           locale={locale}
           onCatch={() => {
             setGoCatch(null);
@@ -1235,10 +1285,13 @@ export default function App() {
           month={monthOf(new Date())}
           backAround={cardSeason && !cardSeason.open ? cardSeason.backAround : null}
           onBack={() => setSelected(null)}
+          findNearbyLabel={previewMode && !viewCounty ? tr('preview.setHomeToPlay') : undefined}
           onFindNearby={
             canCollect
               ? findCatchSpot
-              : () => {
+              : previewMode && !viewCounty
+                ? () => void setHomeCounty()
+                : () => {
                   track('store_opened', { source: 'catch_spot' });
                   setShowCounties(true);
                 }
@@ -1287,9 +1340,15 @@ export default function App() {
         </View>
       ) : null}
       {previewMode ? (
-        <View style={styles.previewBanner}>
+        <Pressable
+          style={styles.previewBanner}
+          onPress={() => void setHomeCounty()}
+          accessibilityRole="button"
+        >
           <Text style={styles.previewText}>{tr('preview.banner')}</Text>
-        </View>
+          <Text style={[styles.previewText, styles.previewAction]}>{tr('preview.setHome')} →</Text>
+          {homeLookupNote ? <Text style={styles.previewText}>{tr(homeLookupNote)}</Text> : null}
+        </Pressable>
       ) : null}
       {viewCounty ? (
         <View style={styles.previewBanner}>
@@ -1403,6 +1462,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   previewText: { fontSize: 12, color: '#7a5a1f', textAlign: 'center' },
+  previewAction: { marginTop: 4, fontWeight: '700', textDecorationLine: 'underline' },
   previewLink: { marginTop: 4, fontWeight: '700', textDecorationLine: 'underline' },
   tabBar: {
     flexDirection: 'row',

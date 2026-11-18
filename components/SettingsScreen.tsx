@@ -37,6 +37,7 @@ export default function SettingsScreen({
   onExportData,
   onLinkEmail,
   onSignIn,
+  onSetHomeCounty,
   onOpenAccessCode,
   onOpenFamily,
   onOpenStore,
@@ -60,6 +61,8 @@ export default function SettingsScreen({
   onLinkEmail?: () => void;
   /** Sign in to an account with a linked email (T-271). */
   onSignIn?: () => void;
+  /** Set the home county, offered while there is none (T-272 · review B-09). */
+  onSetHomeCounty?: () => void;
   /** Reviewer access codes (T-237); omitted without a backend, since the server checks the code. */
   onOpenAccessCode?: () => void;
   /** Open the Family screen (T-103): join with a code, or manage your family. */
@@ -231,6 +234,16 @@ export default function SettingsScreen({
               style={[styles.row, styles.rowBorder]}
             >
               <Text style={styles.rowLabel}>{tr('settings.linkEmail')}</Text>
+              <Text style={styles.chevron}>›</Text>
+            </Pressable>
+          ) : null}
+          {onSetHomeCounty ? (
+            <Pressable
+              onPress={onSetHomeCounty}
+              accessibilityRole="button"
+              style={[styles.row, styles.rowBorder]}
+            >
+              <Text style={styles.rowLabel}>{tr('preview.setHome')}</Text>
               <Text style={styles.chevron}>›</Text>
             </Pressable>
           ) : null}

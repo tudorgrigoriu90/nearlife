@@ -44,6 +44,7 @@ export default function SpeciesCard({
   tier = EMPTY_TIER_STATE,
   fullGame = false,
   onFindNearby,
+  findNearbyLabel,
   backAround,
   onPledge,
   nearbyNote,
@@ -66,6 +67,8 @@ export default function SpeciesCard({
   /** Full Game entitlement unlocks all depth tiers immediately (T-060). */
   fullGame?: boolean;
   onFindNearby?: (species: Species) => void;
+  /** The find button's label when it does something else, e.g. set the home county (T-272). */
+  findNearbyLabel?: string;
   /**
    * Set when the species is out of season in the county (T-268 · review B-26): the month it is
    * usually back. The card then offers no catch and says when instead.
@@ -286,7 +289,7 @@ export default function SpeciesCard({
             accessibilityRole="button"
             style={styles.cta}
           >
-            <Text style={styles.ctaText}>{tr('card.findNearby')} →</Text>
+            <Text style={styles.ctaText}>{findNearbyLabel ?? tr('card.findNearby')} →</Text>
           </Pressable>
           {nearbyNote ? <Text style={styles.nearbyNote}>{nearbyNote}</Text> : null}
         </View>

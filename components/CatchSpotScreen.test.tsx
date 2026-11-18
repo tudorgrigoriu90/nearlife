@@ -94,3 +94,22 @@ describe('CatchSpotScreen (T-068)', () => {
   });
 });
 
+
+// T-272 · review B-09: with no position the screen can ask for one.
+describe('CatchSpotScreen without a position', () => {
+  it('offers to allow location', async () => {
+    const onAllow = jest.fn();
+    await render(
+      <CatchSpotScreen
+        locale="en"
+        speciesName="Moose"
+        view={{ state: 'gps-off', spot: null, distanceM: null } as never}
+        onCatch={() => {}}
+        onCheckAgain={() => {}}
+        onAllowLocation={onAllow}
+      />,
+    );
+    await fireEvent.press(screen.getByText(tr('catchSpot.allowLocation')));
+    expect(onAllow).toHaveBeenCalled();
+  });
+});

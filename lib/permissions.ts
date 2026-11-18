@@ -2,6 +2,7 @@ import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import type { Coordinates } from './hometown';
+import { locationOutcome, type LocationAccess } from './locationAccess';
 import { speciesIdFromResponse } from './notificationTap';
 import { ANDROID_CHANNEL_ID } from './pushDispatch';
 import type { DeviceToken } from './pushRegistration';
@@ -17,6 +18,15 @@ export type PermissionOutcome = 'granted' | 'denied';
 export async function requestLocationPermission(): Promise<PermissionOutcome> {
   const { status } = await Location.requestForegroundPermissionsAsync();
   return status === 'granted' ? 'granted' : 'denied';
+}
+
+/**
+ * Ask for while-in-use location, telling apart a "no" the user can still change here from one only
+ * the system settings can lift (T-272 · review B-09).
+ */
+export async function requestLocationAccess(): Promise<LocationAccess> {
+  const answer = await Location.requestForegroundPermissionsAsync();
+  return locationOutcome(answer);
 }
 
 /**
