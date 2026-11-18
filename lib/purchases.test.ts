@@ -93,3 +93,30 @@ describe('county packs (T-105)', () => {
   });
 });
 
+
+// T-271 · review B-21: the SDK kept the first account's id for the life of the process, so a
+// purchase after account deletion or sign-in named an account that no longer exists.
+describe('RevenueCat follows the current account', () => {
+  const OTHER = '5e6763d4-aaaa-4bbb-8ccc-ddddeeeeffff';
+
+  it('logs in with the new id when the account changed before a purchase or restore', async () => {
+    const mod = fakeModule();
+    let current = USER;
+    const gw = new RevenueCatPurchaseGateway(mod, 'goog_x', async () => current);
+    await gw.products();
+    current = OTHER;
+    await gw.purchase('full_game');
+    expect(mod.logIn).toHaveBeenCalledWith(OTHER);
+    await gw.restore();
+    expect(mod.logIn).toHaveBeenCalledTimes(1); // already on the new id
+    expect(mod.configure).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not log in while the account is unchanged', async () => {
+    const mod = fakeModule();
+    const gw = new RevenueCatPurchaseGateway(mod, 'goog_x', async () => USER);
+    await gw.purchase('full_game');
+    await gw.restore();
+    expect(mod.logIn).not.toHaveBeenCalled();
+  });
+});

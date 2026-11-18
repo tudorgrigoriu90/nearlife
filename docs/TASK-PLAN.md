@@ -4396,10 +4396,18 @@ document until it is started, when it takes the next free `T-###`.
     (`SESSION_GAP_MS`); never without consent. `this_week_opened` waits for the stored consent
     too. Tests: the hook (3) and `AppSession.test.tsx`, which goes through the real consent gate
     and PostHog tracker (red on the old code: 0 sessions).
-- **T-271 · Sign in with a linked email** — *Claude · M · `TODO` · deps: T-133, T-274 · review B-07, B-21*
+- **T-271 · Sign in with a linked email** — *Claude · M · `DONE` (Director: Magic Link email template, LAUNCH-CHECKLIST Step 9b) · deps: T-133, T-274 · review B-07, B-21*
   - "I already have an account": email → one-time code → the anonymous session is replaced, the
     collection is pulled, and RevenueCat is logged in under the restored id.
   - Closes T-133 and the cross-device half of T-086.
+  - ✅ `lib/accountSignIn.ts` (`signInWithOtp` with `shouldCreateUser: false`, `verifyOtp`;
+    a malformed code is refused locally, a wrong one leaves the session) and `components/SignIn`
+    (email → code). Entry: "I already have an account" on the welcome screen and in Settings. On
+    success the phone clears its collection, pulls the account's (T-274's merge) and re-reads the
+    entitlements.
+  - ✅ B-21: `RevenueCatPurchaseGateway` calls `logIn(newId)` before a purchase or restore whenever
+    the Supabase user differs from the one it acts for. Tests: 6 sign-in core, 2 screen, 2
+    purchases.
 - **T-272 · Location consent that means what it says** — *Claude · S · `TODO` · deps: T-088, T-090 · review B-08, B-09, B-19*
   - Granting location in onboarding sets the consent; the Settings switch asks the OS when turned
     on and stops every location read when turned off.

@@ -118,6 +118,15 @@ In app.revenuecat.com, project Nearlife:
 sentry.io → sign up with **EU data storage** → React Native project `nearby` → paste me the
 **DSN** → add it to EAS (`EXPO_PUBLIC_SENTRY_DSN`) → accept Sentry's DPA.
 
+## Step 9b — Sign-in codes in the email (5 min, T-271)
+"I already have an account" (welcome screen and Settings) signs in with a 6-digit code sent to the
+linked email. Supabase's default sign-in email has only a link, so add the code:
+1. Supabase dashboard → **Authentication → Email Templates → Magic Link**.
+2. Put the code in the body, for example: `<p>Your Nearby code: <strong>{{ .Token }}</strong></p>`
+   (keep or remove the link; the app uses the code). Save.
+3. Test: link an email in Settings, clear the app's storage, open it → **I already have an
+   account** → enter the email → the code arrives → enter it → your collection is back.
+
 ## Step 10 — Privacy policy and the account-deletion page ✅ published 2026-11-01
 - Privacy policy: **https://nytta-ai.se/nearby/privacy/**
 - Delete account: **https://nytta-ai.se/nearby/delete-account/** (English + Swedish)

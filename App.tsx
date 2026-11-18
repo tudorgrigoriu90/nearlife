@@ -65,6 +65,8 @@ import {
 import { ensureAnonymousSession, getSupabase } from './lib/supabase';
 import { getSupabaseConfig, hasSupabaseConfig } from './lib/supabaseConfig';
 import { eraseDeviceStorage } from './lib/deviceErase';
+import { SupabaseSignInGateway } from './lib/accountSignIn';
+import SignIn from './components/SignIn';
 import { useSessionStart } from './components/useSessionStart';
 import { resetAnalyticsIdentity } from './lib/posthog';
 import { supabaseProbe, type ConnectivityProbe } from './lib/connectivity';
@@ -291,6 +293,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [showLinkEmail, setShowLinkEmail] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
   const [showAccessCode, setShowAccessCode] = useState(false);
   const [showSighting, setShowSighting] = useState(false);
   const [recognized, setRecognized] = useState<ReadonlySet<string>>(new Set());
@@ -742,6 +745,17 @@ export default function App() {
     return true;
   };
 
+  // Signed in to an account with a linked email (T-271 · review B-07): the session is now that
+  // account's, so the phone drops the collection it had and pulls the account's, and re-reads what
+  // the account owns. RevenueCat follows the new id at the next purchase or restore (B-21).
+  const onSignedIn = async () => {
+    setShowSignIn(false);
+    setShowSettings(false);
+    await collection.reset();
+    collection.resync();
+    refreshEntitlements();
+  };
+
   // Everything the phone holds, on disk and in memory (T-269 · review B-05, B-12, B-52): the next
   // person to open the app starts exactly as on a new install.
   const eraseDevice = async () => {
@@ -807,6 +821,7 @@ export default function App() {
   // Onboarding keeps the default: there is no earlier in-app screen to return to.
   // Kept in a ref (refreshed after every render) so the one listener always sees current state.
   const goBack = (): boolean => {
+    if (showSignIn) return closed(() => setShowSignIn(false));
     if (!onboarded) return false;
     if (exportJson !== null) return closed(() => setExportJson(null));
     if (showDelete) return closed(() => setShowDelete(false));
@@ -849,10 +864,26 @@ export default function App() {
     );
   }
 
+  // Reachable from the welcome screen too, so it sits before onboarding (T-271).
+  if (showSignIn) {
+    return (
+      <>
+        <SignIn
+          locale={locale}
+          gateway={new SupabaseSignInGateway(getSupabase())}
+          onSignedIn={() => void onSignedIn()}
+          onCancel={() => setShowSignIn(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (!onboarded) {
     return (
       <OnboardingFlow
         locale={locale}
+        onSignIn={hasSupabaseConfig() ? () => setShowSignIn(true) : undefined}
         onFirstSpotted={(speciesId) => {
           collection.spot(speciesId);
           track('species_spotted', { speciesId, source: 'onboarding' });
@@ -1061,6 +1092,7 @@ export default function App() {
           }
           onExportData={() => void exportMyData()}
           onLinkEmail={() => setShowLinkEmail(true)}
+          onSignIn={hasSupabaseConfig() ? () => setShowSignIn(true) : undefined}
           onOpenAccessCode={hasSupabaseConfig() ? () => setShowAccessCode(true) : undefined}
           // Family needs the backend: households live in Supabase (T-102).
           onOpenFamily={hasSupabaseConfig() ? () => setShowFamily(true) : undefined}

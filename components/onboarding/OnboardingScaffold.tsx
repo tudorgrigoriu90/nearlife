@@ -12,6 +12,7 @@ export default function OnboardingScaffold({
   footnote,
   ctaLabel,
   onNext,
+  secondary,
   children,
 }: {
   emoji: string;
@@ -20,6 +21,8 @@ export default function OnboardingScaffold({
   footnote?: string;
   ctaLabel: string;
   onNext: () => void;
+  /** A quieter second action under the CTA, e.g. "I already have an account" (T-271). */
+  secondary?: { label: string; onPress: () => void };
   children?: ReactNode;
 }) {
   return (
@@ -35,6 +38,11 @@ export default function OnboardingScaffold({
         <Pressable style={styles.cta} onPress={onNext} accessibilityRole="button">
           <Text style={styles.ctaText}>{ctaLabel}</Text>
         </Pressable>
+        {secondary ? (
+          <Pressable style={styles.secondary} onPress={secondary.onPress} accessibilityRole="button">
+            <Text style={styles.secondaryText}>{secondary.label}</Text>
+          </Pressable>
+        ) : null}
       </View>
     </View>
   );
@@ -50,4 +58,6 @@ const styles = StyleSheet.create({
   footnote: { fontSize: 12, color: '#7a8a7c', textAlign: 'center', fontStyle: 'italic' },
   cta: { paddingVertical: 16, borderRadius: 14, backgroundColor: '#3a7d44', alignItems: 'center' },
   ctaText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  secondary: { paddingVertical: 12, alignItems: 'center' },
+  secondaryText: { fontSize: 15, fontWeight: '600', color: '#3a7d44' },
 });

@@ -48,8 +48,11 @@ export default function OnboardingFlow({
   onFirstSpotted,
   onComplete,
   resolveHome = deriveFromDevice,
+  onSignIn,
 }: {
   locale?: Locale;
+  /** "I already have an account" on the welcome screen (T-271); absent without a backend. */
+  onSignIn?: () => void;
   onFirstSpotted?: (speciesId: string) => void;
   onComplete: (result: OnboardingResult) => void;
   /** Seam for tests; production uses the device location + locked store. */
@@ -129,6 +132,7 @@ export default function OnboardingFlow({
           body={tr('onboarding.welcome.body')}
           ctaLabel={tr('onboarding.welcome.cta')}
           onNext={advance}
+          secondary={onSignIn ? { label: tr('signin.entry'), onPress: onSignIn } : undefined}
         />
       );
     case 'ageGate': {

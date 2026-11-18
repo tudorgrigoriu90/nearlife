@@ -36,6 +36,7 @@ export default function SettingsScreen({
   onSelectSecondaryLocale,
   onExportData,
   onLinkEmail,
+  onSignIn,
   onOpenAccessCode,
   onOpenFamily,
   onOpenStore,
@@ -57,6 +58,8 @@ export default function SettingsScreen({
   onExportData: () => void;
   /** Open the link-email flow (T-133 · make the account durable across reinstall/devices). */
   onLinkEmail?: () => void;
+  /** Sign in to an account with a linked email (T-271). */
+  onSignIn?: () => void;
   /** Reviewer access codes (T-237); omitted without a backend, since the server checks the code. */
   onOpenAccessCode?: () => void;
   /** Open the Family screen (T-103): join with a code, or manage your family. */
@@ -228,6 +231,16 @@ export default function SettingsScreen({
               style={[styles.row, styles.rowBorder]}
             >
               <Text style={styles.rowLabel}>{tr('settings.linkEmail')}</Text>
+              <Text style={styles.chevron}>›</Text>
+            </Pressable>
+          ) : null}
+          {onSignIn ? (
+            <Pressable
+              onPress={onSignIn}
+              accessibilityRole="button"
+              style={[styles.row, styles.rowBorder]}
+            >
+              <Text style={styles.rowLabel}>{tr('signin.entry')}</Text>
               <Text style={styles.chevron}>›</Text>
             </Pressable>
           ) : null}

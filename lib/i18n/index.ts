@@ -323,6 +323,16 @@ export const en = {
 
   // Link email (T-133 · reinstall / cross-device survival). Optional; off the onboarding path.
   'settings.linkEmail': 'Link an email',
+  'signin.title': 'Sign in',
+  'signin.body': 'Enter the email you linked to your account. We’ll send you a 6-digit code.',
+  'signin.send': 'Send code',
+  'signin.codeSent': 'We sent a code to {email}. Enter it here.',
+  'signin.codePlaceholder': '6-digit code',
+  'signin.verify': 'Sign in',
+  'signin.error.send': 'No account uses that email, or the code could not be sent. Check the address and try again.',
+  'signin.error.format': 'The code is the 6 digits in the email.',
+  'signin.error.code': 'That code is wrong or has expired. Try again or send a new one.',
+  'signin.entry': 'I already have an account',
   'link.title': 'Keep your data safe',
   'link.body':
     'Link an email so your collection survives reinstalling the app or switching phones. We’ll send a confirmation link. Optional.',
@@ -746,6 +756,16 @@ const sv: Catalog = {
 
   // Link email (T-133 · överlever ominstallation / flera enheter)
   'settings.linkEmail': 'Koppla en e-post',
+  'signin.title': 'Logga in',
+  'signin.body': 'Skriv e-postadressen du kopplade till ditt konto. Vi skickar en 6-siffrig kod.',
+  'signin.send': 'Skicka kod',
+  'signin.codeSent': 'Vi skickade en kod till {email}. Skriv in den här.',
+  'signin.codePlaceholder': '6-siffrig kod',
+  'signin.verify': 'Logga in',
+  'signin.error.send': 'Inget konto använder den adressen, eller så kunde koden inte skickas. Kontrollera adressen och försök igen.',
+  'signin.error.format': 'Koden är de 6 siffrorna i mejlet.',
+  'signin.error.code': 'Koden är fel eller har gått ut. Försök igen eller skicka en ny.',
+  'signin.entry': 'Jag har redan ett konto',
   'link.title': 'Skydda dina uppgifter',
   'link.body':
     'Koppla en e-post så att din samling överlever ominstallation av appen eller byte av telefon. Vi skickar en bekräftelselänk. Valfritt.',

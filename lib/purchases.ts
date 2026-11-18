@@ -74,11 +74,15 @@ export class RevenueCatPurchaseGateway implements PurchaseGateway {
     return this.rc !== null && this.apiKey !== '';
   }
 
+  /** The app user id RevenueCat currently acts for. */
+  private appUserID: string | null = null;
+
   private ready(): Promise<RevenueCatModule> {
     const rc = this.rc;
     if (!rc || !this.apiKey) return Promise.reject(new Error('purchases are not available in this build'));
     this.configured ??= this.ensureUser().then((appUserID) => {
       rc.configure({ apiKey: this.apiKey, appUserID });
+      this.appUserID = appUserID;
     });
     // A failed configure (offline at sign-in) must not stick: the next attempt retries.
     return this.configured.then(
@@ -88,6 +92,21 @@ export class RevenueCatPurchaseGateway implements PurchaseGateway {
         throw e;
       },
     );
+  }
+
+  /**
+   * Ready, and acting for the account signed in now (T-271 · review B-21): after an account
+   * deletion or a sign-in the Supabase user changes while the process lives on, and a purchase
+   * made under the old id would reach the webhook naming an account that no longer exists.
+   */
+  private async readyForCurrentUser(): Promise<RevenueCatModule> {
+    const rc = await this.ready();
+    const current = await this.ensureUser();
+    if (current !== this.appUserID) {
+      await rc.logIn(current);
+      this.appUserID = current;
+    }
+    return rc;
   }
 
   private async storeProducts(skus: Sku[]): Promise<RcProduct[]> {
@@ -108,7 +127,7 @@ export class RevenueCatPurchaseGateway implements PurchaseGateway {
     const product = (await this.storeProducts([sku])).find((p) => p.identifier === sku);
     if (!product) throw new Error(`${sku} is not available in the store`);
     try {
-      await (await this.ready()).purchaseStoreProduct(product);
+      await (await this.readyForCurrentUser()).purchaseStoreProduct(product);
       return 'purchased';
     } catch (e) {
       if ((e as { userCancelled?: boolean | null }).userCancelled) return 'cancelled';
@@ -117,7 +136,7 @@ export class RevenueCatPurchaseGateway implements PurchaseGateway {
   }
 
   async restore(): Promise<void> {
-    await (await this.ready()).restorePurchases();
+    await (await this.readyForCurrentUser()).restorePurchases();
   }
 }
 

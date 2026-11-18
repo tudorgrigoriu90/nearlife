@@ -28,6 +28,8 @@ export interface Collection {
   refusedCatches: string[];
   /** The app has shown the notice for this refused catch. */
   clearRefusedCatch: (speciesId: string) => void;
+  /** Pull the server copy now (after a sign-in, T-271). */
+  resync: () => void;
   /** Forget the collection on this device (account deletion, T-269). */
   reset: () => Promise<void>;
 }
@@ -128,5 +130,12 @@ export function useCollection(): Collection {
     setRecords([]);
   }, [getStore]);
 
-  return { records, spot, markCaught, help, reset, refusedCatches, clearRefusedCatch };
+  const resync = useCallback(() => {
+    void getStore()
+      .sync()
+      .then(refresh)
+      .catch((e: unknown) => console.warn('collection sync failed', e));
+  }, [getStore, refresh]);
+
+  return { records, spot, markCaught, help, reset, resync, refusedCatches, clearRefusedCatch };
 }
