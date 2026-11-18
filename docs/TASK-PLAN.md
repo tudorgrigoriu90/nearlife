@@ -4400,6 +4400,12 @@ document until it is started, when it takes the next free `T-###`.
     Swedish reviewed. Option (a) remains open to the Director: have the most recorded species'
     Swedish text reviewed and mark those `reviewed`. Tests: 7.
 
+- **T-284 · The catch range counts the fix's accuracy** — *Claude · XS · `DONE` (phone check at one real spot: Director, with T-141) · deps: T-068 · review B-25*
+  - ✅ The catch screen uses `getCatchFix` (High accuracy, reports its accuracy radius); the home
+    county and travel notice keep Balanced. `catchSpotView` treats the user as in range when
+    `distance − min(accuracy, 50 m) ≤ 100 m`. Tests: 120 m at 30 m accuracy is in range, 200 m is
+    not, a poor fix earns at most 50 m.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

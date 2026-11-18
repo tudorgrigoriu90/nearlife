@@ -45,6 +45,26 @@ export async function getLocationFixOnce(): Promise<Coordinates | null> {
   }
 }
 
+/**
+ * The fix for "am I at the catch spot?" (T-284 · review B-25): High accuracy, with the accuracy
+ * radius it reports, since the decision is within 100 m. The home county and the travel notice
+ * keep the quicker Balanced fix.
+ */
+export async function getCatchFix(): Promise<(Coordinates & { accuracyM?: number }) | null> {
+  try {
+    const { coords } = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+    });
+    return {
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      ...(typeof coords.accuracy === 'number' ? { accuracyM: coords.accuracy } : {}),
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Fire the OS notification dialog (after our own pre-prompt explainer, T-024). */
 export async function requestNotificationPermission(): Promise<PermissionOutcome> {
   const { status } = await Notifications.requestPermissionsAsync();

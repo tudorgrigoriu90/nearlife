@@ -35,6 +35,7 @@ import {
   requestLocationAccess,
   requestNotificationPermission,
   showNotificationsInForeground,
+  getCatchFix,
   getLocationFixOnce,
 } from './lib/permissions';
 import { useTracker } from './components/useTracker';
@@ -568,7 +569,7 @@ export default function App() {
 
   // Location follows the switch (T-272 · review B-08): every read goes through this.
   const consentedFix = useCallback(
-    () => fixIfConsented(() => consentRef.current.location, getLocationFixOnce)(),
+    () => fixIfConsented(() => consentRef.current.location, getCatchFix)(),
     [],
   );
 

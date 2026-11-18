@@ -6,7 +6,12 @@
 export interface LatLng {
   latitude: number;
   longitude: number;
+  /** The fix's reported accuracy radius in metres, when known (T-284). */
+  accuracyM?: number;
 }
+
+/** The most a fix's inaccuracy may count in the user's favour (T-284 · review B-25). */
+export const MAX_ACCURACY_ALLOWANCE_M = 50;
 
 /** Enable catching within this many metres of a spot (config, TSD §5). */
 export const DEFAULT_CATCH_RANGE_M = 100;

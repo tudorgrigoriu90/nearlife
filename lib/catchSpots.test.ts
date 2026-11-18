@@ -138,3 +138,30 @@ describe('an unmapped county', () => {
   });
 });
 
+
+// T-284 · review B-25: the fix's own error counts in the user's favour, up to 50 m.
+describe('catch range and the accuracy of the fix', () => {
+  // 1 degree of latitude is ~111 km: 0.00108° ≈ 120 m, 0.0018° ≈ 200 m.
+  const at = (metresNorth: number, accuracyM?: number) => ({
+    latitude: LAKE.lat + metresNorth / 111_195,
+    longitude: LAKE.lon,
+    ...(accuracyM !== undefined ? { accuracyM } : {}),
+  });
+
+  it('120 m away with 30 m accuracy is in range', () => {
+    expect(catchSpotView(at(120, 30), [LAKE], ['freshwater']).state).toBe('in-range');
+  });
+
+  it('200 m away with 30 m accuracy is too far', () => {
+    expect(catchSpotView(at(200, 30), [LAKE], ['freshwater']).state).toBe('too-far');
+  });
+
+  it('a very poor fix earns at most 50 m', () => {
+    expect(catchSpotView(at(160, 400), [LAKE], ['freshwater']).state).toBe('too-far');
+    expect(catchSpotView(at(140, 400), [LAKE], ['freshwater']).state).toBe('in-range');
+  });
+
+  it('no accuracy: the plain distance', () => {
+    expect(catchSpotView(at(120), [LAKE], ['freshwater']).state).toBe('too-far');
+  });
+});

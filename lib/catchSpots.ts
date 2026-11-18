@@ -1,4 +1,10 @@
-import { DEFAULT_CATCH_RANGE_M, haversineMeters, type LatLng, type ProximityState } from './proximity';
+import {
+  DEFAULT_CATCH_RANGE_M,
+  haversineMeters,
+  MAX_ACCURACY_ALLOWANCE_M,
+  type LatLng,
+  type ProximityState,
+} from './proximity';
 import type { Habitat, SpeciesCategory } from './species/types';
 
 // Catch spots for the app (T-068). The app downloads its county's spots, which the database only
@@ -82,8 +88,12 @@ export function catchSpotView(
   const nearest = chosen
     ? { spot: chosen, distanceM: haversineMeters(user, { latitude: chosen.lat, longitude: chosen.lon }) }
     : nearestSpotFor(user, suitable, habitats)!;
+  // A fix is only as good as its accuracy (T-284 · review B-25): someone standing at the spot with
+  // a 40 m fix must not be told they are too far. The allowance is capped, so a poor fix is never
+  // a free pass.
+  const allowance = Math.min(Math.max(user.accuracyM ?? 0, 0), MAX_ACCURACY_ALLOWANCE_M);
   return {
-    state: nearest.distanceM <= rangeM ? 'in-range' : 'too-far',
+    state: nearest.distanceM - allowance <= rangeM ? 'in-range' : 'too-far',
     spot: nearest.spot,
     distanceM: nearest.distanceM,
   };
