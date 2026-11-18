@@ -1,4 +1,13 @@
-import { Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Linking,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import type { HelpKind, TierState } from '../lib/collection';
 import { EMPTY_TIER_STATE } from '../lib/collection';
 import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
@@ -45,6 +54,8 @@ export default function SpeciesCard({
   fullGame = false,
   onFindNearby,
   findNearbyLabel,
+  contentState,
+  onRetryContent,
   backAround,
   onPledge,
   nearbyNote,
@@ -69,6 +80,13 @@ export default function SpeciesCard({
   onFindNearby?: (species: Species) => void;
   /** The find button's label when it does something else, e.g. set the home county (T-272). */
   findNearbyLabel?: string;
+  /**
+   * Where the card's text stands (T-283 · review B-28): give and protect exist for every species
+   * (invariant #2), so a card still waiting for them, or that failed to get them, says so.
+   * Defaults to `ready` with content and `missing` without.
+   */
+  contentState?: 'loading' | 'ready' | 'missing' | 'error';
+  onRetryContent?: () => void;
   /**
    * Set when the species is out of season in the county (T-268 · review B-26): the month it is
    * usually back. The card then offers no catch and says when instead.
@@ -131,6 +149,11 @@ export default function SpeciesCard({
       ? `${isolate(endonymOf(secondaryLocale))} · ${tr('dual.machineTranslated')}`
       : null;
   const chromeDirection = writingDirectionFor(locale as ContentLocale);
+  // The main language's own text is labelled too while its status is `machine` (T-283 · review
+  // B-64): Swedish, the launch language, is not native-reviewed yet.
+  const mainMachineText =
+    content !== null && content !== undefined && needsMachineTranslationNotice(locale as ContentLocale);
+  const textState = contentState ?? (content ? 'ready' : 'missing');
 
   // Share is a clean delight moment — no upsell (invariant #4); honest, season-framed copy
   // (invariant #1). Text only for now; a deep link arrives with the store work. Failures/dismissal
@@ -167,6 +190,11 @@ export default function SpeciesCard({
           {threat ? (
             <Text style={styles.threat} testID="card-threat">
               ⚠️ {tr(`iucn.${threat}` as TranslationKey)} · {tr('iucn.source')}
+            </Text>
+          ) : null}
+          {mainMachineText ? (
+            <Text style={[styles.mtNotice, { writingDirection: chromeDirection }]}>
+              {tr('card.machineText')}
             </Text>
           ) : null}
           {mtNotice ? (
@@ -252,7 +280,20 @@ export default function SpeciesCard({
             ) : null}
             <Text style={styles.law}>⚖ {tr('card.followLaw')}</Text>
           </>
-        ) : null}
+        ) : textState === 'loading' ? (
+          <ActivityIndicator testID="card-content-loading" style={styles.contentState} color="#3a7d44" />
+        ) : textState === 'error' ? (
+          <View style={styles.contentState}>
+            <Text style={styles.contentStateText}>{tr('card.contentError')}</Text>
+            {onRetryContent ? (
+              <Pressable onPress={onRetryContent} accessibilityRole="button">
+                <Text style={styles.contentRetry}>{tr('thisWeek.retry')}</Text>
+              </Pressable>
+            ) : null}
+          </View>
+        ) : (
+          <Text style={[styles.contentState, styles.contentStateText]}>{tr('card.contentMissing')}</Text>
+        )}
 
         <View style={styles.depthBlock}>
           <Text style={styles.depthLabel}>{tr('card.depth')}</Text>
@@ -272,7 +313,6 @@ export default function SpeciesCard({
               );
             })}
           </View>
-          <Text style={styles.depthHint}>{tr('card.locked')}</Text>
         </View>
       </ScrollView>
 
@@ -378,6 +418,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   mtNotice: { marginTop: 6, fontSize: 11, color: '#7a8a7c' },
+  contentState: { marginTop: 20, alignItems: 'center' },
+  contentStateText: { fontSize: 14, color: '#7a8a7c', textAlign: 'center' },
+  contentRetry: { marginTop: 8, fontSize: 15, fontWeight: '700', color: '#3a7d44' },
   notSpotted: { marginTop: 8, fontSize: 12, fontWeight: '700', color: '#7a8a7c', letterSpacing: 1 },
   fact: { fontSize: 17, lineHeight: 24, color: '#2f3d2c', marginBottom: 8 },
   factCredit: { fontSize: 12, color: '#5f7461', textDecorationLine: 'underline', marginBottom: 8 },

@@ -282,7 +282,10 @@ export default function App() {
   const [cardContent, setCardContent] = useState<{
     speciesId: string;
     content: SpeciesContent | null;
+    /** The read failed (T-283): the card says so and offers a retry. */
+    failed?: boolean;
   } | null>(null);
+  const [contentAttempt, setContentAttempt] = useState(0);
   // Mother-tongue dual display (F13.3). The settings live here; the secondary content is loaded
   // through the same repository seam as the primary, keyed by species id AND locale so a stale
   // result can never be painted against the wrong species or a language the user just changed.
@@ -700,12 +703,12 @@ export default function App() {
         if (!cancelled) setCardContent({ speciesId, content });
       })
       .catch(() => {
-        if (!cancelled) setCardContent({ speciesId, content: null });
+        if (!cancelled) setCardContent({ speciesId, content: null, failed: true });
       });
     return () => {
       cancelled = true;
     };
-  }, [selected, locale, speciesRepo]);
+  }, [selected, locale, speciesRepo, contentAttempt]);
 
   // Rehydrate the dual-display preference (T-148); until it resolves the feature stays off.
   useEffect(() => {
@@ -1318,6 +1321,16 @@ export default function App() {
         <SpeciesCard
           species={selected}
           content={cardContent?.speciesId === selected.id ? cardContent.content : null}
+          contentState={
+            cardContent?.speciesId !== selected.id
+              ? 'loading'
+              : cardContent.failed
+                ? 'error'
+                : cardContent.content
+                  ? 'ready'
+                  : 'missing'
+          }
+          onRetryContent={() => setContentAttempt((n) => n + 1)}
           locale={locale}
           secondaryLocale={secondaryLocale}
           secondaryContent={

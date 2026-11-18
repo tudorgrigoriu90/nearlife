@@ -41,8 +41,8 @@ had is fun. So:
 
 | SKU | Price (one-time) | What it gives |
 |-----|------------------|---------------|
-| **Free** | — | **Home region** (hometown GPS-derived at signup — locked; see below) · Spotted · "Active this week" · all core facts + **all help/protect content** · Helped pledges · depth tiers climbable by *playing* · **3 catches per season** |
-| **Full Game** | **$4.99** (49 SEK) | **Unlimited catching** · all depth tiers unlocked immediately · full home region |
+| **Free** | — | **Home region** (hometown GPS-derived at signup — locked; see below) · Spotted · "Active this week" · all core facts + **all help/protect content** · Helped pledges · **3 catches per season** |
+| **Full Game** | **$4.99** (49 SEK) | **Unlimited catching** · bird song · offline play of the home county · full home region. (Depth tiers 2–5 have no content yet, T-053; the card shows the five pills as progress only, T-283.) |
 | **Family** | **$9.99** (99 SEK) | The Full Game for **up to 5 people**: the buyer shares an invite code and each member gets the Full Game on their own phone. Everyone keeps their own collection. |
 
 - **Price: $4.99 / 49 SEK (Director, 2026-10-29)**, down from the original $9.99 anchor. The

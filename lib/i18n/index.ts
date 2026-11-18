@@ -16,7 +16,10 @@ export const SUPPORTED_LOCALES: Locale[] = [
 ];
 
 export const BASE_LOCALE: Locale = 'en';
-/** Locales with reviewed content that are live for the alpha (all of Sweden). */
+/**
+ * Locales live for the alpha (all of Sweden). Not all reviewed: Swedish content has status `machine`
+ * (coverage.ts), so its cards carry the machine-text notice (T-283 · review B-64).
+ */
 export const ALPHA_LOCALES: Locale[] = ['sv', 'en'];
 
 // English catalog — the source of truth. Keys are derived from this object.
@@ -137,8 +140,10 @@ export const en = {
   'card.backAround': 'Usually seen here again from {month}.',
   'card.factCredit': 'Text: Wikipedia · CC BY-SA 4.0',
   'card.factCreditTranslated': 'Machine-translated from Wikipedia · CC BY-SA 4.0',
-  'card.depth': 'Depth',
-  'card.locked': 'Play to unlock',
+  'card.depth': 'Your progress with this species',
+  'card.contentError': 'The text for this species could not be loaded. Check your connection.',
+  'card.contentMissing': 'The text for this species is not written yet.',
+  'card.machineText': 'Text machine-translated, not yet reviewed',
   'card.notSpotted': 'Not spotted yet',
   'card.back': 'Back',
   'card.followLaw':
@@ -581,8 +586,10 @@ const sv: Catalog = {
   'card.backAround': 'Brukar synas här igen från {month}.',
   'card.factCredit': 'Text: Wikipedia · CC BY-SA 4.0',
   'card.factCreditTranslated': 'Maskinöversatt från Wikipedia · CC BY-SA 4.0',
-  'card.depth': 'Fördjupning',
-  'card.locked': 'Spela för att låsa upp',
+  'card.depth': 'Dina framsteg med arten',
+  'card.contentError': 'Texten om arten kunde inte laddas. Kontrollera anslutningen.',
+  'card.contentMissing': 'Texten om arten är inte skriven än.',
+  'card.machineText': 'Texten är maskinöversatt och inte granskad än',
   'card.notSpotted': 'Inte sedd ännu',
   'card.back': 'Tillbaka',
   'card.followLaw':

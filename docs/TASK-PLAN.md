@@ -4390,6 +4390,16 @@ document until it is started, when it takes the next free `T-###`.
     the key columns); `__tests__/senderOrder.test.js` fails on an unordered one.
   - ✅ B-54: sandbox events count unless `REVENUECAT_ACCEPT_SANDBOX` is `false` (set at launch).
 
+- **T-283 · The card says where its text stands** — *Claude · S · `DONE` (Director may choose review over labelling, below) · deps: T-059, T-152 · review B-28, B-30, B-64*
+  - ✅ B-28: `SpeciesCard` `contentState` (`loading` spinner, `error` with "Try again", `missing`
+    message, `ready`); the App derives it from the content read and retries on demand.
+  - ✅ B-30: the five pills are labelled "Your progress with this species"; no "Play to unlock"
+    (depth tiers 2–5 have no content, T-053). ECONOMY.md lists only what the Full Game gives today.
+  - ✅ B-64, option (b): a card whose main language has status `machine` (Swedish today) says
+    "Texten är maskinöversatt och inte granskad än". The `ALPHA_LOCALES` comment no longer calls
+    Swedish reviewed. Option (a) remains open to the Director: have the most recorded species'
+    Swedish text reviewed and mark those `reviewed`. Tests: 7.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
