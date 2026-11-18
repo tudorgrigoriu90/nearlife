@@ -80,6 +80,9 @@ def build_content_rows(
                     # string renders as a blank title, which is worse than the binomial.
                     "common_name": (item.get("commonName") or "").strip() or None,
                     "fact": fact,  # None when there's no article — never fabricated (invariant #1)
+                    # The article the fact is credited to on the card (T-276, CC BY-SA 4.0).
+                    "fact_source_url": (item.get("factUrl") or None) if fact else None,
+                    "fact_origin": "wikipedia" if fact else None,
                     "when_how": item["whenAndHow"],
                     "give": item["give"],
                     "protect": item["protect"],

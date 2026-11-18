@@ -187,14 +187,15 @@ def main() -> int:
         facts_filled = 0
         for locale in LOCALES:
             try:
-                facts = wiki.fetch_extracts(sorted(set(alias.values())), locale)
+                facts = wiki.fetch_sourced_extracts(sorted(set(alias.values())), locale)
             except Exception as exc:  # one language's failure skips that language, not the run
                 print(f"  ! [{locale}] {exc}", flush=True)
                 continue
             rows = [
-                {"species_id": id_of[name], "locale": locale, "fact": facts[other]}
+                {"species_id": id_of[name], "locale": locale, "fact": facts[other][0],
+                 "fact_source_url": facts[other][1]}
                 for name, other in alias.items()
-                if facts.get(other)
+                if facts.get(other) and facts[other][0]
             ]
             cur.executemany(FACT_SQL, rows)
             facts_filled += cur.rowcount if cur.rowcount and cur.rowcount > 0 else 0

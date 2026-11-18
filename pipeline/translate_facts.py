@@ -80,7 +80,7 @@ def argos_translator(target: str) -> Translate | None:
 
 
 MISSING_SQL = """
-select t.species_id, en.fact, sv.fact
+select t.species_id, en.fact, sv.fact, en.fact_source_url, sv.fact_source_url
 from public.species_content t
 join public.species s on s.id = t.species_id and s.in_catalogue
 left join public.species_content en on en.species_id = t.species_id and en.locale = 'en'
@@ -88,8 +88,10 @@ left join public.species_content sv on sv.species_id = t.species_id and sv.local
 where t.locale = %s and t.fact is null and (en.fact is not null or sv.fact is not null)
 """
 
+# A translation is a modification of CC BY-SA text: it is marked and credited to its source (T-276).
 UPDATE_SQL = (
-    "update public.species_content set fact = %s "
+    "update public.species_content set fact = %s, fact_origin = 'wikipedia-translated', "
+    "fact_source_url = %s "
     "where species_id = %s and locale = %s and fact is null"
 )
 
@@ -112,11 +114,13 @@ def main(argv: list[str]) -> int:
 
     with psycopg.connect(dsn) as conn, conn.cursor() as cur:
         cur.execute(MISSING_SQL, (target,))
-        rows = [{"species_id": a, "en": b, "sv": c} for a, b, c in cur.fetchall()]
+        fetched = cur.fetchall()
+        rows = [{"species_id": a, "en": b, "sv": c} for a, b, c, _, _ in fetched]
+        source = {a: (eu if b else su) for a, b, _, eu, su in fetched}
         plan = plan_translations(rows)
         print(f"[{target}] {len(plan)} facts to translate", flush=True)
         done = translate_missing(plan, target, translate)
-        cur.executemany(UPDATE_SQL, [(fact, sid, target) for sid, fact in done.items()])
+        cur.executemany(UPDATE_SQL, [(fact, source.get(sid), sid, target) for sid, fact in done.items()])
         conn.commit()
     print(f"[{target}] wrote {len(done)} machine-translated facts", flush=True)
     return 0

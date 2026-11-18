@@ -99,6 +99,7 @@ EXPECTED: dict[str, str] = {
     "no two catalogue species share a photo": "ok",
     "curated birds sit on the real species": "ok",
     "no summer migrant is active in winter": "ok",
+    "every catalogue fact has its Wikipedia source": "ok",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -551,6 +552,11 @@ def run_catalogue_checks(cur) -> dict[str, str]:
     _step(cur, results, "curated birds sit on the real species",
           "select case when count(*) = 3 then 'ok' else 'WRONG: ' || count(*) end from public.species "
           "where (id, gbif_key) in (('mallard', 9761484), ('blue-tit', 2487879), ('whooper-swan', 2498347))")
+    # T-276 · review B-59: every Wikipedia fact can be credited on the card.
+    _step(cur, results, "every catalogue fact has its Wikipedia source",
+          "select case when count(*) = 0 then 'ok' else 'UNSOURCED: ' || count(*) end "
+          "from public.species_content where species_id like 'gbif:%%' and fact is not null "
+          "and fact <> '' and fact_source_url is null")
     # T-268 · review B-04: a stray winter record no longer makes a summer migrant "active".
     _step(cur, results, "no summer migrant is active in winter",
           "select case when count(*) = 0 then 'ok' else 'WINTER: ' || string_agg(s.scientific_name || ' ' "

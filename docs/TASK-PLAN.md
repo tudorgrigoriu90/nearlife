@@ -4418,7 +4418,7 @@ document until it is started, when it takes the next free `T-###`.
   - The onboarding first sighting and the seasonal events come from the user's county.
   - Catalogue, presence and catch spots are cached per county and refreshed when the server's
     data version changes, not on every launch.
-- **T-276 · Credit Wikipedia text on the card** — *Claude · S · `TODO` · deps: T-179 · review B-59*
+- **T-276 · Credit Wikipedia text on the card** — *Claude · S · `IN-PROGRESS` (code pushed; done when migration 0034 is applied, the backfill has run and the live check passes) · deps: T-179 · review B-59*
   - Species facts are Wikipedia text (CC BY-SA 4.0) and machine translations of it, shown with no
     source, licence or link anywhere in the app.
   - `species_content` records each fact's article URL and whether it was machine-translated;
@@ -4427,6 +4427,16 @@ document until it is started, when it takes the next free `T-###`.
     Wikipedia · CC BY-SA 4.0") linking to the article; a test fails if a fact renders without it.
   - Settings → Data attribution lists Wikipedia, Wikidata, iNaturalist and Natural Earth beside
     GBIF and OpenStreetMap; DATA-SOURCING-LICENSING.md gains a "Wikipedia text" section.
+  - ✅ Migration `20261118000001_fact_sources.sql` (`fact_source_url`, `fact_origin`, and a check
+    that a source only describes a fact that is there). `WikimediaClient.fetch_sourced_extracts`
+    returns each fact with the article it resolved to; the content loader, `backfill_facts`,
+    `resolve_synonyms` and `translate_facts` (origin `wikipedia-translated`, linked to the source
+    fact's article) write them. `backfill_fact_sources.py` (Backfill facts workflow) sources the
+    rows written before: own-edition article → `wikipedia`; English/Swedish without one → the
+    synonym's search link; other languages without one → translated from the English article.
+  - ✅ `FactCredit` on the card (and for the second-language fact); Settings lists Wikipedia,
+    Wikidata, photos (Commons/iNaturalist) and Natural Earth; licensing doc §7–8; `verify.py`
+    "every catalogue fact has its Wikipedia source". Tests: 8 pipeline, 3 card.
 - **T-277 · Minigames that can be won, measured where the finger is** — *Claude + Director · S · `TODO` · deps: T-069, T-071, T-073 · review B-60, B-62*
   - No minigame counts time or input before the player's first touch ("Tap to start").
   - The insect game counts breaks only after the first touch; tolerance and allowed breaks are

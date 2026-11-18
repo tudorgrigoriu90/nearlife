@@ -27,11 +27,15 @@ class FakeWiki:
     def __init__(self):
         self.asked = []
 
-    def fetch_extracts(self, names, lang="en"):
+    def fetch_sourced_extracts(self, names, lang="en"):
         for name in names:
             self.asked.append((name, lang))
         return {
-            n: (f"[{lang}] The magpie is a bird." if n == "Pica pica" and lang in ("en", "sv") else None)
+            n: (
+                (f"[{lang}] The magpie is a bird.", f"https://{lang}.wikipedia.org/wiki/Pica_pica")
+                if n == "Pica pica" and lang in ("en", "sv")
+                else (None, None)
+            )
             for n in names
         }
 
@@ -47,13 +51,13 @@ def test_facts_are_fetched_in_one_batch_per_locale_not_one_per_species():
     # every other test here while making a full run take 20 hours.
     wiki = FakeWiki()
     wiki.batches = 0
-    inner = wiki.fetch_extracts
+    inner = wiki.fetch_sourced_extracts
 
     def counted(names, lang="en"):
         wiki.batches += 1
         return inner(names, lang)
 
-    wiki.fetch_extracts = counted
+    wiki.fetch_sourced_extracts = counted
     build_localized(SPECIES, "bird", wiki, ["en", "sv", "so"])
     assert wiki.batches == 3
 
@@ -72,6 +76,8 @@ def test_a_missing_article_leaves_the_fact_null_rather_than_falling_back():
     so = next(r for r in rows if r["locale"] == "so" and r["speciesKey"] == 1)
     assert so["fact"] is None
     assert so["factSource"] is None
+    en = next(r for r in rows if r["locale"] == "en" and r["speciesKey"] == 1)
+    assert en["factUrl"] == "https://en.wikipedia.org/wiki/Pica_pica"  # T-276: the credit link
 
 
 def test_give_and_protect_are_always_present_even_with_no_fact():

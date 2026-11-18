@@ -76,14 +76,14 @@ def build_localized(
         # costs the whole locale's facts, not the run: templates still ship, so the rows remain
         # valid and the facts can be backfilled by re-running.
         try:
-            facts = client.fetch_extracts(names, locale)
+            facts = client.fetch_sourced_extracts(names, locale)
         except Exception as exc:
             print(f"  ! [{locale}] extract batch failed: {exc}", flush=True)
             facts = {}
-        print(f"  [{locale}] {sum(1 for n in names if facts.get(n))}/{len(names)} with a fact", flush=True)
+        print(f"  [{locale}] {sum(1 for n in names if (facts.get(n) or (None,))[0])}/{len(names)} with a fact", flush=True)
         tpl = strings_for(locale).templates[taxon]
         for sp in species:
-            fact = facts.get(sp["scientificName"])
+            fact, fact_url = facts.get(sp["scientificName"]) or (None, None)
             rows.append(
                 {
                     "speciesKey": sp["speciesKey"],
@@ -96,6 +96,7 @@ def build_localized(
                     "commonName": vernacular.get(str(sp["speciesKey"]), {}).get(locale),
                     "fact": fact,  # None when that edition has no article — never fabricated
                     "factSource": "Wikipedia" if fact else None,
+                    "factUrl": fact_url,
                     "factLicense": "CC BY-SA" if fact else None,
                     "whenAndHow": when_and_how(
                         taxon,

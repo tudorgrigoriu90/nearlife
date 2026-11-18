@@ -33,7 +33,8 @@ PENDING_SQL = (
     "where p.species_id = s.id) desc, s.id"
 )
 FILL_SQL = (
-    "update public.species_content set fact = %(fact)s "
+    "update public.species_content set fact = %(fact)s, fact_source_url = %(fact_source_url)s, "
+    "fact_origin = 'wikipedia' "
     "where species_id = %(species_id)s and locale = %(locale)s and (fact is null or fact = '')"
 )
 
@@ -42,10 +43,13 @@ def locale_order(locales: list[str]) -> list[str]:
     return [l for l in FIRST if l in locales] + sorted(l for l in locales if l not in FIRST)
 
 
-def fill_rows(locale: str, ids_by_name: dict[str, str], facts: dict[str, str | None]) -> list[dict]:
+def fill_rows(
+    locale: str, ids_by_name: dict[str, str], facts: dict[str, tuple[str | None, str | None]]
+) -> list[dict]:
+    """Rows for FILL_SQL from `fetch_sourced_extracts` results: the fact and its article (T-276)."""
     return [
-        {"species_id": ids_by_name[name], "locale": locale, "fact": fact}
-        for name, fact in facts.items()
+        {"species_id": ids_by_name[name], "locale": locale, "fact": fact, "fact_source_url": url}
+        for name, (fact, url) in facts.items()
         if fact and name in ids_by_name
     ]
 
@@ -77,7 +81,7 @@ def main() -> int:
                 chunk = pending[i : i + CHUNK]
                 ids_by_name = {name: sid for sid, name in chunk}
                 try:
-                    facts = client.fetch_extracts(list(ids_by_name), locale)
+                    facts = client.fetch_sourced_extracts(list(ids_by_name), locale)
                 except Exception as exc:  # stays empty; the next run asks again
                     print(f"  ! [{locale}] {exc}", flush=True)
                     continue

@@ -209,6 +209,9 @@ export interface SpeciesContentRow {
   common_name: string | null;
   /** Null for species with no Wikipedia article (T-146) — mission content still ships. */
   fact: string | null;
+  /** The article the fact is credited to (T-276); absent in packs saved before it. */
+  fact_source_url?: string | null;
+  fact_origin?: 'wikipedia' | 'wikipedia-translated' | null;
   when_how: string;
   give: string;
   protect: string;
@@ -255,6 +258,9 @@ export function contentRowToContent(row: SpeciesContentRow): SpeciesContent {
     // A null DB fact (no article, T-146) becomes an empty string in the domain object; the card
     // treats empty as "no fact" and hides the fact block while still showing the mission content.
     fact: row.fact ?? '',
+    ...(row.fact && row.fact_source_url && row.fact_origin
+      ? { factSourceUrl: row.fact_source_url, factOrigin: row.fact_origin }
+      : {}),
     whenAndHow: row.when_how,
     give: row.give,
     protect: row.protect,
@@ -398,7 +404,7 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
   async fetchContent(speciesId: string, locale: string): Promise<SpeciesContentRow | null> {
     const { data, error } = await this.client
       .from('species_content')
-      .select('species_id,locale,common_name,fact,when_how,give,protect')
+      .select('species_id,locale,common_name,fact,fact_source_url,fact_origin,when_how,give,protect')
       .eq('species_id', speciesId)
       .eq('locale', locale)
       .maybeSingle();
@@ -467,7 +473,7 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
         (from, to) =>
           this.client
             .from('species_content')
-            .select('species_id,locale,common_name,fact,when_how,give,protect')
+            .select('species_id,locale,common_name,fact,fact_source_url,fact_origin,when_how,give,protect')
             .in('species_id', chunk)
             .in('locale', locales)
             .order('species_id')

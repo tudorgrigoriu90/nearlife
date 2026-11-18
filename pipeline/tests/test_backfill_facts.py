@@ -19,5 +19,10 @@ def test_only_empty_slots_are_asked_for_and_written():
 
 def test_no_article_writes_nothing():
     ids = {"Pica pica": "gbif:1", "Nonexistent name": "gbif:2"}
-    rows = fill_rows("sv", ids, {"Pica pica": "Skata är en fågel.", "Nonexistent name": None})
-    assert rows == [{"species_id": "gbif:1", "locale": "sv", "fact": "Skata är en fågel."}]
+    rows = fill_rows(
+        "sv", ids, {"Pica pica": ("Skata är en fågel.", "https://sv.wikipedia.org/wiki/Skata"), "Nonexistent name": (None, None)}
+    )
+    assert rows == [
+        {"species_id": "gbif:1", "locale": "sv", "fact": "Skata är en fågel.",
+         "fact_source_url": "https://sv.wikipedia.org/wiki/Skata"}
+    ]

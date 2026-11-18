@@ -257,6 +257,10 @@ export default function SettingsScreen({
         <View style={styles.card}>
           <Text style={styles.attribution}>{tr('attribution.gbif')}</Text>
           <Text style={[styles.attribution, styles.rowBorder]}>{tr('attribution.osm')}</Text>
+          <Text style={[styles.attribution, styles.rowBorder]}>{tr('attribution.wikipedia')}</Text>
+          <Text style={[styles.attribution, styles.rowBorder]}>{tr('attribution.wikidata')}</Text>
+          <Text style={[styles.attribution, styles.rowBorder]}>{tr('attribution.photos')}</Text>
+          <Text style={[styles.attribution, styles.rowBorder]}>{tr('attribution.naturalEarth')}</Text>
         </View>
 
         <Text style={styles.about}>{tr('settings.about')}</Text>

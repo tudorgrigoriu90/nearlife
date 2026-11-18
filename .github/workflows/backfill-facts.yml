@@ -39,3 +39,9 @@ jobs:
         env:
           MAX_MINUTES: ${{ inputs.max_minutes }}
         run: python pipeline/backfill_facts.py --max-minutes "${MAX_MINUTES:-330}"
+
+      # Credit every Wikipedia fact with its article (T-276): fills the rows written before the
+      # writers recorded sources. Only rows without a source; no text is refetched.
+      - name: Record fact sources
+        if: ${{ !cancelled() }}
+        run: python pipeline/backfill_fact_sources.py

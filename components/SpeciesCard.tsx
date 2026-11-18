@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import type { HelpKind, TierState } from '../lib/collection';
 import { EMPTY_TIER_STATE } from '../lib/collection';
 import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
@@ -205,7 +205,14 @@ export default function SpeciesCard({
           <>
             {/* No Wikipedia article → no fact (T-146); hide the block, keep the mission below. */}
             {content.fact ? (
-              <DualText input={dual(content.fact, secondaryContent?.fact)} style={styles.fact} />
+              <>
+                <DualText input={dual(content.fact, secondaryContent?.fact)} style={styles.fact} />
+                <FactCredit content={content} locale={locale} />
+                {secondaryContent?.fact &&
+                secondaryContent.factSourceUrl !== content.factSourceUrl ? (
+                  <FactCredit content={secondaryContent} locale={locale} />
+                ) : null}
+              </>
             ) : null}
 
             {county && month ? (
@@ -288,6 +295,30 @@ export default function SpeciesCard({
   );
 }
 
+/**
+ * The credit a Wikipedia fact needs (T-276 · review B-59): source, licence, a link to the article,
+ * and a note when the text is a machine translation. Nothing on the project's own text.
+ */
+function FactCredit({ content, locale }: { content: SpeciesContent; locale: Locale }) {
+  const tr = createTranslator(locale);
+  const url = content.factSourceUrl;
+  if (!url || !content.factOrigin) return null;
+  return (
+    <Pressable
+      onPress={() => void Linking.openURL(url).catch(() => undefined)}
+      accessibilityRole="link"
+    >
+      <Text style={styles.factCredit}>
+        {tr(
+          content.factOrigin === 'wikipedia-translated'
+            ? 'card.factCreditTranslated'
+            : 'card.factCredit',
+        )}
+      </Text>
+    </Pressable>
+  );
+}
+
 function PledgeButton({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={styles.pledgeBtn}>
@@ -346,6 +377,7 @@ const styles = StyleSheet.create({
   mtNotice: { marginTop: 6, fontSize: 11, color: '#7a8a7c' },
   notSpotted: { marginTop: 8, fontSize: 12, fontWeight: '700', color: '#7a8a7c', letterSpacing: 1 },
   fact: { fontSize: 17, lineHeight: 24, color: '#2f3d2c', marginBottom: 8 },
+  factCredit: { fontSize: 12, color: '#5f7461', textDecorationLine: 'underline', marginBottom: 8 },
   section: { marginTop: 14 },
   sectionTitle: {
     fontSize: 12,

@@ -117,6 +117,27 @@ conservation institutions under licenses written for *research and non-commercia
   join one-to-one.
 - Verdict: **OK.**
 
+### 7. Wikipedia text — the species fact (T-135, credited since T-276)
+- **Source:** the intro of each species' article, one to two sentences, from that language's own
+  Wikipedia edition (T-179); missing languages are machine-translated from the English (else
+  Swedish) fact with Argos Translate (T-235). Species filed under a synonym take the synonym's
+  article (T-260).
+- **Licence:** CC BY-SA 4.0. Reuse requires (1) credit — a link to the article satisfies
+  Wikipedia's terms of use; (2) the licence name and a link to it; (3) an indication of changes;
+  and an adaptation (a translation) is itself offered under CC BY-SA 4.0.
+- **How the app meets it:** `species_content.fact_source_url` holds the article and
+  `fact_origin` says whether the text is the article's own (`wikipedia`) or a machine
+  translation (`wikipedia-translated`). Every writer fills them (content load, `backfill_facts`,
+  `resolve_synonyms`, `translate_facts`); `backfill_fact_sources.py` filled the rows written
+  before. Under every fact the card shows "Text: Wikipedia · CC BY-SA 4.0" or "Machine-translated
+  from Wikipedia · CC BY-SA 4.0", linking to the article. Settings → Data attribution lists
+  Wikipedia. The curated species' facts are the project's own text and carry no Wikipedia credit.
+- **Checks:** `verify.py` fails if a catalogue fact has no source; `FactCredit.test.tsx`.
+- Verdict: **OK, credited.**
+
+### 8. Wikidata — names and threat status (T-258, T-263)
+- **Licence:** CC0. No attribution required; listed in Settings anyway.
+
 ---
 
 ## Decision matrix
@@ -140,6 +161,7 @@ threat content — **no blocking dependency on eBird or the IUCN API.** That is 
 - "Photos: Wikimedia Commons — <author>, <license>" per species photo (link to source).
 - "Biodiversity data: GBIF.org + contributing datasets (cite DOIs)."
 - "Map data © OpenStreetMap contributors."
+- "Text: Wikipedia · CC BY-SA 4.0" under every fact, linking to its article (T-276).
 - IUCN attribution *if* the API is used.
 
 ## Open actions

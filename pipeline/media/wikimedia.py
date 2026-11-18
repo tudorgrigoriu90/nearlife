@@ -88,6 +88,44 @@ def map_extracts(payload: dict, requested: list[str]) -> dict[str, str | None]:
     return out
 
 
+def map_extract_titles(payload: dict, requested: list[str]) -> dict[str, str | None]:
+    """The article title each requested name resolves to (normalisation, then redirect), or None.
+
+    The article a fact came from is what its credit line links to (T-276: Wikipedia text is
+    CC BY-SA 4.0, and a link to the article is the credit Wikipedia asks for).
+    """
+    query = payload.get("query", {}) or {}
+    hop = {r["from"]: r["to"] for r in query.get("normalized", []) or []}
+    redirect = {r["from"]: r["to"] for r in query.get("redirects", []) or []}
+    present = {
+        page.get("title")
+        for page in (query.get("pages", {}) or {}).values()
+        if "missing" not in page and "invalid" not in page
+    }
+    out: dict[str, str | None] = {}
+    for name in requested:
+        title = redirect.get(hop.get(name, name), hop.get(name, name))
+        out[name] = title if title in present else None
+    return out
+
+
+def _edition(lang: str) -> str:
+    wiki_api_for(lang)  # validates the code
+    code = re.split(r"[-_]", (lang or "").strip())[0].lower()
+    return _WIKI_EDITION.get(code, code)
+
+
+def article_url(lang: str, title: str) -> str:
+    """The canonical link to an article in a language's edition."""
+    path = urllib.parse.quote(title.replace(" ", "_"), safe="_()'!*,-.")
+    return f"https://{_edition(lang)}.wikipedia.org/wiki/{path}"
+
+
+def search_url(lang: str, term: str) -> str:
+    """A link that lands on the article for `term` (or its search results) in that edition."""
+    return f"https://{_edition(lang)}.wikipedia.org/w/index.php?search={urllib.parse.quote_plus(term)}&go=Go"
+
+
 @dataclass(frozen=True)
 class ImageUrls:
     """`display` is what the app shows; `original` is what "view full size" links to."""
@@ -203,10 +241,27 @@ class WikimediaClient:
         extract = (page.get("extract") or "").strip()
         return extract or None
 
-    def fetch_extracts(self, scientific_names: list[str], lang: str = "en") -> dict[str, str | None]:
-        """Batched `fetch_extract` — same contract, ~50x fewer requests (T-182)."""
+    def fetch_titles(self, names: list[str], lang: str = "en") -> dict[str, str | None]:
+        """The article each name resolves to in that edition, None where there is none (T-276)."""
         api = wiki_api_for(lang)
         out: dict[str, str | None] = {}
+        for batch in chunked(list(names), 50):
+            data = self._get(
+                api, {"action": "query", "format": "json", "titles": "|".join(batch), "redirects": 1}
+            )
+            out.update(map_extract_titles(data, batch))
+        return out
+
+    def fetch_extracts(self, scientific_names: list[str], lang: str = "en") -> dict[str, str | None]:
+        """Batched `fetch_extract` — same contract, ~50x fewer requests (T-182)."""
+        return {n: text for n, (text, _url) in self.fetch_sourced_extracts(scientific_names, lang).items()}
+
+    def fetch_sourced_extracts(
+        self, scientific_names: list[str], lang: str = "en"
+    ) -> dict[str, tuple[str | None, str | None]]:
+        """name -> (extract, article URL): the fact and the article its credit links to (T-276)."""
+        api = wiki_api_for(lang)
+        out: dict[str, tuple[str | None, str | None]] = {}
         for batch in chunked(list(scientific_names), EXTRACT_BATCH):
             params = {
                 "action": "query",
@@ -219,16 +274,21 @@ class WikimediaClient:
                 "redirects": 1,
             }
             found: dict[str, str | None] = {}
+            titles: dict[str, str | None] = {}
             while True:
                 data = self._get(api, params)
                 for name, extract in map_extracts(data, batch).items():
                     if extract or name not in found:
                         found[name] = extract
+                for name, title in map_extract_titles(data, batch).items():
+                    titles[name] = titles.get(name) or title
                 more = (data.get("continue") or {}).get("excontinue")
                 if more is None:
                     break
                 params = {**params, "excontinue": more}
-            out.update(found)
+            for name, text in found.items():
+                title = titles.get(name)
+                out[name] = (text, article_url(lang, title) if text and title else None)
         return out
 
     def fetch_image(self, scientific_name: str) -> dict | None:

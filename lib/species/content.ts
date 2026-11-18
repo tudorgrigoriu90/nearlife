@@ -25,6 +25,13 @@ export interface SpeciesContent {
   commonName?: string;
   /** Tier-1 fact (always free). */
   fact: string;
+  /**
+   * The Wikipedia article the fact comes from (T-276): Wikipedia text is CC BY-SA 4.0, and the
+   * card credits it with a link here. Absent on the project's own (curated) text.
+   */
+  factSourceUrl?: string;
+  /** `wikipedia-translated` when the fact is a machine translation of the linked article. */
+  factOrigin?: 'wikipedia' | 'wikipedia-translated';
   /** "When & how to see it" trivia (always free) — seasonal/behavioural, never "right now". */
   whenAndHow: string;
   /** GIVE action — a universally safe way to help it thrive (always free). */
