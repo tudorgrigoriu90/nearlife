@@ -207,7 +207,8 @@ function purchaseGateway(): PurchaseGateway {
 
 // After a purchase the server learns of it from RevenueCat's webhook, usually within seconds but
 // not instantly, so the app re-reads a few times rather than once.
-const AFTER_PURCHASE_REREAD_MS = [0, 2_000, 6_000, 15_000];
+// Every 5 s for 2 minutes after a payment, while the Store says "unlocking" (T-285 · B-34).
+const AFTER_PURCHASE_REREAD_MS = Array.from({ length: 25 }, (_, i) => i * 5_000);
 
 // Offline notice (T-252): one request to the server says whether the app can work. Null without a
 // backend (tests, a local build without config): never offline then.

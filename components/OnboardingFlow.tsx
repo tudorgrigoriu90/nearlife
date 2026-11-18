@@ -155,10 +155,12 @@ export default function OnboardingFlow({
 
   const askNotification = () => {
     // The outcome doesn't gate onboarding — the pull surface works without notifications.
-    void requestNotificationPermission().then((outcome) => {
-      setNotificationOutcome(outcome);
-      advance();
-    });
+    // A rejected call (no native module, a platform error) counts as "no" and still advances, in
+    // the same shape as the location step (T-285 · review B-40).
+    void requestNotificationPermission()
+      .then(setNotificationOutcome)
+      .catch(() => setNotificationOutcome('denied'))
+      .finally(advance);
   };
 
   switch (step) {

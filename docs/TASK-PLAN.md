@@ -4406,6 +4406,13 @@ document until it is started, when it takes the next free `T-###`.
     `distance − min(accuracy, 50 m) ≤ 100 m`. Tests: 120 m at 30 m accuracy is in range, 200 m is
     not, a poor fix earns at most 50 m.
 
+- **T-285 · Between payment and unlock; onboarding past a failed prompt** — *Claude · XS · `DONE` · deps: T-085, T-024 · review B-34, B-40*
+  - ✅ B-34: after a payment the product shows "Payment received — unlocking…" instead of Buy;
+    "Unlocked" once the entitlement arrives; after two minutes "This is taking longer than usual.
+    It will unlock by itself; you do not need to buy again." The App re-reads every 5 s for those
+    two minutes. Tests: 2.
+  - ✅ B-40: a rejected notification permission call counts as "no" and onboarding advances. Test: 1.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

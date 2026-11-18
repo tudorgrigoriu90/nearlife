@@ -150,3 +150,19 @@ describe('the first sighting', () => {
     expect(onFirstSpotted.mock.calls[0][0]).not.toMatch(/^gbif:/);
   });
 });
+
+// T-285 · review B-40: the notification answer never gates onboarding, even when the call fails.
+describe('a failing notification prompt', () => {
+  it('still reaches the first sighting', async () => {
+    const { requestNotificationPermission } = jest.requireMock('../lib/permissions');
+    (requestNotificationPermission as jest.Mock).mockRejectedValueOnce(new Error('no module'));
+    const onComplete = jest.fn();
+    await render(
+      <OnboardingFlow locale="en" onComplete={onComplete} resolveHome={async () => ({ region: SKANE })} />,
+    );
+    await throughLocation();
+    await press(tr('onboarding.hometown.cta', { region: 'Skåne' }));
+    await press(tr('onboarding.notif.cta'));
+    expect(await screen.findByText(tr('onboarding.firstSpotted.cta'))).toBeTruthy();
+  });
+});

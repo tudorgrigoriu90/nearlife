@@ -88,3 +88,36 @@ describe('StoreScreen', () => {
     expect(screen.queryByText(tr('store.buy'))).toBeNull();
   });
 });
+
+// T-285 · review B-34: between Google's "paid" and the webhook's unlock the buyer is told the
+// payment went through, and cannot pay twice.
+describe('StoreScreen after a payment', () => {
+  it('shows "unlocking", then Unlocked when the entitlement arrives', async () => {
+    const gw = gateway();
+    const view = await render(<StoreScreen locale="en" gateway={gw} entitlements={NO_ENTITLEMENTS} />);
+    await waitFor(() => expect(screen.getByText('49,00 kr')).toBeTruthy());
+    await fireEvent.press(screen.getAllByText(tr('store.buy'))[0]);
+    expect(await screen.findByText(tr('store.pending'))).toBeTruthy();
+    expect(screen.getAllByText(tr('store.buy'))).toHaveLength(1); // only Family can still be bought
+    await view.rerender(
+      <StoreScreen locale="en" gateway={gw} entitlements={resolveEntitlements(['full_game'])} />,
+    );
+    expect(screen.queryByText(tr('store.pending'))).toBeNull();
+    expect(screen.getByText(tr('store.owned'))).toBeTruthy();
+  });
+
+  it('says it is taking longer after two minutes, without asking to buy again', async () => {
+    jest.useFakeTimers();
+    const gw = gateway();
+    await render(<StoreScreen locale="en" gateway={gw} entitlements={NO_ENTITLEMENTS} />);
+    await waitFor(() => expect(screen.getByText('49,00 kr')).toBeTruthy());
+    await fireEvent.press(screen.getAllByText(tr('store.buy'))[0]);
+    await screen.findByText(tr('store.pending'));
+    const { act } = jest.requireActual('@testing-library/react-native');
+    await act(async () => {
+      jest.advanceTimersByTime(121_000);
+    });
+    expect(screen.getByText(tr('store.pendingLong'))).toBeTruthy();
+    jest.useRealTimers();
+  });
+});

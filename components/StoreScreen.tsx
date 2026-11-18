@@ -18,6 +18,9 @@ const COPY: Record<Sku, { name: TranslationKey; body: TranslationKey }> = {
   family: { name: 'store.family.name', body: 'store.family.body' },
 };
 
+/** How long the Store waits for the webhook's unlock before saying it is taking longer. */
+export const PENDING_LIMIT_MS = 120_000;
+
 export default function StoreScreen({
   locale = 'en',
   gateway,
@@ -36,6 +39,15 @@ export default function StoreScreen({
   const [products, setProducts] = useState<StoreProduct[] | null>(canBuy ? null : []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  // Paid, waiting for the webhook's unlock (T-285 · review B-34): no second Buy, and after two
+  // minutes a reassurance that it will unlock without buying again.
+  const [pending, setPending] = useState<Sku[]>([]);
+  const [waitedLong, setWaitedLong] = useState(false);
+  useEffect(() => {
+    if (pending.length === 0) return;
+    const timer = setTimeout(() => setWaitedLong(true), PENDING_LIMIT_MS);
+    return () => clearTimeout(timer);
+  }, [pending.length]);
 
   useEffect(() => {
     if (!canBuy) return;
@@ -85,9 +97,22 @@ export default function StoreScreen({
             <Text style={styles.body}>{tr(COPY[p.sku].body)}</Text>
             {owned(p.sku) ? (
               <Text style={styles.owned}>{tr('store.owned')}</Text>
+            ) : pending.includes(p.sku) ? (
+              <Text style={styles.owned}>
+                {tr(waitedLong ? 'store.pendingLong' : 'store.pending')}
+              </Text>
             ) : (
               <Pressable
-                onPress={() => void act(() => gateway.purchase(p.sku), (r) => r === 'purchased')}
+                onPress={() =>
+                  void act(
+                    () => gateway.purchase(p.sku),
+                    (r) => {
+                      if (r !== 'purchased') return false;
+                      setPending((list) => [...list, p.sku]);
+                      return true;
+                    },
+                  )
+                }
                 disabled={busy}
                 accessibilityRole="button"
                 style={[styles.buy, busy && styles.busy]}
@@ -104,7 +129,12 @@ export default function StoreScreen({
 
         {canBuy ? (
           <Pressable
-            onPress={() => void act(() => gateway.restore(), () => true)}
+            onPress={() =>
+              void act(
+                () => gateway.restore(),
+                () => true,
+              )
+            }
             disabled={busy}
             accessibilityRole="button"
             style={styles.restore}
@@ -119,7 +149,13 @@ export default function StoreScreen({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingTop: 56, paddingHorizontal: 16 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4, marginBottom: 16 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+    marginBottom: 16,
+  },
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34' },
   done: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
   scroll: { paddingBottom: 32, gap: 12 },
@@ -128,13 +164,30 @@ const styles = StyleSheet.create({
   name: { fontSize: 18, fontWeight: '700', color: '#22331f' },
   price: { fontSize: 18, fontWeight: '700', color: '#3a7d44' },
   body: { fontSize: 14, lineHeight: 20, color: '#4a5c4d' },
-  buy: { marginTop: 4, backgroundColor: '#3a7d44', borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
+  buy: {
+    marginTop: 4,
+    backgroundColor: '#3a7d44',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
   busy: { opacity: 0.6 },
   buyText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   owned: { marginTop: 4, fontSize: 15, fontWeight: '700', color: '#2f7d4f' },
   reassure: { fontSize: 14, fontWeight: '600', color: '#2f7d4f', paddingHorizontal: 4 },
-  note: { fontSize: 14, lineHeight: 20, color: '#7a8a7c', fontStyle: 'italic', paddingHorizontal: 4 },
+  note: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#7a8a7c',
+    fontStyle: 'italic',
+    paddingHorizontal: 4,
+  },
   error: { fontSize: 14, color: '#b3402f', textAlign: 'center' },
   restore: { paddingVertical: 12, alignItems: 'center' },
-  restoreText: { fontSize: 14, color: '#4a5c4d', fontWeight: '600', textDecorationLine: 'underline' },
+  restoreText: {
+    fontSize: 14,
+    color: '#4a5c4d',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
 });
