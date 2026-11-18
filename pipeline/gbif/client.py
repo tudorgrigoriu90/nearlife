@@ -43,11 +43,14 @@ class GbifClient:
         resp.raise_for_status()  # retries exhausted → surface the last error
         return resp.json()
 
-    def resolve_taxon_key(self, scientific_name: str) -> int:
+    def resolve_taxon_key(self, scientific_name: str, rank: str | None = None) -> int:
         # Only an EXACT backbone match is accepted. A HIGHERRANK fallback (e.g. "Reptilia" →
         # Chordata) or a fuzzy/none match is rejected with an error — never silently used, which
         # is what produced a garbage "reptiles = all vertebrates" dataset before this guard.
-        data = self._get("/species/match", {"name": scientific_name, "strict": "true"})
+        params = {"name": scientific_name, "strict": "true"}
+        if rank:  # e.g. Amphibia: GBIF returns "multiple equal matches" without the rank
+            params["rank"] = rank
+        data = self._get("/species/match", params)
         match_type = data.get("matchType")
         key = data.get("usageKey")
         got = (data.get("canonicalName") or data.get("scientificName") or "").lower()

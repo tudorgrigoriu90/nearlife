@@ -72,7 +72,7 @@ def build_for_taxon(client: GbifClient, taxon: dict, regions: list) -> dict:
     taxon_keys = []
     for name in names:
         try:
-            tk = client.resolve_taxon_key(name)
+            tk = client.resolve_taxon_key(name, rank=taxon.get("rank"))
             taxon_keys.append(tk)
             print(f"[{key}] {name} -> taxonKey {tk}", flush=True)
         except ValueError as exc:

@@ -17,9 +17,10 @@
     "counties": 21,
     "facetLimit": 100,
     "minOccurrences": 0,
-    "distinctSpecies": 15,
-    "records": 155,
+    "distinctSpecies": 18,
+    "records": 158,
     "facetTruncations": 0,
+    "activeAllYearShare": 0.0,
     "note": "Observation-based presence proxy (occurrence != true presence; TSD §7). CC0/CC-BY records only; encounterable core (top-N by records, minOccurrences floor). Re-run to refresh."
   },
   "records": [
@@ -34,10 +35,32 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         10
       ],
-      "occurrences": 598
+      "occurrences": 640,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        23,
+        106,
+        150,
+        173,
+        152,
+        35,
+        1,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.10_1",
@@ -52,28 +75,80 @@
         8,
         9
       ],
-      "occurrences": 366
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 384,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        7,
+        59,
+        94,
+        126,
+        89,
+        9,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.10_1",
       "countyName": "Norrbotten",
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         6,
         8
       ],
-      "occurrences": 2
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.10_1",
       "countyName": "Norrbotten",
       "speciesKey": 8894817,
       "scientificName": "Caretta caretta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         1
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.11_1",
@@ -81,6 +156,15 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -91,7 +175,21 @@
         10,
         11
       ],
-      "occurrences": 580
+      "occurrences": 598,
+      "monthCounts": [
+        0,
+        0,
+        10,
+        182,
+        113,
+        114,
+        69,
+        57,
+        45,
+        7,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.11_1",
@@ -99,6 +197,15 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -111,7 +218,21 @@
         10,
         12
       ],
-      "occurrences": 452
+      "occurrences": 474,
+      "monthCounts": [
+        1,
+        1,
+        20,
+        139,
+        98,
+        68,
+        58,
+        65,
+        19,
+        4,
+        0,
+        1
+      ]
     },
     {
       "county": "SWE.11_1",
@@ -119,6 +240,15 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -132,7 +262,21 @@
         11,
         12
       ],
-      "occurrences": 412
+      "occurrences": 423,
+      "monthCounts": [
+        1,
+        1,
+        52,
+        117,
+        83,
+        58,
+        49,
+        32,
+        23,
+        5,
+        1,
+        1
+      ]
     },
     {
       "county": "SWE.11_1",
@@ -140,6 +284,14 @@
       "speciesKey": 2468095,
       "scientificName": "Anguis fragilis",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -151,7 +303,21 @@
         11,
         12
       ],
-      "occurrences": 342
+      "occurrences": 363,
+      "monthCounts": [
+        0,
+        0,
+        4,
+        43,
+        103,
+        68,
+        76,
+        43,
+        22,
+        1,
+        2,
+        1
+      ]
     },
     {
       "county": "SWE.11_1",
@@ -159,32 +325,81 @@
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
       "activeMonths": [
+        5,
+        6
+      ],
+      "recordedMonths": [
         4,
         5,
         6,
-        8
+        8,
+        9
       ],
-      "occurrences": 19
+      "occurrences": 20,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        2,
+        8,
+        8,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.11_1",
       "countyName": "Örebro",
       "speciesKey": 6159223,
       "scientificName": "Lacerta agilis",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         5
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.11_1",
       "countyName": "Örebro",
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         9
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.12_1",
@@ -192,6 +407,16 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         3,
         4,
@@ -204,7 +429,21 @@
         11,
         12
       ],
-      "occurrences": 818
+      "occurrences": 843,
+      "monthCounts": [
+        2,
+        0,
+        19,
+        177,
+        193,
+        160,
+        137,
+        74,
+        63,
+        15,
+        2,
+        1
+      ]
     },
     {
       "county": "SWE.12_1",
@@ -212,6 +451,16 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -223,7 +472,21 @@
         9,
         10
       ],
-      "occurrences": 628
+      "occurrences": 650,
+      "monthCounts": [
+        1,
+        4,
+        77,
+        138,
+        136,
+        95,
+        79,
+        62,
+        50,
+        8,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.12_1",
@@ -237,45 +500,33 @@
         6,
         7,
         8,
-        9,
-        10
-      ],
-      "occurrences": 622
-    },
-    {
-      "county": "SWE.12_1",
-      "countyName": "Östergötland",
-      "speciesKey": 2468095,
-      "scientificName": "Anguis fragilis",
-      "activeMonths": [
-        1,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "occurrences": 574
-    },
-    {
-      "county": "SWE.12_1",
-      "countyName": "Östergötland",
-      "speciesKey": 6159223,
-      "scientificName": "Lacerta agilis",
-      "activeMonths": [
-        1,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
         9
       ],
-      "occurrences": 572
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 639,
+      "monthCounts": [
+        0,
+        0,
+        23,
+        150,
+        131,
+        90,
+        90,
+        109,
+        42,
+        4,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.12_1",
@@ -283,6 +534,15 @@
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -294,28 +554,152 @@
         9,
         10
       ],
-      "occurrences": 563
+      "occurrences": 623,
+      "monthCounts": [
+        5,
+        2,
+        1,
+        31,
+        78,
+        118,
+        156,
+        139,
+        82,
+        11,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.12_1",
+      "countyName": "Östergötland",
+      "speciesKey": 2468095,
+      "scientificName": "Anguis fragilis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 599,
+      "monthCounts": [
+        1,
+        0,
+        17,
+        89,
+        176,
+        95,
+        93,
+        68,
+        52,
+        8,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.12_1",
+      "countyName": "Östergötland",
+      "speciesKey": 6159223,
+      "scientificName": "Lacerta agilis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 584,
+      "monthCounts": [
+        1,
+        0,
+        10,
+        123,
+        219,
+        91,
+        52,
+        74,
+        14,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.12_1",
       "countyName": "Östergötland",
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         7,
         8
       ],
-      "occurrences": 2
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.12_1",
       "countyName": "Östergötland",
       "speciesKey": 2443597,
       "scientificName": "Mauremys reevesii",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         5
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.13_1",
@@ -323,6 +707,16 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -335,7 +729,21 @@
         11,
         12
       ],
-      "occurrences": 2248
+      "occurrences": 2326,
+      "monthCounts": [
+        0,
+        5,
+        62,
+        458,
+        513,
+        385,
+        358,
+        277,
+        199,
+        61,
+        7,
+        1
+      ]
     },
     {
       "county": "SWE.13_1",
@@ -343,6 +751,15 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -356,7 +773,21 @@
         11,
         12
       ],
-      "occurrences": 1367
+      "occurrences": 1415,
+      "monthCounts": [
+        2,
+        7,
+        99,
+        336,
+        238,
+        165,
+        183,
+        244,
+        124,
+        13,
+        3,
+        1
+      ]
     },
     {
       "county": "SWE.13_1",
@@ -370,10 +801,33 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         10
       ],
-      "occurrences": 1142
+      "occurrences": 1189,
+      "monthCounts": [
+        0,
+        0,
+        37,
+        205,
+        356,
+        169,
+        166,
+        138,
+        101,
+        17,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.13_1",
@@ -388,11 +842,35 @@
         7,
         8,
         9,
+        10
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
         10,
         11,
         12
       ],
-      "occurrences": 854
+      "occurrences": 890,
+      "monthCounts": [
+        0,
+        0,
+        14,
+        88,
+        266,
+        120,
+        136,
+        161,
+        88,
+        14,
+        2,
+        1
+      ]
     },
     {
       "county": "SWE.13_1",
@@ -400,6 +878,17 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -412,24 +901,21 @@
         10,
         11
       ],
-      "occurrences": 612
-    },
-    {
-      "county": "SWE.13_1",
-      "countyName": "Skåne",
-      "speciesKey": 2443002,
-      "scientificName": "Trachemys scripta",
-      "activeMonths": [
+      "occurrences": 632,
+      "monthCounts": [
+        1,
+        12,
+        101,
+        139,
+        111,
+        70,
+        67,
+        58,
+        39,
+        31,
         3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "occurrences": 72
+        0
+      ]
     },
     {
       "county": "SWE.13_1",
@@ -441,58 +927,219 @@
         5,
         6,
         7,
+        8
+      ],
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
         8,
         9
       ],
-      "occurrences": 57
+      "occurrences": 73,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        6,
+        24,
+        13,
+        20,
+        8,
+        2,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.13_1",
+      "countyName": "Skåne",
+      "speciesKey": 2443002,
+      "scientificName": "Trachemys scripta",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 72,
+      "monthCounts": [
+        0,
+        0,
+        1,
+        6,
+        21,
+        15,
+        9,
+        10,
+        6,
+        4,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.13_1",
       "countyName": "Skåne",
       "speciesKey": 8909809,
       "scientificName": "Emys orbicularis",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         5,
         8
       ],
-      "occurrences": 2
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.13_1",
       "countyName": "Skåne",
       "speciesKey": 2443597,
       "scientificName": "Mauremys reevesii",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         8,
         11
       ],
-      "occurrences": 2
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.13_1",
       "countyName": "Skåne",
       "speciesKey": 9789983,
       "scientificName": "Dermochelys coriacea",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         2
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.13_1",
       "countyName": "Skåne",
       "speciesKey": 9228211,
       "scientificName": "Graptemys pseudogeographica",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         8
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.14_1",
       "countyName": "Södermanland",
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 574,
+      "monthCounts": [
+        0,
+        0,
+        5,
+        83,
+        119,
+        112,
+        103,
+        93,
+        53,
+        6,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.14_1",
+      "countyName": "Södermanland",
+      "speciesKey": 2468095,
+      "scientificName": "Anguis fragilis",
       "activeMonths": [
         3,
         4,
@@ -503,14 +1150,7 @@
         9,
         10
       ],
-      "occurrences": 549
-    },
-    {
-      "county": "SWE.14_1",
-      "countyName": "Södermanland",
-      "speciesKey": 2468095,
-      "scientificName": "Anguis fragilis",
-      "activeMonths": [
+      "recordedMonths": [
         1,
         3,
         4,
@@ -521,7 +1161,21 @@
         9,
         10
       ],
-      "occurrences": 535
+      "occurrences": 558,
+      "monthCounts": [
+        1,
+        0,
+        8,
+        62,
+        144,
+        96,
+        96,
+        91,
+        50,
+        10,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.14_1",
@@ -529,6 +1183,16 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -539,7 +1203,21 @@
         9,
         10
       ],
-      "occurrences": 518
+      "occurrences": 545,
+      "monthCounts": [
+        0,
+        4,
+        72,
+        118,
+        81,
+        63,
+        64,
+        80,
+        52,
+        11,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.14_1",
@@ -547,6 +1225,15 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -558,7 +1245,21 @@
         10,
         12
       ],
-      "occurrences": 374
+      "occurrences": 394,
+      "monthCounts": [
+        0,
+        4,
+        33,
+        78,
+        61,
+        47,
+        62,
+        81,
+        25,
+        2,
+        0,
+        1
+      ]
     },
     {
       "county": "SWE.14_1",
@@ -572,10 +1273,33 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         10
       ],
-      "occurrences": 360
+      "occurrences": 361,
+      "monthCounts": [
+        0,
+        0,
+        40,
+        85,
+        63,
+        20,
+        13,
+        114,
+        24,
+        2,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.14_1",
@@ -588,20 +1312,57 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         10
       ],
-      "occurrences": 186
+      "occurrences": 208,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        7,
+        20,
+        37,
+        49,
+        63,
+        30,
+        2,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.14_1",
       "countyName": "Södermanland",
       "speciesKey": 2443597,
       "scientificName": "Mauremys reevesii",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         9
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.15_1",
@@ -609,6 +1370,14 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         3,
         4,
@@ -620,7 +1389,64 @@
         10,
         11
       ],
-      "occurrences": 2184
+      "occurrences": 2260,
+      "monthCounts": [
+        1,
+        0,
+        26,
+        320,
+        570,
+        434,
+        371,
+        311,
+        194,
+        27,
+        6,
+        0
+      ]
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 2468095,
+      "scientificName": "Anguis fragilis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 1757,
+      "monthCounts": [
+        1,
+        0,
+        17,
+        175,
+        518,
+        294,
+        313,
+        264,
+        143,
+        27,
+        3,
+        2
+      ]
     },
     {
       "county": "SWE.15_1",
@@ -636,19 +1462,10 @@
         7,
         8,
         9,
-        10,
-        11,
-        12
+        10
       ],
-      "occurrences": 1707
-    },
-    {
-      "county": "SWE.15_1",
-      "countyName": "Stockholm",
-      "speciesKey": 2468095,
-      "scientificName": "Anguis fragilis",
-      "activeMonths": [
-        1,
+      "recordedMonths": [
+        2,
         3,
         4,
         5,
@@ -660,7 +1477,21 @@
         11,
         12
       ],
-      "occurrences": 1685
+      "occurrences": 1741,
+      "monthCounts": [
+        0,
+        28,
+        365,
+        396,
+        306,
+        161,
+        173,
+        131,
+        136,
+        41,
+        3,
+        1
+      ]
     },
     {
       "county": "SWE.15_1",
@@ -668,6 +1499,15 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         3,
         4,
@@ -678,7 +1518,21 @@
         9,
         10
       ],
-      "occurrences": 706
+      "occurrences": 725,
+      "monthCounts": [
+        1,
+        0,
+        29,
+        192,
+        138,
+        94,
+        108,
+        116,
+        40,
+        7,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.15_1",
@@ -691,10 +1545,32 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         10
       ],
-      "occurrences": 488
+      "occurrences": 520,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        16,
+        78,
+        105,
+        122,
+        116,
+        78,
+        5,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.15_1",
@@ -702,6 +1578,13 @@
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
       "activeMonths": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         3,
         4,
@@ -712,7 +1595,21 @@
         9,
         10
       ],
-      "occurrences": 33
+      "occurrences": 34,
+      "monthCounts": [
+        1,
+        0,
+        2,
+        1,
+        11,
+        5,
+        3,
+        4,
+        5,
+        2,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.15_1",
@@ -720,55 +1617,132 @@
       "speciesKey": 6159223,
       "scientificName": "Lacerta agilis",
       "activeMonths": [
+        5
+      ],
+      "recordedMonths": [
         3,
         5,
         6,
         7,
         8
       ],
-      "occurrences": 7
+      "occurrences": 7,
+      "monthCounts": [
+        0,
+        0,
+        1,
+        0,
+        3,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.15_1",
       "countyName": "Stockholm",
       "speciesKey": 2443597,
       "scientificName": "Mauremys reevesii",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         5,
         7,
         8
       ],
-      "occurrences": 3
-    },
-    {
-      "county": "SWE.15_1",
-      "countyName": "Stockholm",
-      "speciesKey": 9228211,
-      "scientificName": "Graptemys pseudogeographica",
-      "activeMonths": [
-        7
-      ],
-      "occurrences": 1
+      "occurrences": 3,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.15_1",
       "countyName": "Stockholm",
       "speciesKey": 2443133,
       "scientificName": "Chrysemys picta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         8
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.15_1",
+      "countyName": "Stockholm",
+      "speciesKey": 9228211,
+      "scientificName": "Graptemys pseudogeographica",
+      "activeMonths": [],
+      "recordedMonths": [
+        7
+      ],
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.15_1",
       "countyName": "Stockholm",
       "speciesKey": 2443341,
       "scientificName": "Mauremys leprosa",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         8
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.16_1",
@@ -776,6 +1750,15 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -787,7 +1770,21 @@
         11,
         12
       ],
-      "occurrences": 1021
+      "occurrences": 1041,
+      "monthCounts": [
+        0,
+        0,
+        29,
+        239,
+        274,
+        170,
+        146,
+        96,
+        71,
+        8,
+        4,
+        4
+      ]
     },
     {
       "county": "SWE.16_1",
@@ -795,6 +1792,15 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -805,7 +1811,21 @@
         9,
         10
       ],
-      "occurrences": 773
+      "occurrences": 793,
+      "monthCounts": [
+        0,
+        2,
+        163,
+        267,
+        116,
+        69,
+        50,
+        69,
+        47,
+        10,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.16_1",
@@ -813,6 +1833,15 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -824,7 +1853,21 @@
         10,
         12
       ],
-      "occurrences": 566
+      "occurrences": 589,
+      "monthCounts": [
+        0,
+        1,
+        23,
+        149,
+        122,
+        68,
+        84,
+        104,
+        36,
+        1,
+        0,
+        1
+      ]
     },
     {
       "county": "SWE.16_1",
@@ -832,6 +1875,15 @@
       "speciesKey": 2468095,
       "scientificName": "Anguis fragilis",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         3,
         4,
@@ -843,7 +1895,21 @@
         10,
         11
       ],
-      "occurrences": 498
+      "occurrences": 518,
+      "monthCounts": [
+        1,
+        0,
+        5,
+        40,
+        139,
+        112,
+        81,
+        95,
+        37,
+        7,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.16_1",
@@ -851,6 +1917,11 @@
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
       "activeMonths": [
+        6,
+        7,
+        8
+      ],
+      "recordedMonths": [
         4,
         5,
         6,
@@ -858,7 +1929,21 @@
         8,
         9
       ],
-      "occurrences": 16
+      "occurrences": 16,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        1,
+        2,
+        5,
+        3,
+        3,
+        2,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.16_1",
@@ -866,6 +1951,10 @@
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
       "activeMonths": [
+        7,
+        8
+      ],
+      "recordedMonths": [
         3,
         5,
         6,
@@ -873,17 +1962,46 @@
         8,
         10
       ],
-      "occurrences": 10
+      "occurrences": 10,
+      "monthCounts": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        3,
+        3,
+        0,
+        1,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.16_1",
       "countyName": "Uppsala",
       "speciesKey": 9228211,
       "scientificName": "Graptemys pseudogeographica",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         7
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.17_1",
@@ -897,10 +2015,33 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         11
       ],
-      "occurrences": 484
+      "occurrences": 507,
+      "monthCounts": [
+        0,
+        0,
+        16,
+        123,
+        99,
+        61,
+        101,
+        80,
+        26,
+        0,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.17_1",
@@ -908,6 +2049,15 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -918,7 +2068,21 @@
         10,
         11
       ],
-      "occurrences": 390
+      "occurrences": 404,
+      "monthCounts": [
+        0,
+        0,
+        3,
+        80,
+        89,
+        69,
+        58,
+        59,
+        37,
+        7,
+        2,
+        0
+      ]
     },
     {
       "county": "SWE.17_1",
@@ -926,6 +2090,15 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -936,7 +2109,21 @@
         9,
         10
       ],
-      "occurrences": 325
+      "occurrences": 339,
+      "monthCounts": [
+        0,
+        1,
+        27,
+        53,
+        72,
+        54,
+        57,
+        34,
+        39,
+        2,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.17_1",
@@ -949,11 +2136,33 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         10,
         11
       ],
-      "occurrences": 304
+      "occurrences": 323,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        36,
+        86,
+        37,
+        83,
+        49,
+        28,
+        3,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.17_1",
@@ -961,6 +2170,13 @@
       "speciesKey": 6159223,
       "scientificName": "Lacerta agilis",
       "activeMonths": [
+        4,
+        5,
+        6,
+        8,
+        9
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -969,7 +2185,21 @@
         8,
         9
       ],
-      "occurrences": 50
+      "occurrences": 54,
+      "monthCounts": [
+        0,
+        0,
+        2,
+        15,
+        14,
+        8,
+        2,
+        7,
+        6,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.17_1",
@@ -977,6 +2207,13 @@
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
       "activeMonths": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         4,
         5,
         6,
@@ -986,17 +2223,46 @@
         10,
         11
       ],
-      "occurrences": 31
+      "occurrences": 33,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        2,
+        7,
+        5,
+        5,
+        9,
+        3,
+        1,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.17_1",
       "countyName": "Värmland",
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         6
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.18_1",
@@ -1004,6 +2270,14 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -1013,7 +2287,21 @@
         9,
         10
       ],
-      "occurrences": 547
+      "occurrences": 571,
+      "monthCounts": [
+        0,
+        0,
+        2,
+        39,
+        122,
+        112,
+        135,
+        109,
+        48,
+        4,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.18_1",
@@ -1021,6 +2309,14 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -1029,7 +2325,21 @@
         8,
         9
       ],
-      "occurrences": 369
+      "occurrences": 387,
+      "monthCounts": [
+        0,
+        0,
+        1,
+        18,
+        70,
+        78,
+        106,
+        97,
+        17,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.18_1",
@@ -1037,6 +2347,13 @@
       "speciesKey": 2468095,
       "scientificName": "Anguis fragilis",
       "activeMonths": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         4,
         5,
         6,
@@ -1044,38 +2361,97 @@
         8,
         9
       ],
-      "occurrences": 132
+      "occurrences": 141,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        1,
+        25,
+        33,
+        39,
+        37,
+        6,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.18_1",
       "countyName": "Västerbotten",
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         6,
         8
       ],
-      "occurrences": 3
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.18_1",
       "countyName": "Västerbotten",
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         7
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.18_1",
       "countyName": "Västerbotten",
       "speciesKey": 6159223,
       "scientificName": "Lacerta agilis",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         7
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.19_1",
@@ -1089,10 +2465,33 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         10
       ],
-      "occurrences": 352
+      "occurrences": 369,
+      "monthCounts": [
+        0,
+        0,
+        10,
+        19,
+        83,
+        71,
+        85,
+        66,
+        32,
+        3,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.19_1",
@@ -1105,10 +2504,32 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         10
       ],
-      "occurrences": 233
+      "occurrences": 246,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        10,
+        59,
+        39,
+        81,
+        41,
+        15,
+        1,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.19_1",
@@ -1116,6 +2537,14 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -1124,7 +2553,21 @@
         8,
         9
       ],
-      "occurrences": 219
+      "occurrences": 230,
+      "monthCounts": [
+        0,
+        0,
+        1,
+        16,
+        39,
+        40,
+        65,
+        63,
+        6,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.19_1",
@@ -1139,252 +2582,588 @@
         8,
         9
       ],
-      "occurrences": 89
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 94,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        4,
+        20,
+        18,
+        28,
+        16,
+        8,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.19_1",
       "countyName": "Västernorrland",
+      "speciesKey": 5959617,
+      "scientificName": "Coronella austriaca",
+      "activeMonths": [],
+      "recordedMonths": [
+        5
+      ],
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.19_1",
+      "countyName": "Västernorrland",
+      "speciesKey": 2443002,
+      "scientificName": "Trachemys scripta",
+      "activeMonths": [],
+      "recordedMonths": [
+        8
+      ],
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 6159223,
+      "scientificName": "Lacerta agilis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 658,
+      "monthCounts": [
+        0,
+        1,
+        4,
+        68,
+        162,
+        124,
+        90,
+        184,
+        24,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 5959617,
+      "scientificName": "Coronella austriaca",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 400,
+      "monthCounts": [
+        0,
+        0,
+        3,
+        49,
+        53,
+        54,
+        117,
+        91,
+        27,
+        6,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 6161347,
+      "scientificName": "Natrix natrix",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 366,
+      "monthCounts": [
+        0,
+        0,
+        2,
+        48,
+        64,
+        82,
+        80,
+        62,
+        25,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 2468095,
+      "scientificName": "Anguis fragilis",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 319,
+      "monthCounts": [
+        2,
+        1,
+        5,
+        53,
+        92,
+        41,
+        55,
+        39,
+        25,
+        5,
+        1,
+        0
+      ]
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 5960862,
+      "scientificName": "Vipera berus",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 277,
+      "monthCounts": [
+        0,
+        2,
+        28,
+        58,
+        58,
+        36,
+        44,
+        24,
+        18,
+        8,
+        1,
+        0
+      ]
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 9702100,
+      "scientificName": "Zootoca vivipara",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11
+      ],
+      "occurrences": 211,
+      "monthCounts": [
+        0,
+        1,
+        10,
+        55,
+        38,
+        22,
+        29,
+        45,
+        10,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "county": "SWE.1_1",
+      "countyName": "Blekinge",
+      "speciesKey": 2443002,
+      "scientificName": "Trachemys scripta",
+      "activeMonths": [
+        6,
+        7,
+        8
+      ],
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 16,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        6,
+        3,
+        4,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 6161347,
+      "scientificName": "Natrix natrix",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "occurrences": 463,
+      "monthCounts": [
+        0,
+        1,
+        13,
+        115,
+        86,
+        85,
+        70,
+        49,
+        33,
+        8,
+        2,
+        1
+      ]
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 5960862,
+      "scientificName": "Vipera berus",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 359,
+      "monthCounts": [
+        0,
+        0,
+        53,
+        89,
+        61,
+        55,
+        38,
+        31,
+        25,
+        7,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 2468095,
+      "scientificName": "Anguis fragilis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 329,
+      "monthCounts": [
+        1,
+        0,
+        4,
+        41,
+        98,
+        31,
+        65,
+        58,
+        29,
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 9702100,
+      "scientificName": "Zootoca vivipara",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 246,
+      "monthCounts": [
+        0,
+        0,
+        8,
+        60,
+        60,
+        34,
+        26,
+        45,
+        9,
+        2,
+        2,
+        0
+      ]
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
+      "speciesKey": 2443002,
+      "scientificName": "Trachemys scripta",
+      "activeMonths": [
+        5
+      ],
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        8,
+        9
+      ],
+      "occurrences": 8,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        1,
+        4,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.20_1",
+      "countyName": "Västmanland",
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
       "activeMonths": [
         5
       ],
-      "occurrences": 1
-    },
-    {
-      "county": "SWE.19_1",
-      "countyName": "Västernorrland",
-      "speciesKey": 2443002,
-      "scientificName": "Trachemys scripta",
-      "activeMonths": [
-        8
-      ],
-      "occurrences": 1
-    },
-    {
-      "county": "SWE.1_1",
-      "countyName": "Blekinge",
-      "speciesKey": 6159223,
-      "scientificName": "Lacerta agilis",
-      "activeMonths": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "occurrences": 648
-    },
-    {
-      "county": "SWE.1_1",
-      "countyName": "Blekinge",
-      "speciesKey": 6161347,
-      "scientificName": "Natrix natrix",
-      "activeMonths": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "occurrences": 358
-    },
-    {
-      "county": "SWE.1_1",
-      "countyName": "Blekinge",
-      "speciesKey": 5959617,
-      "scientificName": "Coronella austriaca",
-      "activeMonths": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "occurrences": 351
-    },
-    {
-      "county": "SWE.1_1",
-      "countyName": "Blekinge",
-      "speciesKey": 2468095,
-      "scientificName": "Anguis fragilis",
-      "activeMonths": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11
-      ],
-      "occurrences": 300
-    },
-    {
-      "county": "SWE.1_1",
-      "countyName": "Blekinge",
-      "speciesKey": 5960862,
-      "scientificName": "Vipera berus",
-      "activeMonths": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11
-      ],
-      "occurrences": 259
-    },
-    {
-      "county": "SWE.1_1",
-      "countyName": "Blekinge",
-      "speciesKey": 9702100,
-      "scientificName": "Zootoca vivipara",
-      "activeMonths": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        11
-      ],
-      "occurrences": 208
-    },
-    {
-      "county": "SWE.1_1",
-      "countyName": "Blekinge",
-      "speciesKey": 2443002,
-      "scientificName": "Trachemys scripta",
-      "activeMonths": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
-      ],
-      "occurrences": 16
-    },
-    {
-      "county": "SWE.20_1",
-      "countyName": "Västmanland",
-      "speciesKey": 6161347,
-      "scientificName": "Natrix natrix",
-      "activeMonths": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "occurrences": 447
-    },
-    {
-      "county": "SWE.20_1",
-      "countyName": "Västmanland",
-      "speciesKey": 5960862,
-      "scientificName": "Vipera berus",
-      "activeMonths": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "occurrences": 349
-    },
-    {
-      "county": "SWE.20_1",
-      "countyName": "Västmanland",
-      "speciesKey": 2468095,
-      "scientificName": "Anguis fragilis",
-      "activeMonths": [
-        1,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "occurrences": 315
-    },
-    {
-      "county": "SWE.20_1",
-      "countyName": "Västmanland",
-      "speciesKey": 9702100,
-      "scientificName": "Zootoca vivipara",
-      "activeMonths": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11
-      ],
-      "occurrences": 239
-    },
-    {
-      "county": "SWE.20_1",
-      "countyName": "Västmanland",
-      "speciesKey": 2443002,
-      "scientificName": "Trachemys scripta",
-      "activeMonths": [
-        4,
-        5,
-        6,
-        8,
-        9
-      ],
-      "occurrences": 8
-    },
-    {
-      "county": "SWE.20_1",
-      "countyName": "Västmanland",
-      "speciesKey": 5959617,
-      "scientificName": "Coronella austriaca",
-      "activeMonths": [
+      "recordedMonths": [
         5,
         6,
         7
       ],
-      "occurrences": 7
+      "occurrences": 7,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        4,
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.20_1",
@@ -1394,17 +3173,49 @@
       "activeMonths": [
         5
       ],
-      "occurrences": 3
+      "recordedMonths": [
+        5
+      ],
+      "occurrences": 3,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.20_1",
       "countyName": "Västmanland",
       "speciesKey": 9228211,
       "scientificName": "Graptemys pseudogeographica",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         6
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.21_1",
@@ -1412,6 +3223,16 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -1423,7 +3244,21 @@
         10,
         11
       ],
-      "occurrences": 2131
+      "occurrences": 2199,
+      "monthCounts": [
+        0,
+        1,
+        27,
+        358,
+        501,
+        451,
+        337,
+        270,
+        194,
+        59,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.21_1",
@@ -1431,6 +3266,14 @@
       "speciesKey": 2468095,
       "scientificName": "Anguis fragilis",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -1444,7 +3287,21 @@
         11,
         12
       ],
-      "occurrences": 1930
+      "occurrences": 2019,
+      "monthCounts": [
+        1,
+        4,
+        27,
+        261,
+        601,
+        281,
+        335,
+        305,
+        165,
+        30,
+        5,
+        4
+      ]
     },
     {
       "county": "SWE.21_1",
@@ -1452,6 +3309,16 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -1465,7 +3332,21 @@
         11,
         12
       ],
-      "occurrences": 1592
+      "occurrences": 1651,
+      "monthCounts": [
+        3,
+        1,
+        108,
+        320,
+        365,
+        211,
+        266,
+        182,
+        151,
+        35,
+        7,
+        2
+      ]
     },
     {
       "county": "SWE.21_1",
@@ -1473,6 +3354,15 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -1486,7 +3376,21 @@
         11,
         12
       ],
-      "occurrences": 1535
+      "occurrences": 1593,
+      "monthCounts": [
+        2,
+        5,
+        84,
+        403,
+        300,
+        194,
+        201,
+        292,
+        92,
+        10,
+        7,
+        3
+      ]
     },
     {
       "county": "SWE.21_1",
@@ -1494,6 +3398,15 @@
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         3,
         4,
@@ -1505,7 +3418,21 @@
         10,
         11
       ],
-      "occurrences": 906
+      "occurrences": 967,
+      "monthCounts": [
+        1,
+        0,
+        3,
+        47,
+        148,
+        169,
+        206,
+        238,
+        124,
+        28,
+        3,
+        0
+      ]
     },
     {
       "county": "SWE.21_1",
@@ -1513,6 +3440,15 @@
       "speciesKey": 6159223,
       "scientificName": "Lacerta agilis",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -1523,7 +3459,21 @@
         9,
         11
       ],
-      "occurrences": 551
+      "occurrences": 570,
+      "monthCounts": [
+        0,
+        1,
+        13,
+        112,
+        146,
+        109,
+        29,
+        118,
+        41,
+        0,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.21_1",
@@ -1531,6 +3481,13 @@
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recordedMonths": [
         1,
         4,
         5,
@@ -1541,58 +3498,172 @@
         10,
         12
       ],
-      "occurrences": 40
-    },
-    {
-      "county": "SWE.21_1",
-      "countyName": "Västra Götaland",
-      "speciesKey": 9228211,
-      "scientificName": "Graptemys pseudogeographica",
-      "activeMonths": [
-        5,
-        8
-      ],
-      "occurrences": 2
+      "occurrences": 41,
+      "monthCounts": [
+        2,
+        0,
+        0,
+        11,
+        8,
+        6,
+        7,
+        4,
+        1,
+        1,
+        0,
+        1
+      ]
     },
     {
       "county": "SWE.21_1",
       "countyName": "Västra Götaland",
       "speciesKey": 8894817,
       "scientificName": "Caretta caretta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         12
       ],
-      "occurrences": 2
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2
+      ]
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 9228211,
+      "scientificName": "Graptemys pseudogeographica",
+      "activeMonths": [],
+      "recordedMonths": [
+        5,
+        8
+      ],
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.21_1",
       "countyName": "Västra Götaland",
       "speciesKey": 9789983,
       "scientificName": "Dermochelys coriacea",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         3
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.21_1",
       "countyName": "Västra Götaland",
       "speciesKey": 8909809,
       "scientificName": "Emys orbicularis",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         9
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.21_1",
+      "countyName": "Västra Götaland",
+      "speciesKey": 5221064,
+      "scientificName": "Lachesis melanocephala",
+      "activeMonths": [],
+      "recordedMonths": [
+        7
+      ],
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.21_1",
       "countyName": "Västra Götaland",
       "speciesKey": 2443597,
       "scientificName": "Mauremys reevesii",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         10
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.2_1",
@@ -1600,6 +3671,15 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -1610,7 +3690,21 @@
         9,
         10
       ],
-      "occurrences": 395
+      "occurrences": 423,
+      "monthCounts": [
+        0,
+        3,
+        20,
+        41,
+        80,
+        81,
+        92,
+        67,
+        37,
+        2,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.2_1",
@@ -1618,6 +3712,14 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -1626,7 +3728,21 @@
         8,
         9
       ],
-      "occurrences": 291
+      "occurrences": 305,
+      "monthCounts": [
+        0,
+        0,
+        2,
+        43,
+        69,
+        62,
+        76,
+        42,
+        11,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.2_1",
@@ -1634,6 +3750,14 @@
       "speciesKey": 2468095,
       "scientificName": "Anguis fragilis",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -1643,7 +3767,21 @@
         9,
         10
       ],
-      "occurrences": 221
+      "occurrences": 238,
+      "monthCounts": [
+        0,
+        0,
+        1,
+        11,
+        54,
+        47,
+        64,
+        45,
+        15,
+        1,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.2_1",
@@ -1659,7 +3797,30 @@
         9,
         10
       ],
-      "occurrences": 186
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 197,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        23,
+        42,
+        43,
+        43,
+        32,
+        11,
+        3,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.2_1",
@@ -1671,10 +3832,31 @@
         5,
         6,
         7,
+        9
+      ],
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
         8,
         9
       ],
-      "occurrences": 26
+      "occurrences": 29,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        6,
+        7,
+        3,
+        8,
+        2,
+        3,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.2_1",
@@ -1684,28 +3866,75 @@
       "activeMonths": [
         5
       ],
-      "occurrences": 3
+      "recordedMonths": [
+        5
+      ],
+      "occurrences": 3,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.2_1",
       "countyName": "Dalarna",
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         5,
         8
       ],
-      "occurrences": 2
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.2_1",
       "countyName": "Dalarna",
       "speciesKey": 9350124,
       "scientificName": "Natrix helvetica",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         6
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.3_1",
@@ -1719,11 +3948,34 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         10,
         11
       ],
-      "occurrences": 297
+      "occurrences": 306,
+      "monthCounts": [
+        0,
+        0,
+        15,
+        54,
+        69,
+        61,
+        48,
+        33,
+        22,
+        3,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.3_1",
@@ -1737,17 +3989,9 @@
         6,
         7,
         8,
-        9,
-        10
+        9
       ],
-      "occurrences": 251
-    },
-    {
-      "county": "SWE.3_1",
-      "countyName": "Gävleborg",
-      "speciesKey": 2468095,
-      "scientificName": "Anguis fragilis",
-      "activeMonths": [
+      "recordedMonths": [
         3,
         4,
         5,
@@ -1757,7 +4001,60 @@
         9,
         10
       ],
-      "occurrences": 221
+      "occurrences": 267,
+      "monthCounts": [
+        0,
+        0,
+        6,
+        21,
+        52,
+        42,
+        62,
+        72,
+        11,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.3_1",
+      "countyName": "Gävleborg",
+      "speciesKey": 2468095,
+      "scientificName": "Anguis fragilis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 229,
+      "monthCounts": [
+        0,
+        0,
+        1,
+        25,
+        51,
+        44,
+        58,
+        30,
+        19,
+        1,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.3_1",
@@ -1765,6 +4062,14 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -1777,28 +4082,72 @@
         10,
         11
       ],
-      "occurrences": 220
+      "occurrences": 229,
+      "monthCounts": [
+        2,
+        1,
+        2,
+        22,
+        52,
+        45,
+        66,
+        24,
+        13,
+        1,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.3_1",
       "countyName": "Gävleborg",
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         7,
         10
       ],
-      "occurrences": 2
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.3_1",
       "countyName": "Gävleborg",
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         6
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.4_1",
@@ -1806,6 +4155,15 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -1817,7 +4175,21 @@
         10,
         12
       ],
-      "occurrences": 465
+      "occurrences": 487,
+      "monthCounts": [
+        0,
+        1,
+        4,
+        49,
+        97,
+        109,
+        104,
+        73,
+        36,
+        13,
+        0,
+        1
+      ]
     },
     {
       "county": "SWE.4_1",
@@ -1833,7 +4205,30 @@
         9,
         10
       ],
-      "occurrences": 185
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 194,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        7,
+        33,
+        42,
+        49,
+        28,
+        32,
+        3,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.4_1",
@@ -1850,7 +4245,31 @@
         9,
         10
       ],
-      "occurrences": 139
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 144,
+      "monthCounts": [
+        0,
+        0,
+        4,
+        17,
+        18,
+        23,
+        32,
+        28,
+        19,
+        3,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.4_1",
@@ -1867,7 +4286,31 @@
         9,
         10
       ],
-      "occurrences": 88
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 90,
+      "monthCounts": [
+        0,
+        0,
+        5,
+        14,
+        22,
+        9,
+        10,
+        19,
+        8,
+        3,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.4_1",
@@ -1880,10 +4323,75 @@
         6,
         7,
         8,
+        9
+      ],
+      "recordedMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
         9,
         10
       ],
-      "occurrences": 47
+      "occurrences": 47,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        6,
+        10,
+        8,
+        6,
+        11,
+        5,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 6161347,
+      "scientificName": "Natrix natrix",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 544,
+      "monthCounts": [
+        1,
+        0,
+        13,
+        79,
+        128,
+        106,
+        107,
+        54,
+        44,
+        9,
+        3,
+        0
+      ]
     },
     {
       "county": "SWE.5_1",
@@ -1891,6 +4399,16 @@
       "speciesKey": 2468095,
       "scientificName": "Anguis fragilis",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         3,
         4,
@@ -1903,71 +4421,27 @@
         11,
         12
       ],
-      "occurrences": 522
-    },
-    {
-      "county": "SWE.5_1",
-      "countyName": "Halland",
-      "speciesKey": 6161347,
-      "scientificName": "Natrix natrix",
-      "activeMonths": [
+      "occurrences": 542,
+      "monthCounts": [
         1,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
+        0,
         10,
-        11
-      ],
-      "occurrences": 520
+        47,
+        162,
+        84,
+        57,
+        120,
+        48,
+        11,
+        1,
+        1
+      ]
     },
     {
       "county": "SWE.5_1",
       "countyName": "Halland",
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
-      "activeMonths": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11
-      ],
-      "occurrences": 431
-    },
-    {
-      "county": "SWE.5_1",
-      "countyName": "Halland",
-      "speciesKey": 5960862,
-      "scientificName": "Vipera berus",
-      "activeMonths": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11
-      ],
-      "occurrences": 382
-    },
-    {
-      "county": "SWE.5_1",
-      "countyName": "Halland",
-      "speciesKey": 6159223,
-      "scientificName": "Lacerta agilis",
       "activeMonths": [
         3,
         4,
@@ -1977,7 +4451,115 @@
         8,
         9
       ],
-      "occurrences": 257
+      "recordedMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 453,
+      "monthCounts": [
+        1,
+        2,
+        28,
+        123,
+        92,
+        45,
+        62,
+        68,
+        29,
+        1,
+        2,
+        0
+      ]
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 5960862,
+      "scientificName": "Vipera berus",
+      "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 393,
+      "monthCounts": [
+        0,
+        3,
+        39,
+        74,
+        92,
+        51,
+        49,
+        39,
+        33,
+        12,
+        1,
+        0
+      ]
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 6159223,
+      "scientificName": "Lacerta agilis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 263,
+      "monthCounts": [
+        0,
+        0,
+        2,
+        28,
+        86,
+        39,
+        54,
+        44,
+        10,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.5_1",
@@ -1985,6 +4567,15 @@
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -1995,30 +4586,99 @@
         9,
         10
       ],
-      "occurrences": 153
+      "occurrences": 164,
+      "monthCounts": [
+        0,
+        1,
+        1,
+        3,
+        20,
+        28,
+        36,
+        44,
+        26,
+        5,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.5_1",
       "countyName": "Halland",
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         4,
         5,
         7,
         8
       ],
-      "occurrences": 5
+      "occurrences": 5,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.5_1",
       "countyName": "Halland",
       "speciesKey": 8894817,
       "scientificName": "Caretta caretta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         12
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "county": "SWE.5_1",
+      "countyName": "Halland",
+      "speciesKey": 2441905,
+      "scientificName": "Chelydra serpentina",
+      "activeMonths": [],
+      "recordedMonths": [
+        9
+      ],
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.6_1",
@@ -2026,6 +4686,13 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recordedMonths": [
         3,
         4,
         5,
@@ -2035,7 +4702,21 @@
         9,
         10
       ],
-      "occurrences": 188
+      "occurrences": 197,
+      "monthCounts": [
+        0,
+        0,
+        1,
+        7,
+        25,
+        44,
+        74,
+        40,
+        3,
+        3,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.6_1",
@@ -2043,6 +4724,13 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         4,
         5,
         6,
@@ -2051,28 +4739,72 @@
         9,
         10
       ],
-      "occurrences": 138
+      "occurrences": 153,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        1,
+        15,
+        30,
+        49,
+        41,
+        15,
+        2,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.6_1",
       "countyName": "Jämtland",
       "speciesKey": 2468095,
       "scientificName": "Anguis fragilis",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         5,
         6
       ],
-      "occurrences": 2
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.6_1",
       "countyName": "Jämtland",
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         10
       ],
-      "occurrences": 2
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.7_1",
@@ -2080,6 +4812,15 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -2091,7 +4832,21 @@
         9,
         10
       ],
-      "occurrences": 538
+      "occurrences": 550,
+      "monthCounts": [
+        1,
+        1,
+        35,
+        120,
+        79,
+        61,
+        100,
+        122,
+        29,
+        2,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.7_1",
@@ -2108,7 +4863,31 @@
         9,
         10
       ],
-      "occurrences": 433
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "occurrences": 441,
+      "monthCounts": [
+        0,
+        0,
+        8,
+        54,
+        101,
+        104,
+        74,
+        58,
+        35,
+        7,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.7_1",
@@ -2116,6 +4895,16 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -2128,7 +4917,21 @@
         10,
         11
       ],
-      "occurrences": 421
+      "occurrences": 425,
+      "monthCounts": [
+        1,
+        1,
+        37,
+        80,
+        84,
+        70,
+        77,
+        41,
+        27,
+        6,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.7_1",
@@ -2136,6 +4939,15 @@
       "speciesKey": 2468095,
       "scientificName": "Anguis fragilis",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         3,
         4,
@@ -2147,7 +4959,21 @@
         10,
         11
       ],
-      "occurrences": 335
+      "occurrences": 356,
+      "monthCounts": [
+        1,
+        0,
+        5,
+        43,
+        91,
+        57,
+        69,
+        63,
+        20,
+        4,
+        3,
+        0
+      ]
     },
     {
       "county": "SWE.7_1",
@@ -2163,7 +4989,30 @@
         8,
         9
       ],
-      "occurrences": 324
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 330,
+      "monthCounts": [
+        0,
+        0,
+        7,
+        45,
+        90,
+        29,
+        25,
+        93,
+        41,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.7_1",
@@ -2171,25 +5020,57 @@
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
       "activeMonths": [
+        6
+      ],
+      "recordedMonths": [
         4,
         6,
         7,
         9
       ],
-      "occurrences": 9
+      "occurrences": 10,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        5,
+        2,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.7_1",
       "countyName": "Jönköping",
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         4,
         5,
         6,
         8
       ],
-      "occurrences": 4
+      "occurrences": 4,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.8_1",
@@ -2197,6 +5078,16 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         3,
         4,
@@ -2209,7 +5100,21 @@
         11,
         12
       ],
-      "occurrences": 1339
+      "occurrences": 1389,
+      "monthCounts": [
+        1,
+        0,
+        19,
+        189,
+        317,
+        326,
+        230,
+        156,
+        115,
+        33,
+        1,
+        2
+      ]
     },
     {
       "county": "SWE.8_1",
@@ -2217,6 +5122,14 @@
       "speciesKey": 6159223,
       "scientificName": "Lacerta agilis",
       "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -2225,9 +5138,24 @@
         6,
         7,
         8,
-        9
+        9,
+        10
       ],
-      "occurrences": 1291
+      "occurrences": 1350,
+      "monthCounts": [
+        1,
+        1,
+        27,
+        149,
+        562,
+        197,
+        160,
+        203,
+        49,
+        1,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.8_1",
@@ -2235,6 +5163,16 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -2248,7 +5186,21 @@
         11,
         12
       ],
-      "occurrences": 1216
+      "occurrences": 1259,
+      "monthCounts": [
+        1,
+        3,
+        125,
+        295,
+        285,
+        164,
+        144,
+        116,
+        83,
+        40,
+        2,
+        1
+      ]
     },
     {
       "county": "SWE.8_1",
@@ -2256,6 +5208,16 @@
       "speciesKey": 2468095,
       "scientificName": "Anguis fragilis",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         1,
         3,
         4,
@@ -2267,7 +5229,64 @@
         10,
         11
       ],
-      "occurrences": 1052
+      "occurrences": 1155,
+      "monthCounts": [
+        2,
+        0,
+        19,
+        137,
+        353,
+        205,
+        180,
+        163,
+        75,
+        19,
+        2,
+        0
+      ]
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 5959617,
+      "scientificName": "Coronella austriaca",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "occurrences": 874,
+      "monthCounts": [
+        1,
+        1,
+        3,
+        34,
+        170,
+        171,
+        216,
+        167,
+        96,
+        13,
+        2,
+        0
+      ]
     },
     {
       "county": "SWE.8_1",
@@ -2275,6 +5294,15 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -2288,34 +5316,29 @@
         11,
         12
       ],
-      "occurrences": 837
-    },
-    {
-      "county": "SWE.8_1",
-      "countyName": "Kalmar",
-      "speciesKey": 5959617,
-      "scientificName": "Coronella austriaca",
-      "activeMonths": [
+      "occurrences": 867,
+      "monthCounts": [
         1,
         2,
-        3,
-        4,
+        63,
+        222,
+        188,
+        100,
+        119,
+        123,
+        40,
         5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11
-      ],
-      "occurrences": 790
+        2,
+        2
+      ]
     },
     {
       "county": "SWE.8_1",
       "countyName": "Kalmar",
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         4,
         5,
         6,
@@ -2323,17 +5346,71 @@
         8,
         9
       ],
-      "occurrences": 6
+      "occurrences": 6,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.8_1",
+      "countyName": "Kalmar",
+      "speciesKey": 8356845,
+      "scientificName": "Anguis colchica",
+      "activeMonths": [],
+      "recordedMonths": [
+        9
+      ],
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.8_1",
       "countyName": "Kalmar",
       "speciesKey": 2443597,
       "scientificName": "Mauremys reevesii",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         9
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.9_1",
@@ -2341,6 +5418,15 @@
       "speciesKey": 6161347,
       "scientificName": "Natrix natrix",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -2353,7 +5439,21 @@
         10,
         11
       ],
-      "occurrences": 379
+      "occurrences": 403,
+      "monthCounts": [
+        1,
+        1,
+        6,
+        46,
+        73,
+        76,
+        79,
+        70,
+        48,
+        2,
+        1,
+        0
+      ]
     },
     {
       "county": "SWE.9_1",
@@ -2361,6 +5461,15 @@
       "speciesKey": 9702100,
       "scientificName": "Zootoca vivipara",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
         1,
         2,
         3,
@@ -2372,7 +5481,21 @@
         9,
         10
       ],
-      "occurrences": 359
+      "occurrences": 368,
+      "monthCounts": [
+        4,
+        1,
+        22,
+        98,
+        61,
+        34,
+        60,
+        74,
+        13,
+        1,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.9_1",
@@ -2380,6 +5503,16 @@
       "speciesKey": 5960862,
       "scientificName": "Vipera berus",
       "activeMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recordedMonths": [
         2,
         3,
         4,
@@ -2390,7 +5523,21 @@
         9,
         10
       ],
-      "occurrences": 343
+      "occurrences": 360,
+      "monthCounts": [
+        0,
+        1,
+        33,
+        71,
+        46,
+        40,
+        76,
+        57,
+        25,
+        11,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.9_1",
@@ -2406,14 +5553,7 @@
         8,
         9
       ],
-      "occurrences": 322
-    },
-    {
-      "county": "SWE.9_1",
-      "countyName": "Kronoberg",
-      "speciesKey": 6159223,
-      "scientificName": "Lacerta agilis",
-      "activeMonths": [
+      "recordedMonths": [
         3,
         4,
         5,
@@ -2422,7 +5562,59 @@
         8,
         9
       ],
-      "occurrences": 55
+      "occurrences": 344,
+      "monthCounts": [
+        0,
+        0,
+        8,
+        30,
+        96,
+        40,
+        81,
+        64,
+        25,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "county": "SWE.9_1",
+      "countyName": "Kronoberg",
+      "speciesKey": 6159223,
+      "scientificName": "Lacerta agilis",
+      "activeMonths": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recordedMonths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "occurrences": 56,
+      "monthCounts": [
+        0,
+        0,
+        2,
+        12,
+        6,
+        5,
+        15,
+        12,
+        4,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.9_1",
@@ -2430,31 +5622,78 @@
       "speciesKey": 2443002,
       "scientificName": "Trachemys scripta",
       "activeMonths": [
+        8
+      ],
+      "recordedMonths": [
         5,
         8,
         9
       ],
-      "occurrences": 7
+      "occurrences": 7,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        4,
+        1,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.9_1",
       "countyName": "Kronoberg",
       "speciesKey": 5959617,
       "scientificName": "Coronella austriaca",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         5
       ],
-      "occurrences": 2
+      "occurrences": 2,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     {
       "county": "SWE.9_1",
       "countyName": "Kronoberg",
       "speciesKey": 9228211,
       "scientificName": "Graptemys pseudogeographica",
-      "activeMonths": [
+      "activeMonths": [],
+      "recordedMonths": [
         11
       ],
-      "occurrences": 1
+      "occurrences": 1,
+      "monthCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
     }
   ]
 }

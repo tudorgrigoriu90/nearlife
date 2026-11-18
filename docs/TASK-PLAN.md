@@ -4328,7 +4328,7 @@ document until it is started, when it takes the next free `T-###`.
   - Claude: the bodies become fixtures under `lib/__fixtures__/revenuecat/`, and
     `revenuecatEvents.test.ts` plans each one (a county pack with its real `entitlement_ids`,
     a TRANSFER with its real fields).
-- **T-268 · "Active this season" from monthly counts** — *Claude · M · `IN-PROGRESS` (code pushed; done when the Swedish presence reload and the live check pass) · deps: T-261 · review B-04, B-26, B-65*
+- **T-268 · "Active this season" from monthly counts** — *Claude · M · `DONE` (reloaded 2026-11-16) · deps: T-261 · review B-04, B-26, B-65*
   - A month is active for a species in a county only from a share of its busiest month and a
     minimum count (the rule `lib/countyStats.ts` already uses), not from a single record.
   - This Week ranks by this month's records; the notification sender and the Almanac's month and
@@ -4349,8 +4349,23 @@ document until it is started, when it takes the next free `T-###`.
     here again from {month}." instead of the catch button, and `attemptCatch` refuses. A species
     with no active month is not gated (no month to name).
   - ✅ `verify.py`: "no summer migrant is active in winter" (live).
-  - Remaining: the presence reload (data pipeline, SWE, content skip), then the live check and the
-    regenerated presence files committed with a data test over them.
+  - ✅ Reloaded (data pipeline run 14, 2026-11-16): no capped facet; big bird rows active all year
+    fell from 2,970 of 4,558 to 1,499 of 4,570, insects 77 → 15, molluscs 36 → 0. Kronoberg swift
+    `[5, 6, 7, 8]`, cuckoo `[5, 6, 7]`; no summer migrant active in winter in any county (live).
+    286,178 season sentences rewritten. Amphibians failed (GBIF now answers "multiple equal
+    matches for Amphibia"); fixed with `rank: CLASS` and rebuilt.
+  - ✅ The regenerated presence files are committed; `test_presence_data.py` checks them (no
+    capped facet, monthly counts on every record, active months = the threshold, no migrant in
+    winter).
+  - Paging recovered species the cap had dropped: the catalogue is now **10,078** species (99.75%
+    of observations), up from 8,064, mostly insects and plants. Their content is T-279.
+- **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `TODO` · deps: T-268*
+  - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
+    every catalogue species has before testers see them: content rows in every locale (fact,
+    season, give, protect), names (GBIF + Wikidata), photo and thumbnail, translated facts, and
+    bird song where a bird is new.
+  - Done when every `in_catalogue` species has a content row in every locale, and the share with a
+    photo and a Swedish name is reported against the previous catalogue's.
 - **T-269 · Account deletion erases the device** — *Claude · S · `DONE` · deps: T-093 · review B-05, B-12, B-52 (device part)*
   - The collection cache and outbox, language choices, cached catch spots and in-memory state are
     cleared; RevenueCat and PostHog identities are reset.

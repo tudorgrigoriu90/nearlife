@@ -27,7 +27,7 @@ class FakeClient:
     def __init__(self):
         self.asked = []
 
-    def resolve_taxon_key(self, name):
+    def resolve_taxon_key(self, name, rank=None):
         return 212
 
     def species_facet(self, gid, taxon_key, month, facet_limit=300, offset=0):
@@ -113,3 +113,25 @@ def test_a_facet_still_capped_after_the_page_limit_fails_the_taxon():
     client = CappedClient()
     with pytest.raises(RuntimeError, match="capped"):
         build_for_taxon(client, {**TAXON, "maxFacetPages": 2}, NOR[:1])
+
+
+# GBIF began answering "Multiple equal matches for Amphibia" (2026-11-16), so the amphibians taxon
+# failed; a taxon can name the rank that makes the match unique.
+def test_a_taxon_rank_is_passed_to_the_name_match():
+    from gbif.client import GbifClient
+    from gbif.taxa import TARGET_TAXA
+
+    asked = []
+
+    class Stub(GbifClient):
+        def __init__(self):
+            pass
+
+        def _get(self, path, params):
+            asked.append(params)
+            return {"matchType": "EXACT", "usageKey": 131, "canonicalName": "Amphibia", "rank": "CLASS"}
+
+    assert Stub().resolve_taxon_key("Amphibia", rank="CLASS") == 131
+    assert asked[-1]["rank"] == "CLASS"
+    amphibians = next(t for t in TARGET_TAXA if t["key"] == "amphibians")
+    assert amphibians["rank"] == "CLASS"

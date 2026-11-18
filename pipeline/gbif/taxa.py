@@ -18,7 +18,8 @@ TARGET_TAXA = [
     # Vertebrates.
     {"key": "birds", "names": ["Aves"], "facetLimit": 400, "minOccurrences": 0},
     {"key": "mammals", "names": ["Mammalia"], "facetLimit": 300, "minOccurrences": 0},
-    {"key": "amphibians", "names": ["Amphibia"], "facetLimit": 100, "minOccurrences": 0},
+    # rank: GBIF finds "multiple equal matches" for Amphibia without it (2026-11-16).
+    {"key": "amphibians", "names": ["Amphibia"], "rank": "CLASS", "facetLimit": 100, "minOccurrences": 0},
     # GBIF backbone: reptiles are Squamata (lizards+snakes, a CLASS there) + Testudines (turtles).
     {"key": "reptiles", "names": ["Squamata", "Testudines"], "facetLimit": 100, "minOccurrences": 0},
     # GBIF backbone has no fish class — target the orders covering Swedish fish.
