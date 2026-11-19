@@ -4587,6 +4587,16 @@ document until it is started, when it takes the next free `T-###`.
     change (the unlock arrived) or the app goes away, and a second purchase restarts the schedule
     instead of adding another. `App.tsx` has no `setTimeout` left. Tests: 4.
 
+- **T-303 · Edge Functions deploy only after the checks; least-privilege workflow tokens** — *Claude · XS · `DONE` · deps: T-206 · review B-69*
+  - ✅ `deploy-functions.yml` has a `verify` job (`npm run verify:ci`, the CI gate) and the deploy
+    `needs: verify`, so a commit that fails lint, types or tests never reaches production. A
+    dry run on a branch was not made (pushes go to `main` only); `needs:` is what guarantees it.
+  - ✅ The Supabase CLI is pinned to 3.2.0 (was `latest`, which once changed deploy behaviour
+    without notice, T-206).
+  - ✅ Every workflow declares `permissions: contents: read` at the top; the jobs that read other
+    runs' artifacts keep their `actions: read`, and store-screenshots keeps `contents: write`.
+    Tests: `__tests__/ciGate.test.js` checks all three for every workflow file.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

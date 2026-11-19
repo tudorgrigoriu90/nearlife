@@ -1,6 +1,6 @@
 /* global describe, it, expect, __dirname */
 // Plain JS: it needs Node's fs, and the app's tsconfig deliberately has no Node types.
-const { readFileSync, existsSync } = require('fs');
+const { readFileSync, existsSync, readdirSync } = require('fs');
 const { join } = require('path');
 const { blocking, staleAccepts } = require('../scripts/auditGate');
 
@@ -77,5 +77,27 @@ describe('CI workflow', () => {
     for (const eco of ['npm', 'pip', 'github-actions']) {
       expect(deps).toMatch(new RegExp(`package-ecosystem: "?${eco}"?`));
     }
+  });
+});
+
+// T-303 · review B-69: deploys wait for the checks; workflow tokens get only what they need.
+describe('workflow hygiene', () => {
+  const dir = join(ROOT, '.github', 'workflows');
+  const workflows = readdirSync(dir).filter((f) => f.endsWith('.yml'));
+
+  it.each(workflows)('%s declares its token permissions', (file) => {
+    expect(readFileSync(join(dir, file), 'utf8')).toMatch(/^permissions:\n {2}contents: (read|write)/m);
+  });
+
+  it('Edge Functions deploy only after the checks pass', () => {
+    const deploy = read('.github/workflows/deploy-functions.yml');
+    expect(deploy).toMatch(/npm run verify:ci/);
+    expect(deploy).toMatch(/needs: verify/);
+  });
+
+  it('the Supabase CLI version is pinned', () => {
+    const deploy = read('.github/workflows/deploy-functions.yml');
+    expect(deploy).not.toMatch(/version: latest/);
+    expect(deploy).toMatch(/version: \d+\.\d+\.\d+/);
   });
 });

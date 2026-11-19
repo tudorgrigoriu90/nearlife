@@ -17,13 +17,36 @@ on:
       - ".github/workflows/deploy-functions.yml"
   workflow_dispatch:
 
+# Read-only token by default (T-303 · review B-69); a job that needs more says so.
+permissions:
+  contents: read
+
 concurrency:
   group: deploy-functions
   cancel-in-progress: false
 
 jobs:
+  # T-303 · review B-69: the code that reaches production first passes the same gate as CI
+  # (lint, types, tests with coverage), so a red commit never deploys.
+  verify:
+    name: Verify (lint + typecheck + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run verify:ci
+
   deploy:
     name: Deploy Edge Functions
+    needs: verify
     runs-on: ubuntu-latest
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -45,17 +68,18 @@ jobs:
           cache: npm
 
       # Never ship a stale copy of the engine: regenerate it and fail if it differs from what is
-      # committed (the same check CI runs as a test, repeated here because this job does not wait
-      # for CI).
+      # committed (also a test in the verify job; kept here next to the deploy it protects).
       - name: Check the shared engine copy is current
         run: |
           npm ci
           node scripts/edgeShared.js
           git diff --exit-code -- supabase/functions/_shared
 
+      # Pinned (T-303): a new CLI changes deploy behaviour without notice (T-206 met one that began
+      # asking for confirmation). Raise it deliberately.
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 3.2.0
 
       # --no-verify-jwt: neither caller has a user JWT. pg_cron calls send-notifications, which
       # checks x-cron-secret; RevenueCat calls revenuecat-webhook, which checks its bearer secret.

@@ -12,6 +12,10 @@ on:
     - cron: "37 5 * * *" # 05:37 UTC daily, after the 03:41 retention run
   workflow_dispatch:
 
+# Read-only token by default (T-303 · review B-69); a job that needs more says so.
+permissions:
+  contents: read
+
 concurrency:
   group: health
   cancel-in-progress: true

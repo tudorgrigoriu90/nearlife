@@ -42,6 +42,10 @@ on:
         required: false
         default: "all"
 
+# Read-only token by default (T-303 · review B-69); a job that needs more says so.
+permissions:
+  contents: read
+
 concurrency:
   group: data-pipeline
   cancel-in-progress: false

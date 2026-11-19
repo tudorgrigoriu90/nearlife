@@ -26,6 +26,10 @@ on:
     - cron: "0 6 * * 1,4" # 06:00 UTC, Mondays and Thursdays
   workflow_dispatch:
 
+# Read-only token by default (T-303 · review B-69); a job that needs more says so.
+permissions:
+  contents: read
+
 concurrency:
   group: supabase-keepalive
   cancel-in-progress: true

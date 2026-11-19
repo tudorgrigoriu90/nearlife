@@ -11,6 +11,10 @@ on:
     branches: [main]
   pull_request:
 
+# Read-only token by default (T-303 · review B-69); a job that needs more says so.
+permissions:
+  contents: read
+
 jobs:
   verify:
     name: Verify (lint + typecheck + test)
