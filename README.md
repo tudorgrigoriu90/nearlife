@@ -45,7 +45,7 @@ caring for it.
 
 ## Tech stack (at a glance)
 
-Expo (React Native) + TypeScript · Supabase (Postgres + PostGIS) · H3 spatial indexing ·
+Expo (React Native) + TypeScript · Supabase (Postgres + PostGIS) · county-level presence ·
 MapLibre · Python data pipeline (GitHub Actions) · RevenueCat. All $0 at MVP scale —
 see [docs/TSD.md](docs/TSD.md).
 

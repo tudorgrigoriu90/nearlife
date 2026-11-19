@@ -11,7 +11,7 @@
 |-------|--------|------|-----|
 | **Mobile app** | **Expo (React Native) + TypeScript** | $0 | One codebase → iOS + Android; Claude expert-level; built-in push, geolocation, background tasks, OTA; cloud builds (no Mac needed) |
 | **Backend + DB** | **Supabase** (Postgres + **PostGIS**, Auth, Storage, Edge Functions, `pg_cron`) | $0 free tier | Spatial-native (PostGIS = exactly the notification model); managed; Claude strong in Postgres/SQL/TS |
-| **Spatial index** | **H3** (`h3-js` / `h3-py`) | $0 | Per-cell probability model; free Uber library |
+| **Spatial index** | **H3** (`h3-js` / `h3-py`) — *not shipped* | $0 | Adopted for a per-cell model (T-091). v1 works per county (GADM regions), so nothing uses cells; `h3-js` and `lib/cell.ts` were removed as dead code (T-301 · review B-46) and come back with the first cell-level feature. |
 | **Maps** | **MapLibre GL** + free tiles (Protomaps/MapTiler free) | $0 | Open-source; avoids Google Maps billing |
 | **Data pipeline** | **Python** batch in **GitHub Actions** | $0 | Free CI minutes; Claude expert in Python/pandas; loads into Supabase |
 | **Push** | **FCM HTTP v1 directly** (device token via `expo-notifications`); scheduled via `pg_cron` + Edge Function | $0 | Notification engine runs server-side on schedule. Direct FCM, not Expo's push service (Director, T-201) — Android-only until iOS gets the Firebase SDK |
@@ -109,9 +109,10 @@ Core tables (key columns; not exhaustive):
 Runs server-side on a schedule (`pg_cron` → Edge Function). For each due user:
 
 ```
-1. Resolve user's H3 cell (from last-known coarse location + home_region).
-2. Candidate set = cell_species_month WHERE h3_index = cell AND month = current
-                   AND is_active_window (season gate — hard constraint).
+1. Resolve the user's area: in v1, the home county (profiles.home_region). The design's
+   H3 cell (coarse location) is not shipped; see the stack table (T-301).
+2. Candidate set = species_presence WHERE region_id = home county AND the month is
+                   active (season gate — hard constraint).
 3. Remove species already in the user's collection this cycle (dedupe).
 4. Weight each candidate:  w = presence_prob  ×  rarity_flavor(species)
       - rarity_flavor rewards surfacing rarer-but-plausible species occasionally,

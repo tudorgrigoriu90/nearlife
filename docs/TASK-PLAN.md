@@ -4574,6 +4574,13 @@ document until it is started, when it takes the next free `T-###`.
     failed delete keeps the flag, so it is retried; unreadable storage counts as registered (an
     extra delete is safe, a missed one is not). Tests: 6.
 
+- **T-301 · Remove the unused H3 cell code** — *Claude · XS · `DONE` · deps: T-091 · review B-46*
+  - ✅ No app file imported `lib/cell.ts`; v1 works per county. Deleted `lib/cell.ts`, its test,
+    the `h3-js` dependency and the Jest `TextDecoder` workaround that existed only for it
+    (`jest.setup.js`; `fcmAuth.test` passes without it). The TSD stack table and notification
+    engine now say H3 is adopted but not shipped, and returns with the first cell-level feature;
+    the README no longer lists it.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

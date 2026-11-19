@@ -9,10 +9,6 @@ module.exports = {
     '^expo-speech$': '<rootDir>/__mocks__/expo-speech.js',
     '^expo-audio$': '<rootDir>/__mocks__/expo-audio.js',
   },
-  // Restore a real TextDecoder/TextEncoder before test modules load (T-091) so h3-js' emscripten
-  // build can initialize under jest-expo. The preset leaves setupFilesAfterEnv unset, so this adds
-  // rather than clobbers.
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   // Honest coverage: measure every source file, not just the ones a test happens to import.
   // Generated data manifests and test files are excluded.
   collectCoverageFrom: [
