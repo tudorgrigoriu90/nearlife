@@ -17,4 +17,6 @@ export interface MinigameProps {
   locale?: Locale;
   onComplete: (outcome: MinigameOutcome) => void;
   onCancel?: () => void;
+  /** After a miss: play the same game again, here and now (T-311 · review B-45). */
+  onRetry?: () => void;
 }

@@ -27,6 +27,7 @@ export default function FrameMinigame({
   config = DEFAULT_FRAME,
   onComplete,
   onCancel,
+  onRetry,
 }: MinigameProps & { config?: FrameConfig }) {
   const tr = createTranslator(locale);
   const [reticle, setReticle] = useState({ x: STAGE / 2, y: STAGE / 2 });
@@ -57,6 +58,7 @@ export default function FrameMinigame({
       result={result}
       onComplete={() => result && onComplete({ success: result.success, score: result.score })}
       onCancel={onCancel}
+      onRetry={onRetry}
     >
       <View
         testID="frame-stage"

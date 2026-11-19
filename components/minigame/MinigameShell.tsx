@@ -27,6 +27,7 @@ export default function MinigameShell({
   result,
   onComplete,
   onCancel,
+  onRetry,
   children,
 }: {
   locale?: Locale;
@@ -36,6 +37,8 @@ export default function MinigameShell({
   result: ShellResult | null;
   onComplete: () => void;
   onCancel?: () => void;
+  /** After a miss, "Try again" (T-311); "Continue" then reads "Back". */
+  onRetry?: () => void;
   children: ReactNode;
 }) {
   const tr = createTranslator(locale);
@@ -49,9 +52,20 @@ export default function MinigameShell({
             {result.success ? tr('minigame.success') : tr('minigame.fail')}
           </Text>
         </View>
-        <Pressable style={styles.cta} onPress={onComplete} accessibilityRole="button">
-          <Text style={styles.ctaText}>{tr('minigame.continue')}</Text>
-        </Pressable>
+        {!result.success && onRetry ? (
+          <>
+            <Pressable style={styles.cta} onPress={onRetry} accessibilityRole="button">
+              <Text style={styles.ctaText}>{tr('minigame.retry')}</Text>
+            </Pressable>
+            <Pressable style={styles.back} onPress={onComplete} accessibilityRole="button">
+              <Text style={styles.backText}>{tr('minigame.back')}</Text>
+            </Pressable>
+          </>
+        ) : (
+          <Pressable style={styles.cta} onPress={onComplete} accessibilityRole="button">
+            <Text style={styles.ctaText}>{tr('minigame.continue')}</Text>
+          </Pressable>
+        )}
       </View>
     );
   }
@@ -76,6 +90,8 @@ const styles = StyleSheet.create({
   instruction: { position: 'absolute', top: 96, fontSize: 16, color: '#dbe7dc', textAlign: 'center', paddingHorizontal: 24 },
   stage: { width: RING * 3, height: RING * 3, alignItems: 'center', justifyContent: 'center' },
   tapHint: { position: 'absolute', bottom: 120, fontSize: 13, color: '#7fa588', letterSpacing: 2, textAlign: 'center', paddingHorizontal: 24 },
+  back: { marginTop: 12, paddingVertical: 12, paddingHorizontal: 24 },
+  backText: { fontSize: 15, color: '#dbe7dc', fontWeight: '600' },
   cancel: { position: 'absolute', bottom: 56 },
   cancelText: { fontSize: 14, color: '#7fa588' },
   resultBlock: { alignItems: 'center' },

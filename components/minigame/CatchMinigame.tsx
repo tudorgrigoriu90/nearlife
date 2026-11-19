@@ -40,8 +40,11 @@ export default function CatchMinigame({
   ...props
 }: MinigameProps & { category: SpeciesCategory }) {
   const [started, setStarted] = useState(false);
+  // A retry is a fresh round of the same game, already started (T-311 · review B-45): a miss costs
+  // nothing, so it is replayed here rather than through the catch-spot screen and a new fix.
+  const [round, setRound] = useState(0);
   const Game = BY_CATEGORY[category];
-  if (started) return <Game {...props} />;
+  if (started) return <Game key={round} {...props} onRetry={() => setRound((n) => n + 1)} />;
   const tr = createTranslator(props.locale ?? 'en');
   return (
     <View style={styles.container}>

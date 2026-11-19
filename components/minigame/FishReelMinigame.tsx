@@ -32,6 +32,7 @@ export default function FishReelMinigame({
   config = DEFAULT_RHYTHM,
   onComplete,
   onCancel,
+  onRetry,
 }: MinigameProps & { config?: RhythmConfig }) {
   const tr = createTranslator(locale);
   const [bandTop, setBandTop] = useState(TRACK_H - BAND_H);
@@ -83,6 +84,7 @@ export default function FishReelMinigame({
       result={result}
       onComplete={() => result && onComplete({ success: result.success, score: result.score })}
       onCancel={onCancel}
+      onRetry={onRetry}
     >
       <Pressable
         style={styles.track}

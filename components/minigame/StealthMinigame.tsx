@@ -35,6 +35,7 @@ export default function StealthMinigame({
   config = DEFAULT_STEALTH,
   onComplete,
   onCancel,
+  onRetry,
 }: MinigameProps & { config?: StealthConfig }) {
   const tr = createTranslator(locale);
   const [phase, setPhase] = useState<Phase>('calm');
@@ -80,6 +81,7 @@ export default function StealthMinigame({
       result={result}
       onComplete={() => result && onComplete({ success: result.success, score: result.score })}
       onCancel={onCancel}
+      onRetry={onRetry}
     >
       <View style={styles.scene}>
         <Text style={styles.animal}>{phase === 'calm' ? '🦊' : phase === 'warn' ? '🦊❔' : '🦊👀'}</Text>

@@ -31,6 +31,7 @@ export default function TraceMinigame({
   config = DEFAULT_TRACE,
   onComplete,
   onCancel,
+  onRetry,
 }: MinigameProps & { config?: TraceConfig }) {
   const tr = createTranslator(locale);
   const [bug, setBug] = useState({ x: C, y: C });
@@ -85,6 +86,7 @@ export default function TraceMinigame({
       result={result}
       onComplete={() => result && onComplete({ success: result.success, score: result.score })}
       onCancel={onCancel}
+      onRetry={onRetry}
     >
       <View
         testID="trace-stage"

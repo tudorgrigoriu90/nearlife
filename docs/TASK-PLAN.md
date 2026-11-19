@@ -4655,6 +4655,12 @@ document until it is started, when it takes the next free `T-###`.
     (1 December at 00:30 and 23:30 the day before; 1 June in summer time), red before the change,
     and green under `TZ=America/New_York` too.
 
+- **T-311 · "Try again" after a missed catch** — *Claude · XS · `DONE` · deps: T-069 · review B-45 (I-29, first half)*
+  - ✅ After a miss the result screen offers "Try again" (a fresh round of the same game, straight
+    in, no "Tap to start", no catch-spot screen or new location fix) and "Back to the card"; a
+    win still offers only "Continue". A miss costs nothing, so the replay is free. en + sv.
+    Tests: 3. The species-specific half of I-29 is B-61.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

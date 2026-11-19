@@ -179,6 +179,8 @@ export const en = {
     'minigame.success': 'Caught!',
     'minigame.fail': 'It got away',
     'minigame.continue': 'Continue',
+    'minigame.retry': 'Try again',
+    'minigame.back': 'Back to the card',
     'minigame.cancel': 'Not now',
     'minigame.tapToStart': 'Tap to start',
     // Bird — timing (T-033/T-069)
@@ -619,6 +621,8 @@ export const sv = {
     'minigame.success': 'Fångad!',
     'minigame.fail': 'Den kom undan',
     'minigame.continue': 'Fortsätt',
+    'minigame.retry': 'Försök igen',
+    'minigame.back': 'Tillbaka till kortet',
     'minigame.cancel': 'Inte nu',
     'minigame.tapToStart': 'Tryck för att börja',
     // Bird — timing (T-033/T-069)

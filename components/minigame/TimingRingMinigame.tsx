@@ -33,6 +33,7 @@ export default function TimingRingMinigame({
   config = DEFAULT_TIMING,
   onComplete,
   onCancel,
+  onRetry,
 }: MinigameProps & { config?: TimingConfig }) {
   const tr = createTranslator(locale);
   const [scale, setScale] = useState(START_SCALE);
@@ -81,6 +82,7 @@ export default function TimingRingMinigame({
       result={result}
       onComplete={() => result && onComplete({ success: result.success, score: result.score })}
       onCancel={onCancel}
+      onRetry={onRetry}
     >
       <Pressable style={styles.tapLayer} onPress={onTap} accessibilityRole="button">
         <View style={[styles.targetRing, { transform: [{ scale: TARGET_SCALE }] }]} />
