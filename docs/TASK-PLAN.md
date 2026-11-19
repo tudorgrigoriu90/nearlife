@@ -4620,6 +4620,14 @@ document until it is started, when it takes the next free `T-###`.
     the languages devices use. Tests: selection 3 (never an unnamed or photo-less species while a
     presentable one exists, over five rng draws), planning 1 (asked in the device's language).
 
+- **T-307 · No write lost while the collection loads** — *Claude · XS · `DONE` · deps: T-165 · review B-41*
+  - ✅ `hydrate` sets a loading promise that every public method of `OfflineCollectionStore`
+    awaits, and the mark methods build their record only after it, on the stored record: a spot
+    made while the stored collection is read is applied on top of it (both kept, both written),
+    and cannot undo a stored catch of the same species (which the naive fix would have done).
+    Writes made before `hydrate` began are merged over the stored copy, with their queued sends
+    after the stored ones. Tests: 3.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

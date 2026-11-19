@@ -78,6 +78,12 @@ export class OfflineCollectionStore implements CollectionStore {
   private syncChain: Promise<void> = Promise.resolve();
   /** Catches the server refused since the app last asked (T-274 · review B-13). */
   private refusedCatches: string[] = [];
+  /**
+   * The stored collection loading (T-307 · review B-41). Every public method waits for it, so a
+   * write that arrives while `hydrate` reads is applied on top of what was stored, not replaced by
+   * it.
+   */
+  private loading: Promise<void> = Promise.resolve();
 
   constructor(
     private readonly cache: OfflineCache,
@@ -85,7 +91,12 @@ export class OfflineCollectionStore implements CollectionStore {
   ) {}
 
   /** Load whatever the last session left behind. Corrupt data decays to empty, never throws. */
-  async hydrate(): Promise<void> {
+  hydrate(): Promise<void> {
+    this.loading = this.load();
+    return this.loading;
+  }
+
+  private async load(): Promise<void> {
     let raw: string | null = null;
     try {
       raw = await this.cache.read();
@@ -96,22 +107,31 @@ export class OfflineCollectionStore implements CollectionStore {
     try {
       const parsed = JSON.parse(raw) as Persisted;
       if (parsed?.version !== STORAGE_VERSION || !Array.isArray(parsed.records)) return;
-      this.records = new Map(parsed.records.map((r) => [r.speciesId, r]));
-      this.pending = Array.isArray(parsed.pending) ? parsed.pending : [];
+      // Anything written in memory before this load began is newer than the stored copy: it is
+      // kept on top, and its queued writes after the stored ones.
+      const records = new Map(parsed.records.map((r) => [r.speciesId, r]));
+      const newer = this.records.size > 0;
+      for (const [id, r] of this.records) records.set(id, r);
+      this.records = records;
+      this.pending = [...(Array.isArray(parsed.pending) ? parsed.pending : []), ...this.pending];
+      if (newer) await this.persist();
     } catch {
       // Unparseable cache is not worth losing the session over; start clean.
     }
   }
 
   async list(): Promise<CollectionRecord[]> {
+    await this.loading;
     return [...this.records.values()].sort((a, b) => a.speciesId.localeCompare(b.speciesId));
   }
 
   async get(speciesId: string): Promise<CollectionRecord | null> {
+    await this.loading;
     return this.records.get(speciesId) ?? null;
   }
 
   async markSpotted(speciesId: string, at: string): Promise<CollectionRecord> {
+    await this.loading; // the record is built on the stored one, never on an empty map (T-307)
     return this.write(applySpotted(this.records.get(speciesId) ?? null, speciesId, at), {
       kind: 'spotted',
       speciesId,
@@ -120,6 +140,7 @@ export class OfflineCollectionStore implements CollectionStore {
   }
 
   async markCaught(speciesId: string, at: string, primeBonus: boolean): Promise<CollectionRecord> {
+    await this.loading; // the record is built on the stored one, never on an empty map (T-307)
     return this.write(applyCaught(this.records.get(speciesId) ?? null, speciesId, at, primeBonus), {
       kind: 'caught',
       speciesId,
@@ -129,6 +150,7 @@ export class OfflineCollectionStore implements CollectionStore {
   }
 
   async markHelped(speciesId: string, kind: HelpKind, at: string): Promise<CollectionRecord> {
+    await this.loading; // the record is built on the stored one, never on an empty map (T-307)
     return this.write(applyHelped(this.records.get(speciesId) ?? null, speciesId, kind, at), {
       kind: 'helped',
       speciesId,
@@ -139,6 +161,7 @@ export class OfflineCollectionStore implements CollectionStore {
 
   /** Forget everything: records, the outbox and the cache (account deletion, T-269). */
   async clear(): Promise<void> {
+    await this.loading;
     this.records = new Map();
     this.pending = [];
     await this.persist();
@@ -229,6 +252,7 @@ export class OfflineCollectionStore implements CollectionStore {
   }
 
   private async write(record: CollectionRecord, op: PendingOp): Promise<CollectionRecord> {
+    await this.loading;
     // A tap that changes nothing (spotting a species already spotted, pledging the same help
     // again) is not sent: every send is an upsert the server's catch rule has to judge (T-266).
     const current = this.records.get(record.speciesId);

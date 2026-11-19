@@ -320,3 +320,65 @@ describe('OfflineCollectionStore reports what the server refused', () => {
     expect((await remote.inner.get('moose'))?.spottedAt).toBe(T2);
   });
 });
+
+// T-307 · review B-41: a write while the stored collection is still loading is never lost.
+describe('OfflineCollectionStore writes during hydrate', () => {
+  function slowCache(stored: string) {
+    let release: () => void = () => {};
+    const gate = new Promise<void>((r) => (release = r));
+    let written: string | null = null;
+    const cache: OfflineCache = {
+      read: async () => {
+        await gate;
+        return stored;
+      },
+      write: async (v: string) => {
+        written = v;
+      },
+    };
+    return { cache, release: () => release(), written: () => written };
+  }
+  const storedA = JSON.stringify({
+    version: 1,
+    records: [{ speciesId: 'a', spottedAt: 't0', caughtAt: null, helpedAt: null, helpedKind: null, primeBonus: false }],
+    pending: [],
+  });
+
+  it('a spot made while hydrate reads ends with both the stored record and the new one', async () => {
+    const c = slowCache(storedA);
+    const store = new OfflineCollectionStore(c.cache, null);
+    const hydrating = store.hydrate();
+    const spotting = store.markSpotted('b', 't1');
+    c.release();
+    await hydrating;
+    await spotting;
+    expect((await store.list()).map((r) => r.speciesId)).toEqual(['a', 'b']);
+    expect(JSON.parse(c.written()!).records.map((r: { speciesId: string }) => r.speciesId).sort()).toEqual(['a', 'b']);
+  });
+
+  it('a spot during hydrate does not undo a stored catch of the same species', async () => {
+    const caught = JSON.stringify({
+      version: 1,
+      records: [{ speciesId: 'a', spottedAt: 't0', caughtAt: 't0', helpedAt: null, helpedKind: null, primeBonus: false }],
+      pending: [],
+    });
+    const c = slowCache(caught);
+    const store = new OfflineCollectionStore(c.cache, null);
+    const hydrating = store.hydrate();
+    const spotting = store.markSpotted('a', 't1');
+    c.release();
+    await hydrating;
+    await spotting;
+    expect((await store.get('a'))?.caughtAt).toBe('t0');
+  });
+
+  it('a spot made before hydrate started is merged, not replaced', async () => {
+    const c = slowCache(storedA);
+    const store = new OfflineCollectionStore(c.cache, null);
+    await store.markSpotted('b', 't1');
+    const hydrating = store.hydrate();
+    c.release();
+    await hydrating;
+    expect((await store.list()).map((r) => r.speciesId)).toEqual(['a', 'b']);
+  });
+});
