@@ -36,6 +36,8 @@ import {
   tokenRequestBody,
 } from '../_shared/lib/fcmAuth.js';
 import { KRONOBERG_MEDIA, primaryPhoto } from '../_shared/lib/species/media.js';
+import { allowedHours } from '../_shared/lib/sendSlot.js';
+import { DEFAULT_CADENCE } from '../_shared/lib/cadence.js';
 
 const PAGE = 1000; // PostgREST's default max rows per request
 const IN_CHUNK = 200; // ids per `in.(...)` filter, to keep URLs short
@@ -123,39 +125,35 @@ Deno.serve(async (req: Request) => {
   const nowMs = Date.now();
 
   try {
-    // 1) Devices → the users worth looking at. No device means no consent, so nothing else loads.
-    const deviceRows = await readAll((from, to) => {
-      let q = db.from('push_devices').select('user_id, token, platform, locale, updated_at');
-      if (opts.testUserId) q = q.eq('user_id', opts.testUserId);
-      return q.order('user_id').order('token').range(from, to);
-    });
-    const userIds = [...new Set(deviceRows.map((r) => r.user_id as string))];
-    if (userIds.length === 0) return json({ users: 0, sent: 0, skipped: {} });
+    // 1) Only the users due this run (T-316 · review B-51): the database picks them, by the same
+    // slot and caps as lib/cadence.ts and lib/sendSlot.ts, and returns each with their devices,
+    // collected species and last 48 hours of sends. Work grows with the users due, not with
+    // everyone opted in. The smoke test asks for its one user, ignoring slot and caps.
+    const dueRows = await readAll((from, to) =>
+      db
+        .rpc('push_due_users', {
+          at: new Date(nowMs).toISOString(),
+          allowed_hours: allowedHours(DEFAULT_CADENCE),
+          min_interval_hours: DEFAULT_CADENCE.minIntervalHours,
+          only_user: opts.testUserId ?? null,
+          ignore_slot: !!opts.testUserId,
+        })
+        .order('user_id')
+        .range(from, to),
+    );
+    if (dueRows.length === 0) return json({ users: 0, sent: 0, skipped: {} });
 
-    const profiles = await readIn(db, 'profiles', 'user_id, home_region', 'user_id', userIds, ['user_id']);
-    const collected = await readIn(db, 'collection', 'user_id, species_id', 'user_id', userIds, ['id']);
-    // Two days covers both cadence caps (≥20 h interval, one per local day).
-    const since = new Date(nowMs - 48 * 3_600_000).toISOString();
-    const log = opts.testUserId
-      ? []
-      : await readIn(db, 'notification_log', 'user_id, sent_at', 'user_id', userIds, ['id'], (q) =>
-          q.gte('sent_at', since),
-        );
-
-    const regionOf = new Map(profiles.map((p) => [p.user_id as string, (p.home_region as string | null) ?? null]));
-    const users = userIds.map((userId) => ({
-      userId,
-      homeRegion: regionOf.get(userId) ?? null,
-      devices: deviceRows
-        .filter((r) => r.user_id === userId)
-        .map((r) => ({
-          token: r.token as string,
-          platform: r.platform as string,
-          locale: (r.locale as string | null) ?? null,
-          updatedAtMs: Date.parse(r.updated_at as string),
-        })),
-      collectedIds: collected.filter((r) => r.user_id === userId).map((r) => r.species_id as string),
-      sentAtMs: log.filter((r) => r.user_id === userId).map((r) => Date.parse(r.sent_at as string)),
+    const users = dueRows.map((r) => ({
+      userId: r.user_id as string,
+      homeRegion: (r.home_region as string | null) ?? null,
+      devices: ((r.devices as Row[] | null) ?? []).map((d) => ({
+        token: d.token as string,
+        platform: d.platform as string,
+        locale: (d.locale as string | null) ?? null,
+        updatedAtMs: Date.parse(d.updated_at as string),
+      })),
+      collectedIds: (r.collected as string[] | null) ?? [],
+      sentAtMs: ((r.sent_at as string[] | null) ?? []).map((t) => Date.parse(t)),
     }));
 
     // 2) Presence, once per region in play.

@@ -109,6 +109,7 @@ EXPECTED: dict[str, str] = {
     "a report cannot be sent in another account's name": "permission denied",
     "a user can keep a recognised species": "ok",
     "a user sees only their own recognitions": "ok",
+    "users cannot list the users due a notification": "permission denied",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -655,6 +656,8 @@ def run_content_report_checks(cur) -> dict[str, str]:
     _step(cur, results, "a user sees only their own recognitions",
           "select case when count(*) = count(*) filter (where user_id = auth.uid()) and count(*) = 1 "
           "then 'ok' else 'saw ' || count(*) end from public.recognitions")
+    _step(cur, results, "users cannot list the users due a notification",
+          "select count(*) from public.push_due_users(now(), array[8, 9], 20)")
     _step(cur, results, "a report cannot be sent in another account's name",
           "insert into public.content_reports (user_id, species_id, locale, kind) "
           "values (gen_random_uuid(), %s, 'sv', 'other')", (species,))

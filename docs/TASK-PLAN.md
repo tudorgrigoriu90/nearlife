@@ -4689,6 +4689,21 @@ document until it is started, when it takes the next free `T-###`.
     county entitlements; `home_region` settable once (plus F-09's yearly move). Tests in a real
     Postgres, as for the free-catch rule.
 
+- **T-316 · The sender reads only the users due** — *Claude · S · `DONE` (migration 0041 applied with this push) · deps: T-201, T-282 · review B-51 (I-09)*
+  - ✅ `public.push_due_users(at, allowed_hours, min_interval_hours, only_user, ignore_slot)`
+    (migration 0041, service role only) returns the users whose slot has arrived in Stockholm's
+    current waking hour and who had no send today or in the last 20 hours, each with devices,
+    collected ids and the last 48 hours of sends. The sender calls it instead of reading every
+    opted-in user's devices, profile, collection and log each hour; the species choice stays in
+    `planSends`. The smoke test asks for its one user, ignoring slot and caps, as before.
+  - ✅ The slot hash is FNV-1a in SQL (`push_slot_hour`); `pipeline/tests/fixtures/send_slots.json`
+    pins 40 ids, checked against the TypeScript (Jest) and the SQL (Postgres). Quiet hours come
+    from the caller (`allowedHours()`), defined once. Index on `notification_log(user_id, sent_at)`.
+  - Tests: 8 in a real Postgres (parity; slot arrival and self-heal; quiet hours; today and 20 h
+    caps; aggregation; the smoke test; service role only; 10,000 opted in returns only the due
+    ~2/13); Jest 2 (fixture) + 1 (the sender reads none of those tables). `verify.py` checks users
+    cannot call it.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
