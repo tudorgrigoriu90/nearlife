@@ -7,3 +7,8 @@ export const PRIVACY_POLICY_URL = 'https://nytta-ai.se/nearby/privacy/';
 // Swedish EPA, the Swedish Agency for Marine and Water Management and SLU, which forwards to
 // Artportalen's form for wanted invasive species. The Director confirms it (T-339).
 export const INVASIVE_REPORT_URL = 'https://www.invasivaarter.nu/';
+
+// Report a sighting to Artportalen (T-354 · review F-15), Sweden's species observation system,
+// run by SLU. Its front page, with nothing in the link: the app passes no species, place or
+// account, so reporting is the user's own act on Artportalen's site, under its own account.
+export const ARTPORTALEN_URL = 'https://www.artportalen.se/';

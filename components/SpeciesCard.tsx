@@ -27,7 +27,7 @@ import type { IucnStatus, LegalStatus, RedlistSeStatus, Month, Species } from '.
 import FieldNotes from './FieldNotes';
 import ConfusedWith from './ConfusedWith';
 import type { FieldNote } from '../lib/fieldNotes';
-import { INVASIVE_REPORT_URL } from '../lib/legal';
+import { ARTPORTALEN_URL, INVASIVE_REPORT_URL } from '../lib/legal';
 import DualText from './DualText';
 import SpeciesHero from './SpeciesHero';
 import ReadAloud from './ReadAloud';
@@ -397,6 +397,16 @@ export default function SpeciesCard({
             })}
           </View>
         </View>
+
+        {legalStatus !== 'invasive' ? (
+          <Pressable
+            onPress={() => void Linking.openURL(ARTPORTALEN_URL).catch(() => undefined)}
+            accessibilityRole="link"
+            style={styles.report}
+          >
+            <Text style={styles.reportText}>{tr('card.reportArtportalen')}</Text>
+          </Pressable>
+        ) : null}
 
         {onOpenSpecies ? <ConfusedWith locale={locale} species={lookalikes} onOpen={onOpenSpecies} /> : null}
 

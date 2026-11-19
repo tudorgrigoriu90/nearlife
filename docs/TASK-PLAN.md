@@ -5099,6 +5099,13 @@ document until it is started, when it takes the next free `T-###`.
     opening its card; the subtitle says these are past years' records (#1), and a county without
     monthly counts yet says so. Tests: model 2, screen 2, Almanac entry 1, app back 1.
 
+- **T-354 · Report a real sighting to Artportalen** — *Claude · XS · `DONE` · deps: — · review F-15*
+  - Done when the link opens and no location or account data is passed.
+  - ✅ The card links "Seen it? Report it to Artportalen ↗" to `ARTPORTALEN_URL`
+    (`https://www.artportalen.se/`, `lib/legal.ts`), with nothing in the link: reporting is the
+    user's own act on SLU's site, under its own account. An invasive card keeps only its own report
+    link (T-336). Tests: link and exact URL 1, invasive card 1.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

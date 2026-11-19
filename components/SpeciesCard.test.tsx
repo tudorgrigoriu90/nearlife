@@ -6,6 +6,7 @@ import { commonNameFor, contentFor } from '../lib/species/localized';
 import { createTranslator } from '../lib/i18n';
 import { FSI, PDI, stripIsolates } from '../lib/i18n/bidi';
 import { AR_NAMES } from '../lib/species/names.ar';
+import { ARTPORTALEN_URL } from '../lib/legal';
 
 const tr = createTranslator('en');
 const swift = KRONOBERG_SPECIES.find((s) => s.id === 'common-swift')!;
@@ -382,4 +383,22 @@ it('shows "Often confused with" and opens the lookalike', async () => {
   expect(screen.getByText(tr('card.confusedWith'))).toBeTruthy();
   await fireEvent.press(screen.getByLabelText(commonNameFor(other, 'en')));
   expect(onOpenSpecies).toHaveBeenCalledWith(other);
+});
+
+// T-354 · review F-15: "Seen it? Report it to Artportalen" opens the site and passes nothing.
+describe('report to Artportalen', () => {
+  it('opens the site with no species, place or account in the link', async () => {
+    const { Linking } = jest.requireActual('react-native');
+    const open = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    await render(<SpeciesCard species={swift} />);
+    await fireEvent.press(screen.getByText(tr('card.reportArtportalen')));
+    expect(open).toHaveBeenCalledWith(ARTPORTALEN_URL);
+    expect(ARTPORTALEN_URL).toBe('https://www.artportalen.se/');
+    open.mockRestore();
+  });
+
+  it('is left out on an invasive card, which has its own report link', async () => {
+    await render(<SpeciesCard species={swift} legalStatus="invasive" />);
+    expect(screen.queryByText(tr('card.reportArtportalen'))).toBeNull();
+  });
 });
