@@ -107,3 +107,73 @@ describe('SupabasePushGateway', () => {
     await expect(gw.setHomeRegion('u1', 'r')).rejects.toThrow('RLS');
   });
 });
+
+// T-300 · review B-37: no DELETE for an install that never registered a device.
+describe('syncPushRegistration with the registered flag', () => {
+  function flag(initial: boolean) {
+    let value = initial;
+    return { get: jest.fn(async () => value), set: jest.fn(async (v: boolean) => void (value = v)), now: () => value };
+  }
+
+  it('consent off on an install that never registered: no request at all', async () => {
+    const g = new FakeGateway();
+    const f = flag(false);
+    await expect(syncPushRegistration(input(g, { wanted: false, registered: f }))).resolves.toBe('unregistered');
+    expect(g.calls).toEqual([]);
+  });
+
+  it('consent off after a registration: delete, then forget the registration', async () => {
+    const g = new FakeGateway();
+    const f = flag(true);
+    await syncPushRegistration(input(g, { wanted: false, registered: f }));
+    expect(g.calls).toEqual(['deleteDevices']);
+    expect(f.now()).toBe(false);
+  });
+
+  it('a registration is remembered', async () => {
+    const g = new FakeGateway();
+    const f = flag(false);
+    await syncPushRegistration(input(g, { registered: f }));
+    expect(f.now()).toBe(true);
+  });
+
+  it('a failed delete keeps the flag, so the next sync tries again', async () => {
+    const g = new FakeGateway();
+    g.deleteDevices = async () => {
+      throw new Error('offline');
+    };
+    const f = flag(true);
+    await expect(syncPushRegistration(input(g, { wanted: false, registered: f }))).rejects.toThrow('offline');
+    expect(f.now()).toBe(true);
+  });
+});
+
+describe('asyncStorageRegisteredFlag', () => {
+  const { asyncStorageRegisteredFlag, PUSH_REGISTERED_KEY } = jest.requireActual('./pushRegistration');
+  function storage(initial: Record<string, string> = {}, failRead = false) {
+    const data = { ...initial };
+    return {
+      data,
+      getItem: async (k: string) => {
+        if (failRead) throw new Error('io');
+        return data[k] ?? null;
+      },
+      setItem: async (k: string, v: string) => void (data[k] = v),
+    };
+  }
+
+  it('never registered reads false; true after set', async () => {
+    const st = storage();
+    const f = asyncStorageRegisteredFlag(st);
+    expect(await f.get()).toBe(false);
+    await f.set(true);
+    expect(st.data[PUSH_REGISTERED_KEY]).toBe('true');
+    expect(await f.get()).toBe(true);
+    await f.set(false);
+    expect(await f.get()).toBe(false);
+  });
+
+  it('unreadable storage counts as registered, so the delete still happens', async () => {
+    expect(await asyncStorageRegisteredFlag(storage({}, true)).get()).toBe(true);
+  });
+});

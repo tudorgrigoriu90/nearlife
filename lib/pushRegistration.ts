@@ -28,6 +28,11 @@ export interface SyncInput {
   homeRegion: string | null;
   getToken: () => Promise<DeviceToken | null>;
   gateway: PushRegistrationGateway;
+  /**
+   * Whether this install has registered a device (T-300 · review B-37). Without it, consent off
+   * deletes every launch, even for a user who never turned notifications on.
+   */
+  registered?: { get(): Promise<boolean>; set(value: boolean): Promise<void> };
 }
 
 export type SyncOutcome = 'registered' | 'unregistered' | 'unavailable';
@@ -39,7 +44,9 @@ function asPlatform(type: string): Platform | null {
 export async function syncPushRegistration(input: SyncInput): Promise<SyncOutcome> {
   const { wanted, userId, gateway } = input;
   if (!wanted) {
+    if (input.registered && !(await input.registered.get())) return 'unregistered';
     await gateway.deleteDevices(userId);
+    await input.registered?.set(false);
     return 'unregistered';
   }
   const token = await input.getToken();
@@ -48,6 +55,7 @@ export async function syncPushRegistration(input: SyncInput): Promise<SyncOutcom
   // The region goes first: a device row without one is skipped by the sender as 'no-region'.
   if (input.homeRegion !== null) await gateway.setHomeRegion(userId, input.homeRegion);
   await gateway.upsertDevice(userId, { token: token.data, platform, locale: input.locale });
+  await input.registered?.set(true);
   return 'registered';
 }
 
@@ -79,4 +87,18 @@ export class SupabasePushGateway implements PushRegistrationGateway {
       .upsert({ user_id: userId, home_region: region }, { onConflict: 'user_id' });
     if (error) throw new Error(`home region save failed: ${error.message}`);
   }
+}
+
+/** The registered flag on the phone (T-300); erased with the account under the `nearby.` prefix. */
+export const PUSH_REGISTERED_KEY = 'nearby.push.registered';
+
+export function asyncStorageRegisteredFlag(storage: {
+  getItem(key: string): Promise<string | null>;
+  setItem(key: string, value: string): Promise<void>;
+}): { get(): Promise<boolean>; set(value: boolean): Promise<void> } {
+  return {
+    // Unreadable storage counts as registered: an extra delete is safe, a missed one is not.
+    get: () => storage.getItem(PUSH_REGISTERED_KEY).then((v) => v !== 'false' && v !== null, () => true),
+    set: (value) => storage.setItem(PUSH_REGISTERED_KEY, String(value)).catch(() => undefined),
+  };
 }

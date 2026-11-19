@@ -72,6 +72,20 @@ export async function requestNotificationPermission(): Promise<PermissionOutcome
 }
 
 /**
+ * The notification permission as the OS holds it now, without asking (T-300 · review B-33): the
+ * user can turn it off in system settings while the app's consent stays on. `unknown` when it
+ * cannot be read, which changes nothing.
+ */
+export async function getNotificationPermission(): Promise<PermissionOutcome | 'unknown'> {
+  try {
+    const { status } = await Notifications.getPermissionsAsync();
+    return status === 'granted' ? 'granted' : 'denied';
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
  * The raw FCM (Android) / APNs (iOS) device token for direct FCM sends (T-201), or null where
  * there is none — web, a simulator, or a build without google-services.json. Creates the Android
  * channel first: Android 8+ files a notification under a channel, and the server addresses

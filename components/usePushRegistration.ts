@@ -1,6 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useRef } from 'react';
 import { getDevicePushToken, onPushTokenChange } from '../lib/permissions';
 import {
+  asyncStorageRegisteredFlag,
   SupabasePushGateway,
   syncPushRegistration,
   type DeviceToken,
@@ -20,6 +22,8 @@ export interface PushRegistrationDeps {
   gateway: () => PushRegistrationGateway;
   getToken: () => Promise<DeviceToken | null>;
   onTokenChange: (listener: () => void) => () => void;
+  /** Whether this install registered a device (T-300); absent means always delete on consent off. */
+  registered?: () => { get(): Promise<boolean>; set(value: boolean): Promise<void> };
 }
 
 const DEFAULT_DEPS: PushRegistrationDeps = {
@@ -28,6 +32,7 @@ const DEFAULT_DEPS: PushRegistrationDeps = {
   gateway: () => new SupabasePushGateway(getSupabase()),
   getToken: getDevicePushToken,
   onTokenChange: onPushTokenChange,
+  registered: () => asyncStorageRegisteredFlag(AsyncStorage),
 };
 
 export interface PushRegistrationInput {
@@ -56,6 +61,7 @@ export function usePushRegistration(
             homeRegion,
             getToken: deps.getToken,
             gateway: deps.gateway(),
+            registered: deps.registered?.(),
           }),
         )
         // Offline or a DB hiccup: the next launch or consent change re-syncs.

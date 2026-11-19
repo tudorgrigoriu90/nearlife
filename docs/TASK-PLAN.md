@@ -4563,6 +4563,17 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ The quiz stores' `save` and `clear` no longer reject when storage fails. Tests: 2.
   - ✅ Privacy policy (🆕): recognitions are part of the collection and the export.
 
+- **T-300 · Notification consent follows the OS; no needless device deletes** — *Claude · XS · `DONE` · deps: T-201 · review B-33, B-37*
+  - ✅ B-33: at launch and on each return to the foreground the app reads the OS notification
+    permission (`getNotificationPermission`, no prompt); revoked while consent is on, consent
+    turns off, which unregisters the device, so the sender stops sending what cannot be shown
+    and the open rate stops counting it. An unreadable permission changes nothing. Tests: hook 4,
+    reader 2, App 1.
+  - ✅ B-37: the phone remembers whether this install registered a device
+    (`nearby.push.registered`); with consent off and no registration, no request is sent. A
+    failed delete keeps the flag, so it is retried; unreadable storage counts as registered (an
+    extra delete is safe, a missed one is not). Tests: 6.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { BackHandler } from 'react-native';
 import App from './App';
 import {
@@ -7,6 +7,7 @@ import {
   requestLocationAccess,
   requestLocationPermission,
   requestNotificationPermission,
+  getNotificationPermission,
 } from './lib/permissions';
 import { CONSENT_STORAGE_KEY } from './lib/consentStore';
 import { HOMETOWN_STORAGE_KEY } from './lib/hometownStore';
@@ -35,6 +36,7 @@ jest.mock('./lib/permissions', () => ({
   getLocationFixOnce: jest.fn(async () => ({ latitude: 56.879, longitude: 14.806 })),
   getCatchFix: jest.fn(async () => ({ latitude: 56.879, longitude: 14.806, accuracyM: 10 })), // Växjö
   requestNotificationPermission: jest.fn(async () => 'granted'),
+  getNotificationPermission: jest.fn(async () => 'granted'),
   getDevicePushToken: jest.fn(async () => null),
   onPushTokenChange: jest.fn(() => () => {}),
   showNotificationsInForeground: jest.fn(),
@@ -215,6 +217,24 @@ describe('App', () => {
       (requestNotificationPermission as jest.Mock).mockResolvedValueOnce('denied');
       await completeOnboarding();
       expect(await storedNotificationConsent()).not.toBe(true);
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'turns notification consent off when the OS permission was revoked in system settings (T-300)',
+    async () => {
+      const storedNotificationConsent = async () =>
+        JSON.parse((await AsyncStorage.getItem(CONSENT_STORAGE_KEY)) ?? '{}').notifications;
+      await completeOnboarding();
+      expect(await storedNotificationConsent()).toBe(true);
+      // The user switches notifications off in Android settings, then the app starts again.
+      await screen.unmount();
+      (getNotificationPermission as jest.Mock).mockResolvedValue('denied');
+      await render(<App />);
+      await screen.findByText(tr('thisWeek.honesty'));
+      await waitFor(async () => expect(await storedNotificationConsent()).toBe(false));
+      (getNotificationPermission as jest.Mock).mockResolvedValue('granted');
     },
     FLOW_TIMEOUT,
   );

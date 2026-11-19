@@ -31,10 +31,12 @@ import { useCollection } from './components/useCollection';
 import { usePushRegistration } from './components/usePushRegistration';
 import { useThisWeek } from './components/useThisWeek';
 import { useAlmanacCatalogue } from './components/useAlmanacCatalogue';
+import { useNotificationPermissionSync } from './components/useNotificationPermissionSync';
 import {
   onNotificationTap,
   requestLocationAccess,
   requestNotificationPermission,
+  getNotificationPermission,
   showNotificationsInForeground,
   getCatchFix,
   getLocationFixOnce,
@@ -659,6 +661,15 @@ export default function App() {
     setConsentState(next);
     void CONSENT_STORE.save(next);
   };
+
+  // Notifications switched off in system settings switch the app's consent off too (T-300 ·
+  // review B-33), which unregisters the device.
+  useNotificationPermissionSync({
+    enabled: onboarded && consentLoaded,
+    consentOn: consent.notifications,
+    check: getNotificationPermission,
+    onRevoked: () => applyConsent('notifications', false),
+  });
 
   // Location follows the switch (T-272 · review B-08): every read goes through this.
   const consentedFix = useCallback(

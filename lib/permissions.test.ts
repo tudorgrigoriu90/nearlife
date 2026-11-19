@@ -8,6 +8,7 @@ import {
   onPushTokenChange,
   showNotificationsInForeground,
   requestNotificationPermission,
+  getNotificationPermission,
 } from './permissions';
 import { ANDROID_CHANNEL_ID } from './pushDispatch';
 
@@ -141,5 +142,22 @@ describe('requestNotificationPermission', () => {
     await expect(requestNotificationPermission()).resolves.toBe('granted');
     mocked.requestPermissionsAsync.mockResolvedValueOnce({ status: 'denied' } as never);
     await expect(requestNotificationPermission()).resolves.toBe('denied');
+  });
+});
+
+// T-300 · review B-33: the permission as the OS holds it, read without asking.
+describe('getNotificationPermission', () => {
+  const getPermissions = mocked.getPermissionsAsync as unknown as jest.Mock;
+
+  it('granted and denied as the OS says', async () => {
+    getPermissions.mockResolvedValueOnce({ status: 'granted' });
+    expect(await getNotificationPermission()).toBe('granted');
+    getPermissions.mockResolvedValueOnce({ status: 'denied' });
+    expect(await getNotificationPermission()).toBe('denied');
+  });
+
+  it('unknown when it cannot be read', async () => {
+    getPermissions.mockRejectedValueOnce(new Error('no module'));
+    expect(await getNotificationPermission()).toBe('unknown');
   });
 });
