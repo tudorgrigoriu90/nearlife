@@ -5116,6 +5116,20 @@ document until it is started, when it takes the next free `T-###`.
   - Note: the list is the home county plus anything collected elsewhere (T-208), so a species
     spotted outside the county counts in both x and y; the figure stays a fraction of a real list.
 
+- **T-356 · Gift and promo codes** — *Claude · S · `DONE` · deps: T-237 · review F-19*
+  - Done when a code grants only its stated entitlement, with budget and expiry enforced (verify
+    checks).
+  - ✅ Migration 0050 (`20261119000013_promo_codes.sql`): `reviewer_codes.grants` (default: the
+    Full Game and every county, so the Play review code is unchanged), limited by a check to 1–3 of
+    `full_game`, `all_regions`, `region_SWE_<n>_1`. Family is left out on purpose: it makes the
+    redeemer a household owner who can add five accounts. `redeem_reviewer_code` grants each named
+    entitlement through `set_entitlement`; hashing, budget and expiry as in T-237. Real Postgres: 4
+    tests; live verify: 2 checks.
+  - ✅ `pipeline/promo_code.py --label … --grant … --uses … --expires YYYY-MM-DD` prints the code
+    once (12 characters from 30 that cannot be misread, ≈ 59 bits) and the SQL holding only its
+    hash, for the Supabase SQL editor. The app's "Access code" screen already redeems any code.
+    Tests: 3.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

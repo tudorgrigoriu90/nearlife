@@ -350,6 +350,7 @@ export type Database = {
           code_hash: string
           created_at: string
           expires_at: string
+          grants: string[]
           label: string
           uses_left: number
         }
@@ -357,6 +358,7 @@ export type Database = {
           code_hash: string
           created_at?: string
           expires_at: string
+          grants?: string[]
           label: string
           uses_left: number
         }
@@ -364,6 +366,7 @@ export type Database = {
           code_hash?: string
           created_at?: string
           expires_at?: string
+          grants?: string[]
           label?: string
           uses_left?: number
         }

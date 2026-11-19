@@ -97,6 +97,9 @@ EXPECTED: dict[str, str] = {
     "a used-up reviewer code is refused": "ok",
     "an expired reviewer code is refused": "ok",
     "users cannot read the reviewer codes": "permission denied",
+    # T-356 promo codes: a code grants only the entitlements it names.
+    "a county-pack code grants that county and nothing else": "ok",
+    "a code naming Family is refused": "ok",
     "no hybrid in the catalogue": "ok",
     "no two catalogue species share a photo": "ok",
     "curated birds sit on the real species": "ok",
@@ -573,6 +576,35 @@ def run_reviewer_checks(cur) -> dict[str, str]:
     redeem("an expired reviewer code is refused", "verify-old", False)
     _step(cur, results, "users cannot read the reviewer codes", "select count(*) from public.reviewer_codes")
     as_user(None)
+
+    # T-356: a promo code for one county pack.
+    cur.execute(
+        "insert into public.reviewer_codes (code_hash, label, uses_left, expires_at, grants) values "
+        "(encode(extensions.digest('VERIFYPACK', 'sha256'), 'hex'), 'verify pack', 1, now() + interval '1 day', "
+        "array['region_SWE_9_1'])"
+    )
+    pupil = new_user()
+    as_user(pupil)
+    cur.execute("select public.redeem_reviewer_code('verify-pack')")
+    as_user(None)
+    cur.execute(
+        "select array_agg(entitlement order by entitlement) from public.entitlements where user_id = %s and active",
+        (pupil,),
+    )
+    granted = cur.fetchone()[0]
+    results["a county-pack code grants that county and nothing else"] = (
+        "ok" if granted == ["region_SWE_9_1"] else f"granted {granted}"
+    )
+    cur.execute("savepoint family_code")
+    try:
+        cur.execute(
+            "insert into public.reviewer_codes (code_hash, label, uses_left, expires_at, grants) values "
+            "('verify-family', 'verify family', 1, now() + interval '1 day', array['family'])"
+        )
+        results["a code naming Family is refused"] = "accepted"
+    except Exception:  # noqa: BLE001 — the check constraint is the expected refusal
+        results["a code naming Family is refused"] = "ok"
+    cur.execute("rollback to savepoint family_code")
     return results
 
 
