@@ -253,7 +253,9 @@ function soundSource(): SoundSource | null {
 
 function communityImpactSource(): CommunityImpactSource | null {
   if (communitySource === undefined) {
-    communitySource = hasSupabaseConfig() ? new SupabaseCommunityImpactSource(getSupabase()) : null;
+    communitySource = hasSupabaseConfig()
+      ? new SupabaseCommunityImpactSource(getSupabase(), ensureAnonymousSession)
+      : null;
   }
   return communitySource;
 }

@@ -50,3 +50,20 @@ describe('SupabaseCommunityImpactSource', () => {
     await expect(new SupabaseCommunityImpactSource({ rpc }).fetch()).resolves.toBeNull();
   });
 });
+
+// T-305 · review B-56: the totals need an account, so the source makes sure there is a session.
+describe('SupabaseCommunityImpactSource with a session first', () => {
+  it('asks for the session before the totals', async () => {
+    const order: string[] = [];
+    const rpc = jest.fn(async () => {
+      order.push('rpc');
+      return { data: [], error: null };
+    });
+    const ensureUser = jest.fn(async () => {
+      order.push('session');
+      return 'u1';
+    });
+    await new SupabaseCommunityImpactSource({ rpc }, ensureUser).fetch();
+    expect(order).toEqual(['session', 'rpc']);
+  });
+});

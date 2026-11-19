@@ -54,7 +54,8 @@ EXPECTED: dict[str, str] = {
     "notification sent yesterday": "kept",
     # T-081 community totals: everyone may read the counts, nobody may read the rows behind them.
     "community totals count a pledge made today": "ok",
-    "anon can read the community totals": "ok",
+    "a signed-in user can read the community totals": "ok",
+    "anon cannot call the community totals": "permission denied",
     "anon reads no collection rows": "ok",
     # T-217 entitlements: only the server grants them, and the latest event wins.
     "purchase grants the Full Game": "ok",
@@ -308,10 +309,17 @@ def run_community_impact_checks(cur) -> dict[str, str]:
         "from public.community_impact()",
         (before,),
     )
+    # T-305 · review B-56: callers need an account (the app always has an anonymous session).
+    cur.execute("set local role authenticated")
+    cur.execute("select set_config('request.jwt.claims', %s, true)",
+                (json.dumps({"sub": helper, "role": "authenticated"}),))
+    _step(cur, results, "a signed-in user can read the community totals",
+          "select case when pledges >= 1 then 'ok' else 'empty' end from public.community_impact()")
+    cur.execute("reset role")
     cur.execute("set local role anon")
     cur.execute("select set_config('request.jwt.claims', %s, true)", (json.dumps({"role": "anon"}),))
-    _step(cur, results, "anon can read the community totals",
-          "select case when pledges >= 1 then 'ok' else 'empty' end from public.community_impact()")
+    _step(cur, results, "anon cannot call the community totals",
+          "select pledges from public.community_impact()")
     _step(cur, results, "anon reads no collection rows",
           "select case when count(*) = 0 then 'ok' else 'LEAK: ' || count(*) end from public.collection")
     cur.execute("reset role")

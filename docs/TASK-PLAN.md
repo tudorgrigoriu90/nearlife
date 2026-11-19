@@ -4604,6 +4604,14 @@ document until it is started, when it takes the next free `T-###`.
     the collection, so typing in the search box no longer rebuilds it. Tests: each function reads
     every record at most once (a counting Proxy), and an index gives the same answers.
 
+- **T-305 · Community totals: signed-in callers, an index range** — *Claude · XS · `DONE` (migration 0040 applied with this push) · deps: T-081 · review B-56*
+  - ✅ `community_impact()` needs an account (the app's anonymous session; the source now asks for
+    it first); `anon` is refused. Tests: Postgres 1, source 1; `verify.py` checks both live.
+  - ✅ The season is a range on `helped_at` (the season's first day to three months later, at
+    midnight in Stockholm) over a new partial index, instead of `season_key()` per row. Tests:
+    the range counts exactly what `season_key` assigns at three boundaries (including 00:30 on
+    1 December in Stockholm), an empty season is a row of zeros, and the plan uses the index.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

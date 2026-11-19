@@ -54,9 +54,14 @@ export interface RpcClient {
 }
 
 export class SupabaseCommunityImpactSource implements CommunityImpactSource {
-  constructor(private readonly client: RpcClient) {}
+  constructor(
+    private readonly client: RpcClient,
+    /** The totals need an account (T-305 · review B-56); the app's is an anonymous session. */
+    private readonly ensureUser?: () => Promise<string>,
+  ) {}
 
   async fetch(): Promise<CommunityImpact | null> {
+    await this.ensureUser?.();
     // No arguments: the server picks the current season on its own clock, the same one that
     // stamps the season for free catches.
     const { data, error } = await this.client.rpc('community_impact');
