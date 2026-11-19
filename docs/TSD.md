@@ -102,6 +102,18 @@ Core tables (key columns; not exhaustive):
 **Aggregates**
 - `impact_counters` — `region_id`, `metric`, `value` (community totals; refreshed by cron).
 
+**Known limit: county access is enforced in the app only (T-314 · review B-49).** Which county a
+user may spot and catch in is decided by the app (`lib/regionAccess.ts`) from the home county,
+which is locked on the phone (`lib/hometownStore.ts`, an AsyncStorage item), and the county
+entitlements. The server enforces the free-catch count (T-075, T-266) but not the county:
+`collection` rows carry no county, `profiles.home_region` is writable by its owner, and clearing
+the app's data resets the lock. An honest user is unaffected; a modified client could collect in
+any county without a pack.
+*Trigger for the server check:* county packs or All of Sweden selling (any revenue from them), or
+a modified client seen in the wild. The change then: `region_id` on collection writes, a trigger
+that checks it against `home_region` and the user's active entitlements (as the free-catch
+trigger does for catches), and `home_region` settable once (plus F-09's yearly move).
+
 ---
 
 ## 4. Notification engine (the heart)

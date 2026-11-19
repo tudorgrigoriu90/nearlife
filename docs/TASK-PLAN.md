@@ -4677,6 +4677,18 @@ document until it is started, when it takes the next free `T-###`.
     build number needs `expo-application`, a new dependency, and is left out. Tests: 4 in
     Swedish; two old tests now check the displayed "Unknown" instead of the stored one.
 
+- **T-314 · Record that county access is enforced in the app only** — *Claude · XS · `DONE` · deps: T-105 · review B-49*
+  - ✅ TSD §3 states the limit (the home-county lock and county packs are decided on the phone;
+    the server enforces catches, not counties), its effect (none on honest users; a modified
+    client could collect anywhere) and the trigger for the server check (county packs selling,
+    or a modified client seen), with the change to make then.
+  - Follow-up, when triggered: T-315.
+
+- **T-315 · Server-side county access** — *Claude · M · `TODO` (waits for its trigger, T-314) · deps: T-314*
+  - `region_id` on collection writes; a trigger checking it against `home_region` and active
+    county entitlements; `home_region` settable once (plus F-09's yearly move). Tests in a real
+    Postgres, as for the free-catch rule.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
