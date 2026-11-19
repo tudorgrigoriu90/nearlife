@@ -28,6 +28,7 @@ export function mergeRecords(a: CollectionRecord, b: CollectionRecord): Collecti
   // bonus for a catch that never happened inside the active window.
   const caughtSide = caughtAt === null ? null : a.caughtAt === caughtAt ? a : b;
   const helpedSide = helpedAt === null ? null : a.helpedAt === helpedAt ? a : b;
+  const doneAt = helpedAt === null ? null : earliest(a.helpedDoneAt ?? null, b.helpedDoneAt ?? null);
 
   return {
     speciesId: a.speciesId,
@@ -36,6 +37,8 @@ export function mergeRecords(a: CollectionRecord, b: CollectionRecord): Collecti
     helpedAt,
     helpedKind: helpedSide?.helpedKind ?? null,
     primeBonus: caughtSide?.primeBonus ?? false,
+    // Done once, done for good (T-344): kept from whichever side has it, the earliest winning.
+    ...(doneAt ? { helpedDoneAt: doneAt } : {}),
   };
 }
 

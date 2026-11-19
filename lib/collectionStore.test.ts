@@ -59,3 +59,19 @@ describe('InMemoryCollectionStore', () => {
     expect((await store.get('robin'))?.spottedAt).toBe(T1); // internal copy untouched
   });
 });
+
+// T-344 · review F-08: a pledge can be marked done.
+describe('markHelpedDone', () => {
+  it('marks a pledged species done, once', async () => {
+    const store = new InMemoryCollectionStore();
+    await store.markHelped('owl', 'give', '2026-11-01T10:00:00Z');
+    expect((await store.markHelpedDone('owl', '2026-11-05T10:00:00Z')).helpedDoneAt).toBe('2026-11-05T10:00:00Z');
+    expect((await store.markHelpedDone('owl', '2026-11-09T10:00:00Z')).helpedDoneAt).toBe('2026-11-05T10:00:00Z');
+  });
+
+  it('does nothing without a pledge', async () => {
+    const store = new InMemoryCollectionStore();
+    await store.markSpotted('owl', '2026-11-01T10:00:00Z');
+    expect((await store.markHelpedDone('owl', '2026-11-05T10:00:00Z')).helpedDoneAt ?? null).toBeNull();
+  });
+});

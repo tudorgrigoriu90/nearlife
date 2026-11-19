@@ -28,6 +28,8 @@ export interface Collection {
   refusedCatches: string[];
   /** The app has shown the notice for this refused catch. */
   clearRefusedCatch: (speciesId: string) => void;
+  /** The pledge on this species was kept (T-344 · review F-08). */
+  markHelpedDone: (speciesId: string) => void;
   /** Pull the server copy now (after a sign-in, T-271). */
   resync: () => void;
   /** Forget the collection on this device (account deletion, T-269). */
@@ -125,6 +127,16 @@ export function useCollection(): Collection {
     [getStore, refresh],
   );
 
+  const markHelpedDone = useCallback(
+    (speciesId: string) => {
+      void getStore()
+        .markHelpedDone(speciesId, new Date().toISOString())
+        .then(refresh)
+        .catch((e: unknown) => console.warn('markHelpedDone failed', e));
+    },
+    [getStore, refresh],
+  );
+
   const reset = useCallback(async () => {
     await getStore().clear();
     setRecords([]);
@@ -137,5 +149,5 @@ export function useCollection(): Collection {
       .catch((e: unknown) => console.warn('collection sync failed', e));
   }, [getStore, refresh]);
 
-  return { records, spot, markCaught, help, reset, resync, refusedCatches, clearRefusedCatch };
+  return { records, spot, markCaught, help, markHelpedDone, reset, resync, refusedCatches, clearRefusedCatch };
 }

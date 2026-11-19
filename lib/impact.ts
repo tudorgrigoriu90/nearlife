@@ -15,6 +15,8 @@ export interface ImpactSummary {
   give: number;
   /** Pledges of the "protect" kind (restraint — don't disturb, keep dogs leashed, …). */
   protect: number;
+  /** Pledges the user marked done (T-344 · review F-08): kept promises, not promises. */
+  done: number;
 }
 
 /**
@@ -27,13 +29,14 @@ export function impactSummary(
   season?: string,
   seasonOfTimestamp: (iso: string) => string = (iso) => seasonKeyOf(new Date(iso)),
 ): ImpactSummary {
-  const summary: ImpactSummary = { helpedSpecies: 0, totalPledges: 0, give: 0, protect: 0 };
+  const summary: ImpactSummary = { helpedSpecies: 0, totalPledges: 0, give: 0, protect: 0, done: 0 };
   const helped = new Set<string>();
   for (const r of records) {
     if (r.helpedAt === null) continue;
     if (season !== undefined && seasonOfTimestamp(r.helpedAt) !== season) continue;
     helped.add(r.speciesId);
     summary.totalPledges += 1;
+    if (r.helpedDoneAt) summary.done += 1;
     if (r.helpedKind === 'give') summary.give += 1;
     else if (r.helpedKind === 'protect') summary.protect += 1;
   }

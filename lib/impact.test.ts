@@ -19,6 +19,7 @@ describe('impactSummary', () => {
       totalPledges: 0,
       give: 0,
       protect: 0,
+      done: 0
     });
   });
 
@@ -34,6 +35,7 @@ describe('impactSummary', () => {
       totalPledges: 3,
       give: 2,
       protect: 1,
+      done: 0
     });
   });
 
@@ -58,6 +60,7 @@ describe('impactSummary', () => {
       totalPledges: 1,
       give: 0,
       protect: 1,
+      done: 0
     });
   });
 
@@ -65,5 +68,17 @@ describe('impactSummary', () => {
     const december = [rec({ speciesId: 'swift', helpedAt: '2026-12-10T10:00:00Z', helpedKind: 'give' })];
     expect(impactSummary(december, '2027-winter').totalPledges).toBe(1);
     expect(impactSummary(december, '2026-winter').totalPledges).toBe(0);
+  });
+});
+
+// T-344 · review F-08: promises and kept promises are counted apart.
+describe('impactSummary done', () => {
+  it('counts pledges marked done separately', () => {
+    const r = (id: string, done: string | null): CollectionRecord => ({
+      speciesId: id, spottedAt: 't', caughtAt: null, helpedAt: '2026-10-20T10:00:00Z', helpedKind: 'give', primeBonus: false, helpedDoneAt: done,
+    });
+    const s = impactSummary([r('a', '2026-10-25T10:00:00Z'), r('b', null)], '2026-autumn');
+    expect(s.totalPledges).toBe(2);
+    expect(s.done).toBe(1);
   });
 });

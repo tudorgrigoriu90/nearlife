@@ -63,6 +63,7 @@ export type Database = {
           caught_at: string | null
           created_at: string
           helped_at: string | null
+          helped_done_at: string | null
           helped_kind: string | null
           id: string
           prime_bonus: boolean
@@ -74,6 +75,7 @@ export type Database = {
           caught_at?: string | null
           created_at?: string
           helped_at?: string | null
+          helped_done_at?: string | null
           helped_kind?: string | null
           id?: string
           prime_bonus?: boolean
@@ -85,6 +87,7 @@ export type Database = {
           caught_at?: string | null
           created_at?: string
           helped_at?: string | null
+          helped_done_at?: string | null
           helped_kind?: string | null
           id?: string
           prime_bonus?: boolean

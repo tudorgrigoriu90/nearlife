@@ -3,6 +3,7 @@ import type { CollectionRecord, HelpKind } from './collection';
 import {
   applyCaught,
   applyHelped,
+  applyHelpedDone,
   applySpotted,
   CatchRefusedError,
   FREE_CATCH_LIMIT_MARKER,
@@ -27,10 +28,12 @@ export interface CollectionRow {
   helped_at: string | null;
   helped_kind: HelpKind | null;
   prime_bonus: boolean;
+  /** T-344; absent before migration 0047. */
+  helped_done_at?: string | null;
 }
 
 export const COLLECTION_COLUMNS =
-  'user_id,species_id,spotted_at,caught_at,helped_at,helped_kind,prime_bonus';
+  'user_id,species_id,spotted_at,caught_at,helped_at,helped_kind,prime_bonus,helped_done_at';
 
 export function rowToRecord(row: CollectionRow): CollectionRecord {
   return {
@@ -40,6 +43,7 @@ export function rowToRecord(row: CollectionRow): CollectionRecord {
     helpedAt: row.helped_at,
     helpedKind: row.helped_kind,
     primeBonus: row.prime_bonus,
+    ...(row.helped_done_at ? { helpedDoneAt: row.helped_done_at } : {}),
   };
 }
 
@@ -52,6 +56,7 @@ export function recordToRow(record: CollectionRecord, userId: string): Collectio
     helped_at: record.helpedAt,
     helped_kind: record.helpedKind,
     prime_bonus: record.primeBonus,
+    helped_done_at: record.helpedDoneAt ?? null,
   };
 }
 
@@ -89,6 +94,10 @@ export class SupabaseCollectionStore implements CollectionStore {
 
   markHelped(speciesId: string, kind: HelpKind, at: string): Promise<CollectionRecord> {
     return this.apply(speciesId, (current) => applyHelped(current, speciesId, kind, at));
+  }
+
+  markHelpedDone(speciesId: string, at: string): Promise<CollectionRecord> {
+    return this.apply(speciesId, (current) => applyHelpedDone(current, speciesId, at));
   }
 
   /** Read the current row, apply the pure transition, write it back. */

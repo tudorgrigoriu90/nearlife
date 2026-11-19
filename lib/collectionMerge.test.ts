@@ -90,3 +90,14 @@ describe('mergeLists', () => {
     );
   });
 });
+
+// T-344: done once, done for good.
+describe('merging a done pledge', () => {
+  const pledged = { ...blankRecord('owl'), spottedAt: 't', helpedAt: '2026-11-01T10:00:00Z', helpedKind: 'give' as const };
+  it('keeps the done mark from whichever side has it, the earliest winning', () => {
+    const phone = { ...pledged, helpedDoneAt: '2026-11-05T10:00:00Z' };
+    expect(mergeRecords(phone, pledged).helpedDoneAt).toBe('2026-11-05T10:00:00Z');
+    expect(mergeRecords(pledged, { ...pledged, helpedDoneAt: '2026-11-03T10:00:00Z' }).helpedDoneAt).toBe('2026-11-03T10:00:00Z');
+    expect(mergeRecords(phone, { ...pledged, helpedDoneAt: '2026-11-03T10:00:00Z' }).helpedDoneAt).toBe('2026-11-03T10:00:00Z');
+  });
+});

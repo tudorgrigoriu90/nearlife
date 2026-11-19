@@ -314,3 +314,41 @@ describe('SpeciesCard read aloud', () => {
     expect(screen.queryByText(`🔊 ${tr('card.listen')}`)).toBeNull();
   });
 });
+
+// T-344 · review F-08: a pledge can be marked done, and then says so.
+describe('SpeciesCard pledge follow-through', () => {
+  const owl = KRONOBERG_SPECIES[0];
+  const content = contentFor(owl.id, 'en')!;
+  const tr = createTranslator('en');
+  const pledged = {
+    speciesId: owl.id, spottedAt: 't', caughtAt: null, helpedAt: '2026-11-01T10:00:00Z',
+    helpedKind: 'give' as const, primeBonus: false,
+  };
+  const tier = { spotted: true, caught: false, helped: true };
+
+  it('offers "Mark as done" under a pledge, and reports it', async () => {
+    const onMarkDone = jest.fn();
+    await render(
+      <SpeciesCard species={owl} content={content} locale="en" tier={tier} record={pledged} onPledge={jest.fn()} onMarkDone={onMarkDone} />,
+    );
+    expect(screen.getByText(tr('card.pledged'))).toBeTruthy();
+    await fireEvent.press(screen.getByText(`✓ ${tr('card.markDone')}`));
+    expect(onMarkDone).toHaveBeenCalledWith(owl);
+  });
+
+  it('shows the kept pledge once done, with no button', async () => {
+    await render(
+      <SpeciesCard
+        species={owl}
+        content={content}
+        locale="en"
+        tier={tier}
+        record={{ ...pledged, helpedDoneAt: '2026-11-05T10:00:00Z' }}
+        onPledge={jest.fn()}
+        onMarkDone={jest.fn()}
+      />,
+    );
+    expect(screen.getByText(tr('card.pledgeDone'))).toBeTruthy();
+    expect(screen.queryByText(`✓ ${tr('card.markDone')}`)).toBeNull();
+  });
+});

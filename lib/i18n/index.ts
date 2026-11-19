@@ -164,8 +164,11 @@ export const en = {
   'card.machineText': 'Text machine-translated, not yet reviewed',
   'card.notSpotted': 'Not spotted yet',
   'card.pledged': 'You pledged this ✓',
+  'card.markDone': 'Mark as done',
+  'card.pledgeDone': 'Done ✓ Thank you',
   'card.groupAdvice': 'General advice for all {group}, not written for this species yet.',
   'impact.actions': 'Different actions',
+  'impact.done': 'Pledges kept',
   'card.caughtThisSeason': 'Caught this season ✓',
   'card.back': 'Back',
   'card.followLaw':
@@ -696,8 +699,11 @@ export const sv: Catalog = {
   'card.machineText': 'Texten är maskinöversatt och inte granskad än',
   'card.notSpotted': 'Inte sedd ännu',
   'card.pledged': 'Du har lovat detta ✓',
+  'card.markDone': 'Markera som gjort',
+  'card.pledgeDone': 'Gjort ✓ Tack',
   'card.groupAdvice': 'Allmänna råd för alla {group}, ännu inte skrivna för just den här arten.',
   'impact.actions': 'Olika handlingar',
+  'impact.done': 'Löften hållna',
   'card.caughtThisSeason': 'Fångad den här säsongen ✓',
   'card.back': 'Tillbaka',
   'card.followLaw':

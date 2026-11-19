@@ -48,6 +48,8 @@ export interface CollectionStore {
   markSpotted(speciesId: string, at: string): Promise<CollectionRecord>;
   markCaught(speciesId: string, at: string, primeBonus: boolean): Promise<CollectionRecord>;
   markHelped(speciesId: string, kind: HelpKind, at: string): Promise<CollectionRecord>;
+  /** The pledge was kept (T-344). Only a pledged species can be marked done. */
+  markHelpedDone(speciesId: string, at: string): Promise<CollectionRecord>;
 }
 
 export function blankRecord(speciesId: string): CollectionRecord {
@@ -94,6 +96,13 @@ export function applyHelped(
   return { ...base, spottedAt: base.spottedAt ?? at, helpedAt: at, helpedKind: kind };
 }
 
+/** Mark a pledge done: only after a pledge, and the first time counts (a second tap changes nothing). */
+export function applyHelpedDone(current: CollectionRecord | null, speciesId: string, at: string): CollectionRecord {
+  const base = current ?? blankRecord(speciesId);
+  if (base.helpedAt === null || base.helpedDoneAt) return base;
+  return { ...base, helpedDoneAt: at };
+}
+
 export class InMemoryCollectionStore implements CollectionStore {
   private readonly records = new Map<string, CollectionRecord>();
 
@@ -125,5 +134,9 @@ export class InMemoryCollectionStore implements CollectionStore {
 
   async markHelped(speciesId: string, kind: HelpKind, at: string): Promise<CollectionRecord> {
     return this.put(applyHelped(this.records.get(speciesId) ?? null, speciesId, kind, at));
+  }
+
+  async markHelpedDone(speciesId: string, at: string): Promise<CollectionRecord> {
+    return this.put(applyHelpedDone(this.records.get(speciesId) ?? null, speciesId, at));
   }
 }

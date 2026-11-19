@@ -57,9 +57,9 @@ describe('ImpactScreen', () => {
       rec('robin', { helpedAt: '2026-10-20T10:00:00Z', helpedKind: 'protect' }),
     ];
     await render(<ImpactScreen locale="en" records={records} seasonKey="2026-autumn" />);
-    // 1 species helped, 0 give, 1 protect, 1 action: the summer pledge is last season's.
+    // 1 species helped, 0 give, 1 protect, 1 action, 0 kept (T-344): the summer pledge is last season's.
     expect(screen.getAllByText('1')).toHaveLength(3);
-    expect(screen.getByText('0')).toBeTruthy();
+    expect(screen.getAllByText('0')).toHaveLength(2);
   });
 
   it('shows the empty state when every pledge was in an earlier season', async () => {
@@ -80,5 +80,18 @@ describe('ImpactScreen distinct actions', () => {
     );
     expect(screen.getByText(tr('impact.actions'))).toBeTruthy();
     expect(screen.getByTestId('impact-actions').props.children).toBe(1);
+  });
+});
+
+// T-344 · review F-08: promises and kept promises apart.
+describe('ImpactScreen kept pledges', () => {
+  it('counts pledges marked done', async () => {
+    const records = [
+      rec('a', { helpedAt: '2026-10-20T10:00:00Z', helpedKind: 'give', helpedDoneAt: '2026-10-25T10:00:00Z' }),
+      rec('b', { helpedAt: '2026-10-20T10:00:00Z', helpedKind: 'give' }),
+    ];
+    await render(<ImpactScreen locale="en" records={records} seasonKey="2026-autumn" />);
+    expect(screen.getByText(tr('impact.done'))).toBeTruthy();
+    expect(screen.getByTestId('impact-done').props.children).toBe(1);
   });
 });

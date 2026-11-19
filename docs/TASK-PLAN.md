@@ -5005,6 +5005,23 @@ document until it is started, when it takes the next free `T-###`.
     with Yes / "No, thanks"; Yes turns dual display on with that language, No only closes the
     offer. Opt-in, off by default. Tests: offer 3, onboarding 3.
 
+- **T-344 · Pledge follow-through: mark a pledge done** — *Claude · M · `DONE` · deps: T-319 · review F-08 (done part)*
+  - Done when "done" is stored, exported and counted. The reminder in the pledge's month is T-345.
+  - ✅ `CollectionRecord.helpedDoneAt` (`collection.helped_done_at`, migration 0047 with a check
+    that a done needs a pledge). `markHelpedDone` in every store and the offline outbox; only a
+    pledged species can be done, the first time counts, and a merge keeps the earliest from
+    either side. The export carries it with the record.
+  - ✅ The card's pledge line reads "You pledged this" + "Mark as done", then "Done ✓ Thank you";
+    Impact shows "Pledges kept" beside the pledges. Community totals are unchanged: a kept pledge
+    was a pledge, so it was already counted. Honour system, as the pledge.
+  - ✅ Tests: store 2, merge 1, outbox 1, Impact 2, card 2, real Postgres 2.
+- **T-345 · Pledge reminders in the pledge's month** — *Claude · S · `TODO` · deps: T-320, T-344 · review F-08 (reminder)*
+  - Needs a month per give/protect text, which comes with species-level advice (T-320). Then one
+    reminder in that month ("Time to put up the nest box you pledged"), never an upsell (#4).
+- **T-346 · Sign in on a second device** — *Claude · — · `DONE` (= T-271) · review F-10*
+  - The review lists it only because it is the basis of "the same almanac on phone and tablet";
+    it is the same change as B-07, built in T-271. No separate work.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

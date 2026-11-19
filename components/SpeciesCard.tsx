@@ -61,6 +61,7 @@ export default function SpeciesCard({
   onRetryContent,
   backAround,
   onPledge,
+  onMarkDone,
   nearbyNote,
   soundSource,
   county = null,
@@ -102,6 +103,8 @@ export default function SpeciesCard({
   backAround?: Month | null;
   /** Pledge a give/protect action → Helped tier (T-076). */
   onPledge?: (species: Species, kind: HelpKind) => void;
+  /** Mark the pledge as done (T-344 · review F-08); honour system, as the pledge. */
+  onMarkDone?: (species: Species) => void;
   /** Small caption under the find-nearby CTA — e.g. the free-catch counter (T-034). */
   nearbyNote?: string;
   /** Where a bird's recording comes from (T-246). Absent: no song button. Playable with the Full
@@ -322,7 +325,7 @@ export default function SpeciesCard({
                 onPress={() => onPledge(species, 'give')}
               />
             ) : record?.helpedKind === 'give' ? (
-              <Text style={styles.pledged}>{tr('card.pledged')}</Text>
+              <PledgedLine record={record} species={species} tr={tr} onMarkDone={onMarkDone} />
             ) : null}
             <Section
               title={tr('card.protect')}
@@ -335,7 +338,7 @@ export default function SpeciesCard({
                 onPress={() => onPledge(species, 'protect')}
               />
             ) : record?.helpedKind === 'protect' ? (
-              <Text style={styles.pledged}>{tr('card.pledged')}</Text>
+              <PledgedLine record={record} species={species} tr={tr} onMarkDone={onMarkDone} />
             ) : null}
             {adviceScope(species.id) === 'group' ? (
               <Text style={styles.groupAdvice}>
@@ -435,6 +438,27 @@ function FactCredit({ content, locale }: { content: SpeciesContent; locale: Loca
         )}
       </Text>
     </Pressable>
+  );
+}
+
+/** "You pledged this", then "Mark as done", then "Done" (T-344 · review F-08). */
+function PledgedLine({
+  record,
+  species,
+  tr,
+  onMarkDone,
+}: {
+  record: CollectionRecord;
+  species: Species;
+  tr: (key: TranslationKey) => string;
+  onMarkDone?: (species: Species) => void;
+}) {
+  if (record.helpedDoneAt) return <Text style={styles.pledged}>{tr('card.pledgeDone')}</Text>;
+  return (
+    <>
+      <Text style={styles.pledged}>{tr('card.pledged')}</Text>
+      {onMarkDone ? <PledgeButton label={tr('card.markDone')} onPress={() => onMarkDone(species)} /> : null}
+    </>
   );
 }
 

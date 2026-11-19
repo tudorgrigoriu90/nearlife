@@ -59,6 +59,7 @@ export default function ImpactScreen({
             <Stat glyph="🎁" label={tr('impact.give')} count={summary.give} />
             <Stat glyph="🛡" label={tr('impact.protect')} count={summary.protect} />
             <Stat glyph="✨" label={tr('impact.actions')} count={actions} testID="impact-actions" />
+            <Stat glyph="✅" label={tr('impact.done')} count={summary.done} testID="impact-done" />
           </View>
         ) : (
           <Text style={styles.empty}>{tr('impact.empty')}</Text>

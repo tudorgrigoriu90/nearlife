@@ -61,7 +61,11 @@ class FlakyRemote implements CollectionStore {
     this.guard();
     if (this.refuseHelp.has(id)) throw new CatchRefusedError(id);
     return this.inner.markHelped(id, kind, at);
+  }  async markHelpedDone(id: string, at: string) {
+    this.guard();
+    return this.inner.markHelpedDone(id, at);
   }
+
 }
 
 function setup(cache: OfflineCache = new InMemoryOfflineCache()) {
@@ -380,5 +384,21 @@ describe('OfflineCollectionStore writes during hydrate', () => {
     c.release();
     await hydrating;
     expect((await store.list()).map((r) => r.speciesId)).toEqual(['a', 'b']);
+  });
+});
+
+// T-344 · review F-08: "done" goes through the outbox like any other write.
+describe('OfflineCollectionStore done', () => {
+  it('records done offline and delivers it once the server is back', async () => {
+    const { store, remote } = setup();
+    remote.online = true;
+    await store.markHelped('owl', 'give', '2026-11-01T10:00:00Z');
+    await store.sync();
+    remote.online = false;
+    await store.markHelpedDone('owl', '2026-11-05T10:00:00Z');
+    expect((await store.get('owl'))?.helpedDoneAt).toBe('2026-11-05T10:00:00Z');
+    remote.online = true;
+    await store.sync();
+    expect((await remote.inner.get('owl'))?.helpedDoneAt).toBe('2026-11-05T10:00:00Z');
   });
 });

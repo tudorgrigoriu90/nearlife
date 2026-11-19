@@ -1547,6 +1547,7 @@ export default function App() {
                   setShowCounties(true);
                 }
           }
+          onMarkDone={(species) => collection.markHelpedDone(species.id)}
           onPledge={(species, kind) => {
             // Helped tier: one-tap honor-system pledge (GDD §5) → mark Helped + confirm.
             collection.help(species.id, kind);

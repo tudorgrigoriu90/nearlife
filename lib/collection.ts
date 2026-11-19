@@ -16,6 +16,8 @@ export interface CollectionRecord {
   helpedKind: HelpKind | null;
   /** Caught within the species' active window (GDD §6). */
   primeBonus: boolean;
+  /** When the user marked the pledge as done (T-344 · review F-08); honour system, no proof. */
+  helpedDoneAt?: string | null;
 }
 
 export interface TierState {

@@ -2,6 +2,7 @@ import type { CollectionRecord, HelpKind } from './collection';
 import {
   applyCaught,
   applyHelped,
+  applyHelpedDone,
   applySpotted,
   CatchRefusedError,
   RejectedWriteError,
@@ -32,7 +33,7 @@ export interface OfflineCache {
 
 /** A queued write, kept as intent rather than as a final row so replay stays convergent. */
 interface PendingOp {
-  kind: 'spotted' | 'caught' | 'helped';
+  kind: 'spotted' | 'caught' | 'helped' | 'done';
   speciesId: string;
   at: string;
   primeBonus?: boolean;
@@ -159,6 +160,15 @@ export class OfflineCollectionStore implements CollectionStore {
     });
   }
 
+  async markHelpedDone(speciesId: string, at: string): Promise<CollectionRecord> {
+    await this.loading;
+    return this.write(applyHelpedDone(this.records.get(speciesId) ?? null, speciesId, at), {
+      kind: 'done',
+      speciesId,
+      at,
+    });
+  }
+
   /** Forget everything: records, the outbox and the cache (account deletion, T-269). */
   async clear(): Promise<void> {
     await this.loading;
@@ -243,6 +253,7 @@ export class OfflineCollectionStore implements CollectionStore {
     if (op.kind === 'spotted') await remote.markSpotted(op.speciesId, op.at);
     else if (op.kind === 'caught')
       await remote.markCaught(op.speciesId, op.at, op.primeBonus ?? false);
+    else if (op.kind === 'done') await remote.markHelpedDone(op.speciesId, op.at);
     else await remote.markHelped(op.speciesId, op.helpedKind ?? 'give', op.at);
   }
 
@@ -286,6 +297,7 @@ function sameRecord(a: CollectionRecord, b: CollectionRecord): boolean {
     a.caughtAt === b.caughtAt &&
     a.helpedAt === b.helpedAt &&
     a.helpedKind === b.helpedKind &&
+    (a.helpedDoneAt ?? null) === (b.helpedDoneAt ?? null) &&
     a.primeBonus === b.primeBonus
   );
 }
