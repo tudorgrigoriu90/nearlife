@@ -140,7 +140,13 @@ Runs server-side on a schedule (`pg_cron` → Edge Function). For each due user:
         so the feed isn't all sparrows. (NOTE: rarity here reflects observation
         frequency, not true rarity — phrase copy honestly; see risks.)
 5. Sample 1 species from the weighted distribution.
-6. Respect cadence: frequency cap + quiet_hours + user notif_prefs.
+6. Respect cadence: frequency cap + quiet_hours + user notif_prefs. *Built (T-341):*
+   `profiles.notif_prefs` = {frequency: daily / everyOtherDay / weekly (gaps of 20, 44, 164 h),
+   window: morning 8–11 / midday 11–15 / evening 15–21 (inside the fixed 08–21 waking hours; the
+   per-user slot is hashed within it, and a missed window waits for the next day), groups: bird /
+   mammal / insect / plant / other}. `push_due_users` applies window and frequency; the choice
+   filters groups. `'{}'` is the original behaviour. Numbers shared with SQL are pinned by
+   `__tests__/notifPrefsParity.test.js`.
 7. Send via FCM HTTP v1 (T-201). Log each send to `notification_log`, which the cadence caps
    are computed from (opened / collected are app-side funnel events).
 ```

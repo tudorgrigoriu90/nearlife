@@ -256,3 +256,33 @@ describe('planSends with presentable species', () => {
     expect(asked).toContain('european-robin:sv');
   });
 });
+
+// T-341 · review F-03: the sender honours each user's choices.
+describe('planSends with notification choices', () => {
+  it('skips a weekly user sent to three days ago, and sends to a daily one', () => {
+    const threeDaysAgo = SUMMER_EVENING - 72 * 3_600_000;
+    const plan = planSends(
+      [
+        user({
+          userId: 'weekly',
+          devices: [device({ token: 'tok-w' })],
+          sentAtMs: [threeDaysAgo],
+          prefs: { frequency: 'weekly', window: null, groups: null },
+        }),
+        user({ userId: 'daily', devices: [device({ token: 'tok-d' })], sentAtMs: [threeDaysAgo] }),
+      ],
+      presence,
+      SUMMER_EVENING,
+      { rng: () => 0 },
+    );
+    expect(plan.sends.map((s) => s.userId)).toEqual(['daily']);
+    expect(plan.skipped['frequency-cap']).toBe(1);
+  });
+
+  it('skips an evening hour for a morning user', () => {
+    const plan = planSends([user({ prefs: { frequency: 'daily', window: 'morning', groups: null } })], presence, SUMMER_EVENING, {
+      rng: () => 0,
+    });
+    expect(plan.sends).toEqual([]);
+  });
+});

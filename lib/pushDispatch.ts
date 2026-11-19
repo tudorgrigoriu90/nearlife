@@ -1,6 +1,7 @@
 import { DEFAULT_CADENCE, type CadenceConfig, type SendHistory } from './cadence';
 import { t, type Locale, SUPPORTED_LOCALES, BASE_LOCALE } from './i18n';
 import type { Rng } from './presenceNotification';
+import type { NotifPrefs } from './notifPrefs';
 import { decideNotification, type SkipReason } from './notificationEngine';
 import { DEFAULT_TUNING, type NotificationTuning } from './tuning';
 import type { Month } from './species/types';
@@ -39,6 +40,8 @@ export interface UserSnapshot {
   collectedIds: string[];
   /** Past sends from `notification_log`, ms since epoch. */
   sentAtMs: number[];
+  /** Frequency, window and groups from `profiles.notif_prefs` (T-341); today's behaviour without. */
+  prefs?: NotifPrefs;
 }
 
 export interface PlannedSend {
@@ -167,7 +170,7 @@ export function planSends(
         history: historyFromLog(user.sentAtMs, nowMs, timeZone),
         // A registered device *is* the opt-in: the app deletes its rows when the user withdraws
         // notification consent (lib/pushRegistration.ts), so there is no second flag to drift.
-        prefs: { enabled: true },
+        prefs: { enabled: true, choices: user.prefs },
         localHour: clock.localHour,
         month: clock.month,
         nowMs,

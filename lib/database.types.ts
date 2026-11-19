@@ -242,6 +242,7 @@ export type Database = {
           free_catches_used: number
           full_game: boolean
           home_region: string | null
+          notif_prefs: Json
           user_id: string
         }
         Insert: {
@@ -250,6 +251,7 @@ export type Database = {
           free_catches_used?: number
           full_game?: boolean
           home_region?: string | null
+          notif_prefs?: Json
           user_id: string
         }
         Update: {
@@ -258,6 +260,7 @@ export type Database = {
           free_catches_used?: number
           full_game?: boolean
           home_region?: string | null
+          notif_prefs?: Json
           user_id?: string
         }
         Relationships: []
@@ -656,6 +659,7 @@ export type Database = {
       my_data_export: { Args: never; Returns: Json }
       my_household: { Args: never; Returns: Json }
       new_invite_code: { Args: never; Returns: string }
+      notif_prefs_valid: { Args: { p: Json }; Returns: boolean }
       prune_species_data_bumps: { Args: never; Returns: undefined }
       push_cron_secret_matches: {
         Args: { candidate: string }
@@ -673,6 +677,7 @@ export type Database = {
           collected: string[]
           devices: Json
           home_region: string
+          prefs: Json
           sent_at: string[]
           user_id: string
         }[]

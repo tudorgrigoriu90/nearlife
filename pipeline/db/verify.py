@@ -105,6 +105,9 @@ EXPECTED: dict[str, str] = {
     "after a removal the old code is refused": "household_not_found",
     "after a removal the code has changed": "ok",
     "every catalogue fact has its Wikipedia source": "ok",
+    # T-341 · review F-03 notification choices.
+    "a user can store notification choices": "ok",
+    "a notification choice the sender cannot read is refused": "violates check constraint",
     "a user can report a mistake": "ok",
     "users cannot read the reports": "permission denied",
     "a report cannot be sent in another account's name": "permission denied",
@@ -656,6 +659,13 @@ def run_content_report_checks(cur) -> dict[str, str]:
     _step(cur, results, "a user can keep a recognised species",
           "insert into public.recognitions (species_id) values (%s) "
           "on conflict (user_id, species_id) do nothing", (species,))
+    # T-341 · review F-03: a user stores their notification choices; nonsense is refused.
+    _step(cur, results, "a user can store notification choices",
+          "insert into public.profiles (user_id, notif_prefs) values (auth.uid(), %s)",
+          (json.dumps({"frequency": "weekly", "window": "evening", "groups": ["bird"]}),))
+    _step(cur, results, "a notification choice the sender cannot read is refused",
+          "update public.profiles set notif_prefs = %s where user_id = auth.uid()",
+          (json.dumps({"frequency": "hourly"}),))
     _step(cur, results, "a user sees only their own recognitions",
           "select case when count(*) = count(*) filter (where user_id = auth.uid()) and count(*) = 1 "
           "then 'ok' else 'saw ' || count(*) end from public.recognitions")

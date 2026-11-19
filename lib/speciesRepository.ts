@@ -1,6 +1,6 @@
 import { asTitleName } from './species/displayName';
 import { parseHabitats } from './catchSpots';
-import { GROUP_BY_TAXON } from './species/group';
+import { GROUP_BY_TAXON, type SpeciesGroup } from './species/group';
 import type { AppClient } from './supabase';
 import type { Locale } from './i18n';
 import type { ContentLocale } from './i18n/contentLocale';
@@ -24,6 +24,8 @@ export interface RegionPresence {
   occurrences: number;
   /** Records per month, January first (T-261); absent where not loaded. */
   monthCounts?: number[] | null;
+  /** The species' group, where the reader has it: the sender filters on it (T-341). */
+  group?: SpeciesGroup;
 }
 
 export interface SpeciesRepository {

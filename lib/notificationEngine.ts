@@ -6,6 +6,7 @@ import {
   type SendHistory,
 } from './cadence';
 import { selectFromPresence, type Rng } from './presenceNotification';
+import { cadenceFor, DEFAULT_NOTIF_PREFS, hoursFor, prefGroupOf, type NotifPrefs } from './notifPrefs';
 import { isAtOrAfterSlot } from './sendSlot';
 import { DEFAULT_TUNING, type NotificationTuning } from './tuning';
 import type { Month } from './species/types';
@@ -21,6 +22,8 @@ import type { RegionPresence } from './speciesRepository';
 export interface NotificationPrefs {
   /** Master opt-in. `false` = the user turned notifications off; the engine never sends. */
   enabled: boolean;
+  /** Frequency, window and groups (T-341); today's behaviour without them. */
+  choices?: NotifPrefs;
 }
 
 /** Everything the engine needs about one due user at decision time. */
@@ -68,7 +71,9 @@ export interface EngineOptions {
 export function decideNotification(user: DueUser, opts: EngineOptions = {}): EngineDecision {
   if (!user.prefs.enabled) return { send: false, reason: 'notifications-off' };
 
-  const cadence = canSendNow(user.nowMs, user.localHour, user.history, opts.cadence ?? DEFAULT_CADENCE);
+  const choices = user.prefs.choices ?? DEFAULT_NOTIF_PREFS;
+  const base = opts.cadence ?? DEFAULT_CADENCE;
+  const cadence = canSendNow(user.nowMs, user.localHour, user.history, cadenceFor(choices, base));
   if (!cadence.allowed) return { send: false, reason: cadence.reason! };
 
   // Per-user send slot: spreads the population across the waking window so one cron cycle does not
@@ -76,13 +81,18 @@ export function decideNotification(user: DueUser, opts: EngineOptions = {}): Eng
   // ('quiet-hours') still wins when both apply.
   if (
     user.userId !== undefined &&
-    !isAtOrAfterSlot(user.localHour, user.userId, opts.cadence ?? DEFAULT_CADENCE)
+    !isAtOrAfterSlot(user.localHour, user.userId, base, hoursFor(choices, base))
   ) {
     return { send: false, reason: 'before-slot' };
   }
 
+  // Only the chosen groups (T-341). A row without a group (an older reader) is kept.
+  const groups = choices.groups;
+  const presence = groups
+    ? user.presence.filter((p) => p.group === undefined || groups.includes(prefGroupOf(p.group)))
+    : user.presence;
   const picked = selectFromPresence(
-    user.presence,
+    presence,
     user.month,
     user.collectedIds,
     opts.rng ?? Math.random,

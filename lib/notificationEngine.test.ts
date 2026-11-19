@@ -98,3 +98,56 @@ describe('per-user send slot', () => {
     expect(d.send).toBe(true);
   });
 });
+
+// T-341 · review F-03: each notification choice changes the decision; the defaults change nothing.
+describe('notification choices in the decision', () => {
+  const HOUR = 3_600_000;
+  const now = 1_000_000_000_000;
+
+  it('frequency: every other day waits 44 hours, weekly 164', () => {
+    const sentHoursAgo = (h: number, frequency: 'daily' | 'everyOtherDay' | 'weekly') =>
+      decideNotification(
+        eligibleUser({
+          history: { lastSentMs: now - h * HOUR, sentTodayCount: 0 },
+          prefs: { enabled: true, choices: { frequency, window: null, groups: null } },
+        }),
+        { rng: () => 0 },
+      );
+    expect(sentHoursAgo(30, 'daily').send).toBe(true);
+    expect(sentHoursAgo(30, 'everyOtherDay')).toEqual({ send: false, reason: 'frequency-cap' });
+    expect(sentHoursAgo(45, 'everyOtherDay').send).toBe(true);
+    expect(sentHoursAgo(100, 'weekly')).toEqual({ send: false, reason: 'frequency-cap' });
+    expect(sentHoursAgo(165, 'weekly').send).toBe(true);
+  });
+
+  it('window: only within the chosen hours, from the user’s slot inside them', () => {
+    const at = (localHour: number) =>
+      decideNotification(
+        eligibleUser({
+          localHour,
+          userId: 'user-a',
+          prefs: { enabled: true, choices: { frequency: 'daily', window: 'morning', groups: null } },
+        }),
+        { rng: () => 0 },
+      );
+    expect(at(12)).toEqual({ send: false, reason: 'before-slot' }); // outside the morning window
+    expect(at(10).send).toBe(true); // the window's last hour is at or after any slot in it
+  });
+
+  it('groups: only species of the chosen groups', () => {
+    const presence: RegionPresence[] = [
+      { speciesId: 'robin', activeMonths: [6], occurrences: 500, group: 'bird' },
+      { speciesId: 'orchid', activeMonths: [6], occurrences: 5, group: 'plant' },
+    ];
+    const d = decideNotification(
+      eligibleUser({ presence, prefs: { enabled: true, choices: { frequency: 'daily', window: null, groups: ['plant'] } } }),
+      { rng: () => 0 },
+    );
+    expect(d).toMatchObject({ send: true, speciesId: 'orchid' });
+    const none = decideNotification(
+      eligibleUser({ presence, prefs: { enabled: true, choices: { frequency: 'daily', window: null, groups: ['mammal'] } } }),
+      { rng: () => 0 },
+    );
+    expect(none).toEqual({ send: false, reason: 'no-candidate' });
+  });
+});

@@ -95,7 +95,7 @@ export function planSends(users, presenceByRegion, nowMs, opts = {}) {
             history: historyFromLog(user.sentAtMs, nowMs, timeZone),
             // A registered device *is* the opt-in: the app deletes its rows when the user withdraws
             // notification consent (lib/pushRegistration.ts), so there is no second flag to drift.
-            prefs: { enabled: true },
+            prefs: { enabled: true, choices: user.prefs },
             localHour: clock.localHour,
             month: clock.month,
             nowMs,

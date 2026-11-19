@@ -35,8 +35,9 @@ function hash(value) {
     return h >>> 0;
 }
 /** The hour this user is notified at — stable for the id, uniform across the population. */
-export function preferredHour(userId, config = DEFAULT_CADENCE) {
-    const hours = allowedHours(config);
+export function preferredHour(userId, config = DEFAULT_CADENCE, 
+/** The user's own hours (a chosen window, T-341); the waking hours by default. */
+hours = allowedHours(config)) {
     if (hours.length === 0)
         return config.quietEndHour; // never-quiet config still needs an answer
     return hours[hash(userId) % hours.length];
@@ -51,10 +52,9 @@ export function preferredHour(userId, config = DEFAULT_CADENCE) {
  * Compared by position in the window, not by clock number, so a window that wraps past midnight
  * orders correctly — in a 22→02 window, hour 0 comes *after* 23.
  */
-export function isAtOrAfterSlot(localHour, userId, config = DEFAULT_CADENCE) {
-    const hours = allowedHours(config);
+export function isAtOrAfterSlot(localHour, userId, config = DEFAULT_CADENCE, hours = allowedHours(config)) {
     const now = hours.indexOf(localHour);
     if (now === -1)
-        return false; // inside quiet hours; the cadence gate rejects this anyway
-    return now >= hours.indexOf(preferredHour(userId, config));
+        return false; // quiet hours, or outside the user's window
+    return now >= hours.indexOf(preferredHour(userId, config, hours));
 }

@@ -28,6 +28,7 @@ import {
   pushLocale,
   sendLogged,
 } from '../_shared/lib/pushDispatch.js';
+import { groupOfRow, parseNotifPrefs } from '../_shared/lib/notifPrefs.js';
 import {
   GOOGLE_TOKEN_URL,
   fcmSendUrl,
@@ -126,8 +127,9 @@ Deno.serve(async (req: Request) => {
 
   try {
     // 1) Only the users due this run (T-316 · review B-51): the database picks them, by the same
-    // slot and caps as lib/cadence.ts and lib/sendSlot.ts, and returns each with their devices,
-    // collected species and last 48 hours of sends. Work grows with the users due, not with
+    // slot and caps as lib/cadence.ts and lib/sendSlot.ts and each user's window and frequency
+    // (T-341), and returns each with their devices, collected species, last seven days of sends
+    // and their choices. Work grows with the users due, not with
     // everyone opted in. The smoke test asks for its one user, ignoring slot and caps.
     const dueRows = await readAll((from, to) =>
       db
@@ -154,6 +156,8 @@ Deno.serve(async (req: Request) => {
       })),
       collectedIds: (r.collected as string[] | null) ?? [],
       sentAtMs: ((r.sent_at as string[] | null) ?? []).map((t) => Date.parse(t)),
+      // Frequency, window and groups (T-341); the database already applied window and frequency.
+      prefs: parseNotifPrefs(r.prefs),
     }));
 
     // 2) Presence, once per region in play.
@@ -164,7 +168,7 @@ Deno.serve(async (req: Request) => {
         // a species the noise filter rejects is never sent as "active in your region".
         db
           .from('species_presence')
-          .select('species_id, active_months, occurrences, month_counts, species!inner(in_catalogue)')
+          .select('species_id, active_months, occurrences, month_counts, species!inner(in_catalogue, category, taxon_group)')
           .eq('region_id', region)
           .eq('species.in_catalogue', true)
           .order('species_id')
@@ -177,6 +181,11 @@ Deno.serve(async (req: Request) => {
           activeMonths: r.active_months as number[],
           occurrences: r.occurrences as number,
           monthCounts: (r.month_counts as number[] | null) ?? null,
+          // For the user's chosen groups (T-341).
+          group: groupOfRow(
+            ((r.species as Row | null)?.category as string | null) ?? null,
+            ((r.species as Row | null)?.taxon_group as string | null) ?? null,
+          ),
         })),
       );
     }

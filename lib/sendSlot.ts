@@ -37,8 +37,12 @@ function hash(value: string): number {
 }
 
 /** The hour this user is notified at — stable for the id, uniform across the population. */
-export function preferredHour(userId: string, config: CadenceConfig = DEFAULT_CADENCE): number {
-  const hours = allowedHours(config);
+export function preferredHour(
+  userId: string,
+  config: CadenceConfig = DEFAULT_CADENCE,
+  /** The user's own hours (a chosen window, T-341); the waking hours by default. */
+  hours: number[] = allowedHours(config),
+): number {
   if (hours.length === 0) return config.quietEndHour; // never-quiet config still needs an answer
   return hours[hash(userId) % hours.length];
 }
@@ -57,9 +61,9 @@ export function isAtOrAfterSlot(
   localHour: number,
   userId: string,
   config: CadenceConfig = DEFAULT_CADENCE,
+  hours: number[] = allowedHours(config),
 ): boolean {
-  const hours = allowedHours(config);
   const now = hours.indexOf(localHour);
-  if (now === -1) return false; // inside quiet hours; the cadence gate rejects this anyway
-  return now >= hours.indexOf(preferredHour(userId, config));
+  if (now === -1) return false; // quiet hours, or outside the user's window
+  return now >= hours.indexOf(preferredHour(userId, config, hours));
 }

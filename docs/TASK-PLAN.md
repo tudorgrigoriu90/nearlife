@@ -4969,6 +4969,26 @@ document until it is started, when it takes the next free `T-###`.
     …"). The catalogue honesty test scans them; a test also requires "usually" / "brukar".
   - ✅ Tests: rules 5, live 1, screen 3.
 
+- **T-341 · Notification choices: stored and honoured by the sender** — *Claude · M · `DONE` · deps: T-316 · review F-03 (server)*
+  - Done when `planSends` honours each setting (a test for each) and the defaults equal today's
+    behaviour. The Settings screen that writes them is T-342.
+  - ✅ `lib/notifPrefs.ts`: frequency daily / every other day / weekly (gaps 20 / 44 / 164 h; "every
+    other day" rather than the review's "3 a week", which a gap cannot promise), window morning /
+    midday / evening inside the fixed waking hours, groups bird / mammal / insect / plant / other.
+    A stored value the sender cannot read falls back to today's behaviour.
+  - ✅ Engine: the gap replaces the 20 h cap, the slot is hashed within the window (a missed window
+    waits for tomorrow rather than sending late), and the choice draws only from chosen groups.
+    `planSends` carries each user's choices. Tests: module 6, engine 3, planner 2.
+  - ✅ Migration 0046 (`20261119000009_notif_prefs.sql`): `profiles.notif_prefs` with a validating
+    check, writable by its owner only (column grants); `push_due_users` applies window and gap,
+    returns the choices and seven days of sends. Real Postgres: owner writes and cannot touch
+    anything else, six invalid shapes refused, window, frequency, defaults (10 tests); live verify
+    checks both; `__tests__/notifPrefsParity.test.js` keeps SQL and TypeScript numbers equal.
+  - ✅ The sender reads each species' group with its presence and passes the choices through.
+- **T-342 · Notification choices in Settings** — *Claude · S · `TODO` · deps: T-341 · review F-03 (app)*
+  - Settings → Notifications: frequency, window and groups, written to `profiles.notif_prefs`,
+    shown only while notifications are on (consent stays the master switch).
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
