@@ -135,7 +135,7 @@ import { spottedIds, tierStateFor } from './lib/collection';
 import { canCatch, freeCatchStateFrom, remainingFreeCatches } from './lib/freeCatch';
 import { isPrimeCatch } from './lib/primeBonus';
 import { openIdentifier } from './lib/identify';
-import { CrashReporter, loadSentry } from './lib/crashReporting';
+import { CrashReporter, loadSentry, setActiveCrashReporter } from './lib/crashReporting';
 import { gradeFromScore } from './lib/minigame/grade';
 import { monthOf, seasonKeyOf } from './lib/season';
 import { catchSeason } from './lib/catchSeason';
@@ -444,6 +444,11 @@ export default function App() {
   useEffect(() => {
     if (consentLoaded) crashReporter.setConsent(hasConsent(consent, 'analytics'));
   }, [crashReporter, consent, consentLoaded]);
+  // The error boundary in AppRoot reports through this reporter (T-323).
+  useEffect(() => {
+    setActiveCrashReporter(crashReporter);
+    return () => setActiveCrashReporter(null);
+  }, [crashReporter]);
   // Every purchase screen reports the same funnel steps (T-087).
   // Cancelled when the unlock arrives or the app goes away (T-302 · review B-47).
   const startPurchaseRereads = usePurchaseRereads(

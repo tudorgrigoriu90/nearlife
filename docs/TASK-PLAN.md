@@ -4763,6 +4763,14 @@ document until it is started, when it takes the next free `T-###`.
     each language once; bad file → no text); existing pack tests now read the text files. The
     review's "within 300 ms of no pack" is a device measurement, left to T-141.
 
+- **T-323 · An error boundary around the app** — *Claude · XS · `DONE` · deps: T-100 · review I-02*
+  - ✅ `ErrorBoundary` in AppRoot: a render error anywhere shows "Something went wrong" (in the
+    device's language: App's own language state is gone by then) with "Back to start", which
+    mounts the app afresh; the collection is on disk and unaffected.
+  - ✅ The error is reported through App's `CrashReporter` (registered for the boundary), which
+    sends it to Sentry only while analytics consent has started reporting. Tests: boundary 2,
+    reporter 2.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

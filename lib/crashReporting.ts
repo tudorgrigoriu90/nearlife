@@ -33,6 +33,7 @@ export const SENTRY_OPTIONS_BASE = {
 export interface SentryModule {
   init(options: typeof SENTRY_OPTIONS_BASE & { dsn: string }): void;
   close(): Promise<unknown>;
+  captureException?(error: unknown): unknown;
 }
 
 /** The real SDK, or null when this build has no native module for it. */
@@ -69,4 +70,21 @@ export class CrashReporter {
       this.started = false;
     }
   }
+
+  /** A render error the app's error boundary caught (T-323): sent only while consent allows. */
+  capture(error: Error): void {
+    if (this.started) this.sentry?.captureException?.(error);
+  }
+}
+
+// The error boundary sits above App, which owns the consent-aware reporter, so App registers it.
+let active: CrashReporter | null = null;
+
+export function setActiveCrashReporter(reporter: CrashReporter | null): void {
+  active = reporter;
+}
+
+/** For the error boundary: report through the app's reporter, or drop it if there is none yet. */
+export function reportCaughtError(error: Error): void {
+  active?.capture(error);
 }

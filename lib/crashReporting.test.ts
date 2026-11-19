@@ -1,4 +1,10 @@
-import { CrashReporter, SENTRY_OPTIONS_BASE, type SentryModule } from './crashReporting';
+import {
+  CrashReporter,
+  reportCaughtError,
+  SENTRY_OPTIONS_BASE,
+  setActiveCrashReporter,
+  type SentryModule,
+} from './crashReporting';
 
 // T-100 (Director, 2026-10-31): crash reports only with analytics consent, never identity.
 
@@ -63,5 +69,36 @@ describe('CrashReporter', () => {
       expect(o.beforeBreadcrumb({ category, message: 'GET /rest/v1/collection?user_id=eq.abc' })).toBeNull();
     }
     expect(o.beforeBreadcrumb({ category: 'ui.click', message: 'Catch' })).toEqual({ category: 'ui.click', message: 'Catch' });
+  });
+});
+
+// T-323 · review I-02: render errors caught by the boundary are reported, with consent only.
+describe('reporting a caught error', () => {
+  function sentry() {
+    return { init: jest.fn(), close: jest.fn(async () => undefined), captureException: jest.fn() };
+  }
+
+  it('is sent only while analytics consent has started reporting', () => {
+    const s = sentry();
+    const reporter = new CrashReporter(s, 'dsn');
+    reporter.capture(new Error('before'));
+    expect(s.captureException).not.toHaveBeenCalled();
+    reporter.setConsent(true);
+    reporter.capture(new Error('during'));
+    expect(s.captureException).toHaveBeenCalledTimes(1);
+    reporter.setConsent(false);
+    reporter.capture(new Error('after'));
+    expect(s.captureException).toHaveBeenCalledTimes(1);
+  });
+
+  it('the boundary reaches the app’s reporter, or nothing before it exists', () => {
+    expect(() => reportCaughtError(new Error('early'))).not.toThrow();
+    const s = sentry();
+    const reporter = new CrashReporter(s, 'dsn');
+    reporter.setConsent(true);
+    setActiveCrashReporter(reporter);
+    reportCaughtError(new Error('late'));
+    expect(s.captureException).toHaveBeenCalledTimes(1);
+    setActiveCrashReporter(null);
   });
 });
