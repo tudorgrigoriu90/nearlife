@@ -4771,6 +4771,15 @@ document until it is started, when it takes the next free `T-###`.
     sends it to Sentry only while analytics consent has started reporting. Tests: boundary 2,
     reporter 2.
 
+- **T-324 · Refresh presence in late August as well** — *Claude · XS · `DONE` · deps: T-172 · review I-34*
+  - Spring and summer observations reach GBIF months late; the February-only refresh left newly
+    recorded species out for a year.
+  - Done when the data pipeline has two schedules and the load guard applies to both.
+  - ✅ `data-pipeline.yml` runs on 5 February and 25 August (03:00 UTC). Both are plain `schedule`
+    events, so every step behaves the same, and `supabase_load` always calls `check_load_sanity`.
+    `__tests__/ciGate.test.js` pins both crons, forbids a step keyed on which schedule fired, and
+    checks the guard call.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

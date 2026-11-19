@@ -3,8 +3,8 @@ name: Data pipeline
 # Operationalises the E3 national data load (T-042/T-134/T-135/T-119) as a manual workflow, so it
 # runs from GitHub with secrets rather than Python on someone's laptop. Content generation always
 # runs (no secrets needed); the Supabase load + photo upload run only when the corresponding repo
-# secrets are set. Manual-only (workflow_dispatch) — it makes external API calls and DB writes, so
-# it never fires automatically.
+# secrets are set. Besides manual dispatch it runs on two yearly schedules (below); each is fully
+# unattended and protected by the load guard.
 #
 # Repo secrets (Settings → Secrets and variables → Actions), all optional:
 #   SUPABASE_DB_URL       privileged Postgres connection string   → load species/presence (T-134)
@@ -24,8 +24,14 @@ on:
   # load arriving with far less data than the database already holds (T-192) — a partial ingest and
   # a real decline are indistinguishable from the loader's point of view, so the benefit of the
   # doubt goes to the data already in production.
+  #
+  # August (T-324 · review I-34): spring and summer observations reach GBIF months after they are
+  # made, so a February-only refresh left newly recorded species out for a year. 25 August is
+  # after most of the season's uploads and before autumn migration, when people start looking.
+  # Both runs are identical `schedule` events: same steps, same guard.
   schedule:
     - cron: "0 3 5 2 *" # 03:00 UTC, 5 February, yearly
+    - cron: "0 3 25 8 *" # 03:00 UTC, 25 August, yearly
 
   workflow_dispatch:
     inputs:

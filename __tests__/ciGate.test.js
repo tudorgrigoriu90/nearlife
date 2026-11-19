@@ -101,3 +101,26 @@ describe('workflow hygiene', () => {
     expect(deploy).toMatch(/version: \d+\.\d+\.\d+/);
   });
 });
+
+// T-324 · review I-34: spring and summer observations reach GBIF months late, so a February-only
+// refresh left new species out for a year. A second run in late August catches them before autumn
+// migration. Both are plain `schedule` events, so every schedule-gated step and the load guard
+// (gbif/load_guard.py, unconditional in supabase_load) apply to each alike.
+describe('data pipeline schedule', () => {
+  const pipeline = read('.github/workflows/data-pipeline.yml');
+  const crons = [...pipeline.matchAll(/- cron: "([^"]+)"/g)].map((m) => m[1].split(' '));
+
+  it('refreshes twice a year: February and late August', () => {
+    expect(crons.map((c) => c[3]).sort()).toEqual(['2', '8']);
+    const august = crons.find((c) => c[3] === '8');
+    expect(Number(august[2])).toBeGreaterThanOrEqual(15);
+  });
+
+  it('no step tells the two scheduled runs apart', () => {
+    expect(pipeline).not.toMatch(/github\.event\.schedule/);
+  });
+
+  it('the species load always goes through the load guard', () => {
+    expect(read('pipeline/gbif/supabase_load.py')).toMatch(/check_load_sanity\(/);
+  });
+});
