@@ -4661,6 +4661,14 @@ document until it is started, when it takes the next free `T-###`.
     win still offers only "Continue". A miss costs nothing, so the replay is free. en + sv.
     Tests: 3. The species-specific half of I-29 is B-61.
 
+- **T-312 · The interface language is always one the app has** — *Claude · XS · `DONE` · deps: T-123 · review B-44*
+  - ✅ `resolveLocale` returns Swedish for a Swedish phone and English for every other language
+    (it accepted any of the 24 EU codes, so a German phone got English menus, German species
+    text and no ticked row in the language picker). The language decides, not the region: a phone
+    in Arabic or German is likelier to be read by someone who reads English than Swedish. Offering
+    the phone's language as the second language is F-05. Tests: 2 new (every tag lands on a
+    picker row), 1 old expectation (`de` → `de`) replaced.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
