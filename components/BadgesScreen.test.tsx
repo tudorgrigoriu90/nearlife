@@ -94,3 +94,19 @@ describe('BadgesScreen', () => {
     ).toBeTruthy();
   });
 });
+
+// T-297 · review B-27: a badge remembered as earned is shown earned on any list.
+describe('BadgesScreen with remembered badges', () => {
+  it('counts a remembered badge as earned though the records alone would not', async () => {
+    await render(
+      <BadgesScreen
+        locale="en"
+        species={species}
+        records={[]}
+        now={NOW}
+        remembered={{ 'spotted-10': '2026-05-01T00:00:00Z' }}
+      />,
+    );
+    expect(screen.getByText(tr('badges.progress', { earned: 1, total: 17 }))).toBeTruthy();
+  });
+});

@@ -54,6 +54,8 @@ export interface DeviceExport {
   travel: unknown;
   languages: { app: string | null; secondLanguage: string | null; secondLanguageOn: boolean };
   agePath: string | null;
+  /** Earned badges and when (T-297). */
+  badges?: Record<string, string>;
 }
 
 type Unavailable = 'purchases' | 'household' | 'server';

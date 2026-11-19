@@ -71,6 +71,8 @@ import { eraseDeviceStorage } from './lib/deviceErase';
 import { ExpoCacheFiles } from './lib/countyCacheFiles';
 import { SupabaseSignInGateway } from './lib/accountSignIn';
 import { sendContentReport, SupabaseReportGateway } from './lib/contentReports';
+import { badgeStatuses, rememberEarned, type RememberedBadges } from './lib/badges';
+import { AsyncStorageBadgeStore } from './lib/badgeStore';
 import { fixIfConsented } from './lib/locationAccess';
 import { pickCountyStarter } from './lib/countyStarter';
 import SignIn from './components/SignIn';
@@ -167,6 +169,8 @@ const ENTITLEMENT_STORE = new AsyncStorageEntitlementStore();
 const QUIZ_ATTEMPTS = new AsyncStorageQuizAttemptStore();
 // Species recognised in the quiz, for the badges (T-243).
 const RECOGNIZED_STORE = new AsyncStorageRecognitionStore();
+// Earned badges, remembered with their date (T-297 · review B-27).
+const BADGE_STORE = new AsyncStorageBadgeStore();
 // Which counties the travel banner has offered (T-218). Counties and times only, never positions.
 const TRAVEL_STORE = new AsyncStorageTravelStore();
 let entitlementSourceInstance: EntitlementSource | null | undefined;
@@ -324,6 +328,19 @@ export default function App() {
     };
   }, []);
   const [showBadges, setShowBadges] = useState(false);
+  const [rememberedBadges, setRememberedBadges] = useState<RememberedBadges>({});
+  const [badgesLoaded, setBadgesLoaded] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    void BADGE_STORE.load().then((badges) => {
+      if (cancelled) return;
+      setRememberedBadges(badges);
+      setBadgesLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [showImpact, setShowImpact] = useState(false);
   const {
     entitlements,
@@ -409,6 +426,27 @@ export default function App() {
     locale,
     new Set(collection.records.map((r) => r.speciesId)),
   );
+  // Badges are a record of what the user did, so they count over the home county (plus anything
+  // collected elsewhere) whichever county is on screen (T-297 · review B-27). The home list is read
+  // separately only while another county is viewed; at home it is the Almanac's own list.
+  const homeCatalogue = useAlmanacCatalogue(
+    speciesRepo,
+    hometown?.id ?? null,
+    locale,
+    new Set(collection.records.map((r) => r.speciesId)),
+    viewCounty !== null,
+  );
+  const badgeSpecies = viewCounty !== null ? homeCatalogue.species : almanacSpecies;
+  const badgeListReady = viewCounty !== null ? !homeCatalogue.loading : !speciesLoading;
+  // Newly earned badges are remembered once the stored ones have loaded (so an older date is never
+  // overwritten), and saved; the first date stays.
+  useEffect(() => {
+    if (!badgesLoaded || !badgeListReady) return;
+    const statuses = badgeStatuses(collection.records, badgeSpecies, new Date(), recognized);
+    const next = rememberEarned(statuses, rememberedBadges, new Date().toISOString());
+    if (next === null) return;
+    void BADGE_STORE.save(next).then(() => setRememberedBadges(next));
+  }, [badgesLoaded, badgeListReady, collection.records, badgeSpecies, recognized, rememberedBadges]);
   // This Week over the user's own county (T-207); null in preview mode → bundled list.
   const thisWeekLive = useThisWeek(
     speciesRepo,
@@ -822,6 +860,7 @@ export default function App() {
         secondLanguageOn: dualLanguage.enabled,
       },
       agePath: onboardingRecord?.agePath ?? null,
+      badges: rememberedBadges,
     };
     const bundle = buildDataExport({
       exportedAt: new Date().toISOString(),
@@ -897,6 +936,7 @@ export default function App() {
     setDualLanguage(DEFAULT_DUAL_LANGUAGE);
     setHometown(null);
     setRecognized(new Set());
+    setRememberedBadges({});
     setOnboarded(false);
   };
 
@@ -1177,9 +1217,10 @@ export default function App() {
       <>
         <BadgesScreen
           locale={locale}
-          species={almanacSpecies}
+          species={badgeSpecies}
           records={collection.records}
           recognized={recognized}
+          remembered={rememberedBadges}
           onDone={() => setShowBadges(false)}
         />
         <StatusBar style="auto" />

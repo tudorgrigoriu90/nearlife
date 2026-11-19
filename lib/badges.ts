@@ -152,3 +152,27 @@ export function earnedBadges(
     .filter((b) => b.earned)
     .map((b) => b.id);
 }
+
+/** Earned badge ids and when they were first earned (T-297 · review B-27). */
+export type RememberedBadges = Record<string, string>;
+
+/**
+ * The remembered set with the badges `statuses` newly earns, dated `nowIso`; null when nothing is
+ * new, so a caller writes only on a change.
+ */
+export function rememberEarned(
+  statuses: BadgeStatus[],
+  remembered: RememberedBadges,
+  nowIso: string,
+): RememberedBadges | null {
+  const fresh = statuses.filter((b) => b.earned && remembered[b.id] === undefined);
+  if (fresh.length === 0) return null;
+  return { ...remembered, ...Object.fromEntries(fresh.map((b) => [b.id, nowIso])) };
+}
+
+/** A badge once earned is never shown locked, even after the species list behind it changed. */
+export function withRemembered(statuses: BadgeStatus[], remembered: RememberedBadges): BadgeStatus[] {
+  return statuses.map((b) =>
+    !b.earned && remembered[b.id] !== undefined ? { ...b, earned: true, progress: b.count } : b,
+  );
+}

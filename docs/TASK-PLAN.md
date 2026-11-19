@@ -4530,6 +4530,17 @@ document until it is started, when it takes the next free `T-###`.
   - Tests: 5 App flows (export, quiz, minigame + tip, delete confirmation, sheet); the sheet
     test fails without the fix.
 
+- **T-297 · Badges count over the home county and are never relocked** — *Claude · S · `DONE` · deps: T-212 · review B-27*
+  - ✅ Badges count over the home county's catalogue plus collected extras whichever county is on
+    screen; the home list is read (from the county cache) only while another county is viewed
+    (`useAlmanacCatalogue(…, enabled)`).
+  - ✅ Earned badges are remembered on the phone with the date first earned (`nearby.badges.v1`,
+    `rememberEarned` / `withRemembered`), so a catalogue refresh that changes a group's size never
+    shows an earned badge locked. Erased with the account, in the export's device section and
+    the privacy policy's list (🆕). Tests: badges 3, store 5, screen 1, hook 1.
+  - Not covered by an App-level test: viewing another county needs the backend's Counties
+    screen, which App tests do not run; the hook and screen tests cover each half.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

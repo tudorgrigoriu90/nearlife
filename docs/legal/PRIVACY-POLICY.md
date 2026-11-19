@@ -109,7 +109,7 @@ consent choices, collection, purchase records and, if you're in a Family, your r
 account's free-catch counter and creation date, the notifications sent to you, the phones
 registered for notifications (shown by the last 6 characters of their token), reviewer-code
 use, and the reports of a mistake you sent. It also holds what the app keeps on your phone: quiz attempts, recognised species, the
-county-visit log, your language choices and the age path. An owner's export shows when members
+county-visit log, your language choices, the age path and 🆕 the badges you earned (with the date). An owner's export shows when members
 joined, not who they are. You can share or save the export as a file. You also have the right to lodge a complaint with your supervisory authority
 — in Sweden, the **Integritetsskyddsmyndigheten (IMY)**.
 

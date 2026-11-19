@@ -25,8 +25,15 @@ const record = (value: AlmanacCatalogue) => {
   latest = value;
 };
 
-function Host(props: { repo: SpeciesRepository; regionId: string | null; collected?: string[] }) {
-  record(useAlmanacCatalogue(props.repo, props.regionId, 'sv', new Set(props.collected ?? [])));
+function Host(props: {
+  repo: SpeciesRepository;
+  regionId: string | null;
+  collected?: string[];
+  enabled?: boolean;
+}) {
+  record(
+    useAlmanacCatalogue(props.repo, props.regionId, 'sv', new Set(props.collected ?? []), props.enabled),
+  );
   return <Text>host</Text>;
 }
 
@@ -68,5 +75,16 @@ describe('useAlmanacCatalogue', () => {
       />,
     );
     await waitFor(() => expect(latest?.species.map((s) => s.id)).toEqual(['a', 'b']));
+  });
+});
+
+// T-297: the home catalogue for Badges is read only while another county is on screen.
+describe('useAlmanacCatalogue switched off', () => {
+  it('reads nothing and lists nothing', async () => {
+    const r = repo();
+    await render(<Host repo={r} regionId="SWE.13_1" collected={['moose']} enabled={false} />);
+    expect(latest).toMatchObject({ species: [], loading: false, error: false });
+    expect(r.regionCatalogue).not.toHaveBeenCalled();
+    expect(r.describeSpecies).not.toHaveBeenCalled();
   });
 });

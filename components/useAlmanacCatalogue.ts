@@ -21,6 +21,8 @@ export function useAlmanacCatalogue(
   regionId: string | null,
   locale: Locale,
   collectedIds: ReadonlySet<string>,
+  /** False reads nothing and lists nothing (T-297: the home list Badges needs only elsewhere). */
+  enabled = true,
 ): AlmanacCatalogue {
   const [base, setBase] = useState<{ key: string; species: Species[]; failed?: boolean } | null>(
     null,
@@ -30,6 +32,7 @@ export function useAlmanacCatalogue(
   const baseKey = `${regionId ?? 'preview'}|${locale}|${attempt}`;
 
   useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
     almanacBase(repo, regionId, locale)
       .then((species) => {
@@ -43,13 +46,13 @@ export function useAlmanacCatalogue(
     return () => {
       cancelled = true;
     };
-  }, [repo, regionId, locale, baseKey]);
+  }, [repo, regionId, locale, baseKey, enabled]);
 
   const collectedKey = [...collectedIds].sort().join(',');
   const current = base?.key === baseKey ? base.species : null;
 
   useEffect(() => {
-    if (current === null) return;
+    if (!enabled || current === null) return;
     let cancelled = false;
     collectedExtras(repo, current, collectedKey ? collectedKey.split(',') : [], locale)
       .then((found) => {
@@ -61,9 +64,10 @@ export function useAlmanacCatalogue(
     return () => {
       cancelled = true;
     };
-  }, [repo, current, collectedKey, locale]);
+  }, [repo, current, collectedKey, locale, enabled]);
 
   const retry = () => setAttempt((n) => n + 1);
+  if (!enabled) return { species: [], loading: false, error: false, retry };
   if (base?.key === baseKey && base.failed) return { species: [], loading: false, error: true, retry };
   return current === null
     ? { species: [], loading: true, error: false, retry }

@@ -3,6 +3,8 @@ import {
   badgeStatuses,
   earnedBadges,
   groupTiers,
+  rememberEarned,
+  withRemembered,
   GROUP_TIERS,
   RECOGNIZED_GROUP_TIERS,
   RECOGNIZED_MILESTONES,
@@ -156,5 +158,30 @@ describe('recognised badges from the "I saw…" quiz (T-243)', () => {
     expect(statuses.filter((b) => b.kind === 'recognized-milestone').every((b) => !b.earned)).toBe(
       true,
     );
+  });
+});
+
+// T-297 · review B-27: a badge once earned stays earned, whatever list is on screen later.
+describe('remembered badges', () => {
+  const reptiles = ['r1', 'r2', 'r3'].map((id) => sp(id, 'fish'));
+
+  it('records the badges newly earned, with the date', () => {
+    const statuses = badgeStatuses(reptiles.map((s) => spotted(s.id)), reptiles, new Date('2026-06-01'));
+    const next = rememberEarned(statuses, {}, '2026-06-01T10:00:00Z');
+    expect(next?.['group-fish-3']).toBe('2026-06-01T10:00:00Z');
+  });
+
+  it('keeps the first date and reports no change when nothing new was earned', () => {
+    const statuses = badgeStatuses(reptiles.map((s) => spotted(s.id)), reptiles, new Date('2026-06-01'));
+    const first = rememberEarned(statuses, {}, 'first')!;
+    expect(rememberEarned(statuses, first, 'later')).toBeNull();
+  });
+
+  it('a remembered badge shows earned even when the list it was earned on changed', () => {
+    // The group grew from 3 to 4 reptiles; "all 3" no longer exists, "all 4" is not reached.
+    const bigger = [...reptiles, sp('r4', 'fish')];
+    const statuses = badgeStatuses(reptiles.map((s) => spotted(s.id)), bigger, new Date('2026-06-01'));
+    const shown = withRemembered(statuses, { 'spotted-10': 'then' });
+    expect(shown.find((b) => b.id === 'spotted-10')).toMatchObject({ earned: true, progress: 10 });
   });
 });

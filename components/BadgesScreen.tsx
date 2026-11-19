@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { badgeStatuses, type BadgeStatus } from '../lib/badges';
+import { badgeStatuses, withRemembered, type BadgeStatus, type RememberedBadges } from '../lib/badges';
 import type { CollectionRecord } from '../lib/collection';
 import { createTranslator, type Locale } from '../lib/i18n';
 import type { Species } from '../lib/species/types';
@@ -27,6 +27,7 @@ export default function BadgesScreen({
   records = [],
   now,
   recognized,
+  remembered = {},
   onDone,
 }: {
   locale?: Locale;
@@ -36,10 +37,15 @@ export default function BadgesScreen({
   now?: Date;
   /** Species picked out correctly in the "I saw…" quiz (T-243). */
   recognized?: ReadonlySet<string>;
+  /** Badges earned before, with their date (T-297): never shown locked again. */
+  remembered?: RememberedBadges;
   onDone?: () => void;
 }) {
   const tr = createTranslator(locale);
-  const statuses = badgeStatuses(records, species, now ?? new Date(), recognized);
+  const statuses = withRemembered(
+    badgeStatuses(records, species, now ?? new Date(), recognized),
+    remembered,
+  );
   const tierIndex = new Map<string, number>();
 
   const label = (b: BadgeStatus): { emoji: string; label: string } => {
