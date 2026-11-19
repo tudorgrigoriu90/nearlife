@@ -2,13 +2,14 @@ import { Directory, File, Paths } from 'expo-file-system';
 import type { PackFiles } from './offlinePack';
 
 // Where the offline county pack lives (T-256): the app's document directory, which Android only
-// clears when the app is uninstalled or its data is wiped. One JSON file plus one small WebP per
-// species photo.
+// clears when the app is uninstalled or its data is wiped. A small index (pack.json), one text
+// file per language (T-322), and one small WebP per species photo.
 
 const ROOT = 'offline';
 const PACK = 'pack.json';
 const PACK_TMP = 'pack.json.tmp';
 
+const contentName = (locale: string) => `content-${locale.replace(/[^a-z]/gi, '')}.json`;
 const fileName = (speciesId: string) => `${speciesId.replace(/[^A-Za-z0-9-]/g, '-')}.webp`;
 const idOf = (name: string) => name.replace(/\.webp$/, '').replace(/^gbif-/, 'gbif:');
 
@@ -37,6 +38,22 @@ export class ExpoPackFiles implements PackFiles {
     tmp.create();
     tmp.write(json);
     const target = new File(this.root(), PACK);
+    if (target.exists) target.delete();
+    tmp.move(target);
+  }
+
+  // One file per language (T-322), written the same safe way.
+  async readContent(locale: string): Promise<string | null> {
+    const file = new File(this.root(), contentName(locale));
+    return file.exists ? file.text() : null;
+  }
+
+  async writeContent(locale: string, json: string): Promise<void> {
+    const tmp = new File(this.root(), `${contentName(locale)}.tmp`);
+    if (tmp.exists) tmp.delete();
+    tmp.create();
+    tmp.write(json);
+    const target = new File(this.root(), contentName(locale));
     if (target.exists) target.delete();
     tmp.move(target);
   }

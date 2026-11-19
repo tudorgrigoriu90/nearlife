@@ -61,13 +61,28 @@ function fakeSource(over: Partial<{ thumbs: ThumbRow[]; content: SpeciesContentR
 
 function fakeFiles(failing: string[] = []) {
   const saved = new Map<string, string>();
+  const contents = new Map<string, string>();
   let pack: string | null = null;
-  const files: PackFiles & { saved: Map<string, string>; downloads: string[] } = {
+  const files: PackFiles & {
+    saved: Map<string, string>;
+    contents: Map<string, string>;
+    downloads: string[];
+    contentReads: string[];
+  } = {
     saved,
+    contents,
     downloads: [],
+    contentReads: [],
     readPack: async () => pack,
     writePack: async (json) => {
       pack = json;
+    },
+    readContent: async (locale) => {
+      files.contentReads.push(locale);
+      return contents.get(locale) ?? null;
+    },
+    writeContent: async (locale, json) => {
+      contents.set(locale, json);
     },
     hasThumb: (id) => saved.has(id),
     downloadThumb: async (url, id) => {
@@ -82,6 +97,7 @@ function fakeFiles(failing: string[] = []) {
     thumbUri: (id) => `file:///offline/thumbs/${id}.webp`,
     clear: () => {
       saved.clear();
+      contents.clear();
       pack = null;
     },
     sizeBytes: () => 0,
@@ -109,8 +125,13 @@ describe('downloadPack', () => {
 
   it('keeps text small: English only where the app language is missing', async () => {
     const source = fakeSource();
-    const pack = await downloadPack(source, fakeFiles(), target, undefined, now);
-    const keys = pack.content.map((c) => `${c.species_id}:${c.locale}`).sort();
+    const files = fakeFiles();
+    const pack = await downloadPack(source, files, target, undefined, now);
+    // T-322 · review B-32: card text is one file per language, beside the index.
+    expect(pack.content).toBeUndefined();
+    expect([...(pack.contentLocales ?? [])].sort()).toEqual(['en', 'ro', 'sv']);
+    const rows = [...files.contents.values()].flatMap((j) => JSON.parse(j) as { species_id: string; locale: string }[]);
+    const keys = rows.map((c) => `${c.species_id}:${c.locale}`).sort();
     expect(keys).toEqual(['a:ro', 'a:sv', 'b:sv', 'c:en']);
     expect(source.contentCalls).toEqual([['sv', 'ro'], ['en']]);
   });
@@ -171,5 +192,42 @@ describe('loadPack', () => {
     expect(await loadPack(files)).toBeNull();
     await files.writePack(JSON.stringify({ ...pack, version: 0 }));
     expect(await loadPack(files)).toBeNull();
+  });
+});
+
+
+// T-322 · review B-32: a launch reads the small index only; card text is read when a card opens.
+describe('pack layout', () => {
+  it('loading the pack reads no card text', async () => {
+    const files = fakeFiles();
+    await downloadPack(fakeSource(), files, target, undefined, now);
+    files.contentReads.length = 0;
+    const loaded = await loadPack(files);
+    expect(loaded?.regionId).toBe('SWE.9_1');
+    expect(files.contentReads).toEqual([]);
+  });
+
+  it('a version-1 pack on the phone is split once, not thrown away', async () => {
+    const files = fakeFiles();
+    const v1 = {
+      version: 1,
+      regionId: 'SWE.9_1',
+      locale: 'sv',
+      secondaryLocale: null,
+      savedAt: 't',
+      catalogue: [],
+      presence: [],
+      content: [
+        { species_id: 'a', locale: 'sv', fact: 'f' },
+        { species_id: 'b', locale: 'en', fact: 'g' },
+      ],
+      thumbs: {},
+    };
+    await files.writePack(JSON.stringify(v1));
+    const loaded = await loadPack(files);
+    expect(loaded?.version).toBe(PACK_VERSION);
+    expect(loaded?.content).toBeUndefined();
+    expect(JSON.parse(files.contents.get('sv')!)).toEqual([{ species_id: 'a', locale: 'sv', fact: 'f' }]);
+    expect(JSON.parse((await files.readPack())!).content).toBeUndefined();
   });
 });

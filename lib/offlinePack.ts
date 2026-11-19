@@ -10,7 +10,10 @@ import type { CatalogueRow, PresenceRow, SpeciesContentRow } from './speciesRepo
 // only where that is missing, the second language if one is chosen, and the 200 px WebP thumbnails
 // (T-255, ~4.5 KB each) instead of card photos. A refresh downloads only photos that changed.
 
-export const PACK_VERSION = 1;
+// Version 2 (T-322 · review B-32): the pack file is a small index (catalogue, presence, thumbs);
+// card text lives in one file per language, read when a card first opens. Version 1 held the text
+// inline, so every launch read and parsed all of it; a version-1 pack is split once on load.
+export const PACK_VERSION = 2;
 
 export interface OfflinePack {
   version: typeof PACK_VERSION;
@@ -21,7 +24,10 @@ export interface OfflinePack {
   savedAt: string;
   catalogue: CatalogueRow[];
   presence: PresenceRow[];
-  content: SpeciesContentRow[];
+  /** Version 1 kept card text here; version 2 keeps it in per-language files (`contentLocales`). */
+  content?: SpeciesContentRow[];
+  /** The languages with a text file beside the index (version 2). */
+  contentLocales?: string[];
   /** speciesId → the photo its saved thumbnail was made from; only species with a saved file. */
   thumbs: Record<string, string>;
 }
@@ -44,6 +50,9 @@ export interface PackSource {
 export interface PackFiles {
   readPack(): Promise<string | null>;
   writePack(json: string): Promise<void>;
+  /** One language's card text (version 2). */
+  readContent(locale: string): Promise<string | null>;
+  writeContent(locale: string, json: string): Promise<void>;
   hasThumb(speciesId: string): boolean;
   downloadThumb(url: string, speciesId: string): Promise<void>;
   deleteThumb(speciesId: string): void;
@@ -74,11 +83,32 @@ export async function loadPack(files: PackFiles): Promise<OfflinePack | null> {
   try {
     const text = await files.readPack();
     if (!text) return null;
-    const pack = JSON.parse(text) as OfflinePack;
-    return pack.version === PACK_VERSION && Array.isArray(pack.catalogue) ? pack : null;
+    const pack = JSON.parse(text) as Omit<OfflinePack, 'version'> & { version: number };
+    if (!Array.isArray(pack.catalogue)) return null;
+    if (pack.version === PACK_VERSION) return pack as OfflinePack;
+    // A version-1 pack: split its text out once, rather than make its owner download again.
+    if (pack.version === 1 && Array.isArray(pack.content)) {
+      return await writeSplit(files, { ...pack, version: PACK_VERSION }, pack.content);
+    }
+    return null;
   } catch {
     return null;
   }
+}
+
+/** Text files first, the index last: a failure part way leaves the previous index whole. */
+async function writeSplit(
+  files: PackFiles,
+  pack: OfflinePack,
+  content: SpeciesContentRow[],
+): Promise<OfflinePack> {
+  const byLocale = new Map<string, SpeciesContentRow[]>();
+  for (const row of content) byLocale.set(row.locale, [...(byLocale.get(row.locale) ?? []), row]);
+  for (const [locale, rows] of byLocale) await files.writeContent(locale, JSON.stringify(rows));
+  const { content: _inline, ...rest } = pack;
+  const index: OfflinePack = { ...rest, contentLocales: [...byLocale.keys()] };
+  await files.writePack(JSON.stringify(index));
+  return index;
 }
 
 /**
@@ -147,17 +177,18 @@ export async function downloadPack(
   // Photos of species that left the county, or left over from an interrupted download, go.
   for (const id of files.listThumbs()) if (!(id in thumbs)) files.deleteThumb(id);
 
-  const pack: OfflinePack = {
-    version: PACK_VERSION,
-    regionId: target.regionId,
-    locale: target.locale,
-    secondaryLocale: target.secondaryLocale,
-    savedAt: now.toISOString(),
-    catalogue,
-    presence,
+  return writeSplit(
+    files,
+    {
+      version: PACK_VERSION,
+      regionId: target.regionId,
+      locale: target.locale,
+      secondaryLocale: target.secondaryLocale,
+      savedAt: now.toISOString(),
+      catalogue,
+      presence,
+      thumbs,
+    },
     content,
-    thumbs,
-  };
-  await files.writePack(JSON.stringify(pack));
-  return pack;
+  );
 }

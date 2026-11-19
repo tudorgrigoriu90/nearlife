@@ -4752,6 +4752,17 @@ document until it is started, when it takes the next free `T-###`.
     components 2. Still the same five mechanics per category: a mechanic per species is beyond
     this bug (GDD §4 asks for reskins, which this is).
 
+- **T-322 · The offline pack: a small index read at launch, text on demand** — *Claude · S · `DONE` (launch-time measurement on the Director's phone with T-141) · deps: T-256, T-257 · review B-32 (I-05)*
+  - ✅ Pack version 2: `pack.json` holds the catalogue, presence and thumbnails; card text is one
+    `content-<locale>.json` per language, written before the index (so a failed download leaves the
+    previous pack whole). A launch reads and parses only the index.
+  - ✅ `PackSpeciesRepository` converts the catalogue on first use and reads a language's text the
+    first time a card needs it, once; a missing or broken file is no text, not an error.
+  - ✅ A version-1 pack already on a phone is split once on load, not discarded.
+  - Tests: 2 pack layout (loading reads no text; v1 split), 2 repository (nothing read until asked,
+    each language once; bad file → no text); existing pack tests now read the text files. The
+    review's "within 300 ms of no pack" is a device measurement, left to T-141.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

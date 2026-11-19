@@ -6,7 +6,7 @@ import type { OfflinePack, PackFiles, PackSource } from '../lib/offlinePack';
 
 const tr = createTranslator('sv');
 const pack: OfflinePack = {
-  version: 1,
+  version: 2,
   regionId: 'SWE.9_1',
   locale: 'sv',
   secondaryLocale: null,
@@ -93,6 +93,8 @@ describe('useOfflinePack', () => {
       writePack: async (json) => {
         stored = json;
       },
+      readContent: async () => null,
+      writeContent: async () => undefined,
       hasThumb: () => false,
       downloadThumb: async () => undefined,
       deleteThumb: () => undefined,

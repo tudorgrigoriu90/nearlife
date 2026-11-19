@@ -34,7 +34,7 @@ const text = (id: string, locale: string, fact = `fact ${locale}`) => ({
   protect: 'p',
 });
 const pack: OfflinePack = {
-  version: 1,
+  version: 2,
   regionId: 'SWE.9_1',
   locale: 'sv',
   secondaryLocale: 'ro',
@@ -111,5 +111,35 @@ describe('composeRepository', () => {
   it('another county offline has no data rather than Kronoberg stand-ins (T-275 · B-14)', async () => {
     const r = composeRepository({ online: failing, bundled, pack, thumbUri: uri, offline: true });
     await expect(r.regionCatalogue('SWE.1_1', 'sv')).rejects.toThrow();
+  });
+});
+
+
+// T-322 · review B-32: text is read per language, once, when first asked for.
+describe('PackSpeciesRepository reading text on demand', () => {
+  const { content: _inline, ...index } = pack;
+  const files: Record<string, string> = {
+    sv: JSON.stringify([text('a', 'sv')]),
+    en: JSON.stringify([text('b', 'en')]),
+  };
+
+  it('builds nothing and reads nothing until asked; each language once', async () => {
+    const reads: string[] = [];
+    const lazy = new PackSpeciesRepository(index as OfflinePack, uri, async (locale) => {
+      reads.push(locale);
+      return files[locale] ?? null;
+    });
+    expect(reads).toEqual([]);
+    expect((await lazy.getContent('a', 'sv'))?.fact).toBe('fact sv');
+    expect((await lazy.getContent('a', 'sv'))?.fact).toBe('fact sv');
+    expect(reads).toEqual(['sv']);
+    expect((await lazy.getContent('b', 'sv'))?.fact).toBe('fact en'); // English where Swedish is missing
+    expect(reads).toEqual(['sv', 'en']);
+  });
+
+  it('a language with no file, or a broken one, is no text rather than an error', async () => {
+    const lazy = new PackSpeciesRepository(index as OfflinePack, uri, async (l) => (l === 'ro' ? '{bad' : null));
+    expect(await lazy.getContentInLocale('a', 'ro')).toBeNull();
+    expect(await lazy.getContent('a', 'fi')).toBeNull();
   });
 });

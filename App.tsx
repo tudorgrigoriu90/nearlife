@@ -412,6 +412,7 @@ export default function App() {
             bundled: REPO_PARTS.bundled,
             pack: usablePack,
             thumbUri: (id) => PACK_FILES.thumbUri(id),
+            readContent: (locale) => PACK_FILES.readContent(locale),
             offline: connectivity.offline,
           })
         : SPECIES_REPO,
