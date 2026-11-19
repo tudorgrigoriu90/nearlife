@@ -17,6 +17,7 @@ It runs as manually dispatched GitHub Actions (free CI minutes), never at app ru
 | `catch-spots.yml` | OSM catch spots with the safety exclusions (`osm/`) |
 | `db-migrate.yml` | Applies `supabase/migrations` (`db/migrate.py`) and checks the live project (`db/verify.py`) |
 | `health.yml` | Daily checks on the live data (`db/health.py`) |
+| `content-sample.yml` | After each Data pipeline run: a review sheet of 30 random species × 5 languages with automatic flags (`content_sample.py`) |
 | `content-reports.yml` | Mondays: the week's "Report a mistake" reports, in the run summary (`db/content_reports.py`) |
 
 ## Local dev

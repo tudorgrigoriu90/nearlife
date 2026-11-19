@@ -1,0 +1,46 @@
+name: Content QA sample
+
+# T-294 · review I-33: after every successful Data pipeline run (or by hand), a review sheet of 30
+# random catalogue species in Swedish, English, Arabic, Persian and Somali, with automatic flags
+# (honesty, untranslated text, missing name / source / photo / advice) and two empty columns for
+# the reviewer. Download the `content-qa-sample` artifact, mark "correct" Y or N, and record the
+# error rate in docs/TASK-PLAN.md. Read-only.
+#
+# Secrets: SUPABASE_DB_URL (read-only query).
+
+on:
+  workflow_run:
+    workflows: ["Data pipeline"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: content-sample
+  cancel-in-progress: false
+
+jobs:
+  sample:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    name: Write the review sheet
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r pipeline/requirements.txt
+
+      - name: Sample
+        run: python pipeline/content_sample.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: content-qa-sample
+          path: pipeline/data/content_sample.csv
+          retention-days: 90

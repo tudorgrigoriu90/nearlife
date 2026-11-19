@@ -4504,6 +4504,22 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ `content-reports.yml` lists the week's reports every Monday in its run summary, grouped by
     species; comments are escaped so they cannot break the table or inject HTML. Tests: 5.
 
+- **T-294 · A content QA sample after every pipeline run** — *Claude · S · `DONE` · deps: T-177 · review I-33*
+  - ✅ `pipeline/content_sample.py` writes a review sheet: 30 random catalogue species (seeded by
+    the run) × sv, en, ar, fa, so, every field the card shows, automatic flags, and empty
+    `correct` / `reviewer_note` columns. Flags: a real-time presence phrase (the app's own list in
+    `lib/contentHonesty.ts`, parsed, so there is one list), a fact not in the row's script (an
+    Arabic row holding English, seen live), no name, a fact without its source, no photo, no
+    give/protect; no fact is noted. Tests: 11 (one against the schema in Postgres).
+  - ✅ `content-sample.yml` runs it after every successful Data pipeline run, or by hand, and
+    uploads the `content-qa-sample` artifact; the counts go in the run summary.
+  - The first human review and its error rate → T-295.
+
+- **T-295 · Review the first content sample and record the error rate** — *Director (+ a native reader per language) · S · `TODO` · deps: T-294*
+  - Download `content-qa-sample` from the latest Content QA sample run, mark each row `correct`
+    Y/N with a note, and send it back. Claude records the error rate per language here and opens
+    tasks for any pattern (a wrong name source, a template that reads badly, a bad translation).
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
