@@ -4541,6 +4541,15 @@ document until it is started, when it takes the next free `T-###`.
   - Not covered by an App-level test: viewing another county needs the backend's Counties
     screen, which App tests do not run; the hook and screen tests cover each half.
 
+- **T-298 · The card shows Caught and Helped, and offers no second catch** — *Claude · XS · `DONE` · deps: T-076 · review B-29*
+  - ✅ Under the name, each tier reached with its date ("Spotted 3 Jun · Caught 5 Jun",
+    `lib/tierMarks.ts`, the reader's date format).
+  - ✅ After a pledge, "You pledged this ✓" under the give or protect section pledged, where the
+    pledge buttons were.
+  - ✅ A species caught in the current season shows "Caught this season ✓" instead of the catch
+    button. Tests: helpers 4, card 3; the T-200 restart test now checks both the caught note and
+    the allowance on another species.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

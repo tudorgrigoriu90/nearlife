@@ -73,6 +73,7 @@ import { SupabaseSignInGateway } from './lib/accountSignIn';
 import { sendContentReport, SupabaseReportGateway } from './lib/contentReports';
 import { badgeStatuses, rememberEarned, type RememberedBadges } from './lib/badges';
 import { AsyncStorageBadgeStore } from './lib/badgeStore';
+import { caughtThisSeason } from './lib/tierMarks';
 import { fixIfConsented } from './lib/locationAccess';
 import { pickCountyStarter } from './lib/countyStarter';
 import SignIn from './components/SignIn';
@@ -1385,6 +1386,7 @@ export default function App() {
   }
 
   if (selected) {
+    const selectedRecord = collection.records.find((r) => r.speciesId === selected.id) ?? null;
     return (
       <View style={styles.root}>
         <SpeciesCard
@@ -1411,6 +1413,8 @@ export default function App() {
               : null
           }
           tier={tierStateFor(collection.records, selected.id)}
+          record={selectedRecord}
+          caughtThisSeason={caughtThisSeason(selectedRecord, new Date())}
           fullGame={freeCatch.fullGame}
           soundSource={soundSource() ?? undefined}
           county={cardCounty}

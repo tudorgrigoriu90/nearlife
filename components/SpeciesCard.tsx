@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import type { HelpKind, TierState } from '../lib/collection';
+import type { CollectionRecord, HelpKind, TierState } from '../lib/collection';
 import { EMPTY_TIER_STATE } from '../lib/collection';
 import { isDepthUnlocked, MAX_DEPTH } from '../lib/depthTier';
 import { dualTitle, type DualTextInput } from '../lib/dualLanguageFormat';
@@ -32,6 +32,7 @@ import type { CountyStats } from '../lib/countyStats';
 import BirdSong from './BirdSong';
 import type { SoundSource } from '../lib/birdSound';
 import { groupOf } from '../lib/species/group';
+import { tierMarks } from '../lib/tierMarks';
 
 // Species card (T-026 · USER-FLOWS §4). The always-free Tier-1 layer: fact, when/how trivia,
 // and the give + protect mission actions (never gated — invariant #2). Below sits the depth-tier
@@ -64,6 +65,8 @@ export default function SpeciesCard({
   threat,
   onBack,
   onReportMistake,
+  record = null,
+  caughtThisSeason = false,
 }: {
   species: Species;
   /** Tier-1 content (fact/when-how/give/protect), loaded by the caller via SpeciesRepository
@@ -101,6 +104,10 @@ export default function SpeciesCard({
   soundSource?: SoundSource;
   /** "Report a mistake" (T-293 · review I-32). Absent without a backend to send it to. */
   onReportMistake?: () => void;
+  /** The user's record of this species: the tier marks' dates and what was pledged (T-298). */
+  record?: CollectionRecord | null;
+  /** Caught in the current season: the card shows that instead of offering a catch (T-298). */
+  caughtThisSeason?: boolean;
   /** The species in the user's county (T-262); replaces the generic "this week" line. */
   county?: { name: string; stats: CountyStats } | null;
   /** This month, for the county chart. */
@@ -111,6 +118,7 @@ export default function SpeciesCard({
 }) {
   const tr = createTranslator(locale);
   const spotted = tier.spotted;
+  const marks = tierMarks(record, locale);
 
   // Dual display (F13.3): every text field pairs the app language with the mother tongue. The
   // formatter drops the second half per-field whenever it is missing, blank or identical, so a
@@ -203,6 +211,15 @@ export default function SpeciesCard({
             <Text style={[styles.mtNotice, { writingDirection: chromeDirection }]}>{mtNotice}</Text>
           ) : null}
           {!spotted ? <Text style={styles.notSpotted}>{tr('card.notSpotted')}</Text> : null}
+          {marks.length > 0 ? (
+            <View style={styles.marks}>
+              {marks.map((m) => (
+                <Text key={m.tier} style={styles.mark}>
+                  {`${tr(`tier.${m.tier}`)} ${m.date}`}
+                </Text>
+              ))}
+            </View>
+          ) : null}
           {/* Read aloud (T-244), switched off for now (T-248). The second language's name, else
               its Latin name. */}
           {READ_ALOUD_ENABLED ? (
@@ -268,6 +285,8 @@ export default function SpeciesCard({
             />
             {onPledge && !tier.helped ? (
               <PledgeButton label={tr('card.pledge')} onPress={() => onPledge(species, 'give')} />
+            ) : record?.helpedKind === 'give' ? (
+              <Text style={styles.pledged}>{tr('card.pledged')}</Text>
             ) : null}
             <Section
               title={tr('card.protect')}
@@ -279,6 +298,8 @@ export default function SpeciesCard({
                 label={tr('card.pledge')}
                 onPress={() => onPledge(species, 'protect')}
               />
+            ) : record?.helpedKind === 'protect' ? (
+              <Text style={styles.pledged}>{tr('card.pledged')}</Text>
             ) : null}
             <Text style={styles.law}>⚖ {tr('card.followLaw')}</Text>
           </>
@@ -324,7 +345,11 @@ export default function SpeciesCard({
         ) : null}
       </ScrollView>
 
-      {backAround ? (
+      {caughtThisSeason ? (
+        <View style={styles.ctaWrap}>
+          <Text style={styles.caughtNote}>{tr('card.caughtThisSeason')}</Text>
+        </View>
+      ) : backAround ? (
         <View style={styles.ctaWrap}>
           <Text style={styles.nearbyNote}>
             {tr('card.backAround', { month: tr('county.months').split('|')[backAround - 1] })}
@@ -401,6 +426,10 @@ function Section({
 }
 
 const styles = StyleSheet.create({
+  marks: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 8 },
+  mark: { fontSize: 12, fontWeight: '700', color: '#336f3c' },
+  pledged: { marginTop: 6, marginBottom: 4, fontSize: 13, fontWeight: '700', color: '#336f3c' },
+  caughtNote: { textAlign: 'center', fontSize: 15, fontWeight: '700', color: '#336f3c', paddingVertical: 12 },
   report: { alignSelf: 'center', marginTop: 18, paddingVertical: 10, paddingHorizontal: 16 },
   reportText: { fontSize: 13, color: '#566658', textDecorationLine: 'underline' },
   container: { flex: 1, backgroundColor: '#f4f8f2' },

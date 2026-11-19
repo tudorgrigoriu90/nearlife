@@ -145,6 +145,8 @@ export const en = {
   'card.contentMissing': 'The text for this species is not written yet.',
   'card.machineText': 'Text machine-translated, not yet reviewed',
   'card.notSpotted': 'Not spotted yet',
+  'card.pledged': 'You pledged this ✓',
+  'card.caughtThisSeason': 'Caught this season ✓',
   'card.back': 'Back',
   'card.followLaw':
     'Always follow local rules — access rights, protected species, and feeding differ by place.',
@@ -610,6 +612,8 @@ const sv: Catalog = {
   'card.contentMissing': 'Texten om arten är inte skriven än.',
   'card.machineText': 'Texten är maskinöversatt och inte granskad än',
   'card.notSpotted': 'Inte sedd ännu',
+  'card.pledged': 'Du har lovat detta ✓',
+  'card.caughtThisSeason': 'Fångad den här säsongen ✓',
   'card.back': 'Tillbaka',
   'card.followLaw':
     'Följ alltid lokala regler – allemansrätten, fridlysta arter och matning skiljer sig åt beroende på plats.',

@@ -92,3 +92,59 @@ describe('SpeciesCard "Report a mistake"', () => {
     expect(screen.queryByText(en('report.link'))).toBeNull();
   });
 });
+
+// T-298 · review B-29: the card shows the tiers reached, what was pledged, and offers no second
+// catch in a season.
+describe('SpeciesCard tier marks', () => {
+  const base = {
+    speciesId: swift.id,
+    spottedAt: '2026-06-03T10:00:00Z',
+    caughtAt: null,
+    helpedAt: null,
+    helpedKind: null,
+    primeBonus: false,
+  };
+  const day = (iso: string) => new Date(iso).toLocaleDateString('en', { day: 'numeric', month: 'short' });
+  const content = contentFor(swift.id, 'en') ?? null;
+
+  it('spotted only: the Spotted mark with its date, no other', async () => {
+    await render(<SpeciesCard species={swift} locale="en" content={content} record={base} tier={{ spotted: true, caught: false, helped: false }} />);
+    expect(screen.getByText(`${en('tier.spotted')} ${day(base.spottedAt)}`)).toBeTruthy();
+    expect(screen.queryByText(en('tier.caught'), { exact: false })).toBeNull();
+  });
+
+  it('caught and helped: every mark, and the pledged action is marked', async () => {
+    const record = { ...base, caughtAt: '2026-06-05T10:00:00Z', helpedAt: '2026-06-06T10:00:00Z', helpedKind: 'protect' as const };
+    await render(
+      <SpeciesCard
+        species={swift}
+        locale="en"
+        content={content}
+        record={record}
+        tier={{ spotted: true, caught: true, helped: true }}
+        onPledge={() => {}}
+      />,
+    );
+    expect(screen.getByText(`${en('tier.caught')} ${day(record.caughtAt)}`)).toBeTruthy();
+    expect(screen.getByText(`${en('tier.helped')} ${day(record.helpedAt)}`)).toBeTruthy();
+    expect(screen.getByText(en('card.pledged'))).toBeTruthy();
+    expect(screen.queryByText(en('card.pledge'), { exact: false })).toBeNull();
+  });
+
+  it('caught this season: no catch button, a plain note instead', async () => {
+    const onFind = jest.fn();
+    await render(
+      <SpeciesCard
+        species={swift}
+        locale="en"
+        content={content}
+        record={{ ...base, caughtAt: new Date().toISOString() }}
+        tier={{ spotted: true, caught: true, helped: false }}
+        caughtThisSeason
+        onFindNearby={onFind}
+      />,
+    );
+    expect(screen.getByText(en('card.caughtThisSeason'))).toBeTruthy();
+    expect(screen.queryByText(en('card.findNearby'), { exact: false })).toBeNull();
+  });
+});

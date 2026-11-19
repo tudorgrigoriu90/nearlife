@@ -420,8 +420,12 @@ describe('App', () => {
       await screen.unmount();
       await render(<App />);
       await press(tr('almanac.title'));
+      // The caught species offers no second catch this season (T-298 · review B-29).
       await press(commonNameFor(topRow, 'en'));
-      // Before T-200 the counter lived in component state and this read 3 again.
+      expect(await screen.findByText(tr('card.caughtThisSeason'))).toBeTruthy();
+      expect(await systemBack()).toBe(true);
+      // Another species shows the allowance. Before T-200 it lived in component state and read 3.
+      await press(commonNameFor(onboardingStarter, 'en'));
       expect(await screen.findByText(tr('catch.remaining', { count: 2 }))).toBeTruthy();
     },
     FLOW_TIMEOUT,
