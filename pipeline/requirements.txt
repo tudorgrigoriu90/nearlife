@@ -1,4 +1,4 @@
 # Data pipeline dependencies.
-pytest==8.3.4
+pytest==9.2.0
 requests==2.32.3  # GBIF occurrence API client (T-042)
 psycopg[binary]==3.2.3  # Supabase bulk loader (T-045, gbif/supabase_load.py)
