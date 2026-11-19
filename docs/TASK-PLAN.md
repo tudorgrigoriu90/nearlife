@@ -4488,6 +4488,22 @@ document until it is started, when it takes the next free `T-###`.
     the theme, so new screens are covered. Components keep hex literals for now; moving them to
     named imports comes with dark mode (I-26), which needs the second palette anyway.
 
+- **T-293 · "Report a mistake" on every card** — *Claude · S · `DONE` (migration 0038 applied with this push) · deps: T-276 · review I-32*
+  - ✅ `content_reports` (migration 0038): a signed-in user inserts a report for themselves
+    (species, language, kind: name / photo / text / season / other, comment ≤ 500 characters);
+    `user_id` comes from the session and cannot be set; nobody but the service role reads the
+    table; at most 20 a day per account (`too_many_reports`); a real species only. Reports leave
+    with the account and expire after 365 days (`expire-content-reports` cron, watched by the
+    daily health check). Tests: 10 in a real Postgres; `verify.py` checks the insert, the refused
+    read and the refused other-account insert live.
+  - ✅ The card has a "Report a mistake" link (with a backend) that opens a short sheet:
+    choose what is wrong, an optional comment, send; it thanks, says when the daily limit is
+    reached, and keeps the form after a failure. en + sv strings. Tests: module 8, sheet 6, card 2.
+  - ✅ Reports are personal data: `my_data_export()` and export v3 carry `contentReports`; the
+    privacy policy (🆕) lists them, their basis and the 365 days.
+  - ✅ `content-reports.yml` lists the week's reports every Monday in its run summary, grouped by
+    species; comments are escaped so they cannot break the table or inject HTML. Tests: 5.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

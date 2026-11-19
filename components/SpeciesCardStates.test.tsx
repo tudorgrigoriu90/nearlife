@@ -70,3 +70,25 @@ describe('main-language machine text', () => {
     expect(screen.queryByText(en('card.machineText'))).toBeNull();
   });
 });
+
+// T-293 · review I-32: every card can report a wrong name, photo, text or season.
+describe('SpeciesCard "Report a mistake"', () => {
+  it('opens the report from the card', async () => {
+    const onReport = jest.fn();
+    await render(
+      <SpeciesCard
+        species={swift}
+        locale="sv"
+        content={contentFor(swift.id, 'sv') ?? null}
+        onReportMistake={onReport}
+      />,
+    );
+    await fireEvent.press(screen.getByText(sv('report.link')));
+    expect(onReport).toHaveBeenCalledTimes(1);
+  });
+
+  it('is absent where reports cannot be sent', async () => {
+    await render(<SpeciesCard species={swift} locale="en" content={contentFor(swift.id, 'en') ?? null} />);
+    expect(screen.queryByText(en('report.link'))).toBeNull();
+  });
+});

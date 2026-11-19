@@ -103,6 +103,9 @@ EXPECTED: dict[str, str] = {
     "after a removal the old code is refused": "household_not_found",
     "after a removal the code has changed": "ok",
     "every catalogue fact has its Wikipedia source": "ok",
+    "a user can report a mistake": "ok",
+    "users cannot read the reports": "permission denied",
+    "a report cannot be sent in another account's name": "permission denied",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -619,6 +622,30 @@ def run_catch_spot_checks(cur) -> dict[str, str]:
     return results
 
 
+def run_content_report_checks(cur) -> dict[str, str]:
+    """T-293 · review I-32: users send reports for themselves; nobody but the service role reads them."""
+    results: dict[str, str] = {}
+    cur.execute(
+        "insert into auth.users (id, instance_id, aud, role, is_anonymous, created_at, updated_at) "
+        "values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', "
+        "'authenticated', true, now(), now()) returning id"
+    )
+    user = str(cur.fetchone()[0])
+    (species,) = real_species(cur, 1)
+    cur.execute("set local role authenticated")
+    cur.execute("select set_config('request.jwt.claims', %s, true)",
+                (json.dumps({"sub": user, "role": "authenticated"}),))
+    _step(cur, results, "a user can report a mistake",
+          "insert into public.content_reports (species_id, locale, kind, comment) "
+          "values (%s, 'sv', 'other', 'verify.py check')", (species,))
+    _step(cur, results, "users cannot read the reports", "select count(*) from public.content_reports")
+    _step(cur, results, "a report cannot be sent in another account's name",
+          "insert into public.content_reports (user_id, species_id, locale, kind) "
+          "values (gen_random_uuid(), %s, 'sv', 'other')", (species,))
+    cur.execute("reset role")
+    return results
+
+
 def main() -> None:
     dsn = os.environ.get("SUPABASE_DB_URL")
     if not dsn:
@@ -636,6 +663,7 @@ def main() -> None:
                 results.update(run_catch_spot_checks(cur))
                 results.update(run_catalogue_checks(cur))
                 results.update(run_reviewer_checks(cur))
+                results.update(run_content_report_checks(cur))
         finally:
             conn.rollback()  # always: these checks must never leave a trace
 

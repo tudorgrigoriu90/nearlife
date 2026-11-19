@@ -9,6 +9,7 @@ import ThisWeekScreen from './components/ThisWeekScreen';
 import CatchMinigame from './components/minigame/CatchMinigame';
 import ProtectTip from './components/catch/ProtectTip';
 import FreeCatchSheet from './components/catch/FreeCatchSheet';
+import ReportMistakeSheet from './components/ReportMistakeSheet';
 import PledgeConfirm from './components/helped/PledgeConfirm';
 import SettingsScreen from './components/SettingsScreen';
 import DataExportView from './components/DataExportView';
@@ -69,6 +70,7 @@ import { getSupabaseConfig, hasSupabaseConfig } from './lib/supabaseConfig';
 import { eraseDeviceStorage } from './lib/deviceErase';
 import { ExpoCacheFiles } from './lib/countyCacheFiles';
 import { SupabaseSignInGateway } from './lib/accountSignIn';
+import { sendContentReport, SupabaseReportGateway } from './lib/contentReports';
 import { fixIfConsented } from './lib/locationAccess';
 import { pickCountyStarter } from './lib/countyStarter';
 import SignIn from './components/SignIn';
@@ -463,6 +465,9 @@ export default function App() {
   const [caughtTip, setCaughtTip] = useState<{ species: Species; prime: boolean } | null>(null);
   const [pledge, setPledge] = useState<{ species: Species; kind: HelpKind } | null>(null);
   const [paywall, setPaywall] = useState(false);
+  // "Report a mistake" on the open card (T-293 · review I-32).
+  // Keyed by species, so a report left open never reappears on the next card.
+  const [reportingFor, setReportingFor] = useState<string | null>(null);
   const goBackRef = useRef<() => boolean>(() => false);
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => goBackRef.current());
@@ -941,7 +946,11 @@ export default function App() {
       return closed(() => setGoCatch(null));
     }
     if (catching) return closed(() => setCatching(null));
-    if (selected) return closed(() => (paywall ? setPaywall(false) : setSelected(null)));
+    if (selected) {
+      return closed(() =>
+        reportingFor === selected.id ? setReportingFor(null) : paywall ? setPaywall(false) : setSelected(null),
+      );
+    }
     if (viewCounty) return closed(() => setViewCounty(null));
     if (tab !== 'thisWeek') return closed(() => setTab('thisWeek'));
     return false;
@@ -1351,6 +1360,7 @@ export default function App() {
           month={monthOf(new Date())}
           backAround={cardSeason && !cardSeason.open ? cardSeason.backAround : null}
           onBack={() => setSelected(null)}
+          onReportMistake={hasSupabaseConfig() ? () => setReportingFor(selected.id) : undefined}
           findNearbyLabel={previewMode && !viewCounty ? tr('preview.setHomeToPlay') : undefined}
           onFindNearby={
             canCollect
@@ -1387,6 +1397,21 @@ export default function App() {
                     setShowStore(true);
                   }
                 : undefined
+            }
+          />
+        ) : null}
+        {reportingFor === selected.id ? (
+          <ReportMistakeSheet
+            speciesName={selected.commonName || selected.scientificName}
+            locale={locale}
+            onClose={() => setReportingFor(null)}
+            onSend={(kind, comment) =>
+              sendContentReport(new SupabaseReportGateway(getSupabase()), {
+                speciesId: selected.id,
+                locale,
+                kind,
+                comment,
+              })
             }
           />
         ) : null}

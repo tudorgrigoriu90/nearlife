@@ -151,6 +151,7 @@ describe('data export v3', () => {
     notifications: [{ speciesId: 'gbif:1', sentAt: '2026-11-02T09:00:00Z' }],
     devices: [{ platform: 'android', locale: 'sv', tokenEnd: '123456', registeredAt: 'x', updatedAt: 'y' }],
     reviewerCodes: [],
+    contentReports: [],
   };
   const device = {
     quizAttempts: { '2026-11-18': 2 },
@@ -189,5 +190,31 @@ describe('data export v3', () => {
     });
     expect(out.unavailable).toEqual(['server']);
     expect(out.notifications).toEqual([]);
+  });
+});
+
+// T-293 · review I-32: reports the user sent are personal data and belong in their export.
+describe('data export: content reports', () => {
+  const report = { speciesId: 'gbif:1', locale: 'sv', kind: 'photo', comment: 'A hare.', sentAt: 't' };
+
+  it('carries the reports the user sent', () => {
+    const out = buildDataExport({
+      exportedAt: 't',
+      profile: { homeRegion: null },
+      consent: { location: false, notifications: false, analytics: false },
+      collection: [],
+      server: { account: null, notifications: [], devices: [], reviewerCodes: [], contentReports: [report] },
+    });
+    expect(out.contentReports).toEqual([report]);
+  });
+
+  it('reads them from the server, and an older server without them as none', async () => {
+    const rpc = jest
+      .fn()
+      .mockResolvedValueOnce({ data: { contentReports: [report] }, error: null })
+      .mockResolvedValueOnce({ data: {}, error: null });
+    const source = new SupabaseExportSource({ from: jest.fn(), rpc } as never, async () => 'u1');
+    expect((await source.server()).contentReports).toEqual([report]);
+    expect((await source.server()).contentReports).toEqual([]);
   });
 });

@@ -15,7 +15,7 @@ import type { Household } from './family';
 
 // v3 (T-280 · review B-18) adds everything else kept about the user: from the server, the
 // account counters, the notification history, the push devices (token by its last 6 characters)
-// and reviewer-code redemptions (`public.my_data_export()`); from the phone, quiz attempts,
+// reviewer-code redemptions and, since T-293, "Report a mistake" reports (`public.my_data_export()`); from the phone, quiz attempts,
 // recognised species, the travel log, language choices and the age path.
 export const EXPORT_FORMAT = 'nearby.export.v3';
 
@@ -37,6 +37,14 @@ export interface ServerExport {
     updatedAt: string;
   }[];
   reviewerCodes: { redeemedAt: string }[];
+  /** "Report a mistake" reports the user sent (T-293). */
+  contentReports: {
+    speciesId: string;
+    locale: string;
+    kind: string;
+    comment: string | null;
+    sentAt: string;
+  }[];
 }
 
 /** What the phone keeps besides the collection and consent. */
@@ -84,6 +92,7 @@ export interface DataExport {
   notifications: ServerExport['notifications'];
   devices: ServerExport['devices'];
   reviewerCodes: ServerExport['reviewerCodes'];
+  contentReports: ServerExport['contentReports'];
   device: DeviceExport;
   /**
    * Sections the server could not be asked for (offline): named, so an empty list there is never
@@ -133,6 +142,7 @@ export function buildDataExport(input: {
     notifications: [...(input.server?.notifications ?? [])],
     devices: [...(input.server?.devices ?? [])],
     reviewerCodes: [...(input.server?.reviewerCodes ?? [])],
+    contentReports: [...(input.server?.contentReports ?? [])],
     device: input.device ?? {
       quizAttempts: null,
       recognized: [],
@@ -171,6 +181,7 @@ export class SupabaseExportSource {
       notifications: Array.isArray(d.notifications) ? d.notifications : [],
       devices: Array.isArray(d.devices) ? d.devices : [],
       reviewerCodes: Array.isArray(d.reviewerCodes) ? d.reviewerCodes : [],
+      contentReports: Array.isArray(d.contentReports) ? d.contentReports : [],
     };
   }
 

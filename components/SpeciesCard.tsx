@@ -63,6 +63,7 @@ export default function SpeciesCard({
   month,
   threat,
   onBack,
+  onReportMistake,
 }: {
   species: Species;
   /** Tier-1 content (fact/when-how/give/protect), loaded by the caller via SpeciesRepository
@@ -98,6 +99,8 @@ export default function SpeciesCard({
   /** Where a bird's recording comes from (T-246). Absent: no song button. Playable with the Full
    * Game only; otherwise shown disabled (T-249, T-250). */
   soundSource?: SoundSource;
+  /** "Report a mistake" (T-293 · review I-32). Absent without a backend to send it to. */
+  onReportMistake?: () => void;
   /** The species in the user's county (T-262); replaces the generic "this week" line. */
   county?: { name: string; stats: CountyStats } | null;
   /** This month, for the county chart. */
@@ -313,6 +316,12 @@ export default function SpeciesCard({
             })}
           </View>
         </View>
+
+        {onReportMistake ? (
+          <Pressable onPress={onReportMistake} accessibilityRole="button" style={styles.report}>
+            <Text style={styles.reportText}>{tr('report.link')}</Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
 
       {backAround ? (
@@ -392,6 +401,8 @@ function Section({
 }
 
 const styles = StyleSheet.create({
+  report: { alignSelf: 'center', marginTop: 18, paddingVertical: 10, paddingHorizontal: 16 },
+  reportText: { fontSize: 13, color: '#566658', textDecorationLine: 'underline' },
   container: { flex: 1, backgroundColor: '#f4f8f2' },
   headerRow: {
     flexDirection: 'row',

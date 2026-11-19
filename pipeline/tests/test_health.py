@@ -18,6 +18,7 @@ def healthy(**over) -> Facts:
         jobs={
             "send-notifications": Job("succeeded", NOW - timedelta(minutes=53), NOW - timedelta(minutes=53)),
             "apply-retention": Job("succeeded", NOW - timedelta(hours=3), NOW - timedelta(hours=3)),
+            "expire-content-reports": Job("succeeded", NOW - timedelta(hours=2), NOW - timedelta(hours=2)),
         },
         http_statuses=[200, 200, 200],
         counties=COUNTIES,
@@ -31,8 +32,8 @@ def test_a_healthy_project_has_no_problems():
     assert problems(healthy()) == []
 
 
-def test_both_cron_jobs_are_watched():
-    assert set(EXPECTED_JOBS) == {"send-notifications", "apply-retention"}
+def test_every_cron_job_is_watched():
+    assert set(EXPECTED_JOBS) == {"send-notifications", "apply-retention", "expire-content-reports"}
 
 
 def test_a_missing_cron_job_is_a_problem():

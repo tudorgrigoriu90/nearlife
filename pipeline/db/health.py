@@ -5,7 +5,8 @@ Things that fail silently, each of which the app would only show as "nothing hap
   * the notification cron stopped, or its last run failed;
   * the notification Edge Function answers pg_net with errors (the cron run still "succeeds",
     because pg_net only queues the call);
-  * the retention cron stopped (personal data would outlive its stated window, PRIVACY §3);
+  * the retention cron stopped (personal data would outlive its stated window, PRIVACY §3), or
+    the expiry of "Report a mistake" reports did (kept 365 days, T-293);
   * a Swedish county has no visible catch spots (catching there degrades to "unmapped");
   * a user got two notifications on one day (the cadence log is failing, T-282).
 
@@ -24,6 +25,7 @@ from datetime import datetime, timedelta
 EXPECTED_JOBS: dict[str, timedelta] = {
     "send-notifications": timedelta(hours=3),  # hourly; two missed runs is a pattern, not noise
     "apply-retention": timedelta(hours=26),  # daily at 03:41 UTC, plus slack
+    "expire-content-reports": timedelta(hours=26),  # daily at 04:23 UTC (T-293)
 }
 
 

@@ -41,6 +41,7 @@ written to meet the EU General Data Protection Regulation (GDPR).
 | 🆕 **Purchases** — Google Play handles the payment; our billing processor (RevenueCat) tells our server what you bought. We store, against your anonymous account id: the unlock (e.g. "Full Game", "Family", a county), the store product id, whether it is active, and when it last changed. We never see your name, email or card details from the store. | Unlock what you bought; restore it on a new device; end it if you are refunded. | Contract (Art. 6(1)(b)). |
 | 🆕 **Family** — if you buy Family, we create a household with an **invite code**. When someone joins with the code, we store that their anonymous account belongs to your household and when it joined. No names, emails or contacts are involved, and the owner sees members only as "joined on <date>". | Share the Full Game with up to 5 people. | Contract (Art. 6(1)(b)). |
 | 🆕 **Catch spots (position while catching)** — when you go to catch a species, the app downloads the public places in your county where it can be caught, and compares them with **one position fix on your phone**. The position is **not sent to us** and not stored, and neither is the spot: the catch itself records only the species and the time. | Check that you're at a real public place before a catch counts. | Consent (Art. 6(1)(a)) for location; contract for the catch. |
+| 🆕 **Reports of a mistake** — if you use "Report a mistake" on a species card: the species, the language you were reading, what is wrong (name, photo, text, season or other) and the comment you write, with your anonymous account id and the time. | Correct names, photos and texts the app shows. | Legitimate interest (Art. 6(1)(f)) in correct content; you choose to send it. |
 | 🆕 **Travel notice** — while the app is open and you have allowed location, the app notices on the phone when you are in another county and offers to show it. Only "county X was offered on date Y" is kept, **on your phone**, so the same offer isn't repeated. Nothing is sent to us. | Show what's active where you are travelling. | Consent (Art. 6(1)(a)). |
 
 You can withdraw any consent at any time in **Settings**; withdrawing does not affect processing
@@ -97,6 +98,8 @@ appropriate safeguards (Standard Contractual Clauses) for any transfer outside t
   the id is not tied to your account we cannot pick out your past events, and they expire after
   365 days.
 - **Your collection:** until you delete your account or the account expires as above.
+- 🆕 **Reports of a mistake:** 365 days, then deleted automatically; earlier if you delete your
+  account. Don't put personal details in the comment.
 
 ## Your rights
 Under the GDPR you can **access**, **export**, **correct**, **delete**, and **restrict** your data,
@@ -104,8 +107,8 @@ and **withdraw consent**. The app provides **"Export my data"** and **"Delete ac
 directly in Settings. 🆕 The export holds everything we keep for your account: home region,
 consent choices, collection, purchase records and, if you're in a Family, your role and dates; your
 account's free-catch counter and creation date, the notifications sent to you, the phones
-registered for notifications (shown by the last 6 characters of their token), and reviewer-code
-use. It also holds what the app keeps on your phone: quiz attempts, recognised species, the
+registered for notifications (shown by the last 6 characters of their token), reviewer-code
+use, and the reports of a mistake you sent. It also holds what the app keeps on your phone: quiz attempts, recognised species, the
 county-visit log, your language choices and the age path. An owner's export shows when members
 joined, not who they are. You can share or save the export as a file. You also have the right to lodge a complaint with your supervisory authority
 — in Sweden, the **Integritetsskyddsmyndigheten (IMY)**.
