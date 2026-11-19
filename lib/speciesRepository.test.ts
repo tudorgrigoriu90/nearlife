@@ -282,4 +282,12 @@ describe('mediaRowToPhoto (T-215)', () => {
     expect(catalogueRowToSpecies({ ...base, iucn_status: 'LC' }, 'sv').iucn).toBeUndefined();
     expect(catalogueRowToSpecies(base, 'sv').iucn).toBeUndefined();
   });
+
+  it('carries Sweden’s own Red List category beside it (T-332)', () => {
+    const base = { id: 'gbif:1', scientific_name: 'Lutra lutra', common_name: null, local_name: null, category: 'mammal' as const, rarity: 'common' as const, active_months: [5], occurrences: 9 };
+    expect(catalogueRowToSpecies({ ...base, iucn_status: 'NT', redlist_se: 'VU' }, 'sv')).toMatchObject({ iucn: 'NT', redlistSe: 'VU' });
+    expect(catalogueRowToSpecies({ ...base, redlist_se: 'RE' }, 'sv').redlistSe).toBe('RE');
+    expect(catalogueRowToSpecies({ ...base, redlist_se: 'DD' }, 'sv').redlistSe).toBeUndefined();
+    expect(catalogueRowToSpecies(base, 'sv').redlistSe).toBeUndefined();
+  });
 });

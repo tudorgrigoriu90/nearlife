@@ -100,6 +100,23 @@ describe('SpeciesCard threat badge', () => {
   it('says nothing for a species that is not threatened', async () => {
     await render(<SpeciesCard species={swift} locale="sv" />);
     expect(screen.queryByTestId('card-threat')).toBeNull();
+    expect(screen.queryByTestId('card-threat-se')).toBeNull();
+  });
+
+  // T-332 · review I-35: each line names its scope, so "least concern worldwide, vulnerable in
+  // Sweden" reads as two facts, not a contradiction.
+  it('shows Sweden’s category on its own line, labelled with its scope and source', async () => {
+    await render(<SpeciesCard species={swift} locale="sv" threat="NT" threatSe="VU" />);
+    expect(screen.getByTestId('card-threat').props.children.join('')).toContain('Nära hotad i världen');
+    const se = screen.getByTestId('card-threat-se').props.children.join('');
+    expect(se).toContain('Sårbar i Sverige');
+    expect(se).toContain('SLU Artdatabanken');
+  });
+
+  it('can show the Swedish line alone', async () => {
+    await render(<SpeciesCard species={swift} locale="en" threatSe="RE" />);
+    expect(screen.queryByTestId('card-threat')).toBeNull();
+    expect(screen.getByTestId('card-threat-se').props.children.join('')).toContain('Regionally extinct in Sweden');
   });
 });
 

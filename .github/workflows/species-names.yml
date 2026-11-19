@@ -51,3 +51,8 @@ jobs:
       - name: Worldwide threat status from Wikidata (T-263)
         if: always()
         run: python pipeline/build_iucn_status.py
+
+      # GBIF, CC0 (DATA-SOURCING §9). Refuses to clear the column if the answer comes back short.
+      - name: Threat status in Sweden from the Swedish Red List (T-332)
+        if: always()
+        run: python pipeline/build_redlist_se.py

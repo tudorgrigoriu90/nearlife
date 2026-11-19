@@ -9,7 +9,7 @@ import { KRONOBERG_SPECIES } from './species/kronoberg';
 import { commonNameFor, contentFor, contentInLocale } from './species/localized';
 import type { SpeciesContent } from './species/content';
 import { isCommercialUseAllowed, type MediaLicense, type SpeciesMedia } from './species/media';
-import type { IucnStatus, Month, Rarity, Species, SpeciesCategory } from './species/types';
+import type { IucnStatus, Month, Rarity, RedlistSeStatus, Species, SpeciesCategory } from './species/types';
 
 // Species data-access seam (T-057 / T-059). The screens read the catalogue + localized content
 // through this interface instead of importing the hardcoded data directly, so the source can
@@ -160,9 +160,12 @@ export interface CatalogueRow extends SpeciesRow {
   month_counts?: number[] | null;
   /** IUCN category when near threatened or worse (T-263). */
   iucn_status?: string | null;
+  /** Swedish Red List category, NT or worse or RE (T-332); absent from an older function. */
+  redlist_se?: string | null;
 }
 
 const IUCN: readonly string[] = ['NT', 'VU', 'EN', 'CR', 'EW', 'EX'];
+const REDLIST_SE: readonly string[] = ['NT', 'VU', 'EN', 'CR', 'RE'];
 
 export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Species {
   const base = speciesRowToSpecies(row);
@@ -181,6 +184,9 @@ export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Specie
     county: { occurrences: row.occurrences, monthCounts },
     ...(row.iucn_status && IUCN.includes(row.iucn_status)
       ? { iucn: row.iucn_status as IucnStatus }
+      : {}),
+    ...(row.redlist_se && REDLIST_SE.includes(row.redlist_se)
+      ? { redlistSe: row.redlist_se as RedlistSeStatus }
       : {}),
     ...(row.local_name ? { names: { [locale]: asTitleName(row.local_name, locale) } } : {}),
     ...(photo ? { photo } : {}),

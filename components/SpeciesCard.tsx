@@ -23,7 +23,7 @@ import { commonNameFor, commonNameInLocale } from '../lib/species/localized';
 import { READ_ALOUD_ENABLED } from '../lib/readAloud';
 import { buildShareMessage } from '../lib/shareSpecies';
 import type { SpeciesContent } from '../lib/species/content';
-import type { IucnStatus, Month, Species } from '../lib/species/types';
+import type { IucnStatus, RedlistSeStatus, Month, Species } from '../lib/species/types';
 import DualText from './DualText';
 import SpeciesHero from './SpeciesHero';
 import ReadAloud from './ReadAloud';
@@ -65,6 +65,7 @@ export default function SpeciesCard({
   county = null,
   month,
   threat,
+  threatSe,
   onBack,
   onReportMistake,
   record = null,
@@ -116,6 +117,8 @@ export default function SpeciesCard({
   month?: Month;
   /** Worldwide IUCN category when near threatened or worse (T-263). */
   threat?: IucnStatus;
+  /** Sweden's own Red List category (T-332 · review I-35), on its own labelled line. */
+  threatSe?: RedlistSeStatus;
   onBack?: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -202,6 +205,11 @@ export default function SpeciesCard({
           {threat ? (
             <Text style={styles.threat} testID="card-threat">
               ⚠️ {tr(`iucn.${threat}` as TranslationKey)} · {tr('iucn.source')}
+            </Text>
+          ) : null}
+          {threatSe ? (
+            <Text style={styles.threat} testID="card-threat-se">
+              ⚠️ {tr(`redlistSe.${threatSe}` as TranslationKey)} · {tr('redlistSe.source')}
             </Text>
           ) : null}
           {mainMachineText ? (

@@ -4865,6 +4865,21 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Tests: configs 4, games 3 (no give-up in easy, still times out without), store 4, hook 4,
     Settings 2.
 
+- **T-332 · Sweden's own Red List beside the worldwide one** — *Claude · S · `IN-PROGRESS` · deps: T-263 · review I-35*
+  - Done when the licensing doc records the decision; if permitted, a `species.redlist_se` column
+    exists and the card labels both lines.
+  - ✅ Licence: SLU Artdatabanken publishes the Swedish Red List 2025 on GBIF under CC0
+    (DATA-SOURCING §9, decision row, attribution line). Use.
+  - ✅ Migration 0044 (`20261119000007_species_redlist_se.sql`): `species.redlist_se` (NT, VU, EN,
+    CR, RE) and `region_catalogue` returns it as a new last column. `pipeline/build_redlist_se.py`
+    joins species-rank records on the backbone key, the worse category winning; it refuses to
+    clear the column when fewer than 1,000 species come back (the live list has 4,957).
+    `species-names.yml` runs it monthly after the worldwide status.
+  - ✅ The card shows "Vulnerable in Sweden · Swedish Red List (SLU Artdatabanken)" on its own line
+    under the worldwide one; Settings credits the list. Data deficient and absent stay silent.
+  - ✅ Tests: pipeline 5, real Postgres 5, mapping 1, card 2.
+  - Remaining: apply 0044 and run the first load; record how many catalogue species got a line.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

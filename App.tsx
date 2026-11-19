@@ -538,9 +538,9 @@ export default function App() {
     const stats = countyStats(own, almanacSpecies);
     return stats ? { name: countyName, stats } : null;
   }, [selected, countyName, almanacSpecies]);
-  const cardThreat = selected
-    ? (almanacSpecies.find((s) => s.id === selected.id) ?? selected).iucn
-    : undefined;
+  const cardSpecies = selected ? (almanacSpecies.find((s) => s.id === selected.id) ?? selected) : null;
+  const cardThreat = cardSpecies?.iucn;
+  const cardThreatSe = cardSpecies?.redlistSe;
   // The season gate (T-268 · review B-26), on the species' active months in the viewed county.
   const seasonOf = (species: Species) =>
     catchSeason(
@@ -1514,6 +1514,7 @@ export default function App() {
           soundSource={soundSource() ?? undefined}
           county={cardCounty}
           threat={cardThreat}
+          threatSe={cardThreatSe}
           month={monthOf(new Date())}
           backAround={cardSeason && !cardSeason.open ? cardSeason.backAround : null}
           onBack={() => setSelected(null)}

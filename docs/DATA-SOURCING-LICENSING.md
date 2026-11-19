@@ -138,6 +138,17 @@ conservation institutions under licenses written for *research and non-commercia
 ### 8. Wikidata — names and threat status (T-258, T-263)
 - **Licence:** CC0. No attribution required; listed in Settings anyway.
 
+### 9. The Swedish Red List — threat status in Sweden (T-332 · review I-35, decided 2026-11-19)
+- **Source:** "The Swedish Red List 2025", SLU Artdatabanken, published on GBIF as a checklist
+  dataset (`87e639cc-30a9-4007-bd2c-b0cab60326b9`, doi:10.15468/zbbyqv, published 24 March 2026).
+- **Licence:** CC0 1.0 (the dataset's own licence on GBIF). Commercial use allowed, no
+  attribution required. **Decision: use.** Credited anyway, on the card line ("Swedish Red List
+  (SLU Artdatabanken)") and in Settings.
+- **Use:** `species.redlist_se` = NT, VU, EN, CR or RE, joined on the GBIF backbone key
+  (`nubKey` → `gbif:<key>`); species-rank records only, so a genus or aggregate never paints its
+  members. Data deficient and "not on the list" stay null: the list holds only red-listed taxa, so
+  absence is not "least concern", and the card says nothing. Refreshed by `species-names.yml`.
+
 ---
 
 ## Decision matrix
@@ -151,6 +162,7 @@ conservation institutions under licenses written for *research and non-commercia
 | Wikimedia Commons photos (CC0/CC-BY/CC-BY-SA) | Yes, with attribution | **Use — primary species photos; exclude NC/ND, keep unmodified** |
 | Natural Earth admin-1 (public domain) | Yes | **Use — bundled county outlines for the hometown lookup** |
 | GADM geometry | No (non-commercial licence) | **Ids only — geometry never shipped** |
+| Swedish Red List 2025, SLU Artdatabanken (CC0, via GBIF) | Yes | **Use — threat status in Sweden on the card (T-332)** |
 
 **Net:** the MVP can launch on **GBIF (filtered) + OSM**, with hand-curated/region-reviewed
 threat content — **no blocking dependency on eBird or the IUCN API.** That is the go path.
@@ -163,6 +175,7 @@ threat content — **no blocking dependency on eBird or the IUCN API.** That is 
 - "Map data © OpenStreetMap contributors."
 - "Text: Wikipedia · CC BY-SA 4.0" under every fact, linking to its article (T-276).
 - IUCN attribution *if* the API is used.
+- "Swedish Red List (SLU Artdatabanken)" on the card's Swedish threat line (T-332).
 
 ## Open actions
 - [ ] Enforce CC0/CC-BY-only filter in GBIF pipeline; verify no NC data leaks in.

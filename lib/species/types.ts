@@ -59,6 +59,9 @@ export interface Species {
   county?: { occurrences: number; monthCounts: number[] | null };
   /** IUCN Red List category, worldwide, when near threatened or worse (T-263, from Wikidata). */
   iucn?: IucnStatus;
+  /** Sweden's own Red List category when near threatened or worse, or regionally extinct (T-332). */
+  redlistSe?: RedlistSeStatus;
 }
 
 export type IucnStatus = 'NT' | 'VU' | 'EN' | 'CR' | 'EW' | 'EX';
+export type RedlistSeStatus = 'NT' | 'VU' | 'EN' | 'CR' | 'RE';
