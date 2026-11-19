@@ -61,6 +61,8 @@ import {
 } from './lib/dualLanguage';
 import { AsyncStorageDualLanguageStore } from './lib/dualLanguageStore';
 import { AsyncStorageEasyModeStore } from './lib/easyModeStore';
+import MoveHomeScreen from './components/MoveHomeScreen';
+import { checkMove, SupabaseHomeMoveGateway } from './lib/homeMove';
 import { useFieldNotes } from './components/useFieldNotes';
 import { notesFor } from './lib/fieldNotes';
 import { AsyncStorageFieldNotesStore } from './lib/fieldNotesStore';
@@ -216,7 +218,9 @@ const familyGateway = () => (familyGatewayInstance ??= new SupabaseFamilyGateway
 let authGatewayInstance: SupabaseAuthGateway | undefined;
 const authGateway = () => (authGatewayInstance ??= new SupabaseAuthGateway(getSupabase()));
 // Notification choices on the profile (T-342); null without a backend.
-const NOTIF_PREFS_GATEWAY = hasSupabaseConfig() ? new SupabaseNotifPrefsGateway(getSupabase(), ensureAnonymousSession) : null;
+let notifPrefsGatewayInstance: SupabaseNotifPrefsGateway | undefined;
+const notifPrefsGateway = () =>
+  hasSupabaseConfig() ? (notifPrefsGatewayInstance ??= new SupabaseNotifPrefsGateway(getSupabase(), ensureAnonymousSession)) : null;
 let accessCodeGatewayInstance: SupabaseAccessCodeGateway | undefined;
 const accessCodeGateway = () =>
   (accessCodeGatewayInstance ??= new SupabaseAccessCodeGateway(getSupabase()));
@@ -303,6 +307,11 @@ const EASY_MODE_STORE = new AsyncStorageEasyModeStore();
 
 // Field notes on sightings (T-347) — on the phone only, erased with the account.
 const FIELD_NOTES_STORE = new AsyncStorageFieldNotesStore();
+
+// Moving home county once a year (T-349); null without a backend.
+let homeMoveGatewayInstance: SupabaseHomeMoveGateway | undefined;
+const homeMoveGateway = () =>
+  hasSupabaseConfig() ? (homeMoveGatewayInstance ??= new SupabaseHomeMoveGateway(getSupabase(), ensureAnonymousSession)) : null;
 
 // Prototype app shell (E2). Onboarding (T-022+) runs first; once complete, a minimal tab
 // switcher between the "This week" pull surface (T-117) and the Almanac grid (T-025); tapping a
@@ -448,8 +457,9 @@ export default function App() {
   const [consentLoaded, setConsentLoaded] = useState(false);
   // The phone's other language, offered at onboarding (T-343 · review F-05).
   const motherTongue = useMemo(() => motherTongueOffer(deviceLanguageTags()), []);
-  const notifChoices = useNotifPrefs(NOTIF_PREFS_GATEWAY, consent.notifications);
+  const notifChoices = useNotifPrefs(notifPrefsGateway(), consent.notifications);
   const fieldNotes = useFieldNotes(FIELD_NOTES_STORE);
+  const [showMoveHome, setShowMoveHome] = useState(false);
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
   const track = useTracker(consent);
@@ -1087,6 +1097,7 @@ export default function App() {
     if (!onboarded) return false;
     if (exportJson !== null) return closed(() => setExportJson(null));
     if (showDelete) return closed(() => setShowDelete(false));
+    if (showMoveHome) return closed(() => setShowMoveHome(false));
     if (showCounties) return closed(() => setShowCounties(false));
     if (showStore) return closed(() => setShowStore(false));
     if (showFamily) return closed(() => setShowFamily(false));
@@ -1244,6 +1255,32 @@ export default function App() {
     );
   }
 
+  const moveGateway = homeMoveGateway();
+  if (showMoveHome && hometown && moveGateway) {
+    const from = hometown;
+    return (
+      <>
+        <MoveHomeScreen
+          locale={locale}
+          current={from}
+          check={() => checkMove(from, getLocationFixOnce)}
+          onConfirm={async (region) => {
+            const result = await moveGateway.move(region);
+            if (result.ok) {
+              // The collection stays; This Week and the Almanac follow the new county.
+              await HOMETOWN_STORE.replace(region);
+              setHometown(region);
+              setViewCounty(null);
+            }
+            return result;
+          }}
+          onDone={() => setShowMoveHome(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
   if (showFamily) {
     return (
       <>
@@ -1370,6 +1407,7 @@ export default function App() {
           onToggleEasyCatching={setEasyCatching}
           notifPrefs={notifChoices.prefs}
           onChangeNotifPrefs={notifChoices.change}
+          onMoveHome={homeMoveGateway() && hometown ? () => setShowMoveHome(true) : undefined}
           onToggleConsent={toggleConsent}
           onSelectLocale={(loc) => {
             setLocaleOverride(loc);

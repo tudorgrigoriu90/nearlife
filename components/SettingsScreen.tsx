@@ -40,6 +40,7 @@ export default function SettingsScreen({
   onToggleEasyCatching,
   notifPrefs = null,
   onChangeNotifPrefs,
+  onMoveHome,
   onSelectSecondaryLocale,
   onExportData,
   onLinkEmail,
@@ -67,6 +68,8 @@ export default function SettingsScreen({
   /** Notification choices (T-342 · review F-03); null until read from the profile. */
   notifPrefs?: NotifPrefs | null;
   onChangeNotifPrefs?: (next: NotifPrefs) => void;
+  /** "I've moved" (T-349 · review F-09); with a backend and a home county only. */
+  onMoveHome?: () => void;
   onToggleEasyCatching?: (on: boolean) => void;
   onSelectSecondaryLocale?: (locale: ContentLocale) => void;
   onExportData: () => void;
@@ -232,6 +235,12 @@ export default function SettingsScreen({
               {onOpenCounties ? (
                 <Pressable onPress={onOpenCounties} accessibilityRole="button" style={[styles.row, styles.rowBorder]}>
                   <Text style={styles.rowLabel}>{tr('settings.counties')}</Text>
+                  <Text style={styles.chevron}>›</Text>
+                </Pressable>
+              ) : null}
+              {onMoveHome ? (
+                <Pressable onPress={onMoveHome} accessibilityRole="button" style={[styles.row, styles.rowBorder]}>
+                  <Text style={styles.rowLabel}>{tr('move.entry')}</Text>
                   <Text style={styles.chevron}>›</Text>
                 </Pressable>
               ) : null}

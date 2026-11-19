@@ -245,6 +245,7 @@ export type Database = {
           free_catches_used: number
           full_game: boolean
           home_region: string | null
+          home_region_moved_at: string | null
           notif_prefs: Json
           user_id: string
         }
@@ -254,6 +255,7 @@ export type Database = {
           free_catches_used?: number
           full_game?: boolean
           home_region?: string | null
+          home_region_moved_at?: string | null
           notif_prefs?: Json
           user_id: string
         }
@@ -263,6 +265,7 @@ export type Database = {
           free_catches_used?: number
           full_game?: boolean
           home_region?: string | null
+          home_region_moved_at?: string | null
           notif_prefs?: Json
           user_id?: string
         }

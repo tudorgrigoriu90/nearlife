@@ -108,6 +108,10 @@ EXPECTED: dict[str, str] = {
     # T-341 · review F-03 notification choices.
     "a user can store notification choices": "ok",
     "a notification choice the sender cannot read is refused": "violates check constraint",
+    # T-349 · review F-09 moving home county.
+    "a user sets a first home county": "ok",
+    "a user moves home county once": "ok",
+    "a second move within a year is refused": "home_move_limit",
     "a user can report a mistake": "ok",
     "users cannot read the reports": "permission denied",
     "a report cannot be sent in another account's name": "permission denied",
@@ -666,6 +670,11 @@ def run_content_report_checks(cur) -> dict[str, str]:
     _step(cur, results, "a notification choice the sender cannot read is refused",
           "update public.profiles set notif_prefs = %s where user_id = auth.uid()",
           (json.dumps({"frequency": "hourly"}),))
+    # T-349 · review F-09: one move of home county a year; the second is refused by the database.
+    _step(cur, results, "a user sets a first home county", "update public.profiles set home_region = 'SWE.9_1' where user_id = auth.uid()")
+    _step(cur, results, "a user moves home county once", "update public.profiles set home_region = 'SWE.13_1' where user_id = auth.uid()")
+    _step(cur, results, "a second move within a year is refused",
+          "update public.profiles set home_region = 'SWE.15_1' where user_id = auth.uid()")
     _step(cur, results, "a user sees only their own recognitions",
           "select case when count(*) = count(*) filter (where user_id = auth.uid()) and count(*) = 1 "
           "then 'ok' else 'saw ' || count(*) end from public.recognitions")

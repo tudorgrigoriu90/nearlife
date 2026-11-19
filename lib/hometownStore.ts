@@ -29,6 +29,8 @@ export interface HometownStore {
   load(): Promise<Region | null>;
   /** Store `region` unless a hometown is already set; returns the hometown now in force. */
   lockIn(region: Region): Promise<Region>;
+  /** A move the server accepted (T-349): the only way the lock changes, once a year. */
+  replace(region: Region): Promise<void>;
   /**
    * Account deletion only (T-209). The lock exists to stop a *user* moving their hometown; erasing
    * the account erases everything the device holds about them, the hometown included.
@@ -46,6 +48,10 @@ export class InMemoryHometownStore implements HometownStore {
   async lockIn(region: Region) {
     this.region ??= region;
     return this.region;
+  }
+
+  async replace(region: Region) {
+    this.region = region;
   }
 
   async clear() {
@@ -71,6 +77,15 @@ export class AsyncStorageHometownStore implements HometownStore {
       // Best-effort: the region still holds in memory for this session and is re-derived next time.
     }
     return region;
+  }
+
+  async replace(region: Region): Promise<void> {
+    try {
+      await AsyncStorage.setItem(HOMETOWN_STORAGE_KEY, JSON.stringify({ id: region.id, name: region.name }));
+    } catch {
+      // The phone keeps the old county; the server already has the new one, so moving again
+      // to it is not counted as a second move.
+    }
   }
 
   async clear(): Promise<void> {

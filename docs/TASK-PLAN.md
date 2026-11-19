@@ -5034,6 +5034,21 @@ document until it is started, when it takes the next free `T-###`.
     Needs `expo-image-picker` (free, Expo's own; the reason to record when adding it) and a new
     build to reach phones.
 
+- **T-349 · Move home county once a year** — *Claude · S · `DONE` · deps: T-314 · review F-09*
+  - Done when a second move within 365 days is refused by the server (verify check), the
+    collection is kept, and This Week reloads for the new county.
+  - ✅ Migration 0048 (`20261119000011_home_move.sql`): `profiles.home_region_moved_at`, written
+    only by a trigger (no client grant). The first county is free; a change records the date; a
+    second change within 365 days raises `home_move_limit` with the next possible date; re-sending
+    the same county is not a move. Real Postgres: 4 tests; live verify: 3 checks.
+  - ✅ Settings → "I've moved" (with a backend and a home county): one location fix, the county it
+    finds, "Make Stockholm my home" with "once a year, your collection stays"; or why not (still at
+    home, outside Sweden, no fix, or moved less than a year ago, with the date). On success the
+    phone's lock is replaced (`HometownStore.replace`) and This Week and the Almanac follow the new
+    county; the collection is untouched. Tests: logic and gateway 6, screen 3, app flow 1.
+  - Note: this is a server rule on moves only. Which county a user may collect in is still
+    enforced on the phone (T-314, T-315).
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

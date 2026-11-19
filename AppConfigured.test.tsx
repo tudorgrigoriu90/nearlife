@@ -179,4 +179,15 @@ describe('App with a backend', () => {
     expect(await screen.findByText(/"unavailable": \[[^\]]*"purchases"[^\]]*"server"/)).toBeTruthy();
     (ensureAnonymousSession as jest.Mock).mockResolvedValue('user-1');
   }, 30000);
+
+  it('"I\u2019ve moved" checks the county once and backs out to Settings (T-349)', async () => {
+    await render(<App />);
+    await screen.findByText(tr('thisWeek.honesty'));
+    await press(`⚙ ${tr('nav.settings')}`);
+    await fireEvent.press(await screen.findByRole('button', { name: new RegExp(`^${tr('move.entry')}`) }));
+    // The fix is in Växjö, inside the home county already.
+    expect(await screen.findByText(tr('move.same', { county: 'Kronoberg' }))).toBeTruthy();
+    expect(await systemBack()).toBe(true);
+    expect(await screen.findByText(tr('settings.title'))).toBeTruthy();
+  }, 30000);
 });
