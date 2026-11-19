@@ -1,4 +1,4 @@
-import { tierStateFor, type CollectionRecord, type TierState } from './collection';
+import { EMPTY_TIER_STATE, tierStateOf, type CollectionRecord, type TierState } from './collection';
 import { isActiveInMonth, isActiveInSeason, type Season } from './season';
 import type { ContentLocale } from './i18n/contentLocale';
 import { commonNameFor } from './species/localized';
@@ -11,6 +11,22 @@ import type { Habitat, Month, Species } from './species/types';
 // single category for the filter chips. Storage-free so it is unit-testable; the screen renders
 // what this returns and the Supabase-backed collection (T-056) drops in unchanged. Undiscovered
 // species render as a greyed silhouette — `discovered` drives that.
+
+/** Records by species id (T-304 · review B-68): built once, looked up per species. */
+export type RecordIndex = ReadonlyMap<string, CollectionRecord>;
+
+/** One pass over the records. Accepts an index already built (the screen memoises it). */
+export function indexRecords(records: CollectionRecord[] | RecordIndex): RecordIndex {
+  if (records instanceof Map) return records;
+  const index = new Map<string, CollectionRecord>();
+  for (const r of records as CollectionRecord[]) index.set(r.speciesId, r);
+  return index;
+}
+
+function tierIn(index: RecordIndex, speciesId: string): TierState {
+  const r = index.get(speciesId);
+  return r ? tierStateOf(r) : EMPTY_TIER_STATE;
+}
 
 export interface AlmanacEntry {
   species: Species;
@@ -40,7 +56,7 @@ export const ALMANAC_CATEGORIES: SpeciesGroup[] = [
  */
 export function almanacEntries(
   species: Species[],
-  records: CollectionRecord[],
+  records: CollectionRecord[] | RecordIndex,
   category?: SpeciesGroup,
   activeIn?: Month,
   habitat?: Habitat,
@@ -55,8 +71,9 @@ export function almanacEntries(
       // The same habitats the catch screen sends people to, defaults included (T-057).
       (habitat === undefined || habitatsFor(s).includes(habitat)),
   );
+  const index = indexRecords(records);
   return filtered.flatMap((s) => {
-    const tier = tierStateFor(records, s.id);
+    const tier = tierIn(index, s.id);
     // Name search covers spotted species only (Director, 2026-11-04): an undiscovered species is
     // never revealed by typing its name, so the "?" cards keep their mystery.
     if (query && !(tier.spotted && matchesName(s, query, find.locale ?? 'en'))) return [];
@@ -104,15 +121,23 @@ export interface CategoryCount {
  * Per-category totals + how many are discovered, for the filter chips and progress. Only
  * categories present in `species` are returned, in `ALMANAC_CATEGORIES` order.
  */
-export function categoryCounts(species: Species[], records: CollectionRecord[]): CategoryCount[] {
+export function categoryCounts(
+  species: Species[],
+  records: CollectionRecord[] | RecordIndex,
+): CategoryCount[] {
+  const index = indexRecords(records);
   return ALMANAC_CATEGORIES.map((category) => {
     const inCategory = species.filter((s) => groupOf(s) === category);
-    const discovered = inCategory.filter((s) => tierStateFor(records, s.id).spotted).length;
+    const discovered = inCategory.filter((s) => tierIn(index, s.id).spotted).length;
     return { category, total: inCategory.length, discovered };
   }).filter((c) => c.total > 0);
 }
 
 /** Total discovered (spotted) across the whole almanac — the grid's progress numerator. */
-export function discoveredCount(species: Species[], records: CollectionRecord[]): number {
-  return species.filter((s) => tierStateFor(records, s.id).spotted).length;
+export function discoveredCount(
+  species: Species[],
+  records: CollectionRecord[] | RecordIndex,
+): number {
+  const index = indexRecords(records);
+  return species.filter((s) => tierIn(index, s.id).spotted).length;
 }

@@ -4,6 +4,7 @@ import {
   discoveredCount,
   matchesName,
   ALMANAC_CATEGORIES,
+  indexRecords,
 } from './almanac';
 import { isActiveInSeason } from './season';
 import { KRONOBERG_SPECIES } from './species/kronoberg';
@@ -237,5 +238,53 @@ describe('name search (T-240)', () => {
         locale: 'sv',
       }),
     ).toHaveLength(2);
+  });
+});
+
+// T-304 · review B-68: the record for each species is looked up, not searched for.
+describe('almanac work is proportional to the list', () => {
+  const many: Species[] = Array.from({ length: 300 }, (_, i) => ({
+    id: `s${i}`,
+    scientificName: `S ${i}`,
+    commonName: `S ${i}`,
+    category: 'bird',
+    rarity: 'common',
+    activeMonths: [5],
+  }));
+  const recs = many.slice(0, 200).map((s) => ({
+    speciesId: s.id,
+    spottedAt: '2026-05-01T00:00:00Z',
+    caughtAt: null,
+    helpedAt: null,
+    helpedKind: null,
+    primeBonus: false,
+  }));
+
+  function counted(records: typeof recs) {
+    let reads = 0;
+    const proxy = new Proxy(records, {
+      get(target, prop, receiver) {
+        if (typeof prop === 'string' && /^\d+$/.test(prop)) reads += 1;
+        return Reflect.get(target, prop, receiver);
+      },
+    });
+    return { proxy, reads: () => reads };
+  }
+
+  it.each([
+    ['almanacEntries', (r: typeof recs) => almanacEntries(many, r)],
+    ['categoryCounts', (r: typeof recs) => categoryCounts(many, r)],
+    ['discoveredCount', (r: typeof recs) => discoveredCount(many, r)],
+  ] as const)('%s reads each record once, not once per species', (_name, run) => {
+    const c = counted(recs);
+    run(c.proxy);
+    expect(c.reads()).toBeLessThanOrEqual(recs.length);
+  });
+
+  it('a prebuilt index gives the same answers', () => {
+    const index = indexRecords(recs);
+    expect(almanacEntries(many, index)).toEqual(almanacEntries(many, recs));
+    expect(categoryCounts(many, index)).toEqual(categoryCounts(many, recs));
+    expect(discoveredCount(many, index)).toBe(200);
   });
 });

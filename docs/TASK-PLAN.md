@@ -4597,6 +4597,13 @@ document until it is started, when it takes the next free `T-###`.
     runs' artifacts keep their `actions: read`, and store-screenshots keeps `contents: write`.
     Tests: `__tests__/ciGate.test.js` checks all three for every workflow file.
 
+- **T-304 · Almanac lookups proportional to the list** — *Claude · XS · `DONE` · deps: T-025 · review B-68*
+  - ✅ `almanacEntries`, `categoryCounts` and `discoveredCount` look each species' record up in
+    an index (`indexRecords`, one pass) instead of scanning the records per species: about 3 ×
+    3,700 × N comparisons per render became 3,700 + N. The Almanac screen memoises the index on
+    the collection, so typing in the search box no longer rebuilds it. Tests: each function reads
+    every record at most once (a counting Proxy), and an index gives the same answers.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

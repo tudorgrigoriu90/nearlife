@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -10,7 +10,13 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { almanacEntries, categoryCounts, discoveredCount, type AlmanacEntry } from '../lib/almanac';
+import {
+  almanacEntries,
+  categoryCounts,
+  discoveredCount,
+  indexRecords,
+  type AlmanacEntry,
+} from '../lib/almanac';
 import { progressSummary, type CollectionRecord } from '../lib/collection';
 import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
 import { photoFor } from '../lib/species/media';
@@ -134,16 +140,18 @@ export default function AlmanacScreen({
   // same kind of time window, and combining them would only ever narrow to the current month.
   const [season, setSeason] = useState<Season | null>(null);
   const [query, setQuery] = useState('');
+  // Built once per change of the collection, not per keystroke (T-304 · review B-68).
+  const index = useMemo(() => indexRecords(records), [records]);
   const entries = almanacEntries(
     species,
-    records,
+    index,
     category ?? undefined,
     activeNow ? month : undefined,
     habitat ?? undefined,
     { season: season ?? undefined, query, locale: locale as ContentLocale },
   );
-  const counts = categoryCounts(species, records);
-  const discovered = discoveredCount(species, records);
+  const counts = categoryCounts(species, index);
+  const discovered = discoveredCount(species, index);
   const summary = progressSummary(records);
 
   if (error) {
