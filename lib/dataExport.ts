@@ -59,6 +59,10 @@ export interface DeviceExport {
   agePath: string | null;
   /** Earned badges and when (T-297). */
   badges?: Record<string, string>;
+  /** Field notes (T-347). */
+  notes?: unknown;
+  /** The name trainer's schedule (T-351): per species, when it is due again or that it is known. */
+  nameTrainer?: Record<string, unknown>;
 }
 
 type Unavailable = 'purchases' | 'household' | 'server';

@@ -5064,6 +5064,21 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Tests: planner 5 (Sunday, other days, twice the same Sunday, a week later, nothing to say),
     message 1, tap 1, real Postgres 1; the catalogue honesty test scans the copy.
 
+- **T-351 · Name trainer** — *Claude · M · `DONE` · deps: — · review F-06*
+  - Done when the schedule (1 / 3 / 7 days) is a tested pure function, the state is in the data
+    export, and only species with a sourced name in both languages are used.
+  - ✅ `lib/nameTrainer.ts` (pure): "Still learning" brings a card back after 1, then 3, then 7
+    days and weekly after that; "Knew it" retires it. Today's deck is the cards that are due, then
+    species never asked, at most 10. The language beside Swedish is the second language when one is
+    on, else the app language, else English. A card needs a sourced name in both (bundled or from
+    the database; an English "name" that is only the binomial does not count): a fallback name
+    would teach a wrong word.
+  - ✅ Almanac → "Learn the names" (after a first sighting): the photo first, then "Show the names"
+    turns to the Swedish name and the other one; "Knew it" / "Still learning". No upsell (#4).
+    The schedule lives on the phone (`nearby.nameTrainer.v1`, so `eraseDevice` removes it; App also
+    clears it in memory) and the export's device section lists it as `nameTrainer`.
+  - ✅ Tests: schedule and languages 6, screen 3, hook 1, Almanac entry 1, app flow 1.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

@@ -276,3 +276,22 @@ it('reads the tier totals as words and numbers (T-329)', async () => {
   await render(<AlmanacScreen species={KRONOBERG_SPECIES.slice(0, 2)} records={[]} />);
   expect(screen.getByLabelText(`${tr('tier.spotted')}: 0`)).toBeTruthy();
 });
+
+// T-351 · review F-06: "Learn the names" appears once something is spotted.
+it('offers "Learn the names" only after a first sighting', async () => {
+  const onOpenTrainer = jest.fn();
+  const sp = KRONOBERG_SPECIES[0];
+  const { rerender } = await render(<AlmanacScreen species={[sp]} records={[]} onOpenTrainer={onOpenTrainer} />);
+  expect(screen.queryByText(`🗣 ${tr('trainer.entry')}`)).toBeNull();
+  await rerender(
+    <AlmanacScreen
+      species={[sp]}
+      records={[
+        { speciesId: sp.id, spottedAt: '2026-11-01T10:00:00Z', caughtAt: null, helpedAt: null, helpedKind: null, primeBonus: false },
+      ]}
+      onOpenTrainer={onOpenTrainer}
+    />,
+  );
+  await fireEvent.press(screen.getByText(`🗣 ${tr('trainer.entry')}`));
+  expect(onOpenTrainer).toHaveBeenCalledTimes(1);
+});

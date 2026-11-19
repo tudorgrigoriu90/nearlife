@@ -702,6 +702,22 @@ describe('system back from each overlay', () => {
     },
     FLOW_TIMEOUT,
   );
+
+  it(
+    '"Learn the names" shows the first sighting with its Swedish name, and back closes it (T-351)',
+    async () => {
+      await completeOnboarding();
+      await press(tr('almanac.title'));
+      await press(tr('trainer.entry'), { exact: false });
+      await press(tr('trainer.reveal'));
+      expect(await screen.findByText(commonNameFor(onboardingStarter, 'sv'))).toBeTruthy();
+      await press(tr('trainer.knew'));
+      expect(await screen.findByText(tr('trainer.finished'))).toBeTruthy();
+      expect(await systemBack()).toBe(true);
+      expect(await screen.findByText(new RegExp(tr('nav.badges')))).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
 });
 
 // T-334 · review B-09, I-17: when the home county cannot be set from preview mode, the banner says

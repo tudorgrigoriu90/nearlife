@@ -66,6 +66,10 @@ import { checkMove, SupabaseHomeMoveGateway } from './lib/homeMove';
 import { useFieldNotes } from './components/useFieldNotes';
 import { notesFor } from './lib/fieldNotes';
 import { AsyncStorageFieldNotesStore } from './lib/fieldNotesStore';
+import NameTrainerScreen from './components/NameTrainerScreen';
+import { useNameTrainer } from './components/useNameTrainer';
+import { trainerLocale } from './lib/nameTrainer';
+import { AsyncStorageNameTrainerStore } from './lib/nameTrainerStore';
 import { useNotifPrefs } from './components/useNotifPrefs';
 import { SupabaseNotifPrefsGateway } from './lib/notifPrefsGateway';
 import { useEasyMode } from './components/useEasyMode';
@@ -307,6 +311,8 @@ const EASY_MODE_STORE = new AsyncStorageEasyModeStore();
 
 // Field notes on sightings (T-347) — on the phone only, erased with the account.
 const FIELD_NOTES_STORE = new AsyncStorageFieldNotesStore();
+// The name trainer's schedule (T-351) — on the phone only, erased with the account.
+const NAME_TRAINER_STORE = new AsyncStorageNameTrainerStore();
 
 // Moving home county once a year (T-349); null without a backend.
 let homeMoveGatewayInstance: SupabaseHomeMoveGateway | undefined;
@@ -459,6 +465,8 @@ export default function App() {
   const motherTongue = useMemo(() => motherTongueOffer(deviceLanguageTags()), []);
   const notifChoices = useNotifPrefs(notifPrefsGateway(), consent.notifications);
   const fieldNotes = useFieldNotes(FIELD_NOTES_STORE);
+  const nameTrainer = useNameTrainer(NAME_TRAINER_STORE);
+  const [showTrainer, setShowTrainer] = useState(false);
   const [showMoveHome, setShowMoveHome] = useState(false);
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
@@ -969,6 +977,7 @@ export default function App() {
       badges: rememberedBadges,
       // Field notes, as text (T-347); no place is ever attached.
       notes: fieldNotes.notes,
+      nameTrainer: nameTrainer.state,
     };
     const bundle = buildDataExport({
       exportedAt: new Date().toISOString(),
@@ -1050,6 +1059,7 @@ export default function App() {
     setRecognized(new Set());
     setRememberedBadges({});
     fieldNotes.reset();
+    nameTrainer.reset();
     setOnboarded(false);
   };
 
@@ -1108,6 +1118,7 @@ export default function App() {
     if (showLinkEmail) return closed(() => setShowLinkEmail(false));
     if (showAccessCode) return closed(() => setShowAccessCode(false));
     if (showSighting) return closed(() => setShowSighting(false));
+    if (showTrainer) return closed(() => setShowTrainer(false));
     if (showBadges) return closed(() => setShowBadges(false));
     if (showImpact) return closed(() => setShowImpact(false));
     if (showSettings) return closed(() => setShowSettings(false));
@@ -1345,6 +1356,29 @@ export default function App() {
             setSelected(species);
           }}
           onDone={() => setShowSighting(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
+  if (showTrainer) {
+    // Oldest sighting first, so the first species the user met are the first names they learn.
+    const spottedIds = collection.records
+      .filter((r) => r.spottedAt !== null)
+      .sort((a, b) => (a.spottedAt as string).localeCompare(b.spottedAt as string))
+      .map((r) => r.speciesId);
+    const byId = new Map([...KRONOBERG_SPECIES, ...almanacSpecies].map((s) => [s.id, s]));
+    return (
+      <>
+        <NameTrainerScreen
+          locale={locale}
+          spotted={spottedIds.flatMap((id) => byId.get(id) ?? [])}
+          state={nameTrainer.state}
+          other={trainerLocale(locale as ContentLocale, secondaryLocale)}
+          today={dayKey(new Date())}
+          onAnswer={nameTrainer.record}
+          onDone={() => setShowTrainer(false)}
         />
         <StatusBar style="auto" />
       </>
@@ -1733,6 +1767,7 @@ export default function App() {
             onOpenBadges={() => setShowBadges(true)}
             onOpenImpact={() => setShowImpact(true)}
             onOpenSighting={canCollect ? () => setShowSighting(true) : undefined}
+            onOpenTrainer={() => setShowTrainer(true)}
           />
         )}
       </View>

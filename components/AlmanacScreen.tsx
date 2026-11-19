@@ -115,6 +115,7 @@ export default function AlmanacScreen({
   onOpenBadges,
   onOpenImpact,
   onOpenSighting,
+  onOpenTrainer,
   month = monthOf(new Date()),
 }: {
   species: Species[];
@@ -130,6 +131,8 @@ export default function AlmanacScreen({
   onOpenImpact?: () => void;
   /** "I saw…" sighting quiz (T-242). */
   onOpenSighting?: () => void;
+  /** "Learn the names" (T-351 · review F-06). */
+  onOpenTrainer?: () => void;
   /** The month "Active this month" filters on; injectable for tests. */
   month?: Month;
 }) {
@@ -211,6 +214,12 @@ export default function AlmanacScreen({
       {onOpenSighting ? (
         <Pressable onPress={onOpenSighting} accessibilityRole="button" style={styles.sightingBtn}>
           <Text style={styles.sightingText}>👁 {tr('quiz.entry')}</Text>
+        </Pressable>
+      ) : null}
+
+      {onOpenTrainer && summary.spotted > 0 ? (
+        <Pressable onPress={onOpenTrainer} accessibilityRole="button" style={styles.linkBtnWide}>
+          <Text style={styles.linkText}>🗣 {tr('trainer.entry')}</Text>
         </Pressable>
       ) : null}
 
@@ -350,6 +359,14 @@ const styles = StyleSheet.create({
   linkRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 4, marginBottom: 10 },
   linkBtn: {
     flex: 1,
+    backgroundColor: '#eaf4ea',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  linkBtnWide: {
+    marginHorizontal: 4,
+    marginBottom: 10,
     backgroundColor: '#eaf4ea',
     borderRadius: 10,
     paddingVertical: 10,
