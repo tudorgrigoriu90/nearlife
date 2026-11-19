@@ -166,3 +166,30 @@ describe('a failing notification prompt', () => {
     expect(await screen.findByText(tr('onboarding.firstSpotted.cta'))).toBeTruthy();
   });
 });
+
+// T-343 · review F-05.
+describe('OnboardingFlow mother-tongue offer', () => {
+  it('asks once on the welcome screen; Yes turns dual display on, No leaves it off', async () => {
+    const onAccept = jest.fn();
+    await render(<OnboardingFlow locale="en" onComplete={() => {}} motherTongue={{ locale: 'ar', onAccept }} />);
+    const tr = createTranslator('en');
+    expect(screen.getByText(tr('onboarding.motherTongue', { language: 'العربية' }))).toBeTruthy();
+    await fireEvent.press(screen.getByText(tr('onboarding.motherTongue.yes')));
+    expect(onAccept).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText(tr('onboarding.motherTongue.yes'))).toBeNull();
+  });
+
+  it('No closes the offer without turning anything on', async () => {
+    const onAccept = jest.fn();
+    await render(<OnboardingFlow locale="en" onComplete={() => {}} motherTongue={{ locale: 'ar', onAccept }} />);
+    const tr = createTranslator('en');
+    await fireEvent.press(screen.getByText(tr('onboarding.motherTongue.no')));
+    expect(onAccept).not.toHaveBeenCalled();
+    expect(screen.queryByText(tr('onboarding.motherTongue', { language: 'العربية' }))).toBeNull();
+  });
+
+  it('shows no offer without one', async () => {
+    await render(<OnboardingFlow locale="en" onComplete={() => {}} />);
+    expect(screen.queryByText(createTranslator('en')('onboarding.motherTongue.yes'))).toBeNull();
+  });
+});

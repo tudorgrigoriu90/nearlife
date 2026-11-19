@@ -129,3 +129,23 @@ describe('dual-display policy (T-152: machine translation is sufficient)', () =>
     expect(needsMachineTranslationNotice(anUnseededContentLocale())).toBe(false);
   });
 });
+
+// T-343 · review F-05: offer the phone's other language at onboarding.
+describe('motherTongueOffer', () => {
+  const { motherTongueOffer } = jest.requireActual('./contentLocale');
+
+  it('offers Arabic to a phone set to Arabic and Swedish', () => {
+    expect(motherTongueOffer(['ar-SE', 'sv-SE'])).toBe('ar');
+  });
+
+  it('offers nothing to a phone with only Swedish or English', () => {
+    expect(motherTongueOffer(['sv-SE'])).toBeNull();
+    expect(motherTongueOffer(['en-GB', 'sv-SE'])).toBeNull();
+    expect(motherTongueOffer([])).toBeNull();
+  });
+
+  it('offers the first one in the phone’s order, and only a language with content', () => {
+    expect(motherTongueOffer(['sv-SE', 'so-SO', 'ar'])).toBe('so');
+    expect(motherTongueOffer(['xx-YY', 'fa-IR'])).toBe('fa');
+  });
+});

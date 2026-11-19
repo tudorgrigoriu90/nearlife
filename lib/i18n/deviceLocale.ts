@@ -10,3 +10,12 @@ export function detectDeviceLocale(): Locale {
   const tag = getLocales()[0]?.languageTag;
   return resolveLocale(tag);
 }
+
+/** Every language the phone lists, in its order (T-343): an offer can come from the second. */
+export function deviceLanguageTags(): string[] {
+  try {
+    return getLocales().map((l) => l.languageTag);
+  } catch {
+    return [];
+  }
+}

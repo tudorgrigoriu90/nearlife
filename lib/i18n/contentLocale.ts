@@ -125,3 +125,18 @@ export function anUnseededContentLocale(): ContentLocale {
   if (!unseeded) throw new Error('every content locale is seeded — update these tests');
   return unseeded;
 }
+
+/**
+ * The language to offer for dual display at onboarding (T-343 · review F-05): the first in the
+ * phone's own list (`getLocales()`, in its order) that has content and is not Swedish or English,
+ * the two interface languages. Null when there is none; the offer is opt-in either way.
+ */
+export function motherTongueOffer(languageTags: string[]): ContentLocale | null {
+  for (const tag of languageTags) {
+    const language = tag.split(/[-_]/)[0].toLowerCase();
+    if (language === 'sv' || language === 'en') continue;
+    const locale = CONTENT_LOCALES.find((l) => l === language);
+    if (locale && isOfferableForDualDisplay(locale)) return locale;
+  }
+  return null;
+}

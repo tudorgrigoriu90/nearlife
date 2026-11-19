@@ -4996,6 +4996,15 @@ document until it is started, when it takes the next free `T-###`.
     shows nothing until then, so defaults never overwrite stored choices; a change shows at once
     and saves in the background. Tests: component 2, toggle 3, gateway 3, hook 3, Settings 2.
 
+- **T-343 · Offer the mother tongue at onboarding** — *Claude · XS · `DONE` · deps: T-312 · review F-05*
+  - Done when a device language list `['ar-SE', 'sv-SE']` shows the offer for Arabic, `['sv-SE']`
+    shows nothing, and No leaves dual display off.
+  - ✅ `motherTongueOffer` (`lib/i18n/contentLocale.ts`): the first language in the phone's own
+    list (`deviceLanguageTags()`, all of `getLocales()` in order) that has content and is not
+    Swedish or English. The welcome screen asks "Also show species in العربية?" (the endonym)
+    with Yes / "No, thanks"; Yes turns dual display on with that language, No only closes the
+    offer. Opt-in, off by default. Tests: offer 3, onboarding 3.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

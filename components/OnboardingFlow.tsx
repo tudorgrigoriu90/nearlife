@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
+import { endonymOf, type ContentLocale } from '../lib/i18n/contentLocale';
 import { agePath, type AgePath } from '../lib/ageGate';
 import type { Region } from '../lib/hometown';
 import { AsyncStorageHometownStore, deriveHometown, type HometownLookup } from '../lib/hometownStore';
@@ -55,6 +56,7 @@ export default function OnboardingFlow({
   resolveHome = deriveFromDevice,
   onSignIn,
   starterFor,
+  motherTongue,
 }: {
   locale?: Locale;
   /** "I already have an account" on the welcome screen (T-271); absent without a backend. */
@@ -70,9 +72,12 @@ export default function OnboardingFlow({
   starterFor?: (
     regionId: string,
   ) => Promise<{ species: Species; content: SpeciesContent | null } | null>;
+  /** A language from the phone's list to offer for dual display (T-343 · review F-05). */
+  motherTongue?: { locale: ContentLocale; onAccept: () => void } | null;
 }) {
   const tr = createTranslator(locale);
   const [step, setStep] = useState<OnboardingStep>(FIRST_STEP);
+  const [motherTongueAnswered, setMotherTongueAnswered] = useState(false);
   const [locationOutcome, setLocationOutcome] = useState<PermissionOutcome>('denied');
   const [notificationOutcome, setNotificationOutcome] = useState<PermissionOutcome>('denied');
   const [lookup, setLookup] = useState<HometownLookup | null>(null);
@@ -173,7 +178,30 @@ export default function OnboardingFlow({
           ctaLabel={tr('onboarding.welcome.cta')}
           onNext={advance}
           secondary={onSignIn ? { label: tr('signin.entry'), onPress: onSignIn } : undefined}
-        />
+        >
+          {motherTongue && !motherTongueAnswered ? (
+            <View style={styles.offer} testID="mother-tongue-offer">
+              <Text style={styles.offerText}>
+                {tr('onboarding.motherTongue', { language: endonymOf(motherTongue.locale) })}
+              </Text>
+              <View style={styles.offerActions}>
+                <Pressable
+                  accessibilityRole="button"
+                  style={styles.offerYes}
+                  onPress={() => {
+                    motherTongue.onAccept();
+                    setMotherTongueAnswered(true);
+                  }}
+                >
+                  <Text style={styles.offerYesText}>{tr('onboarding.motherTongue.yes')}</Text>
+                </Pressable>
+                <Pressable accessibilityRole="button" style={styles.offerNo} onPress={() => setMotherTongueAnswered(true)}>
+                  <Text style={styles.offerNoText}>{tr('onboarding.motherTongue.no')}</Text>
+                </Pressable>
+              </View>
+            </View>
+          ) : null}
+        </OnboardingScaffold>
       );
     case 'ageGate': {
       const currentYear = new Date().getFullYear();
@@ -270,6 +298,13 @@ function OnMount({ run }: { run: () => void }) {
 }
 
 const styles = StyleSheet.create({
+  offer: { marginTop: 16, backgroundColor: '#eef5ec', borderRadius: 12, padding: 12, gap: 8 },
+  offerText: { fontSize: 15, lineHeight: 21, color: '#22331f' },
+  offerActions: { flexDirection: 'row', gap: 8 },
+  offerYes: { backgroundColor: '#3a7d44', borderRadius: 18, paddingHorizontal: 16, paddingVertical: 8 },
+  offerYesText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  offerNo: { borderRadius: 18, paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1, borderColor: '#cdd8ca' },
+  offerNoText: { color: '#336f3c', fontWeight: '600', fontSize: 14 },
   spottedWrap: { flex: 1, backgroundColor: '#f4f8f2' },
   badge: { paddingTop: 52, paddingBottom: 8, alignItems: 'center', backgroundColor: '#eaf4ea' },
   badgeText: { fontSize: 14, fontWeight: '700', color: '#296f46' },

@@ -64,7 +64,7 @@ import { AsyncStorageEasyModeStore } from './lib/easyModeStore';
 import { useNotifPrefs } from './components/useNotifPrefs';
 import { SupabaseNotifPrefsGateway } from './lib/notifPrefsGateway';
 import { useEasyMode } from './components/useEasyMode';
-import type { ContentLocale } from './lib/i18n/contentLocale';
+import { motherTongueOffer, type ContentLocale } from './lib/i18n/contentLocale';
 import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
 import { SupabaseAuthGateway } from './lib/accountLinking';
 import { SupabaseAccessCodeGateway } from './lib/reviewerAccess';
@@ -141,7 +141,7 @@ import { gradeFromScore } from './lib/minigame/grade';
 import { monthOf, seasonKeyOf } from './lib/season';
 import { catchSeason } from './lib/catchSeason';
 import { countyStats } from './lib/countyStats';
-import { detectDeviceLocale } from './lib/i18n/deviceLocale';
+import { detectDeviceLocale, deviceLanguageTags } from './lib/i18n/deviceLocale';
 import { createTranslator, type Locale, type TranslationKey } from './lib/i18n';
 import {
   createPackSource,
@@ -440,6 +440,8 @@ export default function App() {
   // Push registration must not act on the all-off default before the stored choice loads: that
   // would withdraw a consenting user's device on every launch (T-201).
   const [consentLoaded, setConsentLoaded] = useState(false);
+  // The phone's other language, offered at onboarding (T-343 · review F-05).
+  const motherTongue = useMemo(() => motherTongueOffer(deviceLanguageTags()), []);
   const notifChoices = useNotifPrefs(NOTIF_PREFS_GATEWAY, consent.notifications);
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
@@ -1139,6 +1141,15 @@ export default function App() {
         locale={locale}
         onSignIn={hasSupabaseConfig() ? () => setShowSignIn(true) : undefined}
         starterFor={hasSupabaseConfig() ? countyStarterFor : undefined}
+        motherTongue={
+          motherTongue
+            ? {
+                locale: motherTongue,
+                onAccept: () =>
+                  updateDualLanguage(setSecondaryLocale(setDualEnabled(dualLanguage, true), motherTongue, locale as ContentLocale)),
+              }
+            : null
+        }
         onFirstSpotted={(speciesId) => {
           collection.spot(speciesId);
           track('species_spotted', { speciesId, source: 'onboarding' });
