@@ -106,6 +106,8 @@ EXPECTED: dict[str, str] = {
     "a user can report a mistake": "ok",
     "users cannot read the reports": "permission denied",
     "a report cannot be sent in another account's name": "permission denied",
+    "a user can keep a recognised species": "ok",
+    "a user sees only their own recognitions": "ok",
 }
 
 # Outcomes compared exactly, not as substrings of an error.
@@ -639,6 +641,12 @@ def run_content_report_checks(cur) -> dict[str, str]:
           "insert into public.content_reports (species_id, locale, kind, comment) "
           "values (%s, 'sv', 'other', 'verify.py check')", (species,))
     _step(cur, results, "users cannot read the reports", "select count(*) from public.content_reports")
+    _step(cur, results, "a user can keep a recognised species",
+          "insert into public.recognitions (species_id) values (%s) "
+          "on conflict (user_id, species_id) do nothing", (species,))
+    _step(cur, results, "a user sees only their own recognitions",
+          "select case when count(*) = count(*) filter (where user_id = auth.uid()) and count(*) = 1 "
+          "then 'ok' else 'saw ' || count(*) end from public.recognitions")
     _step(cur, results, "a report cannot be sent in another account's name",
           "insert into public.content_reports (user_id, species_id, locale, kind) "
           "values (gen_random_uuid(), %s, 'sv', 'other')", (species,))

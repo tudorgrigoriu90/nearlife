@@ -218,3 +218,25 @@ describe('data export: content reports', () => {
     expect((await source.server()).contentReports).toEqual([]);
   });
 });
+
+// T-299 · review B-31: recognitions are kept with the account and are in its export.
+describe('data export: recognitions', () => {
+  it('carries the account’s recognitions, and none from an older server', async () => {
+    const rpc = jest
+      .fn()
+      .mockResolvedValueOnce({ data: { recognitions: [{ speciesId: 'gbif:1', recognizedAt: 't' }] }, error: null })
+      .mockResolvedValueOnce({ data: {}, error: null });
+    const source = new SupabaseExportSource({ from: jest.fn(), rpc } as never, async () => 'u1');
+    const server = await source.server();
+    expect(server.recognitions).toEqual([{ speciesId: 'gbif:1', recognizedAt: 't' }]);
+    const out = buildDataExport({
+      exportedAt: 't',
+      profile: { homeRegion: null },
+      consent: { location: false, notifications: false, analytics: false },
+      collection: [],
+      server,
+    });
+    expect(out.recognitions).toEqual([{ speciesId: 'gbif:1', recognizedAt: 't' }]);
+    expect((await source.server()).recognitions).toEqual([]);
+  });
+});

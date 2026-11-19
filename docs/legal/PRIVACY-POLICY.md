@@ -35,7 +35,7 @@ written to meet the EU General Data Protection Regulation (GDPR).
 | **Account identifier** — an anonymous account is created so your collection can persist. You may optionally link an **email** to keep it across reinstalls/devices. | Save your almanac progress. | Contract (Art. 6(1)(b)). |
 | **Home region** — at onboarding, your device location is resolved **once** to a region/province (e.g. Kronoberg). **The coordinates are discarded immediately**; only the region is stored. | Show wildlife active in your area this season. | Consent (Art. 6(1)(a)). |
 | **Approximate location while using the app** — where a feature needs it, only a **coarse grid cell** is used, never precise coordinates, and only "while in use". | Tell you what wildlife is active around you. | Consent (Art. 6(1)(a)). |
-| **Your collection** — which species you've spotted, caught, or pledged to help, with timestamps. | The core almanac feature. | Contract (Art. 6(1)(b)). |
+| **Your collection** — which species you've spotted, caught, or pledged to help, with timestamps; 🆕 and the species you recognised in the "I saw…" quiz, with the date. | The core almanac feature. | Contract (Art. 6(1)(b)). |
 | **Notification token** — only if you enable notifications. | Send the seasonal nudges you asked for. | Consent (Art. 6(1)(a)). |
 | **Product analytics** — only if you consent: app events (e.g. screen opened, species spotted) with an anonymous id. **No precise location, no contact details.** Collected via PostHog with **EU hosting and IP anonymization**. | Understand what's useful and improve the app. | Consent (Art. 6(1)(a)). |
 | 🆕 **Purchases** — Google Play handles the payment; our billing processor (RevenueCat) tells our server what you bought. We store, against your anonymous account id: the unlock (e.g. "Full Game", "Family", a county), the store product id, whether it is active, and when it last changed. We never see your name, email or card details from the store. | Unlock what you bought; restore it on a new device; end it if you are refunded. | Contract (Art. 6(1)(b)). |
@@ -108,7 +108,7 @@ directly in Settings. 🆕 The export holds everything we keep for your account:
 consent choices, collection, purchase records and, if you're in a Family, your role and dates; your
 account's free-catch counter and creation date, the notifications sent to you, the phones
 registered for notifications (shown by the last 6 characters of their token), reviewer-code
-use, and the reports of a mistake you sent. It also holds what the app keeps on your phone: quiz attempts, recognised species, the
+use, the species you recognised in the quiz, and the reports of a mistake you sent. It also holds what the app keeps on your phone: quiz attempts, recognised species, the
 county-visit log, your language choices, the age path and 🆕 the badges you earned (with the date). An owner's export shows when members
 joined, not who they are. You can share or save the export as a file. You also have the right to lodge a complaint with your supervisory authority
 — in Sweden, the **Integritetsskyddsmyndigheten (IMY)**.

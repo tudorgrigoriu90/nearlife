@@ -37,6 +37,8 @@ export interface ServerExport {
     updatedAt: string;
   }[];
   reviewerCodes: { redeemedAt: string }[];
+  /** Species recognised in the "I saw…" quiz (T-299). */
+  recognitions?: { speciesId: string; recognizedAt: string }[];
   /** "Report a mistake" reports the user sent (T-293). */
   contentReports: {
     speciesId: string;
@@ -94,6 +96,7 @@ export interface DataExport {
   notifications: ServerExport['notifications'];
   devices: ServerExport['devices'];
   reviewerCodes: ServerExport['reviewerCodes'];
+  recognitions: NonNullable<ServerExport['recognitions']>;
   contentReports: ServerExport['contentReports'];
   device: DeviceExport;
   /**
@@ -144,6 +147,7 @@ export function buildDataExport(input: {
     notifications: [...(input.server?.notifications ?? [])],
     devices: [...(input.server?.devices ?? [])],
     reviewerCodes: [...(input.server?.reviewerCodes ?? [])],
+    recognitions: [...(input.server?.recognitions ?? [])],
     contentReports: [...(input.server?.contentReports ?? [])],
     device: input.device ?? {
       quizAttempts: null,
@@ -183,6 +187,7 @@ export class SupabaseExportSource {
       notifications: Array.isArray(d.notifications) ? d.notifications : [],
       devices: Array.isArray(d.devices) ? d.devices : [],
       reviewerCodes: Array.isArray(d.reviewerCodes) ? d.reviewerCodes : [],
+      recognitions: Array.isArray(d.recognitions) ? d.recognitions : [],
       contentReports: Array.isArray(d.contentReports) ? d.contentReports : [],
     };
   }

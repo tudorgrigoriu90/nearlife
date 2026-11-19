@@ -4550,6 +4550,19 @@ document until it is started, when it takes the next free `T-###`.
     button. Tests: helpers 4, card 3; the T-200 restart test now checks both the caught note and
     the allowance on another species.
 
+- **T-299 · Recognised species kept with the account** — *Claude · S · `DONE` (migration 0039 applied with this push) · deps: T-243 · review B-31*
+  - ✅ `recognitions` (migration 0039): each user reads and adds only their own rows; a species
+    is recognised once (the first date kept); real species only; gone with the account; in
+    `my_data_export()` and export v3. A separate table rather than a collection column, so the
+    collection's outbox and free-catch path (B-01) stay untouched. Tests: 4 in a real Postgres;
+    `verify.py` checks the add and the own-rows read live.
+  - ✅ The phone's copy stays (the quiz works offline). Once onboarded, and after a sign-in, the
+    app merges the two and uploads what only the phone has (`syncRecognitions`); each new
+    recognition is uploaded at once, and a failed upload is retried by the next merge. A sign-in
+    starts from the new account's set. Tests: 6.
+  - ✅ The quiz stores' `save` and `clear` no longer reject when storage fails. Tests: 2.
+  - ✅ Privacy policy (🆕): recognitions are part of the collection and the export.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

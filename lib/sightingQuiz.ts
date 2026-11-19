@@ -148,17 +148,18 @@ export class AsyncStorageQuizAttemptStore {
     }
   }
 
+  // A failing disk costs at most a second try today; it must not be an unhandled rejection (T-299).
   async save(attempts: QuizAttempts): Promise<void> {
-    await AsyncStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(attempts));
+    await AsyncStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(attempts)).catch(() => undefined);
   }
 
   async clear(): Promise<void> {
-    await AsyncStorage.removeItem(QUIZ_STORAGE_KEY);
+    await AsyncStorage.removeItem(QUIZ_STORAGE_KEY).catch(() => undefined);
   }
 }
 
-// Species the user picked out correctly (T-243), for the "recognised" badges. Kept on the device
-// like the daily tries: a reinstall loses them, which costs a few badges and no collection data.
+// Species the user picked out correctly (T-243), for the "recognised" badges. The phone's copy;
+// the account keeps them too (T-299, lib/recognitionSync.ts), so a reinstall gets them back.
 export const RECOGNIZED_STORAGE_KEY = 'nearby.recognized';
 
 export class AsyncStorageRecognitionStore {
@@ -175,10 +176,10 @@ export class AsyncStorageRecognitionStore {
   }
 
   async save(ids: ReadonlySet<string>): Promise<void> {
-    await AsyncStorage.setItem(RECOGNIZED_STORAGE_KEY, JSON.stringify([...ids]));
+    await AsyncStorage.setItem(RECOGNIZED_STORAGE_KEY, JSON.stringify([...ids])).catch(() => undefined);
   }
 
   async clear(): Promise<void> {
-    await AsyncStorage.removeItem(RECOGNIZED_STORAGE_KEY);
+    await AsyncStorage.removeItem(RECOGNIZED_STORAGE_KEY).catch(() => undefined);
   }
 }

@@ -74,6 +74,11 @@ import { sendContentReport, SupabaseReportGateway } from './lib/contentReports';
 import { badgeStatuses, rememberEarned, type RememberedBadges } from './lib/badges';
 import { AsyncStorageBadgeStore } from './lib/badgeStore';
 import { caughtThisSeason } from './lib/tierMarks';
+import {
+  SupabaseRecognitionGateway,
+  syncRecognitions,
+  type RecognitionGateway,
+} from './lib/recognitionSync';
 import { fixIfConsented } from './lib/locationAccess';
 import { pickCountyStarter } from './lib/countyStarter';
 import SignIn from './components/SignIn';
@@ -191,6 +196,11 @@ function entitlementSource(): EntitlementSource | null {
 // catching then works as before, with no spot to walk to.
 const CATCH_SPOT_STORE = new AsyncStorageCatchSpotStore();
 let catchSpotSourceInstance: CatchSpotSource | null | undefined;
+/** Recognitions on the account (T-299); null without a backend. */
+function recognitionGateway(): RecognitionGateway | null {
+  return hasSupabaseConfig() ? new SupabaseRecognitionGateway(getSupabase()) : null;
+}
+
 function catchSpotSource(): CatchSpotSource | null {
   if (catchSpotSourceInstance === undefined) {
     catchSpotSourceInstance = hasSupabaseConfig()
@@ -328,6 +338,9 @@ export default function App() {
       cancelled = true;
     };
   }, []);
+  // The account keeps them too (T-299 · review B-31): merged with the phone's copy once onboarded,
+  // and again after a sign-in (`recognitionRound`), so a reinstall gets them back.
+  const [recognitionRound, setRecognitionRound] = useState(0);
   const [showBadges, setShowBadges] = useState(false);
   const [rememberedBadges, setRememberedBadges] = useState<RememberedBadges>({});
   const [badgesLoaded, setBadgesLoaded] = useState(false);
@@ -520,6 +533,24 @@ export default function App() {
     showNotificationsInForeground();
     return onNotificationTap(setTappedSpeciesId);
   }, []);
+  useEffect(() => {
+    const gateway = recognitionGateway();
+    if (!onboarded || gateway === null) return;
+    let cancelled = false;
+    void ensureAnonymousSession()
+      .then(() => RECOGNIZED_STORE.load())
+      .then((local) => syncRecognitions(local, gateway))
+      .then(async (all) => {
+        if (cancelled) return;
+        await RECOGNIZED_STORE.save(all);
+        setRecognized(all);
+      })
+      .catch((e: unknown) => console.warn('recognitions sync failed', e));
+    return () => {
+      cancelled = true;
+    };
+  }, [onboarded, recognitionRound]);
+
   // A tap waits while something must finish first (T-296 · review B-24): a minigame in progress,
   // the catch tip right after it (a delight moment), a sign-in, and the delete confirmation. When
   // that closes, this effect runs again and the card opens.
@@ -915,6 +946,10 @@ export default function App() {
     await collection.reset();
     collection.resync();
     refreshEntitlements();
+    // The previous account's recognitions are not this one's: start from the server's set.
+    await RECOGNIZED_STORE.clear();
+    setRecognized(new Set());
+    setRecognitionRound((n) => n + 1);
   };
 
   // Everything the phone holds, on disk and in memory (T-269 · review B-05, B-12, B-52): the next
@@ -1187,6 +1222,10 @@ export default function App() {
               void RECOGNIZED_STORE.save(next);
               return next;
             });
+            // Offline, the next launch's merge uploads it (T-299).
+            void recognitionGateway()
+              ?.add([speciesId])
+              .catch(() => undefined);
           }}
           onOpenSpecies={(species) => {
             setShowSighting(false);

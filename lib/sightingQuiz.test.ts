@@ -172,3 +172,27 @@ describe('recognised species, kept on the device for the badges (T-243)', () => 
     expect(await store.load()).toEqual({});
   });
 });
+
+// T-299 · review B-31: a storage failure is never an unhandled rejection.
+describe('quiz stores when storage fails', () => {
+  const AS = require('@react-native-async-storage/async-storage') as {
+    setItem: jest.Mock;
+    removeItem: jest.Mock;
+  };
+
+  it('saving and clearing quiz attempts survive a failing disk', async () => {
+    const store = new AsyncStorageQuizAttemptStore();
+    AS.setItem.mockRejectedValueOnce(new Error('full'));
+    await expect(store.save({ a: '2026-11-19' })).resolves.toBeUndefined();
+    AS.removeItem.mockRejectedValueOnce(new Error('io'));
+    await expect(store.clear()).resolves.toBeUndefined();
+  });
+
+  it('saving and clearing recognitions survive a failing disk', async () => {
+    const store = new AsyncStorageRecognitionStore();
+    AS.setItem.mockRejectedValueOnce(new Error('full'));
+    await expect(store.save(new Set(['a']))).resolves.toBeUndefined();
+    AS.removeItem.mockRejectedValueOnce(new Error('io'));
+    await expect(store.clear()).resolves.toBeUndefined();
+  });
+});
