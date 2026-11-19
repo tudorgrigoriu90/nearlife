@@ -5,7 +5,6 @@ import {
   HardcodedSpeciesRepository,
   minigameCategory,
   speciesRowToSpecies,
-  SupabaseSpeciesGateway,
   SupabaseSpeciesRepository,
   type SpeciesContentRow,
   type SpeciesGateway,
@@ -15,14 +14,9 @@ import {
 describe('HardcodedSpeciesRepository', () => {
   const repo = new HardcodedSpeciesRepository();
 
-  it('lists the curated catalogue with localized names', async () => {
-    const en = await repo.listSpecies('en');
-    expect(en.length).toBeGreaterThan(50);
-    const robin = en.find((e) => e.species.id === 'european-robin');
-    expect(robin?.commonName).toBe('European Robin');
-
-    const sv = await repo.listSpecies('sv');
-    expect(sv.find((e) => e.species.id === 'european-robin')?.commonName).toBe('Rödhake');
+  it('names the curated species in each language', async () => {
+    expect((await repo.describeSpecies(['european-robin'], 'en'))[0]?.commonName).toBe('European Robin');
+    expect((await repo.describeSpecies(['european-robin'], 'sv'))[0]?.commonName).toBe('Rödhake');
   });
 
   it('returns localized content, null for an unknown species', async () => {
@@ -88,7 +82,6 @@ describe('SupabaseSpeciesRepository', () => {
     'pike|en': { species_id: 'pike', locale: 'en', common_name: 'Northern Pike', fact: 'en fact', when_how: 'w', give: 'g', protect: 'p' },
   };
   const gateway: SpeciesGateway = {
-    fetchSpecies: async () => speciesRows,
     fetchContent: async (id, locale) => contentRows[`${id}|${locale}`] ?? null,
     fetchPresence: async (regionId) =>
       regionId === 'SWE.9_1'
@@ -118,12 +111,6 @@ describe('SupabaseSpeciesRepository', () => {
         : [],
   };
   const repo = new SupabaseSpeciesRepository(gateway);
-
-  it('lists species from the gateway with localized names', async () => {
-    const list = await repo.listSpecies('en');
-    expect(list.map((e) => e.species.id)).toEqual(['pike']);
-    expect(list[0].commonName).toBe('Northern Pike');
-  });
 
   it('falls back to English content when the locale has no row', async () => {
     // No 'sv' row for pike → falls back to the 'en' row.
@@ -294,23 +281,5 @@ describe('mediaRowToPhoto (T-215)', () => {
     expect(catalogueRowToSpecies({ ...base, iucn_status: 'CR' }, 'sv').iucn).toBe('CR');
     expect(catalogueRowToSpecies({ ...base, iucn_status: 'LC' }, 'sv').iucn).toBeUndefined();
     expect(catalogueRowToSpecies(base, 'sv').iucn).toBeUndefined();
-  });
-});
-
-describe('SupabaseSpeciesGateway.fetchSpecies (T-225)', () => {
-  it('asks only for species the noise filter ships', async () => {
-    const calls: unknown[][] = [];
-    const client = {
-      from: (table: string) => ({
-        select: (cols: string) => ({
-          eq: (col: string, val: unknown) => {
-            calls.push([table, cols, col, val]);
-            return Promise.resolve({ data: [], error: null });
-          },
-        }),
-      }),
-    };
-    await new SupabaseSpeciesGateway(client as never).fetchSpecies();
-    expect(calls).toEqual([['species', expect.any(String), 'in_catalogue', true]]);
   });
 });

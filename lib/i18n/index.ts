@@ -1043,7 +1043,3 @@ export function createTranslator(locale: Locale) {
   return (key: TranslationKey, params?: TParams): string => t(locale, key, params);
 }
 
-/** Whether a full, reviewed catalog exists for the locale (else it falls back to English). */
-export function hasCatalog(locale: Locale): boolean {
-  return CATALOGS[locale] !== undefined;
-}

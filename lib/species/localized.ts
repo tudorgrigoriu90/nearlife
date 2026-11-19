@@ -205,6 +205,7 @@ export function commonNameInLocale(species: Species, locale: ContentLocale): str
   return name === undefined ? undefined : asTitleName(name, locale);
 }
 
+// keep: T-154 — test support: the roster tests iterate the seeded languages.
 /** Locales with bundled content beyond the English base — the roster tests iterate over this. */
 export function seededContentLocales(): ContentLocale[] {
   return (Object.keys(CONTENT_BY_LOCALE) as ContentLocale[]).filter((l) => l !== 'en');

@@ -1,4 +1,4 @@
-import { ConsentGatedTracker, InMemoryTracker, NoopTracker, retentionDayIndex } from './analytics';
+import { ConsentGatedTracker, InMemoryTracker, NoopTracker } from './analytics';
 
 describe('InMemoryTracker', () => {
   it('records events with their typed props in order', () => {
@@ -54,18 +54,3 @@ describe('ConsentGatedTracker', () => {
   });
 });
 
-describe('retentionDayIndex', () => {
-  const first = Date.UTC(2026, 3, 1, 9, 0, 0);
-  const day = 86_400_000;
-
-  it('buckets events into D0/D1/D7 relative to first-seen', () => {
-    expect(retentionDayIndex(first, first)).toBe(0);
-    expect(retentionDayIndex(first, first + 20 * 3_600_000)).toBe(0); // same 24h window
-    expect(retentionDayIndex(first, first + day)).toBe(1);
-    expect(retentionDayIndex(first, first + 7 * day)).toBe(7);
-  });
-
-  it('clamps events before first-seen to day 0', () => {
-    expect(retentionDayIndex(first, first - day)).toBe(0);
-  });
-});

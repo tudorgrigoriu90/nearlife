@@ -96,8 +96,7 @@ export function contentLocaleStatus(locale: ContentLocale): ReviewStatus {
 // ── Dual-display policy (T-152, Director-resolved) ───────────────────────────
 // Machine translation is sufficient here — no native-review gate, give/protect included — because
 // dual display is a *supplementary* aid shown alongside the always-reviewed primary content, not a
-// replacement for it. That is a deliberately lower bar than `isLiveForUsers` in coverage.ts, which
-// still requires `reviewed` before a locale may become the primary UI language (T-125). The one
+// replacement for it. The interface languages themselves are ALPHA_LOCALES (T-312). The one
 // carried-over requirement is honesty: machine-status content must be visibly labelled (T-153).
 
 /** Offerable as a secondary language once *any* content exists — `machine` is enough (T-152). */
@@ -115,6 +114,7 @@ export function needsMachineTranslationNotice(locale: ContentLocale): boolean {
   return contentLocaleStatus(locale) === 'machine';
 }
 
+// keep: T-154 — test support.
 /**
  * A content locale that has no content yet — for tests that need to exercise the not-translated
  * path. Derived rather than hardcoded so it stays valid as T-154 seeds languages one by one;

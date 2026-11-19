@@ -45,11 +45,6 @@ export function isDualActive(
   );
 }
 
-/** Enabled but no language chosen yet — Settings should surface the picker, not silently no-op. */
-export function needsLanguageChoice(settings: DualLanguageSettings): boolean {
-  return settings.enabled && settings.secondaryLocale === null;
-}
-
 /**
  * Turn the feature on/off. Disabling **keeps** the chosen language: toggling off and back on
  * shouldn't make the user hunt through 40 languages again to get back where they were.

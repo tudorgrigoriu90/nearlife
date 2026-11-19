@@ -2,7 +2,6 @@ import {
   DUAL_TITLE_DELIMITER,
   dualSegments,
   dualTitle,
-  hasSecondary,
   type DualTextInput,
 } from './dualLanguageFormat';
 import { FSI, PDI, stripIsolates } from './i18n/bidi';
@@ -97,10 +96,3 @@ describe('dualSegments', () => {
   });
 });
 
-describe('hasSecondary', () => {
-  it('reports whether a second half actually rendered', () => {
-    expect(hasSecondary(pair)).toBe(true);
-    expect(hasSecondary({ ...pair, secondary: null })).toBe(false);
-    expect(hasSecondary({ ...pair, secondary: 'European Robin' })).toBe(false);
-  });
-});

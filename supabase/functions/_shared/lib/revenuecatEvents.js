@@ -22,10 +22,6 @@ const GRANT = new Set([
     'PRODUCT_CHANGE',
 ]);
 const REVOKE = new Set(['CANCELLATION', 'EXPIRATION']);
-/** The entitlement id for one county pack: `SWE.9_1` → `region_SWE_9_1` (no dots in RC ids). */
-export function regionEntitlement(regionId) {
-    return `region_${regionId.replace(/[^A-Za-z0-9]/g, '_')}`;
-}
 /** The Play Console product id for one county pack: `SWE.9_1` → `region_swe_9`. */
 export function regionProductId(regionId) {
     const m = /^SWE\.(\d+)_1$/.exec(regionId);

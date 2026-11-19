@@ -1,7 +1,6 @@
 import {
   DEFAULT_DUAL_LANGUAGE,
   isDualActive,
-  needsLanguageChoice,
   setDualEnabled,
   setSecondaryLocale,
   type DualLanguageSettings,
@@ -51,17 +50,6 @@ describe('isDualActive', () => {
     const picked = setSecondaryLocale(on(null), 'sv', 'en');
     expect(isDualActive(picked, 'en')).toBe(true);
     expect(isDualActive(picked, 'sv')).toBe(false);
-  });
-});
-
-describe('needsLanguageChoice', () => {
-  it('is true when enabled with nothing picked — Settings must surface the picker', () => {
-    expect(needsLanguageChoice(on(null))).toBe(true);
-  });
-
-  it('is false once a language is picked, and while the feature is off', () => {
-    expect(needsLanguageChoice(on('sv'))).toBe(false);
-    expect(needsLanguageChoice(DEFAULT_DUAL_LANGUAGE)).toBe(false);
   });
 });
 

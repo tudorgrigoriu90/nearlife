@@ -40,7 +40,6 @@ describe('SupabaseSpeciesGateway', () => {
         species_presence: { data: [{ species_id: 'gbif:1', active_months: [5, 6], occurrences: 10 }], error: null },
       }),
     );
-    expect(await gw.fetchSpecies()).toHaveLength(1);
     expect((await gw.fetchContent('gbif:1', 'en'))?.fact).toBe('f');
     expect(await gw.fetchPresence('SWE.9_1')).toHaveLength(1);
   });
@@ -53,7 +52,6 @@ describe('SupabaseSpeciesGateway', () => {
         species_presence: { data: null, error: null },
       }),
     );
-    expect(await gw.fetchSpecies()).toEqual([]);
     expect(await gw.fetchContent('x', 'en')).toBeNull();
     expect(await gw.fetchPresence('r')).toEqual([]);
   });
@@ -97,7 +95,6 @@ describe('SupabaseSpeciesGateway', () => {
     const gw = new SupabaseSpeciesGateway(
       fakeClient({ species: { data: null, error: { message: 'boom' } } }),
     );
-    await expect(gw.fetchSpecies()).rejects.toThrow(/species fetch failed: boom/);
     await expect(gw.fetchSpeciesByIds(['a'])).rejects.toThrow(/species fetch failed: boom/);
   });
 });

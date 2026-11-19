@@ -3,7 +3,6 @@ import { canSendNow, DEFAULT_CADENCE, } from './cadence.js';
 import { selectFromPresence } from './presenceNotification.js';
 import { isAtOrAfterSlot } from './sendSlot.js';
 import { DEFAULT_TUNING } from './tuning.js';
-export const DEFAULT_PREFS = { enabled: true };
 /**
  * Decide whether — and what — to send this cycle. Order mirrors TSD §4: master opt-in → cadence
  * (quiet hours → daily cap → frequency cap, from `canSendNow`) → per-user send slot (T-186) →
@@ -32,13 +31,4 @@ export function decideNotification(user, opts = {}) {
         occurrences: picked.occurrences,
         deliveredAtMs: user.nowMs,
     };
-}
-/**
- * Log a send for the validation funnel (TSD §4 step 7). Emits `notification_delivered` only for a
- * send decision, so a skipped cycle is silent. Consent gating is the tracker's concern
- * (`ConsentGatedTracker`), not the engine's.
- */
-export function recordDelivery(tracker, decision) {
-    if (decision.send)
-        tracker.track('notification_delivered', { speciesId: decision.speciesId });
 }

@@ -17,12 +17,6 @@ import type { IucnStatus, Month, Rarity, Species, SpeciesCategory } from './spec
 // Mirrors the collection-store seam: a tested in-memory/hardcoded impl the app runs on today, and
 // a Supabase impl (behind a tiny gateway) that reads the production tables when data is seeded.
 
-export interface LocalizedSpecies {
-  species: Species;
-  /** Common name in the requested locale (English fallback). */
-  commonName: string;
-}
-
 /** A species' presence in a region: the months it's recorded there + observation count (TSD §4). */
 export interface RegionPresence {
   speciesId: string;
@@ -33,7 +27,6 @@ export interface RegionPresence {
 }
 
 export interface SpeciesRepository {
-  listSpecies(locale: Locale): Promise<LocalizedSpecies[]>;
   getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null>;
   /**
    * Content in exactly `locale`, with **no** English fallback — the mother-tongue half of dual
@@ -66,10 +59,6 @@ export interface SpeciesSummary {
 /** The bundled curated data (default source until the app reads from the DB). */
 export class HardcodedSpeciesRepository implements SpeciesRepository {
   constructor(private readonly species: Species[] = KRONOBERG_SPECIES) {}
-
-  async listSpecies(locale: Locale): Promise<LocalizedSpecies[]> {
-    return this.species.map((species) => ({ species, commonName: commonNameFor(species, locale) }));
-  }
 
   async getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null> {
     return contentFor(speciesId, locale) ?? null;
@@ -281,7 +270,6 @@ export function contentRowToContent(row: SpeciesContentRow): SpeciesContent {
 
 /** The reads the Supabase repository needs — kept minimal so it is trivially fakeable. */
 export interface SpeciesGateway {
-  fetchSpecies(): Promise<SpeciesRow[]>;
   fetchContent(speciesId: string, locale: string): Promise<SpeciesContentRow | null>;
   fetchPresence(regionId: string): Promise<PresenceRow[]>;
   fetchSpeciesByIds(ids: string[]): Promise<SpeciesRow[]>;
@@ -293,15 +281,6 @@ export interface SpeciesGateway {
 
 export class SupabaseSpeciesRepository implements SpeciesRepository {
   constructor(private readonly gateway: SpeciesGateway) {}
-
-  async listSpecies(locale: Locale): Promise<LocalizedSpecies[]> {
-    const rows = await this.gateway.fetchSpecies();
-    return rows.map((row) => {
-      const species = speciesRowToSpecies(row);
-      // Localized name resolution mirrors the hardcoded path (English name is the base).
-      return { species, commonName: commonNameFor(species, locale) };
-    });
-  }
 
   async getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null> {
     // Requested locale, falling back to English if the locale has no row (mirrors contentFor).
@@ -407,17 +386,6 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
     const { data, error } = await this.client.rpc('data_version');
     if (error) throw new Error(`data_version failed: ${error.message}`);
     return String(data ?? '');
-  }
-
-  async fetchSpecies(): Promise<SpeciesRow[]> {
-    const { data, error } = await this.client
-      .from('species')
-      .select(SPECIES_COLUMNS)
-      // Only species the noise filter ships (T-225). Presence is already limited by RLS; this
-      // list reads the species table, which stays readable so a collected species' card loads.
-      .eq('in_catalogue', true);
-    if (error) throw new Error(`species fetch failed: ${error.message}`);
-    return (data ?? []) as SpeciesRow[];
   }
 
   async fetchContent(speciesId: string, locale: string): Promise<SpeciesContentRow | null> {

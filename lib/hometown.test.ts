@@ -1,5 +1,5 @@
 import type { CountyShape } from './geo/countyShape';
-import { KRONOBERG_REGION, NEAREST_COUNTY_MAX_KM, resolveHometown } from './hometown';
+import { NEAREST_COUNTY_MAX_KM, resolveHometown } from './hometown';
 
 // Real places, real outlines (lib/geo/swedishCounties.ts). One per county, so a join that slipped
 // by one — every user in their neighbour's county — cannot pass.
@@ -34,7 +34,7 @@ describe('resolveHometown', () => {
 
   it('uses the Swedish county name', () => {
     expect(resolveHometown({ latitude: 59.274, longitude: 15.207 })?.name).toBe('Örebro');
-    expect(resolveHometown({ latitude: 56.879, longitude: 14.806 })).toEqual(KRONOBERG_REGION);
+    expect(resolveHometown({ latitude: 56.879, longitude: 14.806 })).toEqual({ id: 'SWE.9_1', name: 'Kronoberg' });
   });
 
   it('returns null outside Sweden — v1 is Sweden only', () => {

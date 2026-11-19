@@ -80,13 +80,11 @@ describe('PackSpeciesRepository', () => {
     expect(rows.map((r) => r.species.id)).toEqual(['b', 'a']);
     expect(rows[1]).toMatchObject({ commonName: 'Sv a', detail: 'when sv' });
     expect(rows[0].detail).toBe('when en');
-    expect((await repo.listSpecies('sv')).map((l) => l.species.id)).toEqual(['a', 'b', 'c']);
   });
 });
 
 describe('composeRepository', () => {
   const failing: SpeciesRepository = {
-    listSpecies: () => Promise.reject(new Error('offline')),
     getContent: () => Promise.reject(new Error('offline')),
     getContentInLocale: () => Promise.reject(new Error('offline')),
     regionPresence: () => Promise.reject(new Error('offline')),

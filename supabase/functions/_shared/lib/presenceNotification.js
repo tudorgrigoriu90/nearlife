@@ -3,8 +3,7 @@ import { candidatesForMonth, recordsInMonth } from './presence.js';
 import { DEFAULT_TUNING } from './tuning.js';
 // Production notification selection over live region presence (T-062, TSD §4 steps 4–5).
 // The candidate set (season gate + collection dedupe) comes from T-061; this module adds the
-// weighting + sampling. The hardcoded path (`notification.ts`) weights by a curated rarity enum;
-// here the flavour is derived from the observation count in `species_presence`.
+// weighting + sampling. The flavour is derived from the observation count in `species_presence`.
 //
 // Weight  w = base + scale × log10(1 + occurrences)  — a dampened presence weight (TSD §4), with
 // `base`/`scale` from the tuning config (T-065). More-observed species are more likely to surface

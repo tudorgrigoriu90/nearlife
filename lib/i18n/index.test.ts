@@ -3,7 +3,6 @@ import {
   BASE_LOCALE,
   createTranslator,
   en,
-  hasCatalog,
   SUPPORTED_LOCALES,
   sv,
   t,
@@ -36,7 +35,6 @@ describe('i18n runtime', () => {
 
   it('falls back to English for a locale with no catalog yet', () => {
     // German is a supported target but not yet translated → English fallback.
-    expect(hasCatalog('de')).toBe(false);
     expect(t('de', 'thisWeek.title')).toBe('This week');
   });
 

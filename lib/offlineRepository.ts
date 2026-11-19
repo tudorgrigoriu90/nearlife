@@ -7,7 +7,6 @@ import {
   catalogueRowToSpecies,
   contentRowToContent,
   presenceRowToPresence,
-  type LocalizedSpecies,
   type RegionPresence,
   type SpeciesContentRow,
   type SpeciesRepository,
@@ -77,10 +76,6 @@ export class PackSpeciesRepository implements SpeciesRepository {
 
   private county(regionId: string): void {
     if (regionId !== this.pack.regionId) throw new Error(`no offline pack for ${regionId}`);
-  }
-
-  async listSpecies(locale: Locale): Promise<LocalizedSpecies[]> {
-    return this.catalogue().species.map((species) => ({ species, commonName: commonNameFor(species, locale) }));
   }
 
   async getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null> {

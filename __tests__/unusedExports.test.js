@@ -1,0 +1,64 @@
+/* global describe, it, expect, __dirname */
+// Plain JS: it needs Node's fs, and the app's tsconfig deliberately has no Node types.
+const { readFileSync, readdirSync, statSync } = require('fs');
+const { join, relative } = require('path');
+
+// T-325 · review I-10: every exported function, class and constant in lib/ has a caller outside
+// the tests, or says which task keeps it (`keep: T-###` in the comment above it). Dead exports
+// cost more than their lines: tests pin them, coverage counts them, and readers take them for the
+// path the app uses (the bundled notification selection was read as live for months).
+
+const ROOT = join(__dirname, '..');
+const SKIP_DIRS = new Set(['node_modules', 'coverage', '.expo', '.git', '_shared', 'dist', 'android', 'ios']);
+const isTest = (p) => /\.test\.[jt]sx?$/.test(p) || p.includes('__tests__') || p.includes('__mocks__');
+
+function walk(dir, out = []) {
+  for (const name of readdirSync(dir)) {
+    if (SKIP_DIRS.has(name)) continue;
+    const p = join(dir, name);
+    if (statSync(p).isDirectory()) walk(p, out);
+    else if (/\.(ts|tsx|js)$/.test(name) && !name.endsWith('.d.ts')) out.push(p);
+  }
+  return out;
+}
+
+const sources = ['App.tsx', 'AppRoot.tsx', 'index.ts', 'lib', 'components', 'supabase/functions', 'scripts']
+  .map((p) => join(ROOT, p))
+  .flatMap((p) => {
+    try {
+      return statSync(p).isDirectory() ? walk(p) : [p];
+    } catch {
+      return [];
+    }
+  })
+  .filter((p) => !isTest(p));
+const text = new Map(sources.map((p) => [p, readFileSync(p, 'utf8')]));
+
+function unused() {
+  const found = [];
+  for (const [file, src] of text) {
+    if (!relative(ROOT, file).startsWith('lib')) continue;
+    const lines = src.split('\n');
+    lines.forEach((line, i) => {
+      const m = /^export (?:async )?(?:function|class|const) (\w+)/.exec(line);
+      if (!m) return;
+      const name = m[1];
+      // The in-memory store classes are the test doubles of each storage interface: the tests are
+      // their only callers by design, and the interface beside them is what the app uses.
+      if (/^InMemory[A-Z]/.test(name)) return;
+      const above = lines.slice(Math.max(0, i - 8), i).join('\n');
+      if (/keep: T-\d+/.test(above)) return;
+      const word = new RegExp(`\\b${name}\\b`, 'g');
+      let uses = 0;
+      for (const s of text.values()) uses += (s.match(word) ?? []).length;
+      if (uses <= 1) found.push(`${relative(ROOT, file)}: ${name}`);
+    });
+  }
+  return found;
+}
+
+describe('lib exports', () => {
+  it('each has a caller outside the tests, or a task that keeps it', () => {
+    expect(unused()).toEqual([]);
+  });
+});

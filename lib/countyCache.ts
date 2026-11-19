@@ -3,7 +3,6 @@ import type { ContentLocale } from './i18n/contentLocale';
 import type { SpeciesContent } from './species/content';
 import type { Species } from './species/types';
 import type {
-  LocalizedSpecies,
   RegionPresence,
   SpeciesRepository,
   SpeciesSummary,
@@ -101,10 +100,6 @@ export class CachingSpeciesRepository implements SpeciesRepository {
     return this.cached(`catalogue.${regionId}.${locale}`, () =>
       this.inner.regionCatalogue(regionId, locale),
     );
-  }
-
-  listSpecies(locale: Locale): Promise<LocalizedSpecies[]> {
-    return this.inner.listSpecies(locale);
   }
 
   getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null> {

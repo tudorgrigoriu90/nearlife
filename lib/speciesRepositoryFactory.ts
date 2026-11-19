@@ -8,7 +8,6 @@ import {
   HardcodedSpeciesRepository,
   SupabaseSpeciesGateway,
   SupabaseSpeciesRepository,
-  type LocalizedSpecies,
   type RegionPresence,
   type SpeciesRepository,
   type SpeciesSummary,
@@ -50,10 +49,6 @@ export class FallbackSpeciesRepository implements SpeciesRepository {
       console.warn(`species ${what} fell back to bundled data`, error);
       return run(this.backup);
     }
-  }
-
-  listSpecies(locale: Locale): Promise<LocalizedSpecies[]> {
-    return this.attempt((r) => r.listSpecies(locale), 'list');
   }
 
   getContent(speciesId: string, locale: ContentLocale): Promise<SpeciesContent | null> {
@@ -110,10 +105,4 @@ export function createRepositoryParts(cache?: CacheFiles): {
   const bundled = new HardcodedSpeciesRepository();
   if (!hasSupabaseConfig()) return { online: null, bundled };
   return { online: onlineRepository(cache), bundled };
-}
-
-export function createSpeciesRepository(cache?: CacheFiles): SpeciesRepository {
-  const bundled = new HardcodedSpeciesRepository();
-  if (!hasSupabaseConfig()) return bundled;
-  return new FallbackSpeciesRepository(onlineRepository(cache), bundled);
 }

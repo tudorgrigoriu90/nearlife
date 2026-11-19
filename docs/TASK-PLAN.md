@@ -4780,6 +4780,27 @@ document until it is started, when it takes the next free `T-###`.
     `__tests__/ciGate.test.js` pins both crons, forbids a step keyed on which schedule fired, and
     checks the guard call.
 
+- **T-325 · Remove code that nothing uses** — *Claude · S · `DONE` · deps: — · review I-10*
+  - Done when every exported function, class and constant in `lib/` has a non-test caller or a
+    `keep: T-###` comment naming the task that keeps it.
+  - ✅ `__tests__/unusedExports.test.js` scans `lib/` against the app, components, Edge Functions
+    and scripts (tests and the generated `_shared` copies excluded) and fails on an export with no
+    caller. The `InMemory*` store classes are exempt by name: they are the test doubles of each
+    storage interface.
+  - ✅ Removed with their tests: the bundled notification selection (`lib/notification.ts` and the
+    `rarityFlavor` tuning it read; `Rng` moved to `presenceNotification.ts`), `registerCatch` (the
+    database enforces the limit, T-075), `recordDelivery` and the client `notification_delivered`
+    event (deliveries are counted from `notification_log`), `earnedBadges`, `hasSecondary`,
+    `retentionDayIndex`, `assertAllowedLicense`, `isExpired`/`expiryMs`, `revoke`,
+    `needsLanguageChoice`, `KRONOBERG_REGION`, `hasCatalog`, `isLiveForUsers`/`liveLocales`/
+    `translationProgress` (a native-review gate nothing enforced; ALPHA_LOCALES decides, T-312),
+    `DEFAULT_PREFS`, `proximityState`/`nearestSpot`, `regionEntitlement`, `CONTENT_SPECIES_IDS`,
+    `HAS_FULL_COVERAGE`, `createSpeciesRepository`, `DELETE_ACCOUNT_URL`, and the unpaged
+    `SpeciesRepository.listSpecies` / `SpeciesGateway.fetchSpecies` across every implementation.
+  - ✅ Kept with a marker: `DEFAULT_RETENTION` (T-094, pinned by the pipeline test), the honest-copy
+    checks (T-066, T-153), test support for bidi and the language roster (T-154, T-157) and the
+    contrast palette (T-292). `cell.ts` was already gone (T-301); `seasonalWindow.ts` is wired.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

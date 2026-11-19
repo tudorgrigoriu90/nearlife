@@ -1,7 +1,6 @@
 import type { CollectionRecord } from './collection';
 import {
   badgeStatuses,
-  earnedBadges,
   groupTiers,
   rememberEarned,
   withRemembered,
@@ -10,6 +9,12 @@ import {
   RECOGNIZED_MILESTONES,
   SPOTTED_MILESTONES,
 } from './badges';
+
+/** Ids of the earned badges, in badgeStatuses' order. */
+const earnedBadges = (...args: Parameters<typeof badgeStatuses>) =>
+  badgeStatuses(...args)
+    .filter((b) => b.earned)
+    .map((b) => b.id);
 import type { Species } from './species/types';
 
 // T-212 (Director, 2026-10-31): tiers per group instead of "every species in the group", which

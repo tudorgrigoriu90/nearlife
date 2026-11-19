@@ -11,12 +11,6 @@ export const ALLOWED_LICENSES = ['CC0', 'CC-BY', 'CC-BY-SA'];
 export function isCommercialUseAllowed(license) {
     return ALLOWED_LICENSES.includes(license);
 }
-/** Guard used when ingesting media — throws on an NC/ND/unknown license (never ships). */
-export function assertAllowedLicense(media) {
-    if (!isCommercialUseAllowed(media.license)) {
-        throw new Error(`disallowed photo license for ${media.speciesId}: ${media.license}`);
-    }
-}
 const PHOTO_SOURCES = [
     ['wikimedia.org', 'Wikimedia Commons'],
     ['wikipedia.org', 'Wikimedia Commons'],

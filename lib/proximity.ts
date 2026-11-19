@@ -30,34 +30,5 @@ export function haversineMeters(a: LatLng, b: LatLng): number {
   return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
-export interface NearestSpot {
-  spot: LatLng;
-  distanceM: number;
-}
-
-/** The closest spot to `user`, or null if there are none. */
-export function nearestSpot(user: LatLng, spots: LatLng[]): NearestSpot | null {
-  let best: NearestSpot | null = null;
-  for (const spot of spots) {
-    const distanceM = haversineMeters(user, spot);
-    if (best === null || distanceM < best.distanceM) best = { spot, distanceM };
-  }
-  return best;
-}
-
+/** Catch availability, as `catchSpotView` (catchSpots.ts) reports it. */
 export type ProximityState = 'in-range' | 'too-far' | 'no-spots' | 'gps-off';
-
-/**
- * The catch-availability state. `null` user location → gps-off; no spots → no-spots; nearest spot
- * within `rangeM` → in-range; otherwise too-far.
- */
-export function proximityState(
-  user: LatLng | null,
-  spots: LatLng[],
-  rangeM: number = DEFAULT_CATCH_RANGE_M,
-): ProximityState {
-  if (user === null) return 'gps-off';
-  const nearest = nearestSpot(user, spots);
-  if (nearest === null) return 'no-spots';
-  return nearest.distanceM <= rangeM ? 'in-range' : 'too-far';
-}

@@ -5,8 +5,9 @@ import { seasonKeyOf } from './season';
 // key rolls over, and the Full Game entitlement grants unlimited catches (ECONOMY).
 //
 // This module is intentionally clock-free and storage-free: callers pass the current season
-// key (from seasonKeyOf, T-110) and the persisted state. The real enforcement runs in an Edge
-// Function so it is never client-trusted (TSD §5b); this is the logic it evaluates.
+// key (from seasonKeyOf, T-110) and the state derived from the collection. The real enforcement
+// is the database's (migration 20261029000001, T-075), never client-trusted; this module is what
+// the app shows and checks before it asks.
 
 export const FREE_CATCHES_PER_SEASON = 3; // = the 3 in migration 20261029000001 (test_free_catch_limit.py)
 
@@ -33,25 +34,6 @@ export function remainingFreeCatches(state: FreeCatchState, currentSeasonKey: st
 /** Whether the user may catch right now. */
 export function canCatch(state: FreeCatchState, currentSeasonKey: string): boolean {
   return remainingFreeCatches(state, currentSeasonKey) > 0;
-}
-
-/**
- * Apply a successful catch, returning the new persisted state. Throws if the user cannot
- * catch — the caller must check `canCatch` first; the throw is the server-side guard against
- * races and tampering (TSD §5b). Full Game owners' counts are not incremented.
- */
-export function registerCatch(state: FreeCatchState, currentSeasonKey: string): FreeCatchState {
-  if (!canCatch(state, currentSeasonKey)) {
-    throw new Error('free catch limit reached for this season');
-  }
-  if (state.fullGame) {
-    return { ...state, freeCatchSeason: currentSeasonKey };
-  }
-  return {
-    fullGame: false,
-    freeCatchesUsed: usedThisSeason(state, currentSeasonKey) + 1,
-    freeCatchSeason: currentSeasonKey,
-  };
 }
 
 /**

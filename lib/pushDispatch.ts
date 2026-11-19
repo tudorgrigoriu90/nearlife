@@ -1,6 +1,6 @@
 import { DEFAULT_CADENCE, type CadenceConfig, type SendHistory } from './cadence';
 import { t, type Locale, SUPPORTED_LOCALES, BASE_LOCALE } from './i18n';
-import type { Rng } from './notification';
+import type { Rng } from './presenceNotification';
 import { decideNotification, type SkipReason } from './notificationEngine';
 import { DEFAULT_TUNING, type NotificationTuning } from './tuning';
 import type { Month } from './species/types';

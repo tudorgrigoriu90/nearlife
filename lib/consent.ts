@@ -25,10 +25,6 @@ export function grant(state: ConsentState, kind: ConsentKind): ConsentState {
   return { ...state, [kind]: true };
 }
 
-export function revoke(state: ConsentState, kind: ConsentKind): ConsentState {
-  return { ...state, [kind]: false };
-}
-
 /** Set an explicit value (e.g. mirroring an OS permission result back into consent). */
 export function setConsent(state: ConsentState, kind: ConsentKind, value: boolean): ConsentState {
   return { ...state, [kind]: value };

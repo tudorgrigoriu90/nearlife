@@ -64,6 +64,7 @@ export const REALTIME_CLAIM_PHRASES: Partial<Record<ContentLocale, string[]>> = 
  * therefore declare its own phrases before its content may ship; `contentHonesty.test.ts` fails
  * the build for any offerable locale missing them (T-153).
  */
+// keep: T-153 — contentHonesty.test.ts blocks any offerable locale without its own phrases.
 export function hasHonestyPhrasesFor(locale: ContentLocale): boolean {
   return REALTIME_CLAIM_PHRASES[locale] !== undefined;
 }
@@ -75,6 +76,7 @@ export function findRealtimeClaims(text: string, locale: ContentLocale): string[
   return phrases.filter((phrase) => lower.includes(phrase));
 }
 
+// keep: T-066 — the honest-copy tests check every shipped text with it (invariant #1).
 /** True when `text` makes no real-time-presence claim for `locale`. */
 export function isHonest(text: string, locale: ContentLocale): boolean {
   return findRealtimeClaims(text, locale).length === 0;

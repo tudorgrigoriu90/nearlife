@@ -50,6 +50,7 @@ export function isolate(text: string): string {
   return text === '' ? '' : `${FSI}${text}${PDI}`;
 }
 
+// keep: T-157 — test support: compares wrapped text with what a reader sees.
 /** Strip isolate controls — for tests and for comparing/measuring the human-readable text. */
 export function stripIsolates(text: string): string {
   return text.split(FSI).join('').split(PDI).join('');

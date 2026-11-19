@@ -1,9 +1,10 @@
-import { type Locale, SUPPORTED_LOCALES } from './index';
+import type { Locale } from './index';
 
-// Locale coverage & review status (T-124). Tracks, per language, how far its localization has
-// progressed. A locale only goes live for users in a market once its content is `reviewed` —
-// give/protect advice is law-sensitive and must have native review (INTERNATIONALIZATION.md,
-// T-125). This is the honest gate that stops half-translated or raw-MT content from shipping.
+// Locale coverage & review status (T-124). Tracks, per language, how far its content has
+// progressed. `contentLocale.ts` reads it to decide which languages may be offered beside the
+// interface language, and pipeline/tests/test_templates_i18n.py reads it for the template roster.
+// Which languages the interface itself speaks is ALPHA_LOCALES (T-312); the old `isLiveForUsers`
+// gate described a native-review rule nothing enforced and went in T-325.
 
 export type ReviewStatus =
   | 'missing' // no localized content yet → falls back to English
@@ -21,20 +22,3 @@ export const LOCALE_STATUS: Record<Locale, ReviewStatus> = {
   mt: 'missing', pl: 'machine', pt: 'machine', ro: 'machine', sk: 'machine',
   sl: 'machine', es: 'machine',
 };
-
-/** A locale may be offered to users only when its content is native-reviewed. */
-export function isLiveForUsers(locale: Locale): boolean {
-  return LOCALE_STATUS[locale] === 'reviewed';
-}
-
-/** Locales currently safe to offer to users. */
-export function liveLocales(): Locale[] {
-  return SUPPORTED_LOCALES.filter(isLiveForUsers);
-}
-
-/** Count of locales in each status — a simple rollout dashboard. */
-export function translationProgress(): Record<ReviewStatus, number> {
-  const counts: Record<ReviewStatus, number> = { missing: 0, machine: 0, reviewed: 0 };
-  for (const locale of SUPPORTED_LOCALES) counts[LOCALE_STATUS[locale]] += 1;
-  return counts;
-}

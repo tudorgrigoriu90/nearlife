@@ -30,13 +30,6 @@ export function isCommercialUseAllowed(license: string): boolean {
   return (ALLOWED_LICENSES as string[]).includes(license);
 }
 
-/** Guard used when ingesting media — throws on an NC/ND/unknown license (never ships). */
-export function assertAllowedLicense(media: SpeciesMedia): void {
-  if (!isCommercialUseAllowed(media.license)) {
-    throw new Error(`disallowed photo license for ${media.speciesId}: ${media.license}`);
-  }
-}
-
 const PHOTO_SOURCES: [string, string][] = [
   ['wikimedia.org', 'Wikimedia Commons'],
   ['wikipedia.org', 'Wikimedia Commons'],

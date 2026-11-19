@@ -4,7 +4,6 @@ import {
   DEFAULT_CONSENT,
   grant,
   hasConsent,
-  revoke,
   type ConsentState,
   setConsent,
 } from './consent';
@@ -19,13 +18,10 @@ describe('consent', () => {
     expect(CONSENT_KINDS).toEqual(['location', 'notifications', 'analytics']);
   });
 
-  it('grants and revokes one kind without touching others', () => {
+  it('grants one kind without touching others', () => {
     const granted = grant(DEFAULT_CONSENT, 'location');
     expect(hasConsent(granted, 'location')).toBe(true);
     expect(hasConsent(granted, 'notifications')).toBe(false);
-
-    const revoked = revoke(granted, 'location');
-    expect(hasConsent(revoked, 'location')).toBe(false);
   });
 
   it('does not mutate the input state', () => {

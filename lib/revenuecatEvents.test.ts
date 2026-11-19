@@ -1,6 +1,5 @@
 import {
   planEntitlementChanges,
-  regionEntitlement,
   regionProductId,
   revenueCatErasure,
   secretMatches,
@@ -89,7 +88,7 @@ describe('planEntitlementChanges', () => {
   it('keeps every known entitlement of a purchase and drops unknown ones', () => {
     const plan = planEntitlementChanges(
       event({
-        entitlement_ids: ['family', 'all_regions', regionEntitlement('SWE.9_1'), 'admin'],
+        entitlement_ids: ['family', 'all_regions', 'region_SWE_9_1', 'admin'],
         product_id: 'family',
       }),
     );
@@ -124,13 +123,6 @@ describe('planEntitlementChanges', () => {
     expect(planEntitlementChanges(event({ entitlement_ids: [], product_id: 'mystery' })).kind).toBe(
       'ignore',
     );
-  });
-});
-
-describe('regionEntitlement', () => {
-  it('maps a GADM county id to an identifier RevenueCat accepts', () => {
-    expect(regionEntitlement('SWE.9_1')).toBe('region_SWE_9_1');
-    expect(regionEntitlement('SWE.12_1')).toBe('region_SWE_12_1');
   });
 });
 

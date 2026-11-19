@@ -5,8 +5,6 @@
 // The user's collection is their own data and is kept while the account is active (no expiry
 // here). Pure so the windows are one source of truth and the expiry job is testable.
 
-const DAY_MS = 86_400_000;
-
 export interface RetentionPolicy {
   /** Analytics events (PostHog / logs) — kept for product analysis, then dropped. */
   analyticsEventDays: number;
@@ -18,19 +16,10 @@ export interface RetentionPolicy {
   notificationLogDays: number;
 }
 
+// keep: T-094 — a values module: pipeline/tests/test_retention_job.py pins the cron job to it.
 export const DEFAULT_RETENTION: RetentionPolicy = {
   analyticsEventDays: 365,
   runtimeLocationDays: 30,
   inactiveAnonymousUserDays: 90,
   notificationLogDays: 30,
 };
-
-/** Timestamp (ms) at which a record created at `createdAtMs` expires under `retentionDays`. */
-export function expiryMs(createdAtMs: number, retentionDays: number): number {
-  return createdAtMs + retentionDays * DAY_MS;
-}
-
-/** Whether a record created at `createdAtMs` is past its retention window as of `nowMs`. */
-export function isExpired(createdAtMs: number, nowMs: number, retentionDays: number): boolean {
-  return nowMs >= expiryMs(createdAtMs, retentionDays);
-}

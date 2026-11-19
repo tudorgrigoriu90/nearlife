@@ -1,5 +1,4 @@
 import {
-  assertAllowedLicense,
   attributionFor,
   isCommercialUseAllowed,
   KRONOBERG_MEDIA,
@@ -34,10 +33,6 @@ describe('license rules', () => {
     expect(isCommercialUseAllowed('All rights reserved')).toBe(false);
   });
 
-  it('assertAllowedLicense throws on a disallowed license', () => {
-    const bad = { ...media({ speciesId: 'swift' }), license: 'CC-BY-NC' as never };
-    expect(() => assertAllowedLicense(bad)).toThrow(/disallowed/);
-  });
 });
 
 describe('attributionFor', () => {

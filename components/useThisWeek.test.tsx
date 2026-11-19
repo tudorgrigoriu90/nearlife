@@ -6,7 +6,6 @@ import { useThisWeek } from './useThisWeek';
 
 function repo(overrides: Partial<SpeciesRepository> = {}): SpeciesRepository {
   return {
-    listSpecies: async () => [],
     getContent: async () => null,
     getContentInLocale: async () => null,
     regionPresence: jest.fn(async (regionId: string) =>

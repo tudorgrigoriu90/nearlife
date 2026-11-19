@@ -1,4 +1,3 @@
-import { KRONOBERG_SPECIES } from './kronoberg';
 
 // Card content for the Kronoberg prototype (T-020): the always-free Tier-1 layer —
 // fact, "when & how to see it" trivia, and give/protect mission actions.
@@ -429,11 +428,3 @@ export const KRONOBERG_CONTENT: Record<string, SpeciesContent> = {
     protect: 'Keep run-off and litter out of the water; follow local fishing rules.',
   },
 };
-
-/** All species that have authored content — used by tests and (later) the app. */
-export const CONTENT_SPECIES_IDS = Object.keys(KRONOBERG_CONTENT);
-
-// Sanity: the module is only meaningful alongside the species list.
-export const HAS_FULL_COVERAGE = KRONOBERG_SPECIES.every(
-  (s) => KRONOBERG_CONTENT[s.id] !== undefined,
-);

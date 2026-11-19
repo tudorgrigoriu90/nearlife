@@ -141,18 +141,6 @@ export function badgeStatuses(
   return statuses;
 }
 
-/** Ids of the earned badges, in the same stable order (groups → season → spotted → helped). */
-export function earnedBadges(
-  records: CollectionRecord[],
-  species: Species[],
-  now: Date = new Date(),
-  recognized: ReadonlySet<string> = new Set(),
-): string[] {
-  return badgeStatuses(records, species, now, recognized)
-    .filter((b) => b.earned)
-    .map((b) => b.id);
-}
-
 /** Earned badge ids and when they were first earned (T-297 · review B-27). */
 export type RememberedBadges = Record<string, string>;
 

@@ -1,12 +1,8 @@
-import { InMemoryTracker } from './analytics';
 import { DEFAULT_CADENCE } from './cadence';
 import { allowedHours, preferredHour } from './sendSlot';
 import {
   decideNotification,
-  DEFAULT_PREFS,
-  recordDelivery,
   type DueUser,
-  type EngineDecision,
 } from './notificationEngine';
 import type { RegionPresence } from './speciesRepository';
 
@@ -56,22 +52,6 @@ describe('decideNotification', () => {
   });
 });
 
-describe('recordDelivery', () => {
-  it('emits notification_delivered for a send', () => {
-    const tracker = new InMemoryTracker();
-    recordDelivery(tracker, { send: true, speciesId: 'robin', occurrences: 500, deliveredAtMs: 1 });
-    expect(tracker.ofType('notification_delivered')).toEqual([
-      { event: 'notification_delivered', props: { speciesId: 'robin' } },
-    ]);
-  });
-
-  it('stays silent on a skipped cycle', () => {
-    const tracker = new InMemoryTracker();
-    const skip: EngineDecision = { send: false, reason: 'quiet-hours' };
-    recordDelivery(tracker, skip);
-    expect(tracker.events).toEqual([]);
-  });
-});
 
 // T-186: the engine now respects a per-user send slot, so a single cron cycle no longer notifies
 // every user at once.
@@ -80,7 +60,7 @@ describe('per-user send slot', () => {
     presence: [{ speciesId: 'great-tit', activeMonths: [1], occurrences: 1000 }],
     collectedIds: new Set<string>(),
     history: { lastSentMs: null, sentTodayCount: 0 },
-    prefs: DEFAULT_PREFS,
+    prefs: { enabled: true },
     localHour: 12,
     month: 1,
     nowMs: 0,

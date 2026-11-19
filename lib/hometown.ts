@@ -18,8 +18,6 @@ export interface Coordinates {
   longitude: number;
 }
 
-export const KRONOBERG_REGION: Region = { id: 'SWE.9_1', name: 'Kronoberg' };
-
 /**
  * How far off every outline a point may be and still get the nearest county. The outlines are
  * 1:10m Natural Earth and drop small islands, so an outer island falls just outside them. Measured

@@ -73,8 +73,3 @@ export function dualSegments(input: DualTextInput): DualTextSegment[] {
   }
   return segments;
 }
-
-/** True when the pair actually produced a second half (i.e. dual display is visibly happening). */
-export function hasSecondary(input: DualTextInput): boolean {
-  return resolveSecondary(input) !== null;
-}

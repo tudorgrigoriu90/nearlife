@@ -9,7 +9,7 @@
 export interface AnalyticsEventProps {
   session_start: Record<string, never>;
   this_week_opened: Record<string, never>;
-  notification_delivered: { speciesId: string };
+  // Deliveries are counted server-side, from notification_log (T-325).
   notification_opened: { speciesId: string };
   species_spotted: { speciesId: string; source: 'notification' | 'this_week' | 'onboarding' | 'quiz' };
   catch_attempted: { speciesId: string };
@@ -75,15 +75,4 @@ export class ConsentGatedTracker implements Tracker {
   track<E extends AnalyticsEvent>(event: E, props: AnalyticsEventProps[E]): void {
     if (this.hasConsent()) this.delegate.track(event, props);
   }
-}
-
-const DAY_MS = 86_400_000;
-
-/**
- * The retention day-index of an event relative to first-seen (D0 = first day, D1 = next day …).
- * The day-1/3/7 retention buckets the validation criteria need are derived from this
- * (VALIDATION-CRITERIA.md). Events before first-seen clamp to 0.
- */
-export function retentionDayIndex(firstSeenMs: number, eventMs: number): number {
-  return Math.max(0, Math.floor((eventMs - firstSeenMs) / DAY_MS));
 }

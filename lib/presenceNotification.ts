@@ -1,13 +1,14 @@
 import { candidatesForMonth, recordsInMonth } from './presence';
-import type { Rng } from './notification';
 import { DEFAULT_TUNING, type NotificationTuning } from './tuning';
 import type { Month } from './species/types';
 import type { RegionPresence } from './speciesRepository';
 
+/** Deterministic-testable RNG contract: returns a float in [0, 1). */
+export type Rng = () => number;
+
 // Production notification selection over live region presence (T-062, TSD §4 steps 4–5).
 // The candidate set (season gate + collection dedupe) comes from T-061; this module adds the
-// weighting + sampling. The hardcoded path (`notification.ts`) weights by a curated rarity enum;
-// here the flavour is derived from the observation count in `species_presence`.
+// weighting + sampling. The flavour is derived from the observation count in `species_presence`.
 //
 // Weight  w = base + scale × log10(1 + occurrences)  — a dampened presence weight (TSD §4), with
 // `base`/`scale` from the tuning config (T-065). More-observed species are more likely to surface

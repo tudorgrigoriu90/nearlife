@@ -8,7 +8,6 @@ const sp = (id: string) => ({ id, commonName: id }) as Species;
 
 function repo(overrides: Partial<SpeciesRepository> = {}): SpeciesRepository {
   return {
-    listSpecies: async () => [],
     getContent: async () => null,
     getContentInLocale: async () => null,
     regionPresence: async () => [],

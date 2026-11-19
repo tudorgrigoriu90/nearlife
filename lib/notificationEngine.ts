@@ -1,4 +1,3 @@
-import type { Tracker } from './analytics';
 import {
   canSendNow,
   DEFAULT_CADENCE,
@@ -6,8 +5,7 @@ import {
   type CadenceConfig,
   type SendHistory,
 } from './cadence';
-import type { Rng } from './notification';
-import { selectFromPresence } from './presenceNotification';
+import { selectFromPresence, type Rng } from './presenceNotification';
 import { isAtOrAfterSlot } from './sendSlot';
 import { DEFAULT_TUNING, type NotificationTuning } from './tuning';
 import type { Month } from './species/types';
@@ -24,8 +22,6 @@ export interface NotificationPrefs {
   /** Master opt-in. `false` = the user turned notifications off; the engine never sends. */
   enabled: boolean;
 }
-
-export const DEFAULT_PREFS: NotificationPrefs = { enabled: true };
 
 /** Everything the engine needs about one due user at decision time. */
 export interface DueUser {
@@ -101,13 +97,4 @@ export function decideNotification(user: DueUser, opts: EngineOptions = {}): Eng
     occurrences: picked.occurrences,
     deliveredAtMs: user.nowMs,
   };
-}
-
-/**
- * Log a send for the validation funnel (TSD §4 step 7). Emits `notification_delivered` only for a
- * send decision, so a skipped cycle is silent. Consent gating is the tracker's concern
- * (`ConsentGatedTracker`), not the engine's.
- */
-export function recordDelivery(tracker: Tracker, decision: EngineDecision): void {
-  if (decision.send) tracker.track('notification_delivered', { speciesId: decision.speciesId });
 }

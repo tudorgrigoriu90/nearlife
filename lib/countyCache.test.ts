@@ -130,13 +130,11 @@ describe('CachingSpeciesRepository, partial failures', () => {
 
   it('passes the per-species reads straight through', async () => {
     const inner = {
-      listSpecies: jest.fn(async () => ['list']),
       getContent: jest.fn(async () => 'content'),
       getContentInLocale: jest.fn(async () => 'in-locale'),
       describeSpecies: jest.fn(async () => ['summary']),
     } as unknown as SpeciesRepository;
     const repo = new CachingSpeciesRepository(inner, new InMemoryCacheFiles(), async () => 'v1');
-    expect(await repo.listSpecies('sv')).toEqual(['list']);
     expect(await repo.getContent('a', 'sv')).toBe('content');
     expect(await repo.getContentInLocale('a', 'ar')).toBe('in-locale');
     expect(await repo.describeSpecies(['a'], 'en')).toEqual(['summary']);

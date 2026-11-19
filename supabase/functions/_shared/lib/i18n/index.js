@@ -957,7 +957,3 @@ function pluralKey(locale, key, params) {
 export function createTranslator(locale) {
     return (key, params) => t(locale, key, params);
 }
-/** Whether a full, reviewed catalog exists for the locale (else it falls back to English). */
-export function hasCatalog(locale) {
-    return CATALOGS[locale] !== undefined;
-}

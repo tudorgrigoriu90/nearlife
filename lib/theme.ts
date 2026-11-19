@@ -7,6 +7,8 @@
 // second palette anyway. Disabled and busy controls (#bcd0bd, #7fa886) are exempt from contrast
 // under WCAG and are not listed as surfaces.
 
+// keep: T-292 — textOnLight, textOnDark, textOnAccent and contrastRatio are the palette the
+// contrast tests check and __tests__/textColours.test.js holds components to.
 /** Text on the app background, white cards and the pale green and amber tints. */
 export const textOnLight = {
   ink: '#22331f',
@@ -26,6 +28,7 @@ export const textOnLight = {
   warning: '#ab3d2d',
 } as const;
 
+// keep: T-292 — see textOnLight.
 /** Text in the minigames and the export's JSON view. */
 export const textOnDark = {
   white: '#ffffff',
@@ -37,6 +40,7 @@ export const textOnDark = {
   sage: '#7fa588',
 } as const;
 
+// keep: T-292 — see textOnLight.
 /** Text on filled buttons and chips. */
 export const textOnAccent = {
   white: '#fff',
@@ -72,6 +76,7 @@ function luminance(colour: string): number {
   return 0.2126 * channel(h, 0) + 0.7152 * channel(h, 2) + 0.0722 * channel(h, 4);
 }
 
+// keep: T-292 — see textOnLight.
 /** WCAG 2.1 contrast ratio between two #rgb / #rrggbb colours. */
 export function contrastRatio(a: string, b: string): number {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
