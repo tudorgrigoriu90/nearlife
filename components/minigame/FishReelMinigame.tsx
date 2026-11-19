@@ -33,6 +33,7 @@ export default function FishReelMinigame({
   onComplete,
   onCancel,
   onRetry,
+  glyph,
 }: MinigameProps & { config?: RhythmConfig }) {
   const tr = createTranslator(locale);
   const [bandTop, setBandTop] = useState(TRACK_H - BAND_H);
@@ -93,7 +94,7 @@ export default function FishReelMinigame({
         accessibilityRole="button"
       >
         <View style={[styles.band, fishInBand ? styles.bandHot : null, { top: bandTop }]} />
-        <Text style={[styles.fish, { top: fishTop }]}>🐟</Text>
+        <Text style={[styles.fish, { top: fishTop }]}>{glyph ?? '🐟'}</Text>
       </Pressable>
     </MinigameShell>
   );

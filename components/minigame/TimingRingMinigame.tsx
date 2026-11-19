@@ -34,6 +34,7 @@ export default function TimingRingMinigame({
   onComplete,
   onCancel,
   onRetry,
+  glyph,
 }: MinigameProps & { config?: TimingConfig }) {
   const tr = createTranslator(locale);
   const [scale, setScale] = useState(START_SCALE);
@@ -87,7 +88,7 @@ export default function TimingRingMinigame({
       <Pressable style={styles.tapLayer} onPress={onTap} accessibilityRole="button">
         <View style={[styles.targetRing, { transform: [{ scale: TARGET_SCALE }] }]} />
         <View style={[styles.ring, { transform: [{ scale }] }]} />
-        <Text style={styles.diver}>🐦</Text>
+        <Text style={styles.diver}>{glyph ?? '🐦'}</Text>
       </Pressable>
     </MinigameShell>
   );

@@ -1,7 +1,11 @@
 import { useState, type ComponentType } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type TranslationKey } from '../../lib/i18n';
-import { type SpeciesCategory } from '../../lib/species/types';
+import { type Species, type SpeciesCategory } from '../../lib/species/types';
+import { groupOf } from '../../lib/species/group';
+import { commonNameFor } from '../../lib/species/localized';
+import { catchSeed } from '../../lib/minigame/frame';
+import { CATEGORY_EMOJI } from '../speciesVisual';
 import { type MinigameProps } from './types';
 import TimingRingMinigame from './TimingRingMinigame';
 import FishReelMinigame from './FishReelMinigame';
@@ -37,17 +41,39 @@ const INSTRUCTION: Record<SpeciesCategory, TranslationKey> = {
 // after the tap, so reading the instruction never costs time or input.
 export default function CatchMinigame({
   category,
+  species,
   ...props
-}: MinigameProps & { category: SpeciesCategory }) {
+}: MinigameProps & {
+  category: SpeciesCategory;
+  /** The species being caught (T-321 · review B-61): named, and its glyph is the game's creature. */
+  species?: Species;
+}) {
   const [started, setStarted] = useState(false);
   // A retry is a fresh round of the same game, already started (T-311 · review B-45): a miss costs
   // nothing, so it is replayed here rather than through the catch-spot screen and a new fix.
   const [round, setRound] = useState(0);
   const Game = BY_CATEGORY[category];
-  if (started) return <Game key={round} {...props} onRetry={() => setRound((n) => n + 1)} />;
+  const glyph = species ? CATEGORY_EMOJI[groupOf(species)] : undefined;
+  const seed = species ? catchSeed(species.id, new Date().toISOString().slice(0, 10)) + round : undefined;
+  if (started) {
+    return (
+      <Game
+        key={round}
+        glyph={glyph}
+        seed={seed}
+        {...props}
+        onRetry={() => setRound((n) => n + 1)}
+      />
+    );
+  }
   const tr = createTranslator(props.locale ?? 'en');
   return (
     <View style={styles.container}>
+      {species ? (
+        <Text style={styles.species}>
+          {glyph} {commonNameFor(species, props.locale ?? 'en')}
+        </Text>
+      ) : null}
       <Text style={styles.instruction}>{tr(INSTRUCTION[category])}</Text>
       <Pressable style={styles.start} onPress={() => setStarted(true)} accessibilityRole="button">
         <Text style={styles.startText}>{tr('minigame.tapToStart')}</Text>
@@ -62,6 +88,7 @@ export default function CatchMinigame({
 }
 
 const styles = StyleSheet.create({
+  species: { fontSize: 20, fontWeight: '700', color: '#dbe7dc', marginBottom: 16, textAlign: 'center' },
   container: { flex: 1, backgroundColor: '#0e1f14', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
   instruction: { fontSize: 18, lineHeight: 26, color: '#dbe7dc', textAlign: 'center', marginBottom: 40 },
   start: { paddingVertical: 22, paddingHorizontal: 56, borderRadius: 20, backgroundColor: '#3a7d44' },

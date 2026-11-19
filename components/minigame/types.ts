@@ -19,4 +19,8 @@ export interface MinigameProps {
   onCancel?: () => void;
   /** After a miss: play the same game again, here and now (T-311 · review B-45). */
   onRetry?: () => void;
+  /** The species' glyph, shown as the creature in the game (T-321 · review B-61). */
+  glyph?: string;
+  /** Varies the layout per species and day (T-321); a fixed default without one. */
+  seed?: number;
 }

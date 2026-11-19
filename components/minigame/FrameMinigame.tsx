@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
 import { createTranslator } from '../../lib/i18n';
-import { DEFAULT_FRAME, evaluateFrame, type FrameConfig } from '../../lib/minigame/frame';
+import { DEFAULT_FRAME, evaluateFrame, frameLayout, type FrameConfig } from '../../lib/minigame/frame';
 import MinigameShell, { type ShellResult } from './MinigameShell';
 import { type MinigameProps } from './types';
 
@@ -14,13 +14,9 @@ const STAGE = 288;
 const RETICLE = 96;
 const TARGET_RADIUS = 84; // generous "on it" radius fed to the frame core
 
-// Deterministic layout: one subject among decoys. Positions are fractions of the stage.
-const SUBJECT = { x: STAGE * 0.66, y: STAGE * 0.32, glyph: '🌸' };
-const DECOYS = [
-  { x: STAGE * 0.28, y: STAGE * 0.7, glyph: '🌿' },
-  { x: STAGE * 0.74, y: STAGE * 0.76, glyph: '🍃' },
-  { x: STAGE * 0.2, y: STAGE * 0.26, glyph: '🌱' },
-];
+// One subject among three decoys; where they sit comes from the seed (species and day, T-321).
+const DECOY_GLYPHS = ['🌿', '🍃', '🌱'];
+const DEFAULT_SEED = 1;
 
 export default function FrameMinigame({
   locale = 'en',
@@ -28,8 +24,13 @@ export default function FrameMinigame({
   onComplete,
   onCancel,
   onRetry,
+  glyph,
+  seed,
 }: MinigameProps & { config?: FrameConfig }) {
   const tr = createTranslator(locale);
+  const layout = useMemo(() => frameLayout(seed ?? DEFAULT_SEED, STAGE), [seed]);
+  const SUBJECT = { ...layout.subject, glyph: glyph ?? '🌸' };
+  const DECOYS = layout.decoys.map((p, i) => ({ ...p, glyph: DECOY_GLYPHS[i] }));
   const [reticle, setReticle] = useState({ x: STAGE / 2, y: STAGE / 2 });
   const [result, setResult] = useState<ShellResult | null>(null);
   const reticleRef = useRef(reticle);

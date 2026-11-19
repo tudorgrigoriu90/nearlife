@@ -4742,6 +4742,16 @@ document until it is started, when it takes the next free `T-###`.
     counties), sourced from threat data, reviewed before shipping; `species_content.advice_scope`
     ('species' / 'group') replaces the derived rule; the count in T-319 is updated.
 
+- **T-321 · The catch shows the species being caught** — *Claude · S · `DONE` (feel checked on the phone with T-141) · deps: T-069 · review B-61 (I-29, second half)*
+  - ✅ The catch receives the species: its start screen names it with its group's glyph, and every
+    game uses that glyph as its creature (a frog in the mammal game, a spider in the insect game,
+    a snail in the plant game) instead of a fixed fox, bird, fish, butterfly or flower.
+  - ✅ The plant game's subject and decoys sit on four of nine places chosen by a seed made of the
+    species id and the day (`frameLayout`, `catchSeed`); "Try again" moves them too.
+  - Tests: layout 3 (same seed same layout; seeds differ; four distinct on-stage places), seed 1,
+    components 2. Still the same five mechanics per category: a mechanic per species is beyond
+    this bug (GDD §4 asks for reskins, which this is).
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

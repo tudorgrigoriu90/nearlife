@@ -32,6 +32,7 @@ export default function TraceMinigame({
   onComplete,
   onCancel,
   onRetry,
+  glyph,
 }: MinigameProps & { config?: TraceConfig }) {
   const tr = createTranslator(locale);
   const [bug, setBug] = useState({ x: C, y: C });
@@ -108,7 +109,7 @@ export default function TraceMinigame({
           pointerEvents="none"
           style={[styles.bug, onPath ? styles.bugOn : null, { left: bug.x - BUG / 2, top: bug.y - BUG / 2 - LIFT }]}
         >
-          🦋
+          {glyph ?? '🦋'}
         </Text>
       </View>
     </MinigameShell>

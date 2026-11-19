@@ -1441,6 +1441,7 @@ export default function App() {
       <>
         <CatchMinigame
           category={target.category}
+          species={target}
           locale={locale}
           onCancel={() => setCatching(null)}
           onComplete={({ success, score }) => {

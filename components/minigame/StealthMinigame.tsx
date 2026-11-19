@@ -36,8 +36,10 @@ export default function StealthMinigame({
   onComplete,
   onCancel,
   onRetry,
+  glyph,
 }: MinigameProps & { config?: StealthConfig }) {
   const tr = createTranslator(locale);
+  const animal = glyph ?? '🦊';
   const [phase, setPhase] = useState<Phase>('calm');
   const [progress, setProgress] = useState(0);
   const [holding, setHolding] = useState(false);
@@ -84,7 +86,7 @@ export default function StealthMinigame({
       onRetry={onRetry}
     >
       <View style={styles.scene}>
-        <Text style={styles.animal}>{phase === 'calm' ? '🦊' : phase === 'warn' ? '🦊❔' : '🦊👀'}</Text>
+        <Text style={styles.animal}>{phase === 'calm' ? animal : phase === 'warn' ? `${animal}❔` : `${animal}👀`}</Text>
         <Text style={[styles.state, phase === 'alert' ? styles.alert : phase === 'warn' ? styles.warn : styles.safe]}>
           {tr(phase === 'alert' ? 'minigame.mammal.watching' : phase === 'warn' ? 'minigame.mammal.turning' : 'minigame.mammal.grazing')}
         </Text>
