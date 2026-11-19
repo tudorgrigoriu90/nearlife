@@ -122,3 +122,21 @@ describe('formatDistance in a language', () => {
     expect(formatDistance(40, 'sv')).toBe('40 m');
   });
 });
+
+// T-327 · review I-22: seasonal dangers and the dark, above the general safety line.
+describe('CatchSpotScreen warnings', () => {
+  it('shows each warning it is given, in Swedish too', async () => {
+    const warnings = [{ key: 'catchSpot.ice' as const }, { key: 'catchSpot.dark' as const, params: { time: '16:05' } }];
+    await render(
+      <CatchSpotScreen locale="sv" speciesName="Gädda" view={view({})} warnings={warnings} onCatch={jest.fn()} onCheckAgain={jest.fn()} />,
+    );
+    const sv = createTranslator('sv');
+    expect(screen.getByText(sv('catchSpot.ice'))).toBeTruthy();
+    expect(screen.getByText(sv('catchSpot.dark', { time: '16:05' }))).toBeTruthy();
+  });
+
+  it('shows none without warnings', async () => {
+    await render(<CatchSpotScreen locale="en" speciesName="Pike" view={view({})} onCatch={jest.fn()} onCheckAgain={jest.fn()} />);
+    expect(screen.queryByText(tr('catchSpot.ice'))).toBeNull();
+  });
+});

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { CatchSpotView } from '../lib/catchSpots';
 import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
+import type { SpotWarning } from '../lib/spotWarnings';
 
 // The catch spot (T-068 · USER-FLOWS §6 · GDD §4). Catching means going to the species' habitat:
 // the nearest designated public place that suits it (a pike is sent to water). Within range the
@@ -43,6 +44,7 @@ export default function CatchSpotScreen({
   onBack,
   map,
   onAllowLocation,
+  warnings = [],
 }: {
   locale?: Locale;
   speciesName: string;
@@ -55,6 +57,8 @@ export default function CatchSpotScreen({
   onAllowLocation?: () => void;
   /** The map (T-067), when this build has one; the screen works the same without it. */
   map?: ReactNode;
+  /** Ice, hunting season, darkness at this spot now (T-327). */
+  warnings?: SpotWarning[];
 }) {
   const tr = createTranslator(locale);
   const spot = view?.spot ?? null;
@@ -128,6 +132,11 @@ export default function CatchSpotScreen({
               </Pressable>
             </>
           )}
+          {warnings.map((w) => (
+            <Text key={w.key} style={styles.warning} accessibilityRole="alert">
+              {tr(w.key, w.params)}
+            </Text>
+          ))}
           <Text style={styles.safety}>{tr('catchSpot.safety')}</Text>
         </View>
       )}
@@ -155,5 +164,6 @@ const styles = StyleSheet.create({
   secondary: { backgroundColor: '#eaf4ea', borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
   secondaryText: { color: '#296f46', fontSize: 15, fontWeight: '600' },
   safety: { fontSize: 12, lineHeight: 18, color: '#566658' },
+  warning: { fontSize: 15, lineHeight: 21, fontWeight: '700', color: '#7a5a1f' },
   osm: { marginTop: 12, fontSize: 11, color: '#566658', textAlign: 'center' },
 });

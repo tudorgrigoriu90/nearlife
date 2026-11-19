@@ -4813,12 +4813,18 @@ document until it is started, when it takes the next free `T-###`.
     flags the spot 22 m away, a quarry flags the spot inside it), real Postgres (every flag stored
     and invisible to a user, an unknown flag refused), and a live verify check for a cliff spot.
   - Remaining: apply 0043, refresh all 21 counties (catch-spots.yml), record the counts.
-- **T-327 · Catch-spot screen: ice, hunting season and darkness** — *Claude · S · `TODO` · deps: T-326, T-328 · review I-22 (b, c)*
+- **T-327 · Catch-spot screen: ice, hunting season and darkness** — *Claude · S · `DONE` · deps: T-326 · review I-22 (b, c)*
   - December–March, freshwater and coast spots show "Never go onto ice". Land spots show "Hunting
     season: keep to paths and wear something bright" in the county's hunting months, from a table
     in the app (one row per county, filled by T-328). "It will be dark at {time}" when sunset is
     within an hour, computed on the device.
   - Done when each line shows in its months or hour and not outside them (tests), in en and sv.
+  - ✅ `lib/spotWarnings.ts`: months read on the Swedish clock; `HUNTING_MONTHS` ships empty, so no
+    county shows a guessed hunting line before T-328; `sunsetAt` is the standard sunrise equation
+    (within 10 minutes of the published Stockholm sunsets at both solstices, null under the
+    midnight sun and in the polar night). `CatchSpotScreen` shows the lines above the safety note
+    (`accessibilityRole="alert"`); the route computes them for the shown spot on each render.
+    Tests: 10 rules, 2 screen.
 - **T-328 · Hunting-season months per county** — *Director · XS · `TODO` · deps: — · review I-22 (b)*
   - Fill the table T-327 reads from Naturvårdsverket's published hunting seasons (moose is the
     largest: early September in most counties). One row per county, months only.
