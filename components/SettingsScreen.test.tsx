@@ -136,3 +136,26 @@ describe('SettingsScreen easy catching', () => {
     expect(screen.queryByText(tr('easy.toggle'))).toBeNull();
   });
 });
+
+// T-342 · review F-03: the choices sit under the consent switch, which stays the master.
+describe('SettingsScreen notification choices', () => {
+  const { DEFAULT_NOTIF_PREFS } = jest.requireActual('../lib/notifPrefs');
+
+  it('shows them while notifications are on', async () => {
+    const onChangeNotifPrefs = jest.fn();
+    await render(
+      <SettingsScreen
+        {...renderSettings({ consent: { ...DEFAULT_CONSENT, notifications: true }, notifPrefs: DEFAULT_NOTIF_PREFS, onChangeNotifPrefs })}
+      />,
+    );
+    await fireEvent.press(screen.getByText(tr('notif.frequency.weekly')));
+    expect(onChangeNotifPrefs).toHaveBeenCalledWith({ ...DEFAULT_NOTIF_PREFS, frequency: 'weekly' });
+  });
+
+  it('hides them while notifications are off', async () => {
+    await render(
+      <SettingsScreen {...renderSettings({ notifPrefs: DEFAULT_NOTIF_PREFS, onChangeNotifPrefs: jest.fn() })} />,
+    );
+    expect(screen.queryByTestId('notif-choices')).toBeNull();
+  });
+});

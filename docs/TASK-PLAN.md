@@ -4985,9 +4985,16 @@ document until it is started, when it takes the next free `T-###`.
     anything else, six invalid shapes refused, window, frequency, defaults (10 tests); live verify
     checks both; `__tests__/notifPrefsParity.test.js` keeps SQL and TypeScript numbers equal.
   - ✅ The sender reads each species' group with its presence and passes the choices through.
-- **T-342 · Notification choices in Settings** — *Claude · S · `TODO` · deps: T-341 · review F-03 (app)*
+- **T-342 · Notification choices in Settings** — *Claude · S · `DONE` · deps: T-341 · review F-03 (app)*
   - Settings → Notifications: frequency, window and groups, written to `profiles.notif_prefs`,
     shown only while notifications are on (consent stays the master switch).
+  - ✅ `components/NotifChoices.tsx` under the consent switches: how often, time of day (any /
+    morning / midday / evening, with their hours), about which groups; en and sv. The last group
+    cannot be turned off (that would be "never", which is the consent switch); all on is stored as
+    no choice. `lib/notifPrefsGateway.ts` reads and writes the user's own row, storing only what
+    differs from the default. `components/useNotifPrefs.ts` reads once notifications are on and
+    shows nothing until then, so defaults never overwrite stored choices; a change shows at once
+    and saves in the background. Tests: component 2, toggle 3, gateway 3, hook 3, Settings 2.
 
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what

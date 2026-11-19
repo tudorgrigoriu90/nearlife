@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import NotifChoices from './NotifChoices';
+import type { NotifPrefs } from '../lib/notifPrefs';
 import appJson from '../app.json';
 import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { CONSENT_KINDS, type ConsentKind, type ConsentState } from '../lib/consent';
@@ -36,6 +38,8 @@ export default function SettingsScreen({
   onToggleDualLanguage,
   easyCatching = false,
   onToggleEasyCatching,
+  notifPrefs = null,
+  onChangeNotifPrefs,
   onSelectSecondaryLocale,
   onExportData,
   onLinkEmail,
@@ -60,6 +64,9 @@ export default function SettingsScreen({
   onToggleDualLanguage?: (enabled: boolean) => void;
   /** Easy catching (T-331 · review I-25). */
   easyCatching?: boolean;
+  /** Notification choices (T-342 · review F-03); null until read from the profile. */
+  notifPrefs?: NotifPrefs | null;
+  onChangeNotifPrefs?: (next: NotifPrefs) => void;
   onToggleEasyCatching?: (on: boolean) => void;
   onSelectSecondaryLocale?: (locale: ContentLocale) => void;
   onExportData: () => void;
@@ -114,6 +121,9 @@ export default function SettingsScreen({
         </View>
         <Text style={styles.hint}>{tr('consent.hint')}</Text>
         {analyticsLocked ? <Text style={styles.hint}>{tr('consent.analyticsLocked')}</Text> : null}
+        {consent.notifications && notifPrefs && onChangeNotifPrefs ? (
+          <NotifChoices locale={locale} prefs={notifPrefs} onChange={onChangeNotifPrefs} />
+        ) : null}
 
         <Text style={styles.sectionLabel}>{tr('settings.language')}</Text>
         <View style={styles.card}>

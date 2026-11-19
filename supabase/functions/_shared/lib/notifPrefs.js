@@ -49,3 +49,12 @@ export function prefGroupOf(group) {
 export function groupOfRow(category, taxonGroup) {
     return category ?? GROUP_BY_TAXON[taxonGroup ?? ''] ?? 'plant';
 }
+/** Turn one group on or off. All on is stored as null; the last one cannot be turned off. */
+export function toggleGroup(prefs, group) {
+    const on = prefs.groups ?? [...PREF_GROUPS];
+    const next = on.includes(group) ? on.filter((g) => g !== group) : [...on, group];
+    if (next.length === 0)
+        return prefs;
+    const ordered = PREF_GROUPS.filter((g) => next.includes(g));
+    return { ...prefs, groups: ordered.length === PREF_GROUPS.length ? null : ordered };
+}

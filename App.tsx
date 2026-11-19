@@ -61,6 +61,8 @@ import {
 } from './lib/dualLanguage';
 import { AsyncStorageDualLanguageStore } from './lib/dualLanguageStore';
 import { AsyncStorageEasyModeStore } from './lib/easyModeStore';
+import { useNotifPrefs } from './components/useNotifPrefs';
+import { SupabaseNotifPrefsGateway } from './lib/notifPrefsGateway';
 import { useEasyMode } from './components/useEasyMode';
 import type { ContentLocale } from './lib/i18n/contentLocale';
 import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
@@ -210,6 +212,8 @@ let familyGatewayInstance: SupabaseFamilyGateway | undefined;
 const familyGateway = () => (familyGatewayInstance ??= new SupabaseFamilyGateway(getSupabase()));
 let authGatewayInstance: SupabaseAuthGateway | undefined;
 const authGateway = () => (authGatewayInstance ??= new SupabaseAuthGateway(getSupabase()));
+// Notification choices on the profile (T-342); null without a backend.
+const NOTIF_PREFS_GATEWAY = hasSupabaseConfig() ? new SupabaseNotifPrefsGateway(getSupabase(), ensureAnonymousSession) : null;
 let accessCodeGatewayInstance: SupabaseAccessCodeGateway | undefined;
 const accessCodeGateway = () =>
   (accessCodeGatewayInstance ??= new SupabaseAccessCodeGateway(getSupabase()));
@@ -436,6 +440,7 @@ export default function App() {
   // Push registration must not act on the all-off default before the stored choice loads: that
   // would withdraw a consenting user's device on every launch (T-201).
   const [consentLoaded, setConsentLoaded] = useState(false);
+  const notifChoices = useNotifPrefs(NOTIF_PREFS_GATEWAY, consent.notifications);
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
   const track = useTracker(consent);
@@ -1342,6 +1347,8 @@ export default function App() {
           dualLanguage={dualLanguage}
           easyCatching={easyCatching}
           onToggleEasyCatching={setEasyCatching}
+          notifPrefs={notifChoices.prefs}
+          onChangeNotifPrefs={notifChoices.change}
           onToggleConsent={toggleConsent}
           onSelectLocale={(loc) => {
             setLocaleOverride(loc);

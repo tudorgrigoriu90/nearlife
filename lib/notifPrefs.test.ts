@@ -6,6 +6,7 @@ import {
   hoursFor,
   parseNotifPrefs,
   groupOfRow,
+  toggleGroup,
   prefGroupOf,
 } from './notifPrefs';
 
@@ -54,5 +55,19 @@ describe('groupOfRow', () => {
       const row = { id: 'x', scientific_name: 'X', common_name: null, category, rarity: 'common', active_months: [1], taxon_group };
       expect(groupOfRow(category, taxon_group)).toBe(groupOf(speciesRowToSpecies(row)));
     }
+  });
+});
+
+describe('toggleGroup', () => {
+  const all = { frequency: 'daily' as const, window: null, groups: null };
+  it('turning one off from "all" keeps the other four', () => {
+    expect(toggleGroup(all, 'plant').groups).toEqual(['bird', 'mammal', 'insect', 'other']);
+  });
+  it('turning the last missing one back on is "all" again', () => {
+    expect(toggleGroup(toggleGroup(all, 'plant'), 'plant').groups).toBeNull();
+  });
+  it('never turns off the last group: that would be "never", which is the consent switch', () => {
+    const one = { ...all, groups: ['bird' as const] };
+    expect(toggleGroup(one, 'bird')).toBe(one);
   });
 });
