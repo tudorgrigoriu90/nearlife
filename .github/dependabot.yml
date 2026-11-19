@@ -1,0 +1,29 @@
+# T-289 · review I-16: weekly update PRs for every dependency source. Pushes to main stay the way
+# of working; these PRs are proposals to review, never merged without `npm run verify` green.
+# Expo SDK packages move together, so they are grouped and majors are left to a planned upgrade.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      expo-sdk:
+        patterns: ["expo", "expo-*", "@expo/*", "react-native", "react", "react-dom"]
+    ignore:
+      - dependency-name: "expo"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+
+  - package-ecosystem: "pip"
+    directory: "/pipeline"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

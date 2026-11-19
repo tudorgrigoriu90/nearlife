@@ -17,7 +17,6 @@ import { MAP_STYLE_URL, nearbySpots, spotsGeoJson } from '../lib/spotMap';
 //
 // ⚠️ The native rendering is not covered by Jest; it needs a device check with the next build.
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type MapLibreModule = any;
 
 let cached: MapLibreModule | null | undefined;

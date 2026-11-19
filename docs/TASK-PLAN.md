@@ -4445,6 +4445,26 @@ document until it is started, when it takes the next free `T-###`.
     no file of any age can load an uncredited fact. Tests: 4.
   - Repair: rerun Backfill facts (its "Record fact sources" step sources only rows without one).
 
+- **T-289 · CI additions: audit, bundle build, Dependabot, zero lint warnings** — *Claude · S · `DONE` · deps: T-109 · review I-16*
+  - ✅ `npm audit fix` resolved 14 of 23 production advisories (the critical `shell-quote`,
+    `node-forge`, `zod`, `source-map-js`, `uuid` …); an override pins `brace-expansion@1` to
+    1.1.22. The two left at high are `image-size` under Metro: build-time only, on the repo's own
+    assets, and npm's only fix is downgrading Expo. They are accepted in `audit-accepted.json`
+    with that reason; the rest are moderate.
+  - ✅ CI runs `scripts/auditGate.js` (fails on any high or critical advisory not accepted with a
+    reason, and names accepts that no longer match) and `expo export --platform android`.
+  - ✅ `.github/dependabot.yml`: npm and pip weekly, Actions monthly; Expo SDK packages grouped,
+    majors left to a planned upgrade.
+  - ✅ Lint runs with `--max-warnings 0`. 33 of the 37 warnings were `jest.mock(() =>
+    require(…))`, the documented Jest pattern; test files turn those two rules off with the reason
+    in `eslint.config.js`. The other four are fixed. Tests: 9 (`__tests__/ciGate.test.js`).
+  - Secret scanning and push protection are repository settings → T-290 (Director).
+
+- **T-290 · Turn on secret scanning and push protection** — *Director · XS · `TODO` · deps: — · review I-16, B-58*
+  - GitHub → the repository → Settings → Code security: enable **Secret scanning** and **Push
+    protection**. Then confirm here, and Claude records it. (Claude has no tool that changes
+    repository settings.)
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

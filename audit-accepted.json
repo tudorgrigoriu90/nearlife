@@ -1,0 +1,14 @@
+[
+  {
+    "id": "GHSA-5p2g-fcmc-qvqq",
+    "package": "image-size (via metro)",
+    "reason": "Build time only: Metro reads the sizes of the repository's own image assets while bundling; the app never parses an untrusted image with it. The fixed 2.x line changes the API Metro calls, and npm's only offered fix is a downgrade of Expo. Re-check on each Expo SDK upgrade.",
+    "accepted": "2026-11-19"
+  },
+  {
+    "id": "GHSA-w3rx-r6r6-pgpr",
+    "package": "image-size (via metro)",
+    "reason": "Build time only: Metro reads the sizes of the repository's own image assets while bundling; the app never parses an untrusted image with it. The fixed 2.x line changes the API Metro calls, and npm's only offered fix is a downgrade of Expo. Re-check on each Expo SDK upgrade.",
+    "accepted": "2026-11-19"
+  }
+]

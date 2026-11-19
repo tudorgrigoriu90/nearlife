@@ -1,4 +1,4 @@
-import { eraseDeviceStorage, ERASED_PREFIXES } from './deviceErase';
+import { eraseDeviceStorage } from './deviceErase';
 
 // T-269 · review B-05, B-12: deleting the account erases what the phone holds.
 

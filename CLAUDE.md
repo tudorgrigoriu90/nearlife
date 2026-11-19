@@ -43,8 +43,10 @@ instruction wins for that task only — the defaults below resume afterward.
 
 ## Quality gate (enforced)
 - **Authoritative gate: GitHub Actions CI** — `.github/workflows/ci.yml` runs the verify pipeline
-  (`npm run verify` = lint + typecheck + test) plus the Python pipeline checks on every push to
-  `main` and on every PR. A red run is a failed gate: fix the code, don't disable the check.
+  (`npm run verify` = lint with zero warnings + typecheck + test) plus the Python pipeline checks,
+  the dependency audit gate (`scripts/auditGate.js`, accepts in `audit-accepted.json` need a reason)
+  and an Android bundle build, on every push to `main` and on every PR. A red run is a failed gate:
+  fix the code, don't disable the check.
 - **The local pre-push hook was removed** (T-142) — it was slow, easy to have unconfigured, and
   redundant with CI. There is no `core.hooksPath` / `setup-hooks.sh` step anymore.
 - **Run `npm run verify` locally before you push.** Because pushes go straight to `main` (no PRs),

@@ -46,6 +46,16 @@ jobs:
             echo "No package.json yet — code checks activate after T-010 (app scaffold)."
           fi
 
+      # T-289 · review I-16: high and critical advisories in the shipped dependency tree fail the
+      # job unless audit-accepted.json accepts each one with a reason.
+      - name: Dependency audit
+        run: node scripts/auditGate.js
+
+      # Tests run components in Jest, which does not bundle; a module Metro cannot resolve or a
+      # native-only import used at module level only shows up when the real bundle is built.
+      - name: Build the Android bundle
+        run: npx expo export --platform android --output-dir "$RUNNER_TEMP/expo-export"
+
       - name: Set up Python
         if: hashFiles('pipeline/requirements.txt') != ''
         uses: actions/setup-python@v5
