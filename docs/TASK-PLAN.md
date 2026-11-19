@@ -4810,7 +4810,12 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ B-17: each seasonal event names its counties; `activeEvents(county, date)`; Norrbotten in
     November has no first frost. Tests: 25 across the pieces.
   - Still a network read on each launch: `describeSpecies` for the ~50 This Week rows shown (small).
-- **T-276 · Credit Wikipedia text on the card** — *Claude · S · `IN-PROGRESS` (code pushed; done when migration 0034 is applied, the backfill has run and the live check passes) · deps: T-179 · review B-59*
+- **T-276 · Credit Wikipedia text on the card** — *Claude · S · `DONE` (2026-11-19) · deps: T-179 · review B-59*
+  - ✅ Live, 2026-11-19: migration 0034 applied; after the backfill (and the T-288 repair of the
+    rows a stale file had overwritten) **0** catalogue facts lack their source (`species_id like
+    'gbif:%'`, non-empty fact, null `fact_source_url`); the curated 54 keep their own text with no
+    Wikipedia credit, by design. `db-migrate` verify mode passed every live check, including
+    "every catalogue fact has its Wikipedia source".
   - Species facts are Wikipedia text (CC BY-SA 4.0) and machine translations of it, shown with no
     source, licence or link anywhere in the app.
   - `species_content` records each fact's article URL and whether it was machine-translated;
