@@ -33,3 +33,18 @@ describe('speciesIdFromResponse', () => {
     expect(speciesIdFromResponse({ actionIdentifier: DEFAULT_ACTION } as never)).toBeNull();
   });
 });
+
+// T-350 · review F-04.
+describe('isRecapTap', () => {
+  const { isRecapTap } = jest.requireActual('./notificationTap');
+  const tap = (data: unknown) => ({
+    actionIdentifier: DEFAULT_ACTION,
+    notification: { request: { content: { data } } },
+  });
+  it('recognises the weekly recap, and nothing else', () => {
+    expect(isRecapTap(tap({ view: 'thisWeek' }))).toBe(true);
+    expect(isRecapTap(tap({ speciesId: 'owl' }))).toBe(false);
+    expect(isRecapTap({ actionIdentifier: 'dismiss', notification: { request: { content: { data: { view: 'thisWeek' } } } } })).toBe(false);
+    expect(isRecapTap(null)).toBe(false);
+  });
+});

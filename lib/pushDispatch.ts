@@ -1,7 +1,9 @@
 import { DEFAULT_CADENCE, type CadenceConfig, type SendHistory } from './cadence';
 import { t, type Locale, SUPPORTED_LOCALES, BASE_LOCALE } from './i18n';
 import type { Rng } from './presenceNotification';
-import type { NotifPrefs } from './notifPrefs';
+import { prefGroupOf, type NotifPrefs } from './notifPrefs';
+import { candidatesForMonth } from './presence';
+import { arrivingCount } from './seasonShift';
 import { decideNotification, type SkipReason } from './notificationEngine';
 import { DEFAULT_TUNING, type NotificationTuning } from './tuning';
 import type { Month } from './species/types';
@@ -44,13 +46,24 @@ export interface UserSnapshot {
   prefs?: NotifPrefs;
 }
 
-export interface PlannedSend {
-  userId: string;
-  speciesId: string;
-  devices: PushDevice[];
+/** The weekly recap's counts (T-350 · review F-04): records-based, worded "usually". */
+export interface WeeklyRecap {
+  /** Species active in the county this month that the user has not met yet. */
+  unmet: number;
+  /** Species that usually arrive next month (`arrivingCount`). */
+  arriving: number;
 }
 
-export type PlanSkipReason = SkipReason | 'no-region' | 'no-device';
+/** A species notification, or a weekly user's Sunday recap. */
+export type PlannedSend = { userId: string; devices: PushDevice[] } & (
+  | { speciesId: string; recap?: undefined }
+  | { speciesId?: undefined; recap: WeeklyRecap }
+);
+
+export type PlanSkipReason = SkipReason | 'no-region' | 'no-device' | 'not-recap-day';
+
+/** Sunday, the recap's day (T-350). */
+export const RECAP_WEEKDAY = 0;
 
 export interface DispatchPlan {
   sends: PlannedSend[];
@@ -79,6 +92,8 @@ export interface LocalClock {
   month: Month;
   /** YYYY-MM-DD in the zone — the key for "today" in the daily cap. */
   dateKey: string;
+  /** 0 = Sunday … 6 = Saturday, in the zone. */
+  weekday: number;
 }
 
 /** Wall-clock hour, month and date in `timeZone`. Intl handles DST, which a fixed offset would not. */
@@ -90,12 +105,14 @@ export function localClock(nowMs: number, timeZone: string = PUSH_TIME_ZONE): Lo
     day: '2-digit',
     hour: '2-digit',
     hourCycle: 'h23',
+    weekday: 'short',
   }).formatToParts(new Date(nowMs));
   const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
   return {
     localHour: Number(get('hour')),
     month: Number(get('month')) as Month,
     dateKey: `${get('year')}-${get('month')}-${get('day')}`,
+    weekday: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(get('weekday')),
   };
 }
 
@@ -163,6 +180,13 @@ export function planSends(
       skip('no-region');
       continue;
     }
+    // Weekly users get one Sunday recap instead of a species (T-350 · review F-04); the cadence
+    // and slot gates below are the same, so it is at most one per week.
+    const recapUser = user.prefs?.frequency === 'weekly';
+    if (recapUser && clock.weekday !== RECAP_WEEKDAY) {
+      skip('not-recap-day');
+      continue;
+    }
     const decision = decideNotification(
       {
         presence: presenceByRegion.get(user.homeRegion) ?? [],
@@ -186,8 +210,26 @@ export function planSends(
         rng: opts.rng,
       },
     );
-    if (decision.send) plan.sends.push({ userId: user.userId, speciesId: decision.speciesId, devices });
-    else skip(decision.reason);
+    if (!decision.send) {
+      skip(decision.reason);
+      continue;
+    }
+    if (recapUser) {
+      const groups = user.prefs?.groups ?? null;
+      const shown = (presenceByRegion.get(user.homeRegion) ?? []).filter(
+        (p) => groups === null || p.group === undefined || groups.includes(prefGroupOf(p.group)),
+      );
+      plan.sends.push({
+        userId: user.userId,
+        devices,
+        recap: {
+          unmet: candidatesForMonth(shown, clock.month, new Set(user.collectedIds)).length,
+          arriving: arrivingCount(shown, clock.month),
+        },
+      });
+    } else {
+      plan.sends.push({ userId: user.userId, speciesId: decision.speciesId, devices });
+    }
   }
   return plan;
 }
@@ -210,10 +252,19 @@ export function pushCopy(locale: Locale, speciesName: string): PushCopy {
   };
 }
 
+/** The Sunday recap (T-350): counts from records, worded as what usually happens (#1). */
+export function recapCopy(locale: Locale, county: string, recap: WeeklyRecap): PushCopy {
+  return {
+    title: t(locale, 'push.recap.title', { county }),
+    body: t(locale, 'push.recap.body', { unmet: recap.unmet, arriving: recap.arriving }),
+  };
+}
+
 export interface FcmMessageInput {
   token: string;
   copy: PushCopy;
-  speciesId: string;
+  /** The species to open; absent for the weekly recap, which opens This Week (T-350). */
+  speciesId?: string;
   imageUrl: string | null;
 }
 
@@ -225,7 +276,7 @@ export function buildFcmMessage({ token, copy, speciesId, imageUrl }: FcmMessage
     message: {
       token,
       notification,
-      data: { speciesId },
+      data: speciesId ? { speciesId } : { view: 'thisWeek' },
       android: { priority: 'normal', notification: { channel_id: ANDROID_CHANNEL_ID } },
     },
   };

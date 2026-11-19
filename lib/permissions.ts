@@ -3,7 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import type { Coordinates } from './hometown';
 import { locationOutcome, type LocationAccess } from './locationAccess';
-import { speciesIdFromResponse } from './notificationTap';
+import { isRecapTap, speciesIdFromResponse } from './notificationTap';
 import { ANDROID_CHANNEL_ID } from './pushDispatch';
 import type { DeviceToken } from './pushRegistration';
 
@@ -118,8 +118,13 @@ export function onPushTokenChange(listener: () => void): () => void {
  * the "last response". Each handled response is cleared so a later re-render or app resume does
  * not reopen the same card. Returns the unsubscribe.
  */
-export function onNotificationTap(listener: (speciesId: string) => void): () => void {
+export function onNotificationTap(listener: (speciesId: string) => void, onRecap?: () => void): () => void {
   const handle = (response: Notifications.NotificationResponse | null) => {
+    if (onRecap && isRecapTap(response)) {
+      Notifications.clearLastNotificationResponse();
+      onRecap();
+      return;
+    }
     const speciesId = speciesIdFromResponse(response);
     if (speciesId === null) return;
     Notifications.clearLastNotificationResponse();

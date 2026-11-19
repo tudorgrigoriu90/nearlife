@@ -29,3 +29,12 @@ export function speciesIdFromResponse(response: TapLike | null | undefined): str
   const trigger = request?.trigger as { remoteMessage?: { data?: unknown } } | null | undefined;
   return idIn(request?.content?.data) ?? idIn(trigger?.remoteMessage?.data);
 }
+
+/** A tapped weekly recap (T-350 · review F-04): it opens This Week, not a card. */
+export function isRecapTap(response: TapLike | null | undefined): boolean {
+  if (!response || response.actionIdentifier !== DEFAULT_ACTION) return false;
+  const request = response.notification?.request;
+  const trigger = request?.trigger as { remoteMessage?: { data?: unknown } } | null | undefined;
+  const view = (d: unknown) => typeof d === 'object' && d !== null && (d as Record<string, unknown>).view === 'thisWeek';
+  return view(request?.content?.data) || view(trigger?.remoteMessage?.data);
+}

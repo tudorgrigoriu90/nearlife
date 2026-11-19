@@ -5049,6 +5049,21 @@ document until it is started, when it takes the next free `T-###`.
   - Note: this is a server rule on moves only. Which county a user may collect in is still
     enforced on the phone (T-314, T-315).
 
+- **T-350 · Weekly recap notification** — *Claude · S · `DONE` · deps: T-341, T-340 · review F-04*
+  - Done when the planner produces at most one recap per user per ISO week (test) and the copy
+    passes the honesty test.
+  - ✅ A user who chose "weekly" gets, on Sundays only, "This week in {county}: {n} species active
+    this season that you haven't met yet; {m} usually arrive next month" instead of a species
+    (`planSends` → `PlannedSend.recap`; counts within the chosen groups; `arrivingCount` from
+    T-340's rule, uncapped). The same cadence and slot gates apply, so Sundays only and the daily
+    cap make it at most one a week; nothing to say means no recap. Tapping opens This Week
+    (`data.view = 'thisWeek'`, `isRecapTap`).
+  - ✅ Migration 0049 (`20261119000012_notification_kind.sql`): `notification_log.kind`
+    ('species' / 'recap'); a recap has no species, a species send must name one. The sender reads
+    county names from `regions` and logs recaps like any send, so the caps count them.
+  - ✅ Tests: planner 5 (Sunday, other days, twice the same Sunday, a week later, nothing to say),
+    message 1, tap 1, real Postgres 1; the catalogue honesty test scans the copy.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

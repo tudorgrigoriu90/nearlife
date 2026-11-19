@@ -592,7 +592,11 @@ export default function App() {
   const [tappedSpeciesId, setTappedSpeciesId] = useState<string | null>(null);
   useEffect(() => {
     showNotificationsInForeground();
-    return onNotificationTap(setTappedSpeciesId);
+    return onNotificationTap(setTappedSpeciesId, () => {
+      // The weekly recap (T-350) opens This Week.
+      setSelected(null);
+      setTab('thisWeek');
+    });
   }, []);
   useEffect(() => {
     const gateway = recognitionGateway();

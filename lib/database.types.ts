@@ -220,20 +220,23 @@ export type Database = {
       notification_log: {
         Row: {
           id: number
+          kind: string
           sent_at: string
-          species_id: string
+          species_id: string | null
           user_id: string
         }
         Insert: {
           id?: never
+          kind?: string
           sent_at?: string
-          species_id: string
+          species_id?: string | null
           user_id: string
         }
         Update: {
           id?: never
+          kind?: string
           sent_at?: string
-          species_id?: string
+          species_id?: string | null
           user_id?: string
         }
         Relationships: []

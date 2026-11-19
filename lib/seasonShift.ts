@@ -36,3 +36,12 @@ export function seasonShifts(presence: RegionPresence[], month: Month): SeasonSh
       .map(([id]) => id);
   return { arriving: top(arriving), leaving: top(leaving) };
 }
+
+/** How many species usually arrive next month, all of them (the recap's count, T-350). */
+export function arrivingCount(presence: RegionPresence[], month: Month): number {
+  const next = (month % 12) + 1;
+  return presence.filter((p) => {
+    const c = p.monthCounts;
+    return !!c && c.length === 12 && c[next - 1] >= SHIFT_MIN_RECORDS && c[next - 1] >= SHIFT_RATIO_UP * c[month - 1];
+  }).length;
+}

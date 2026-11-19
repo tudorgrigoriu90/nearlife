@@ -26,6 +26,7 @@ import {
   planSends,
   pushCopy,
   pushLocale,
+  recapCopy,
   sendLogged,
 } from '../_shared/lib/pushDispatch.js';
 import { groupOfRow, parseNotifPrefs } from '../_shared/lib/notifPrefs.js';
@@ -230,7 +231,15 @@ Deno.serve(async (req: Request) => {
     }
 
     // 3) Names for the chosen species, in each device's language.
-    const speciesIds = [...new Set(plan.sends.map((s) => s.speciesId))];
+    const speciesIds = [...new Set(plan.sends.flatMap((s) => (s.speciesId ? [s.speciesId] : [])))];
+    // County names for the weekly recaps (T-350), from the regions table.
+    const homeOf = new Map(users.map((u) => [u.userId, u.homeRegion]));
+    const recapRegions = [...new Set(plan.sends.filter((s) => s.recap).map((s) => homeOf.get(s.userId)).filter((r): r is string => !!r))];
+    const regionNames = new Map(
+      (recapRegions.length > 0 ? await readIn(db, 'regions', 'id, name', 'id', recapRegions, ['id']) : []).map(
+        (r) => [r.id as string, r.name as string],
+      ),
+    );
     const species = await readIn(db, 'species', 'id, common_name, scientific_name', 'id', speciesIds, ['id']);
     const localized = await readIn(db, 'species_content', 'species_id, locale, common_name', 'species_id', speciesIds, [
       'species_id',
@@ -259,7 +268,7 @@ Deno.serve(async (req: Request) => {
     let deadTokens = 0;
     const errors: string[] = [];
     for (const send of plan.sends) {
-      const imageUrl = photoUrlFor(send.speciesId);
+      const imageUrl = send.speciesId ? photoUrlFor(send.speciesId) : null;
       const deliverAll = async (): Promise<boolean> => {
       let delivered = false;
       for (const device of send.devices) {
@@ -270,7 +279,9 @@ Deno.serve(async (req: Request) => {
           body: JSON.stringify(
             buildFcmMessage({
               token: device.token,
-              copy: pushCopy(locale, nameFor(send.speciesId, locale)),
+              copy: send.recap
+                ? recapCopy(locale, regionNames.get(homeOf.get(send.userId) ?? '') ?? '', send.recap)
+                : pushCopy(locale, nameFor(send.speciesId, locale)),
               speciesId: send.speciesId,
               imageUrl,
             }),
@@ -302,7 +313,11 @@ Deno.serve(async (req: Request) => {
         reserve: async () => {
           const { data, error } = await db
             .from('notification_log')
-            .insert({ user_id: send.userId, species_id: send.speciesId })
+            .insert(
+              send.recap
+                ? { user_id: send.userId, kind: 'recap', species_id: null }
+                : { user_id: send.userId, species_id: send.speciesId },
+            )
             .select('id')
             .single();
           if (error || !data) throw new Error(`notification_log insert failed: ${error?.message ?? 'no row'}`);

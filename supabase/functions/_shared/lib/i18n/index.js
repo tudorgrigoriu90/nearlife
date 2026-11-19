@@ -193,6 +193,8 @@ export const en = {
     // Push notification text (T-201) — seasonal, never real-time (invariant #1).
     'push.title': '{name} is active in your region',
     'push.body': 'This is its season where you live. Tap to meet it.',
+    'push.recap.title': 'This week in {county}',
+    'push.recap.body': '{unmet} species active this season that you haven’t met yet; {arriving} usually arrive next month.',
     'onboarding.firstSpotted.badge': 'Your first sighting!',
     'onboarding.firstSpotted.cta': 'Start exploring',
     // Age-gate (T-089 · GDPR-K). Birth YEAR only (data minimization) — never a full date.
@@ -707,6 +709,8 @@ export const sv = {
     'onboarding.notif.cta': 'Slå på påminnelser',
     'push.title': '{name} är aktiv i din region',
     'push.body': 'Det är dess säsong där du bor. Tryck för att möta den.',
+    'push.recap.title': 'Den här veckan i {county}',
+    'push.recap.body': '{unmet} arter aktiva den här säsongen som du inte har träffat än; {arriving} brukar komma nästa månad.',
     'onboarding.firstSpotted.badge': 'Din första observation!',
     'onboarding.firstSpotted.cta': 'Börja utforska',
     // Age-gate (T-089 · GDPR-K). Birth YEAR only (data minimization) — never a full date.

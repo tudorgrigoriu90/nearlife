@@ -9,6 +9,7 @@ import {
   planSends,
   pushCopy,
   pushLocale,
+  recapCopy,
   type PushDevice,
   type UserSnapshot,
   sendLogged,
@@ -43,11 +44,13 @@ describe('localClock', () => {
       localHour: 8,
       month: 1,
       dateKey: '2026-01-15',
+      weekday: 4, // a Thursday (T-350)
     });
     expect(localClock(Date.parse('2026-07-15T06:30:00Z'))).toEqual({
       localHour: 8,
       month: 7,
       dateKey: '2026-07-15',
+      weekday: 3, // a Wednesday
     });
   });
 
@@ -259,15 +262,15 @@ describe('planSends with presentable species', () => {
 
 // T-341 · review F-03: the sender honours each user's choices.
 describe('planSends with notification choices', () => {
-  it('skips a weekly user sent to three days ago, and sends to a daily one', () => {
-    const threeDaysAgo = SUMMER_EVENING - 72 * 3_600_000;
+  it('skips an every-other-day user sent to 30 hours ago, and sends to a daily one', () => {
+    const threeDaysAgo = SUMMER_EVENING - 30 * 3_600_000;
     const plan = planSends(
       [
         user({
-          userId: 'weekly',
+          userId: 'every-other-day',
           devices: [device({ token: 'tok-w' })],
           sentAtMs: [threeDaysAgo],
-          prefs: { frequency: 'weekly', window: null, groups: null },
+          prefs: { frequency: 'everyOtherDay', window: null, groups: null },
         }),
         user({ userId: 'daily', devices: [device({ token: 'tok-d' })], sentAtMs: [threeDaysAgo] }),
       ],
@@ -284,5 +287,66 @@ describe('planSends with notification choices', () => {
       rng: () => 0,
     });
     expect(plan.sends).toEqual([]);
+  });
+});
+
+// T-350 · review F-04: weekly users get one Sunday recap instead of a species.
+describe('weekly recap', () => {
+  // 2026-06-14 is a Sunday; 20:30 in Stockholm (CEST), the last waking hour.
+  const SUNDAY_EVENING = Date.parse('2026-06-14T18:30:00Z');
+  const weekly = { frequency: 'weekly' as const, window: null, groups: null };
+  const counts = (n: number[]) => Array.from({ length: 12 }, (_, i) => n[i] ?? 0);
+  const recapPresence = new Map<string, RegionPresence[]>([
+    [
+      KRONOBERG,
+      [
+        { speciesId: 'robin', activeMonths: [6], occurrences: 900 },
+        { speciesId: 'swift', activeMonths: [6, 7], occurrences: 90, monthCounts: counts([0, 0, 0, 0, 0, 0, 80]) },
+        { speciesId: 'owl', activeMonths: [6], occurrences: 40 },
+      ],
+    ],
+  ]);
+
+  it('on a Sunday: the species not met yet and how many usually arrive next month', () => {
+    const plan = planSends([user({ prefs: weekly, collectedIds: ['owl'] })], recapPresence, SUNDAY_EVENING, { rng: () => 0 });
+    expect(plan.sends).toEqual([{ userId: 'user-a', devices: [device()], recap: { unmet: 2, arriving: 1 } }]);
+  });
+
+  it('not on any other day', () => {
+    const plan = planSends([user({ prefs: weekly })], recapPresence, SUMMER_EVENING, { rng: () => 0 });
+    expect(plan.sends).toEqual([]);
+    expect(plan.skipped['not-recap-day']).toBe(1);
+  });
+
+  it('at most once per ISO week: Sundays only, and never twice the same Sunday', () => {
+    const earlierToday = SUNDAY_EVENING - 2 * 3_600_000;
+    const again = planSends([user({ prefs: weekly, sentAtMs: [earlierToday] })], recapPresence, SUNDAY_EVENING, { rng: () => 0 });
+    expect(again.sends).toEqual([]);
+    expect(again.skipped['daily-cap']).toBe(1);
+    const lastSunday = SUNDAY_EVENING - 7 * 24 * 3_600_000 + 3_600_000; // the previous week's recap
+    const next = planSends([user({ prefs: weekly, sentAtMs: [lastSunday] })], recapPresence, SUNDAY_EVENING, { rng: () => 0 });
+    expect(next.sends).toHaveLength(1);
+  });
+
+  it('nothing to say, no recap', () => {
+    const plan = planSends([user({ prefs: weekly, collectedIds: ['robin', 'swift', 'owl'] })], recapPresence, SUNDAY_EVENING, {
+      rng: () => 0,
+    });
+    expect(plan.sends).toEqual([]);
+  });
+
+  it('the copy says "usually", in both languages', () => {
+    for (const loc of ['en', 'sv'] as const) {
+      const copy = recapCopy(loc, 'Kronoberg', { unmet: 12, arriving: 3 });
+      expect(copy.title).toContain('Kronoberg');
+      expect(copy.body).toMatch(loc === 'en' ? /usually/ : /brukar/);
+    }
+  });
+});
+
+describe('the recap message', () => {
+  it('opens This Week rather than a card', () => {
+    const msg = buildFcmMessage({ token: 't', copy: { title: 'a', body: 'b' }, imageUrl: null });
+    expect(msg.message.data).toEqual({ view: 'thisWeek' });
   });
 });
