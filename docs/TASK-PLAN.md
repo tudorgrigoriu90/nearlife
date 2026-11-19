@@ -4434,6 +4434,17 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ `__tests__/catalogueDocs.test.js` checks README and CLAUDE.md against
     `pipeline/data/catalogue.json` meta, and each corrected row.
 
+- **T-288 · The content load overwrote sourced facts with a stale committed file** — *Claude · S · `DONE` (repair: Backfill facts rerun after this push) · deps: T-276*
+  - Found checking T-276: after the fact-source backfill sourced every Wikipedia fact, 273 rows
+    were unsourced again. The T-279 content run loaded every `data/content_*.json` on disk, which
+    included `content_mammal.json`, committed in August as a validation file and predating
+    `factUrl`. Its 147 English mammal facts replaced the sourced ones with no credit (give and
+    protect were the same templates; the season sentence was rewritten by the next step).
+  - ✅ The file is deleted and `pipeline/data/content_*.json` is git-ignored; a test fails if one
+    is tracked. `build_content_rows` refuses a fact without its `factUrl` (CC BY-SA credit), so
+    no file of any age can load an uncredited fact. Tests: 4.
+  - Repair: rerun Backfill facts (its "Record fact sources" step sources only rows without one).
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

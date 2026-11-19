@@ -169,9 +169,9 @@ jobs:
 
       # Runs after the species load: species_content.species_id references public.species, so
       # the rows it writes have nothing to point at until that has landed (T-193).
-      # Only when this run generated content: with content_scope=skip the only content files on
-      # disk are committed validation files (content_mammal.json, August 2026), and loading them
-      # would overwrite current rows with stale ones.
+      # Only when this run generated content. Content files are never committed (T-288): the
+      # loader reads every data/content_*.json on disk, and a stale committed one overwrote 147
+      # sourced facts with uncredited August copies. It also refuses any fact without its source.
       - name: Load species content into Supabase (T-145)
         if: ${{ !cancelled() && env.SUPABASE_DB_URL != '' && inputs.content_scope != 'skip' }}
         working-directory: pipeline

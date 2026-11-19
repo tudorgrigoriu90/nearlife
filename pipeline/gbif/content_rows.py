@@ -71,6 +71,15 @@ def build_content_rows(
                 without_fact += 1
             else:
                 with_fact += 1
+            source_url = (item.get("factUrl") or "").strip() or None
+            # Wikipedia text is shown only with its credit (CC BY-SA 4.0, T-276). An item without
+            # the article is from a builder that predates factUrl — a stale file (T-288) — and
+            # loading it would overwrite a sourced fact with an uncredited one.
+            if fact is not None and source_url is None:
+                raise ValueError(
+                    f"{species_id} [{row_locale}]: fact without its source (factUrl); "
+                    "regenerate the content file instead of loading it"
+                )
 
             rows.append(
                 {
@@ -81,7 +90,7 @@ def build_content_rows(
                     "common_name": (item.get("commonName") or "").strip() or None,
                     "fact": fact,  # None when there's no article — never fabricated (invariant #1)
                     # The article the fact is credited to on the card (T-276, CC BY-SA 4.0).
-                    "fact_source_url": (item.get("factUrl") or None) if fact else None,
+                    "fact_source_url": source_url if fact else None,
                     "fact_origin": "wikipedia" if fact else None,
                     "when_how": item["whenAndHow"],
                     "give": item["give"],

@@ -14,13 +14,14 @@ from gbif.db_rows import species_id_for  # noqa: E402
 
 
 def _item(key, name, fact, taxon="mammal"):
-    """A build_content.py content item (matches data/content_mammal.json shape)."""
+    """A build_content.py content item."""
     return {
         "speciesKey": key,
         "scientificName": name,
         "taxonGroup": taxon,
         "fact": fact,  # None when Wikipedia has no article — never fabricated
         "factSource": "Wikipedia" if fact else None,
+        "factUrl": f"https://en.wikipedia.org/wiki/{name.replace(' ', '_')}" if fact else None,
         "factLicense": "CC BY-SA" if fact else None,
         "whenAndHow": f"Active in your region year-round. Look for it in {taxon} cover.",
         "give": "give-template",
@@ -95,6 +96,7 @@ def _loc_item(locale, name="Pica pica", fact="A magpie."):
         "scientificName": name,
         "locale": locale,
         "fact": fact,
+        "factUrl": f"https://{locale}.wikipedia.org/wiki/{name.replace(' ', '_')}",
         "whenAndHow": f"[{locale}] when",
         "give": f"[{locale}] give",
         "protect": f"[{locale}] protect",
@@ -185,3 +187,50 @@ def test_rows_for_unknown_species_are_split_off_instead_of_failing_the_load():
     kept, missing = keep_known_species(rows, {species_id_for(1)})
     assert [r["species_id"] for r in kept] == [species_id_for(1)]
     assert missing == {species_id_for(2)}
+
+
+# T-288: a content load wrote 147 August-era mammal facts with no source over sourced rows (the
+# committed validation file content_mammal.json predates factUrl). Wikipedia text may only be
+# shown with its credit (CC BY-SA 4.0, T-276), so a fact without its article is refused outright.
+def test_a_fact_without_its_source_is_refused():
+    import pytest
+
+    item = _item(7, "Lutra lutra", "The Eurasian otter is a semiaquatic mammal.")
+    del item["factUrl"]
+    with pytest.raises(ValueError, match="gbif:7"):
+        build_content_rows([{"content": [item]}])
+
+
+def test_a_fact_less_item_needs_no_source():
+    item = _item(8, "A b", None)
+    del item["factUrl"]
+    rows, _ = build_content_rows([{"content": [item]}])
+    assert rows[0]["fact"] is None and rows[0]["fact_source_url"] is None
+
+
+def test_the_fact_source_reaches_the_row():
+    rows, _ = build_content_rows([{"content": [_item(9, "Vulpes vulpes", "A fox.")]}])
+    assert rows[0]["fact_source_url"] == "https://en.wikipedia.org/wiki/Vulpes_vulpes"
+    assert rows[0]["fact_origin"] == "wikipedia"
+
+
+def test_no_generated_content_file_is_committed():
+    # The loader reads every data/content_*.json on disk; a committed one is loaded by every run
+    # that generates content and overwrites current rows with whatever it held when committed.
+    import subprocess
+
+    root = Path(__file__).resolve().parents[2]
+    try:
+        tracked = subprocess.run(
+            ["git", "ls-files", "pipeline/data/content_*.json"],
+            cwd=root, capture_output=True, text=True, check=True,
+        ).stdout.split()
+    except (OSError, subprocess.CalledProcessError):
+        import pytest
+
+        pytest.skip("not a git checkout")
+    assert tracked == []
+    ignored = subprocess.run(
+        ["git", "check-ignore", "-q", "pipeline/data/content_bird.json"], cwd=root
+    ).returncode
+    assert ignored == 0, "pipeline/data/content_*.json must be git-ignored"
