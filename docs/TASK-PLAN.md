@@ -5130,6 +5130,23 @@ document until it is started, when it takes the next free `T-###`.
     hash, for the Supabase SQL editor. The app's "Access code" screen already redeems any code.
     Tests: 3.
 
+- **T-357 · Seasonal events from the county's records** — *Claude · M · `DONE` · deps: T-261 · review F-17*
+  - Done when no event is shown in a county where its data does not show it (replaces B-17's fix).
+  - ✅ `lib/seasonalEvents.ts` replaces the four fixed Kronoberg windows (`lib/liveEvents.ts`,
+    removed). Each event has a curated name and an indicator (a species, or a whole group) and is
+    shown in a county only in the months its records there show it: an *arrival* is the first
+    month in its window with ≥ 4× the previous month's records and ≥ 5% of the year's (swifts and
+    cuckoos: May in Kronoberg); a *peak* is the window's months with ≥ 70% of the busiest month
+    (cranes: March and April). Fewer than 100 records: shown nowhere. Thresholds were set against
+    the live counts of four counties (Kronoberg, Stockholm, SWE.11_1, SWE.12_1).
+  - ✅ Events: crane gathering, swift arrival, cuckoo arrival, mushroom season (all fungi summed),
+    salmon run. The salmon run has 11 records in Kronoberg, so it is no longer claimed there; the
+    mushroom season shows nowhere yet because the catalogue holds no fungi (checked live: no
+    `fungus` category), and appears by itself once they are added (F-21). "First frost" went: no
+    species record shows frost. Copy says "usually" and "most recorded here", never "now" (#1).
+  - ✅ This Week shows the events App derives from the shown county's list; the preview shows
+    none. Tests: model 6, strip 2, visuals 2.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

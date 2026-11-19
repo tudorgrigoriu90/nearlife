@@ -1,10 +1,10 @@
-import { KRONOBERG_EVENTS } from '../lib/liveEvents';
+import { SEASONAL_EVENTS } from '../lib/seasonalEvents';
 import { en } from '../lib/i18n';
 import { LIVE_EVENT_META } from './liveEventVisual';
 
 describe('LIVE_EVENT_META', () => {
-  it('has a visual entry for every Kronoberg live event (no event renders blank)', () => {
-    for (const event of KRONOBERG_EVENTS) {
+  it('has a visual entry for every seasonal event (no event renders blank)', () => {
+    for (const event of SEASONAL_EVENTS) {
       expect(LIVE_EVENT_META[event.id]).toBeDefined();
     }
   });

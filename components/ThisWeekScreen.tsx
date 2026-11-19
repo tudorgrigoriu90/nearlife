@@ -2,12 +2,10 @@ import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, 
 import { createTranslator, type Locale } from '../lib/i18n';
 import { monthOf } from '../lib/season';
 import { thisWeek, type ThisWeekEntry } from '../lib/thisWeek';
-import { activeEvents } from '../lib/liveEvents';
 import { commonNameFor, contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import type { Month, Species } from '../lib/species/types';
 import type { LiveThisWeek, LiveThisWeekItem } from '../lib/thisWeekLive';
-import { BUNDLED_REGION_ID } from '../lib/speciesRepository';
 import { groupOf } from '../lib/species/group';
 import { CATEGORY_EMOJI } from './speciesVisual';
 import { LIVE_EVENT_META } from './liveEventVisual';
@@ -107,19 +105,16 @@ function bundledRow(entry: ThisWeekEntry, locale: Locale): RowData {
   };
 }
 
-// Live-events strip (T-080): the real seasonal moments genuinely under way this month, rendered
-// only when there are any (nothing shows out of season). Honest by construction — the windows come
-// from the tested core (lib/liveEvents.ts). Scrolls with the list as its header.
+// Seasonal-events strip (T-080, T-357): the events the county's own records show for this month
+// (lib/seasonalEvents.ts), rendered only when there are any. Scrolls with the list as its header.
 function EventsHeader({
   tr,
-  countyId,
+  ids,
 }: {
-  locale: Locale;
   tr: ReturnType<typeof createTranslator>;
-  /** The county the list is for; events are shown only for counties they are known for (B-17). */
-  countyId: string;
+  ids: string[];
 }) {
-  const events = activeEvents(countyId, new Date()).filter((e) => LIVE_EVENT_META[e.id]);
+  const events = ids.filter((id) => LIVE_EVENT_META[id]).map((id) => ({ id }));
   if (events.length === 0) return null;
   return (
     <View style={styles.events}>
@@ -147,7 +142,7 @@ export default function ThisWeekScreen({
   live = null,
   status,
   onRetry,
-  regionId,
+  events = [],
   regionName,
   onOpenCounties,
   travel,
@@ -166,8 +161,8 @@ export default function ThisWeekScreen({
    */
   status?: 'preview' | 'loading' | 'error' | 'ready';
   onRetry?: () => void;
-  /** The county shown, for its seasonal events (B-17); the preview is Kronoberg. */
-  regionId?: string;
+  /** The seasonal events the county's records show this month (T-357 · `seasonalEvents`). */
+  events?: string[];
   regionName?: string;
   /** Show the Counties screen (T-105): look around, or open, another county. */
   onOpenCounties?: () => void;
@@ -199,7 +194,6 @@ export default function ThisWeekScreen({
         : [];
   const count = mode === 'ready' && live !== null ? live.total : rows.length;
   const region = mode !== 'preview' && regionName ? regionName : tr('region.kronoberg');
-  const eventsCounty = mode === 'preview' ? BUNDLED_REGION_ID : (regionId ?? '');
 
   return (
     <View style={styles.container}>
@@ -295,7 +289,7 @@ export default function ThisWeekScreen({
                 />
               </>
             ) : null}
-            <EventsHeader locale={locale} tr={tr} countyId={eventsCounty} />
+            <EventsHeader tr={tr} ids={mode === 'ready' ? events : []} />
           </>
         }
         contentContainerStyle={styles.list}

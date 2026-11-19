@@ -71,6 +71,7 @@ import { useNameTrainer } from './components/useNameTrainer';
 import { trainerLocale } from './lib/nameTrainer';
 import { confusedWith } from './lib/confusedWith';
 import NatureCalendarScreen from './components/NatureCalendarScreen';
+import { seasonalEvents } from './lib/seasonalEvents';
 import { AsyncStorageNameTrainerStore } from './lib/nameTrainerStore';
 import { useNotifPrefs } from './components/useNotifPrefs';
 import { SupabaseNotifPrefsGateway } from './lib/notifPrefsGateway';
@@ -522,6 +523,8 @@ export default function App() {
     viewCounty !== null,
   );
   const badgeSpecies = viewCounty !== null ? homeCatalogue.species : almanacSpecies;
+  // Seasonal events from the shown county's own monthly records (T-357 · review F-17).
+  const thisWeekEvents = useMemo(() => seasonalEvents(almanacSpecies, monthOf(new Date())), [almanacSpecies]);
   const badgeListReady = viewCounty !== null ? !homeCatalogue.loading : !speciesLoading;
   // Newly earned badges are remembered once the stored ones have loaded (so an older date is never
   // overwritten), and saved; the first date stays.
@@ -1754,7 +1757,7 @@ export default function App() {
             live={thisWeekLive.live}
             status={thisWeekLive.status}
             onRetry={thisWeekLive.retry}
-            regionId={viewCounty?.id ?? hometown?.id}
+            events={thisWeekEvents}
             regionName={viewCounty?.name ?? hometown?.name}
             spottedIds={spottedIds(collection.records)}
             onOpenCounties={

@@ -96,3 +96,18 @@ describe('ThisWeekScreen season shifts', () => {
     }
   });
 });
+
+// T-357 · review F-17: the events the county's records show, and none in the preview.
+describe('seasonal events strip', () => {
+  const live = { arriving: [], leaving: [], state: 'active' as const, total: 0, items: [] };
+  it('shows the events it is given for the county', async () => {
+    await render(<ThisWeekScreen locale="en" live={live} regionName="Kronoberg" events={['swift-arrival', 'unknown-id']} />);
+    expect(screen.getByText(tr('events.title'))).toBeTruthy();
+    expect(screen.getByText(tr('event.swift-arrival.name'))).toBeTruthy();
+  });
+
+  it('shows none in the preview, whose bundled list has no monthly records', async () => {
+    await render(<ThisWeekScreen locale="en" events={['swift-arrival']} />);
+    expect(screen.queryByText(tr('events.title'))).toBeNull();
+  });
+});
