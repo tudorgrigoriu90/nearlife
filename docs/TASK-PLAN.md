@@ -4925,6 +4925,11 @@ document until it is started, when it takes the next free `T-###`.
     client interface made TypeScript give up comparing it with the generated client ("excessively
     deep"), which is why the narrow interfaces went rather than staying beside the types.
 
+- **T-338 · A staging Supabase project** — *Director · `WONTFIX` (Director, 2026-11-19) · review I-15*
+  - Not now. Migrations stay tested on real Postgres in CI (`pipeline/tests/*_pg.py`) and checked
+    live with `db-migrate.yml` `verify` (rolled back), which is the substitute until a second
+    project is worth its cost.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
