@@ -70,6 +70,7 @@ import NameTrainerScreen from './components/NameTrainerScreen';
 import { useNameTrainer } from './components/useNameTrainer';
 import { trainerLocale } from './lib/nameTrainer';
 import { confusedWith } from './lib/confusedWith';
+import NatureCalendarScreen from './components/NatureCalendarScreen';
 import { AsyncStorageNameTrainerStore } from './lib/nameTrainerStore';
 import { useNotifPrefs } from './components/useNotifPrefs';
 import { SupabaseNotifPrefsGateway } from './lib/notifPrefsGateway';
@@ -468,6 +469,7 @@ export default function App() {
   const fieldNotes = useFieldNotes(FIELD_NOTES_STORE);
   const nameTrainer = useNameTrainer(NAME_TRAINER_STORE);
   const [showTrainer, setShowTrainer] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [showMoveHome, setShowMoveHome] = useState(false);
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
@@ -1120,6 +1122,7 @@ export default function App() {
     if (showAccessCode) return closed(() => setShowAccessCode(false));
     if (showSighting) return closed(() => setShowSighting(false));
     if (showTrainer) return closed(() => setShowTrainer(false));
+    if (showCalendar) return closed(() => setShowCalendar(false));
     if (showBadges) return closed(() => setShowBadges(false));
     if (showImpact) return closed(() => setShowImpact(false));
     if (showSettings) return closed(() => setShowSettings(false));
@@ -1357,6 +1360,25 @@ export default function App() {
             setSelected(species);
           }}
           onDone={() => setShowSighting(false)}
+        />
+        <StatusBar style="auto" />
+      </>
+    );
+  }
+
+  if (showCalendar) {
+    return (
+      <>
+        <NatureCalendarScreen
+          locale={locale}
+          county={countyName}
+          species={almanacSpecies}
+          month={monthOf(new Date())}
+          onOpenSpecies={(species) => {
+            setShowCalendar(false);
+            setSelected(species);
+          }}
+          onDone={() => setShowCalendar(false)}
         />
         <StatusBar style="auto" />
       </>
@@ -1771,6 +1793,7 @@ export default function App() {
             onOpenImpact={() => setShowImpact(true)}
             onOpenSighting={canCollect ? () => setShowSighting(true) : undefined}
             onOpenTrainer={() => setShowTrainer(true)}
+            onOpenCalendar={() => setShowCalendar(true)}
           />
         )}
       </View>

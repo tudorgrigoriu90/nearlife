@@ -295,3 +295,11 @@ it('offers "Learn the names" only after a first sighting', async () => {
   await fireEvent.press(screen.getByText(`🗣 ${tr('trainer.entry')}`));
   expect(onOpenTrainer).toHaveBeenCalledTimes(1);
 });
+
+// T-353 · review F-12.
+it('opens the nature calendar', async () => {
+  const onOpenCalendar = jest.fn();
+  await render(<AlmanacScreen species={[KRONOBERG_SPECIES[0]]} records={[]} onOpenCalendar={onOpenCalendar} />);
+  await fireEvent.press(screen.getByText(`📅 ${tr('calendar.entry')}`));
+  expect(onOpenCalendar).toHaveBeenCalledTimes(1);
+});

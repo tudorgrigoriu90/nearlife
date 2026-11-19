@@ -116,6 +116,7 @@ export default function AlmanacScreen({
   onOpenImpact,
   onOpenSighting,
   onOpenTrainer,
+  onOpenCalendar,
   month = monthOf(new Date()),
 }: {
   species: Species[];
@@ -133,6 +134,8 @@ export default function AlmanacScreen({
   onOpenSighting?: () => void;
   /** "Learn the names" (T-351 · review F-06). */
   onOpenTrainer?: () => void;
+  /** The county's nature calendar (T-353 · review F-12). */
+  onOpenCalendar?: () => void;
   /** The month "Active this month" filters on; injectable for tests. */
   month?: Month;
 }) {
@@ -214,6 +217,12 @@ export default function AlmanacScreen({
       {onOpenSighting ? (
         <Pressable onPress={onOpenSighting} accessibilityRole="button" style={styles.sightingBtn}>
           <Text style={styles.sightingText}>👁 {tr('quiz.entry')}</Text>
+        </Pressable>
+      ) : null}
+
+      {onOpenCalendar ? (
+        <Pressable onPress={onOpenCalendar} accessibilityRole="button" style={styles.linkBtnWide}>
+          <Text style={styles.linkText}>📅 {tr('calendar.entry')}</Text>
         </Pressable>
       ) : null}
 

@@ -693,6 +693,8 @@ describe('system back from each overlay', () => {
         [new RegExp(tr('nav.badges')), new RegExp(`^${tr('badges.title')} `)],
         [new RegExp(tr('nav.impact')), new RegExp(`^${tr('impact.title')} `)],
         [new RegExp(tr('quiz.entry')), new RegExp(` ${tr('quiz.title')}$`)],
+        // T-353
+        [new RegExp(tr('calendar.entry')), new RegExp(`^${tr('calendar.title')} `)],
       ] as const) {
         await press(open);
         expect(await screen.findAllByText(title)).not.toHaveLength(0);
