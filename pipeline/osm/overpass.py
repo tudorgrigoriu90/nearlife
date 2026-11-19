@@ -1,10 +1,11 @@
 """Overpass API client and the queries behind catch spots (T-046 · T-049). Network I/O only; what a
 result means lives in osm/rules.py.
 
-One county per query, selected by its boundary's ISO 3166-2 tag. Five queries per county: the
-spots themselves; the ids of spots inside protected or military land; and the geometry of the major
-roads and railways, and of the coastline, in the spots' bounding box (distances measured locally). Overpass is a shared community service, so the client paces itself and backs off on
-429/502/503/504. The whole country is about 105 queries, run yearly from CI.
+One county per query, selected by its boundary's ISO 3166-2 tag. Nine queries per county: the
+spots themselves; the geometry of the major roads and railways, the coastline and cliff edges in
+the spots' bounding box (distances measured locally); and the ids of spots inside each kind of zone
+(ZONES). Overpass is a shared community service, so the client paces itself and backs off on
+429/502/503/504. The whole country is about 190 queries, run yearly from CI.
 
 A busy answer moves the next attempt to the other public instance: in the first full run
 (2026-10-30) the main server answered Norrbotten's queries with six 502s in a row, and retrying the
@@ -40,6 +41,7 @@ def spots_query(iso: str) -> str:
 
 ROAD_FILTERS = ['["highway"~"^(motorway|trunk|primary|motorway_link|trunk_link)$"]', '["railway"="rail"]']
 COAST_FILTERS = ['["natural"="coastline"]']
+CLIFF_FILTERS = ['["natural"="cliff"]']
 
 
 def lines_query(filters: list[str], bbox: tuple[float, float, float, float]) -> str:
@@ -62,6 +64,16 @@ def inside_query(iso: str, area_filters: list[str]) -> str:
 
 RESERVE_FILTERS = ['["leisure"="nature_reserve"]', '["boundary"="protected_area"]', '["boundary"="national_park"]']
 MILITARY_FILTERS = ['["landuse"="military"]', '["military"]']
+
+# Each zone query gives the ids of spots inside it, flagged with its name. One query per flag, so a
+# spot's flag says which rule removed it (the density audit, T-050, counts by flag).
+ZONES: list[tuple[str, list[str]]] = [
+    ("reserve", RESERVE_FILTERS),
+    ("military", MILITARY_FILTERS),
+    ("quarry", ['["landuse"="quarry"]']),
+    ("landfill", ['["landuse"="landfill"]']),
+    ("airport", ['["aeroway"="aerodrome"]']),
+]
 
 
 def ids_from(result: dict) -> set[str]:

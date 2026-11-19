@@ -7,6 +7,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from osm.overpass import (  # noqa: E402
+    CLIFF_FILTERS,
+    ZONES,
     MILITARY_FILTERS,
     RESERVE_FILTERS,
     ids_from,
@@ -34,6 +36,20 @@ def test_the_exclusion_zones_cover_reserves_parks_and_military_land():
     reserves = inside_query("SE-G", RESERVE_FILTERS)
     assert '"leisure"="nature_reserve"' in reserves and '"boundary"="national_park"' in reserves
     assert '"landuse"="military"' in inside_query("SE-G", MILITARY_FILTERS)
+
+
+def test_hazard_zones_cover_quarries_landfills_and_airports():
+    # T-326 · review I-22: places where walking in is dangerous or not allowed.
+    by_flag = dict(ZONES)
+    assert '"landuse"="quarry"' in inside_query("SE-G", by_flag["quarry"])
+    assert '"landuse"="landfill"' in inside_query("SE-G", by_flag["landfill"])
+    assert '"aeroway"="aerodrome"' in inside_query("SE-G", by_flag["airport"])
+    assert set(by_flag) == {"reserve", "military", "quarry", "landfill", "airport"}
+
+
+def test_cliffs_are_downloaded_as_lines():
+    q = lines_query(CLIFF_FILTERS, (59.0, 18.0, 59.5, 18.5))
+    assert 'way["natural"="cliff"](59.0,18.0,59.5,18.5);' in q
 
 
 def test_major_roads_and_railways_only():
@@ -215,7 +231,7 @@ def test_dropped_connections_that_never_recover_fail_with_the_reason():
 
 def test_a_county_build_flags_a_spot_beside_a_motorway_and_marks_a_beach_coastal():
     # End to end through build_county with canned Overpass answers, in query order:
-    # spots, roads, coastline, reserves, military.
+    # spots, roads, coastline, cliffs, then the zones: reserve, military, quarry, landfill, airport.
     import build_catch_spots
     from osm.overpass import OverpassClient
 
@@ -223,13 +239,20 @@ def test_a_county_build_flags_a_spot_beside_a_motorway_and_marks_a_beach_coastal
         {"type": "node", "id": 1, "lat": 59.0002, "lon": 18.005, "tags": {"tourism": "picnic_site"}},
         {"type": "node", "id": 2, "lat": 59.0100, "lon": 18.005, "tags": {"tourism": "picnic_site"}},
         {"type": "node", "id": 3, "lat": 59.0300, "lon": 18.005, "tags": {"natural": "beach"}},
+        {"type": "node", "id": 4, "lat": 59.0500, "lon": 18.005, "tags": {"tourism": "viewpoint"}},
+        {"type": "node", "id": 5, "lat": 59.0700, "lon": 18.005, "tags": {"tourism": "viewpoint"}},
     ]}
     motorway = {"elements": [{"type": "way", "id": 10, "geometry": [{"lat": 59.0, "lon": 18.0}, {"lat": 59.0, "lon": 18.01}]}]}
     coastline = {"elements": [{"type": "way", "id": 20, "geometry": [{"lat": 59.031, "lon": 18.0}, {"lat": 59.031, "lon": 18.01}]}]}
     client = OverpassClient(endpoints=["https://a/api"], pause=0, backoff=0, max_retries=1)
-    client.session = _BodySession([spots, motorway, coastline, {"elements": []}, {"elements": []}])
+    cliff = {"elements": [{"type": "way", "id": 30, "geometry": [{"lat": 59.0502, "lon": 18.0}, {"lat": 59.0502, "lon": 18.01}]}]}
+    none = {"elements": []}
+    quarry = {"elements": [{"type": "node", "id": 5}]}
+    client.session = _BodySession([spots, motorway, coastline, cliff, none, none, quarry, none, none])
 
     built = {s["id"]: s for s in build_catch_spots.build_county(client, "SWE.15_1", "SE-AB")}
     assert built["n1"]["flags"] == ["major_road"]  # ~22 m from the motorway
     assert built["n2"]["flags"] == []  # ~1.1 km away
     assert built["n3"]["habitat"] == "coast"  # ~110 m from the coastline
+    assert built["n4"]["flags"] == ["cliff"]  # ~22 m from a cliff edge
+    assert built["n5"]["flags"] == ["quarry"]

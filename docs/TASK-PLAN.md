@@ -4801,6 +4801,28 @@ document until it is started, when it takes the next free `T-###`.
     checks (T-066, T-153), test support for bidi and the language roster (T-154, T-157) and the
     contrast palette (T-292). `cell.ts` was already gone (T-301); `seasonalWindow.ts` is wired.
 
+- **T-326 · Catch-spot hazards: cliffs, quarries, landfills, airports** — *Claude · S · `IN-PROGRESS` · deps: T-049 · review I-22 (a)*
+  - Done when the four new flags appear in `catch_spots.flags`, are hidden by the read policy,
+    and the build summary (the density audit's input, T-050) counts what each removed.
+  - ✅ `pipeline/osm/rules.py` `EXCLUSION_FLAGS` is the one list of flags; a test pins migration
+    0043 (`20261119000006_catch_spot_hazards.sql`, the widened check constraint) to it, and
+    `county_spots` refuses a flag outside it. Cliff edges are downloaded as lines and measured
+    locally (30 m, like roads); quarries, landfills and airports are zone queries, one per flag, so
+    `summary()` reports `excluded_by_flag` for each. Nine Overpass queries per county, from five.
+  - ✅ Tests: rules and queries (end to end through `build_county` with canned answers: a cliff
+    flags the spot 22 m away, a quarry flags the spot inside it), real Postgres (every flag stored
+    and invisible to a user, an unknown flag refused), and a live verify check for a cliff spot.
+  - Remaining: apply 0043, refresh all 21 counties (catch-spots.yml), record the counts.
+- **T-327 · Catch-spot screen: ice, hunting season and darkness** — *Claude · S · `TODO` · deps: T-326, T-328 · review I-22 (b, c)*
+  - December–March, freshwater and coast spots show "Never go onto ice". Land spots show "Hunting
+    season: keep to paths and wear something bright" in the county's hunting months, from a table
+    in the app (one row per county, filled by T-328). "It will be dark at {time}" when sunset is
+    within an hour, computed on the device.
+  - Done when each line shows in its months or hour and not outside them (tests), in en and sv.
+- **T-328 · Hunting-season months per county** — *Director · XS · `TODO` · deps: — · review I-22 (b)*
+  - Fill the table T-327 reads from Naturvårdsverket's published hunting seasons (moose is the
+    largest: early September in most counties). One row per county, months only.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

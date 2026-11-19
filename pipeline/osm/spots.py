@@ -1,16 +1,19 @@
 """Assemble one county's catch spots from the Overpass results (T-046 · T-049). Pure."""
 
-from .rules import habitat_of, spot_from_element
+from .rules import EXCLUSION_FLAGS, habitat_of, spot_from_element
 
 
 def county_spots(
     region_id: str,
     spot_result: dict,
     near_coast: set[str],
-    in_reserve: set[str],
-    in_military: set[str],
-    near_road: set[str],
+    flagged: dict[str, set[str]],
 ) -> list[dict]:
+    """`flagged` maps each spatial exclusion flag to the ids of the spots it applies to."""
+    unknown = set(flagged) - set(EXCLUSION_FLAGS)
+    if unknown:
+        # The database would refuse the whole county's load; say which rule is unnamed instead.
+        raise ValueError(f"unknown exclusion flag(s): {', '.join(sorted(unknown))}")
     spots: dict[str, dict] = {}
     for el in spot_result.get("elements", []):
         spot = spot_from_element(el)
@@ -18,7 +21,7 @@ def county_spots(
             continue
         sid = spot["id"]
         flags = list(spot.pop("tags_flags"))
-        flags += [f for f, ids in (("reserve", in_reserve), ("military", in_military), ("major_road", near_road)) if sid in ids]
+        flags += [f for f, ids in flagged.items() if sid in ids]
         spot.update(region_id=region_id, habitat=habitat_of(spot["kind"], sid in near_coast), flags=sorted(set(flags)))
         spots[sid] = spot
     return sorted(spots.values(), key=lambda s: s["id"])

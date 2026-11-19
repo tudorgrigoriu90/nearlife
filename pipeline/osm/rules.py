@@ -15,8 +15,23 @@ covers the case that matters most: never send someone to a picnic table to catch
 
 A spot with any exclusion flag is never surfaced. The flags are private access, a major road or
 railway within 30 m, in or over water, inside a protected area or nature reserve, or inside
-military land.
+military land. T-326 (review I-22) added a cliff edge within 30 m and a quarry, landfill or airport
+around the spot: places where walking in is dangerous or not allowed.
 """
+
+# Every exclusion flag. The catch_spots check constraint lists exactly these
+# (test_the_database_accepts_exactly_the_flags_the_pipeline_writes).
+EXCLUSION_FLAGS = (
+    "private",
+    "water",
+    "major_road",
+    "reserve",
+    "military",
+    "cliff",
+    "quarry",
+    "landfill",
+    "airport",
+)
 
 # (key, value) → spot kind. Order matters only for features carrying several of these tags.
 KINDS: list[tuple[str, str, str]] = [
@@ -39,6 +54,9 @@ WATER_EDGE = {"bird_hide", "fishing", "bathing_place", "beach"}
 COAST_RADIUS_M = 300
 # Spots this close to a major road or railway are excluded (metres).
 ROAD_RADIUS_M = 30
+# Spots this close to a mapped cliff edge are excluded (metres). Cliffs are mapped as the line of
+# the top edge; a viewpoint is often right at it, which is the danger.
+CLIFF_RADIUS_M = 30
 
 PRIVATE_ACCESS = {"private", "no"}
 IN_WATER = {"pier", "breakwater", "groyne", "jetty"}

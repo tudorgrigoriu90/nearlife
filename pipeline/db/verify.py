@@ -88,6 +88,7 @@ EXPECTED: dict[str, str] = {
     "a user sees an unflagged catch spot": "ok",
     "a spot inside a nature reserve is invisible": "ok",
     "a spot near a major road is invisible": "ok",
+    "a spot beside a cliff edge is invisible": "ok",
     "a user cannot add a catch spot": "permission denied",
     # T-237 reviewer access codes: a valid code unlocks everything for that account only.
     "a wrong reviewer code unlocks nothing": "ok",
@@ -614,7 +615,8 @@ def run_catch_spot_checks(cur) -> dict[str, str]:
         "insert into public.catch_spots (id, region_id, kind, habitat, lat, lon, flags) values "
         "('zz-verify-ok', 'SWE.9_1', 'viewpoint', 'land', 56.9, 14.8, '{}'), "
         "('zz-verify-reserve', 'SWE.9_1', 'bird_hide', 'freshwater', 56.9, 14.8, '{reserve}'), "
-        "('zz-verify-road', 'SWE.9_1', 'picnic_site', 'land', 56.9, 14.8, '{major_road}')"
+        "('zz-verify-road', 'SWE.9_1', 'picnic_site', 'land', 56.9, 14.8, '{major_road}'), "
+        "('zz-verify-cliff', 'SWE.9_1', 'viewpoint', 'land', 56.9, 14.8, '{cliff}')"
     )
     cur.execute("set local role anon")
     cur.execute("select set_config('request.jwt.claims', %s, true)", (json.dumps({"role": "anon"}),))
@@ -622,6 +624,7 @@ def run_catch_spot_checks(cur) -> dict[str, str]:
         ("a user sees an unflagged catch spot", "zz-verify-ok", 1),
         ("a spot inside a nature reserve is invisible", "zz-verify-reserve", 0),
         ("a spot near a major road is invisible", "zz-verify-road", 0),
+        ("a spot beside a cliff edge is invisible", "zz-verify-cliff", 0),
     ):
         _step(cur, results, name,
               "select case when count(*) = %s then 'ok' else 'saw ' || count(*) end "

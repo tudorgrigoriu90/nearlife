@@ -8,6 +8,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from osm.counties import ISO_BY_GADM  # noqa: E402
 from osm.rules import (  # noqa: E402
+    CLIFF_RADIUS_M,
+    EXCLUSION_FLAGS,
     SURFACED,
     habitat_of,
     kind_of,
@@ -48,10 +50,28 @@ def test_tags_that_exclude_a_spot():
 
 
 def test_every_exclusion_class_is_never_surfaced():
-    # TSD §5: private, roads/rail, water hazards, protected reserves, restricted (military) land.
-    for flag in ("private", "major_road", "water", "reserve", "military"):
+    # TSD §5: private, roads/rail, water hazards, protected reserves, restricted (military) land;
+    # T-326 · review I-22: cliffs, quarries, landfills and airports.
+    for flag in EXCLUSION_FLAGS:
         assert not SURFACED([flag])
     assert SURFACED([])
+
+
+def test_the_hazard_round_of_t326_is_in_the_flag_list():
+    assert {"cliff", "quarry", "landfill", "airport"} <= set(EXCLUSION_FLAGS)
+    assert CLIFF_RADIUS_M == 30
+
+
+def test_the_database_accepts_exactly_the_flags_the_pipeline_writes():
+    # A flag the check constraint lacks would fail the load; one the pipeline lacks is dead. The
+    # latest migration that redefines the constraint is the one in force.
+    import re
+
+    migrations = sorted((Path(__file__).resolve().parents[2] / "supabase" / "migrations").glob("*.sql"))
+    defining = [m for m in migrations if re.search(r"flags <@ array\[", m.read_text(encoding="utf-8"))]
+    body = defining[-1].read_text(encoding="utf-8")
+    listed = re.findall(r"'(\w+)'", re.search(r"flags <@ array\[([^\]]*)\]", body).group(1))
+    assert sorted(listed) == sorted(EXCLUSION_FLAGS)
 
 
 def test_elements_become_spots_with_a_stable_id_and_a_point():
@@ -85,7 +105,9 @@ def test_a_county_is_assembled_with_habitat_and_every_flag():
             {"type": "node", "id": 2, "lat": 56.1, "lon": 14.1, "tags": {"tourism": "viewpoint"}},  # duplicate
         ]
     }
-    spots = county_spots("SWE.9_1", result, near_coast={"n1"}, in_reserve={"n3"}, in_military=set(), near_road={"n2"})
+    spots = county_spots(
+        "SWE.9_1", result, near_coast={"n1"}, flagged={"reserve": {"n3"}, "military": set(), "major_road": {"n2"}}
+    )
     by_id = {s["id"]: s for s in spots}
     assert len(spots) == 4
     assert by_id["n1"]["habitat"] == "coast" and by_id["n1"]["flags"] == []
@@ -98,3 +120,23 @@ def test_a_county_is_assembled_with_habitat_and_every_flag():
         "excluded_by_flag": {"major_road": 1, "reserve": 1, "private": 1},
         "shown_by_habitat": {"coast": 1},
     }
+
+
+def test_a_spot_in_several_zones_carries_each_flag_once():
+    from osm.spots import county_spots
+
+    result = {"elements": [{"type": "node", "id": 5, "lat": 56.0, "lon": 14.0, "tags": {"tourism": "viewpoint"}}]}
+    spots = county_spots("SWE.9_1", result, near_coast=set(), flagged={"quarry": {"n5"}, "cliff": {"n5"}})
+    assert spots[0]["flags"] == ["cliff", "quarry"]
+
+
+def test_county_spots_refuses_a_flag_the_database_does_not_know():
+    from osm.spots import county_spots
+
+    result = {"elements": [{"type": "node", "id": 5, "lat": 56.0, "lon": 14.0, "tags": {"tourism": "viewpoint"}}]}
+    try:
+        county_spots("SWE.9_1", result, near_coast=set(), flagged={"volcano": {"n5"}})
+    except ValueError as exc:
+        assert "volcano" in str(exc)
+    else:
+        raise AssertionError("expected an unknown flag to be refused")

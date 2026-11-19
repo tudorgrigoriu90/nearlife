@@ -178,6 +178,13 @@ makes the product usable with notifications declined or muted (screen spec in
 - **Hard exclusions (safety/liability):** private property, roads/rail, water hazards,
   protected reserves, restricted-access land. Encode as `safety_flags`; a flagged spot is
   never surfaced. This is a launch requirement, not a later patch.
+- **Hazard round (T-326 · review I-22):** a cliff edge within 30 m (`natural=cliff`, measured
+  from the line of the edge), and inside a quarry, landfill or airport (`landuse=quarry`,
+  `landuse=landfill`, `aeroway=aerodrome`). Flags `cliff`, `quarry`, `landfill`, `airport`;
+  `pipeline/osm/rules.py` `EXCLUSION_FLAGS` is the one list, pinned to the table's check
+  constraint by a test. Each flag has its own query so the build summary counts what each rule
+  removed. Seasonal dangers (ice, hunting) and darkness are shown on the catch-spot screen
+  instead of excluding spots: T-327.
 
 ### 5b. Catch minigames (per species category)
 
