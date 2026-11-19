@@ -4865,7 +4865,7 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Tests: configs 4, games 3 (no give-up in easy, still times out without), store 4, hook 4,
     Settings 2.
 
-- **T-332 · Sweden's own Red List beside the worldwide one** — *Claude · S · `IN-PROGRESS` · deps: T-263 · review I-35*
+- **T-332 · Sweden's own Red List beside the worldwide one** — *Claude · S · `DONE` · deps: T-263 · review I-35*
   - Done when the licensing doc records the decision; if permitted, a `species.redlist_se` column
     exists and the card labels both lines.
   - ✅ Licence: SLU Artdatabanken publishes the Swedish Red List 2025 on GBIF under CC0
@@ -4878,7 +4878,8 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ The card shows "Vulnerable in Sweden · Swedish Red List (SLU Artdatabanken)" on its own line
     under the worldwide one; Settings credits the list. Data deficient and absent stay silent.
   - ✅ Tests: pipeline 5, real Postgres 5, mapping 1, card 2.
-  - Remaining: apply 0044 and run the first load; record how many catalogue species got a line.
+  - ✅ Live (0044 applied; first load by `species-names.yml`, 2026-11-19): 888 catalogue species
+    carry a Swedish line: NT 453, VU 258, EN 128, CR 33, RE 16.
 
 - **T-333 · Raise coverage where it was thin** — *Claude · S · `DONE` · deps: — · review I-17 (part)*
   - Done when each listed file is at or above 85 % lines and the floors match the achieved level.
