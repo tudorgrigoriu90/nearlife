@@ -101,7 +101,7 @@ jobs:
 
       - run: pip install -r pipeline/requirements.txt
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: catch-spots*
           path: pipeline/data
