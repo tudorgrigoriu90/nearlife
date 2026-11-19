@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AppClient } from './supabase';
 
 // Link an email to an anonymous user (T-133, PRIVACY §1). Anonymous sessions survive app restarts
 // (AsyncStorage) but not reinstall or a second device. Linking an email turns the anonymous account
@@ -62,7 +62,7 @@ export async function linkEmail(gateway: AuthGateway, rawEmail: string): Promise
 
 /** supabase-js adapter for `AuthGateway`. Thin — the tested logic is in `linkEmail`. */
 export class SupabaseAuthGateway implements AuthGateway {
-  constructor(private readonly client: SupabaseClient) {}
+  constructor(private readonly client: AppClient) {}
 
   async currentIdentity(): Promise<AuthIdentity | null> {
     const {

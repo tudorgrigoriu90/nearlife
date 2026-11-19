@@ -1,3 +1,4 @@
+import type { AppClient } from './supabase';
 import type { createTranslator } from './i18n';
 import { isCommercialUseAllowed, type MediaLicense } from './species/media';
 
@@ -87,30 +88,8 @@ export function cachedSoundSource(
   };
 }
 
-/** The minimal Supabase surface the sound source uses (a fake in tests). */
-export interface SoundClient {
-  from(table: 'species_sounds'): {
-    select(columns: string): {
-      eq(
-        column: 'species_id',
-        value: string,
-      ): { maybeSingle(): PromiseLike<{ data: SoundRow | null; error: unknown }> };
-      in(
-        column: 'species_id',
-        values: string[],
-      ): {
-        not(
-          column: 'url',
-          operator: 'is',
-          value: null,
-        ): PromiseLike<{ data: SoundRow[] | null; error: unknown }>;
-      };
-    };
-  };
-}
-
 /** `species_sounds` is public-read (migration 0027), so no session is needed. */
-export function supabaseSoundSource(client: SoundClient): SoundSource {
+export function supabaseSoundSource(client: AppClient): SoundSource {
   return cachedSoundSource(
     async (speciesId) => {
       const { data, error } = await client

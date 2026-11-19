@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AppClient } from './supabase';
 import { isValidEmail, normalizeEmail } from './accountLinking';
 
 // Sign in with a linked email (T-271 · review B-07). Linking an email (T-133) promised that a
@@ -53,7 +53,7 @@ export async function verifySignInCode(
 
 /** supabase-js adapter. `shouldCreateUser: false`: signing in never makes a new account. */
 export class SupabaseSignInGateway implements SignInGateway {
-  constructor(private readonly client: SupabaseClient) {}
+  constructor(private readonly client: AppClient) {}
 
   async sendCode(email: string): Promise<void> {
     const { error } = await this.client.auth.signInWithOtp({

@@ -123,7 +123,7 @@ describe('SupabaseExportSource (T-219)', () => {
       data: [{ entitlement: 'family', product_id: 'family', active: true, changed_at: '2026-10-29T09:00:00Z' }],
       error: null,
     });
-    const source = new SupabaseExportSource(c, async () => 'u1');
+    const source = new SupabaseExportSource(c as never, async () => 'u1');
     await expect(source.purchases()).resolves.toEqual([
       { entitlement: 'family', productId: 'family', active: true, changedAt: '2026-10-29T09:00:00Z' },
     ]);
@@ -131,13 +131,13 @@ describe('SupabaseExportSource (T-219)', () => {
   });
 
   it('fails rather than export an incomplete bundle', async () => {
-    const source = new SupabaseExportSource(client({ data: null, error: { message: 'boom' } }), async () => 'u1');
+    const source = new SupabaseExportSource(client({ data: null, error: { message: 'boom' } }) as never, async () => 'u1');
     await expect(source.purchases()).rejects.toThrow('boom');
   });
 
   it('skips malformed rows', async () => {
     const c = client({ data: [{ entitlement: 7 }, { entitlement: 'full_game', product_id: null, active: true, changed_at: 't' }], error: null });
-    await expect(new SupabaseExportSource(c, async () => 'u1').purchases()).resolves.toEqual([
+    await expect(new SupabaseExportSource(c as never, async () => 'u1').purchases()).resolves.toEqual([
       { entitlement: 'full_game', productId: null, active: true, changedAt: 't' },
     ]);
   });

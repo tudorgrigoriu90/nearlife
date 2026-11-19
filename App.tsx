@@ -95,18 +95,16 @@ import { resetAnalyticsIdentity } from './lib/posthog';
 import { supabaseProbe, type ConnectivityProbe } from './lib/connectivity';
 import { useConnectivity } from './components/useConnectivity';
 import OfflineScreen from './components/OfflineScreen';
-import { supabaseSoundSource, type SoundClient, type SoundSource } from './lib/birdSound';
+import { supabaseSoundSource, type SoundSource } from './lib/birdSound';
 import { SupabaseCommunityImpactSource, type CommunityImpactSource } from './lib/communityImpact';
 import {
   SupabaseEntitlementSource,
-  type EntitlementClient,
   type EntitlementSource,
 } from './lib/entitlement';
 import { AsyncStorageEntitlementStore } from './lib/entitlementStore';
 import { AsyncStorageTravelStore } from './lib/travelStore';
 import {
   SupabaseCatchSpotSource,
-  type CatchSpotClient,
   type CatchSpotSource,
 } from './lib/catchSpots';
 import { AsyncStorageCatchSpotStore } from './lib/catchSpotStore';
@@ -124,7 +122,6 @@ import {
   exportToJson,
   householdForExport,
   SupabaseExportSource,
-  type ExportClient,
   type ExportHousehold,
   type PurchaseRecord,
   type ServerExport,
@@ -192,7 +189,7 @@ function entitlementSource(): EntitlementSource | null {
   if (entitlementSourceInstance === undefined) {
     entitlementSourceInstance = hasSupabaseConfig()
       ? new SupabaseEntitlementSource(
-          getSupabase() as unknown as EntitlementClient,
+          getSupabase(),
           ensureAnonymousSession,
         )
       : null;
@@ -225,7 +222,7 @@ function recognitionGateway(): RecognitionGateway | null {
 function catchSpotSource(): CatchSpotSource | null {
   if (catchSpotSourceInstance === undefined) {
     catchSpotSourceInstance = hasSupabaseConfig()
-      ? new SupabaseCatchSpotSource(getSupabase() as unknown as CatchSpotClient)
+      ? new SupabaseCatchSpotSource(getSupabase())
       : null;
   }
   return catchSpotSourceInstance;
@@ -263,7 +260,7 @@ let soundSourceInstance: SoundSource | null | undefined;
 function soundSource(): SoundSource | null {
   if (soundSourceInstance === undefined) {
     soundSourceInstance = hasSupabaseConfig()
-      ? supabaseSoundSource(getSupabase() as unknown as SoundClient)
+      ? supabaseSoundSource(getSupabase())
       : null;
   }
   return soundSourceInstance;
@@ -904,7 +901,7 @@ export default function App() {
     let server: ServerExport | null = null;
     if (hasSupabaseConfig()) {
       const client = getSupabase();
-      const source = new SupabaseExportSource(client as unknown as ExportClient, ensureAnonymousSession);
+      const source = new SupabaseExportSource(client, ensureAnonymousSession);
       [purchases, household, server] = await Promise.all([
         source.purchases().catch(() => {
           unavailable.push('purchases');

@@ -106,6 +106,21 @@ describe('workflow hygiene', () => {
 // refresh left new species out for a year. A second run in late August catches them before autumn
 // migration. Both are plain `schedule` events, so every schedule-gated step and the load guard
 // (gbif/load_guard.py, unconditional in supabase_load) apply to each alike.
+describe('generated database types (T-335 · review I-03)', () => {
+  it('the migrate workflow fails when lib/database.types.ts no longer matches the schema', () => {
+    const migrate = read('.github/workflows/db-migrate.yml');
+    expect(migrate).toMatch(/supabase gen types typescript --project-id/);
+    expect(migrate).toMatch(/diff -u -w -B lib\/database\.types\.ts/);
+  });
+
+  it('the app has one client, typed with the generated schema, and no client casts', () => {
+    expect(read('lib/supabase.ts')).toMatch(/createClient<Database>\(/);
+    const app = read('App.tsx');
+    expect(app).not.toMatch(/getSupabase\(\) as unknown as/);
+    expect(app).not.toMatch(/createClient\(/);
+  });
+});
+
 describe('data pipeline schedule', () => {
   const pipeline = read('.github/workflows/data-pipeline.yml');
   const crons = [...pipeline.matchAll(/- cron: "([^"]+)"/g)].map((m) => m[1].split(' '));

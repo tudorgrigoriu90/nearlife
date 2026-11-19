@@ -9,6 +9,8 @@
 // cache can only be wrong in the user's favour for the UI; the database trigger still enforces
 // the limit (T-200).
 
+import type { AppClient } from './supabase';
+
 export const FULL_GAME_ENTITLEMENT = 'full_game';
 export const FAMILY_ENTITLEMENT = 'family';
 export const ALL_REGIONS_ENTITLEMENT = 'all_regions';
@@ -72,23 +74,10 @@ export interface EntitlementSource {
   fetch(): Promise<Entitlements>;
 }
 
-type Result = { data: unknown; error: { message: string } | null };
-
-/** The slice of the supabase-js client this needs, so tests can fake it. */
-export interface EntitlementClient {
-  from(table: 'profiles' | 'entitlements'): {
-    select(columns: string): {
-      eq(column: string, value: unknown): {
-        maybeSingle(): PromiseLike<Result>;
-        eq(column: string, value: unknown): PromiseLike<Result>;
-      };
-    };
-  };
-}
-
 export class SupabaseEntitlementSource implements EntitlementSource {
   constructor(
-    private readonly client: EntitlementClient,
+    // The generated client type (T-335 · review I-03): a renamed column fails to compile here.
+    private readonly client: AppClient,
     private readonly ensureUser: () => Promise<string>,
   ) {}
 
@@ -99,10 +88,8 @@ export class SupabaseEntitlementSource implements EntitlementSource {
     // RLS already limits this to the user's own rows; the filter states the intent.
     const rows = await this.client.from('entitlements').select('entitlement').eq('user_id', userId).eq('active', true);
     if (rows.error) throw new Error(`entitlement read failed: ${rows.error.message}`);
-    const ids = Array.isArray(rows.data)
-      ? rows.data.map((r) => (r as { entitlement?: unknown }).entitlement).filter((x): x is string => typeof x === 'string')
-      : [];
-    const fullGame = (profile.data as { full_game?: unknown } | null)?.full_game === true;
+    const ids = (rows.data ?? []).map((r) => r.entitlement);
+    const fullGame = profile.data?.full_game === true;
     return resolveEntitlements(ids, fullGame);
   }
 }

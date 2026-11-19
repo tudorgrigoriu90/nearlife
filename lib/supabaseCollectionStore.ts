@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AppClient } from './supabase';
 import type { CollectionRecord, HelpKind } from './collection';
 import {
   applyCaught,
@@ -106,7 +106,7 @@ export class SupabaseCollectionStore implements CollectionStore {
 
 /** supabase-js adapter for `CollectionGateway`. RLS scopes every query to the signed-in user. */
 export class SupabaseCollectionGateway implements CollectionGateway {
-  constructor(private readonly client: SupabaseClient) {}
+  constructor(private readonly client: AppClient) {}
 
   async selectAll(userId: string): Promise<CollectionRow[]> {
     const { data, error } = await this.client

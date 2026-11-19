@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AppClient } from './supabase';
 
 // Species recognised in the "I saw…" quiz, kept with the account (T-299 · review B-31). They earn
 // the "recognised" badges and lived only on the phone, so a reinstall lost them. The phone keeps
@@ -25,7 +25,7 @@ export async function syncRecognitions(
 }
 
 export class SupabaseRecognitionGateway implements RecognitionGateway {
-  constructor(private readonly client: SupabaseClient) {}
+  constructor(private readonly client: AppClient) {}
 
   async list(): Promise<string[]> {
     const { data, error } = await this.client.from('recognitions').select('species_id');

@@ -5,7 +5,6 @@ import {
   nearestSpotFor,
   parseSpots,
   type CatchSpot,
-  type CatchSpotClient,
 } from './catchSpots';
 
 const spot = (id: string, habitat: CatchSpot['habitat'], lat: number, lon: number): CatchSpot => ({
@@ -83,7 +82,7 @@ describe('SupabaseCatchSpotSource', () => {
           }),
         }),
       }),
-    } as unknown as CatchSpotClient;
+    } as never;
     const spots = await new SupabaseCatchSpotSource(client).forRegion('SWE.9_1');
     expect(spots).toHaveLength(1001);
     expect(range.mock.calls).toEqual([
@@ -97,7 +96,7 @@ describe('SupabaseCatchSpotSource.habitatsOf', () => {
   function client(data: unknown) {
     return {
       from: () => ({ select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({ data, error: null }) }) }) }),
-    } as unknown as CatchSpotClient;
+    } as never;
   }
 
   it('reads the species’ habitats', async () => {

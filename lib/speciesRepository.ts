@@ -1,7 +1,7 @@
 import { asTitleName } from './species/displayName';
 import { parseHabitats } from './catchSpots';
 import { GROUP_BY_TAXON } from './species/group';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AppClient } from './supabase';
 import type { Locale } from './i18n';
 import type { ContentLocale } from './i18n/contentLocale';
 import type { ThumbRow } from './offlinePack';
@@ -377,6 +377,17 @@ async function readAllPages<T>(page: (from: number, to: number) => Page<T>, what
   }
 }
 
+/**
+ * The one narrowing from the generated row type to the app's (T-335 · review I-03). The database
+ * types text columns as `string`; the app's rows name the values it understands (a category, a
+ * rarity), and the converters (`speciesRowToSpecies`, `contentRowToContent`) handle anything else.
+ */
+function asRows<T>(rows: (Record<string, unknown> & { error?: never })[]): T[] {
+  // A select naming a column the schema lacks types its rows as `{ error: true } & String`, which
+  // this parameter refuses: the misspelling fails to compile instead of reading nulls at run time.
+  return rows as unknown as T[];
+}
+
 async function readInChunks<T>(ids: string[], read: (chunk: string[]) => Promise<T[]>): Promise<T[]> {
   const out: T[] = [];
   for (let i = 0; i < ids.length; i += IN_CHUNK) out.push(...(await read(ids.slice(i, i + IN_CHUNK))));
@@ -385,7 +396,7 @@ async function readInChunks<T>(ids: string[], read: (chunk: string[]) => Promise
 
 /** supabase-js adapter for `SpeciesGateway` (reads are public via RLS). */
 export class SupabaseSpeciesGateway implements SpeciesGateway {
-  constructor(private readonly client: SupabaseClient) {}
+  constructor(private readonly client: AppClient) {}
 
   /** The species data version the phone's county cache is checked against (T-275). */
   async fetchDataVersion(): Promise<string> {
@@ -421,10 +432,10 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
 
   async fetchSpeciesByIds(ids: string[]): Promise<SpeciesRow[]> {
     return readInChunks(ids, (chunk) =>
-      readAllPages<SpeciesRow>(
+      readAllPages(
         (from, to) => this.client.from('species').select(SPECIES_COLUMNS).in('id', chunk).order('id').range(from, to),
         'species',
-      ),
+      ).then(asRows<SpeciesRow>),
     );
   }
 
@@ -462,7 +473,7 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
   /** Full card text for many species at once: the offline pack (T-256). */
   async fetchFullContent(ids: string[], locales: string[]): Promise<SpeciesContentRow[]> {
     return readInChunks(ids, (chunk) =>
-      readAllPages<SpeciesContentRow>(
+      readAllPages(
         (from, to) =>
           this.client
             .from('species_content')
@@ -473,7 +484,7 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
             .order('locale')
             .range(from, to),
         'species_content',
-      ),
+      ).then(asRows<SpeciesContentRow>),
     );
   }
 
@@ -496,10 +507,10 @@ export class SupabaseSpeciesGateway implements SpeciesGateway {
 
   async fetchRegionCatalogue(regionId: string, locale: string): Promise<CatalogueRow[]> {
     // The function orders by (occurrences desc, id) — a total order, so pages never overlap.
-    return readAllPages<CatalogueRow>(
+    return readAllPages(
       (from, to) => this.client.rpc('region_catalogue', { region: regionId, loc: locale }).range(from, to),
       'region_catalogue',
-    );
+    ).then(asRows<CatalogueRow>);
   }
 }
 

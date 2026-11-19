@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AppClient } from './supabase';
 
 // "Report a mistake" (T-293 · review I-32). 10,000 species ship in 38 languages without
 // per-species review, so a user who sees a wrong name, photo, text or season can say so. Rows go to
@@ -39,7 +39,7 @@ export async function sendContentReport(
 }
 
 export class SupabaseReportGateway implements ReportGateway {
-  constructor(private readonly client: SupabaseClient) {}
+  constructor(private readonly client: AppClient) {}
 
   async insert(report: ContentReport): Promise<void> {
     // No user id: the column defaults to auth.uid() and users may not set it.

@@ -116,6 +116,15 @@ trigger does for catches), and `home_region` settable once (plus F-09's yearly m
 
 ---
 
+**Schema types in the app (T-335 · review I-03).** `lib/database.types.ts` is generated
+(`supabase gen types typescript`) and types the app's one client (`createClient<Database>` in
+`lib/supabase.ts`, exported as `AppClient`). Every gateway takes `AppClient`, so a select naming a
+column the schema lacks fails to compile. The app's row interfaces (`SpeciesRow`, `CatalogueRow`…)
+stay: they name the values the app understands (a category, a rarity) where the database says
+`text`, and `asRows` in `speciesRepository.ts` is the one place generated rows are narrowed to them,
+refusing an error-typed row. `db-migrate.yml` regenerates the types after `apply` and `verify` and
+fails when the committed file differs. Edge Functions (Deno) keep their own untyped service client.
+
 ## 4. Notification engine (the heart)
 
 Runs server-side on a schedule (`pg_cron` → Edge Function). For each due user:

@@ -4897,6 +4897,23 @@ document until it is started, when it takes the next free `T-###`.
     spent allowance, a notification tap over an open sheet, account deletion, sign-in) until App is
     at 85 % lines, then raise the floors again.
 
+- **T-335 · One Supabase client with generated types** — *Claude · M · `DONE` · deps: T-308 · review I-03*
+  - Done when `createClient` is called once; no `as unknown as` cast remains for a Supabase client;
+    CI fails when the generated file is stale.
+  - ✅ `lib/database.types.ts` generated from the live project; `getSupabase()` returns
+    `AppClient = SupabaseClient<Database>`. All four casts in App are gone: the catch-spot, sound,
+    export and entitlement sources and the eight gateways that took an untyped client now take
+    `AppClient`, so their selects are checked against the schema (shown: a misspelled column fails
+    to compile). Their narrow hand-written client interfaces were deleted; the fakes in tests are
+    cast at the call instead.
+  - ✅ `db-migrate.yml` regenerates the types after `apply` and `verify` and fails on any difference;
+    `__tests__/ciGate.test.js` pins the step and the cast-free App.
+  - Decided: the hand-written row interfaces stay rather than be deleted. The database types text
+    columns as `string`; the app's rows name the values it understands, and `asRows` narrows to them
+    in one place, refusing error-typed rows (TSD §3). Learned: a union of two tables in a narrow
+    client interface made TypeScript give up comparing it with the generated client ("excessively
+    deep"), which is why the narrow interfaces went rather than staying beside the types.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

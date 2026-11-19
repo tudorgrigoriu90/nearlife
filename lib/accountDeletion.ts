@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AppClient } from './supabase';
 
 // Account + data deletion (T-093 · PRIVACY §2, GDPR right to erasure · USER-FLOWS §9). Reachable
 // from Settings at all times (invariant #6). The erase itself runs server-side: a Supabase Edge
@@ -46,7 +46,7 @@ export async function deleteAccount(gateway: DeletionGateway): Promise<DeleteRes
 
 /** supabase-js adapter for `DeletionGateway`. Thin — the tested logic is in `deleteAccount`. */
 export class SupabaseDeletionGateway implements DeletionGateway {
-  constructor(private readonly client: SupabaseClient) {}
+  constructor(private readonly client: AppClient) {}
 
   async currentUserId(): Promise<string | null> {
     const {

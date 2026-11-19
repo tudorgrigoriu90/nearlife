@@ -2,11 +2,11 @@ import {
   FULL_GAME_ENTITLEMENT,
   NO_ENTITLEMENTS,
   SupabaseEntitlementSource,
-  type EntitlementClient,
   parseEntitlements,
   resolveEntitlements,
   serializeEntitlements,
 } from './entitlement';
+import type { AppClient } from './supabase';
 
 describe('resolveEntitlements', () => {
   it('is locked with no active entitlements', () => {
@@ -72,7 +72,7 @@ describe('SupabaseEntitlementSource', () => {
       });
       return chain;
     });
-    return { from } as unknown as EntitlementClient;
+    return { from } as unknown as AppClient;
   }
 
   it('combines the derived profile flag with the active entitlement rows', async () => {

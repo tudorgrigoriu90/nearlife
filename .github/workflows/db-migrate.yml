@@ -80,3 +80,23 @@ jobs:
           else
             python -m db.migrate "$MODE" $VERSIONS
           fi
+
+      # T-335 · review I-03: the app's Supabase client is typed with lib/database.types.ts, so a
+      # renamed column fails to compile. After a schema change the file must follow, or the types
+      # describe a database that no longer exists: regenerate and compare, and fail when they differ.
+      - uses: supabase/setup-cli@v1
+        if: ${{ inputs.mode == 'apply' || inputs.mode == 'verify' }}
+        with:
+          version: 3.2.0
+
+      - name: Generated types match the live schema (T-335)
+        if: ${{ inputs.mode == 'apply' || inputs.mode == 'verify' }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: subjdoiicfmiimtvlzsg
+        run: |
+          supabase gen types typescript --project-id "$PROJECT_REF" > "$RUNNER_TEMP/database.types.ts"
+          if ! diff -u -w -B lib/database.types.ts "$RUNNER_TEMP/database.types.ts"; then
+            echo "::error::lib/database.types.ts is stale: regenerate it (supabase gen types typescript) and commit"
+            exit 1
+          fi

@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AppClient } from './supabase';
 
 // Push device registration (T-201). Keeps the server's `push_devices` rows in step with the
 // user's notification consent: a row exists exactly while consent is on, because the sender
@@ -60,7 +60,7 @@ export async function syncPushRegistration(input: SyncInput): Promise<SyncOutcom
 }
 
 export class SupabasePushGateway implements PushRegistrationGateway {
-  constructor(private readonly client: SupabaseClient) {}
+  constructor(private readonly client: AppClient) {}
 
   async upsertDevice(userId: string, device: { token: string; platform: Platform; locale: string }) {
     const { error } = await this.client.from('push_devices').upsert(

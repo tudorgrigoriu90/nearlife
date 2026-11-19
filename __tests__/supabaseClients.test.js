@@ -17,8 +17,10 @@ const sources = [...files(join(ROOT, 'lib')), ...files(join(ROOT, 'components'))
 
 describe('Supabase clients', () => {
   it('createClient is called from lib/supabase.ts only (one client, one auth session)', () => {
+    // `createClient<Database>(` counts too (T-335); the generated types file only names it in a comment.
     const callers = sources
-      .filter((f) => /\bcreateClient\(/.test(readFileSync(f, 'utf8')))
+      .filter((f) => !f.endsWith('database.types.ts'))
+      .filter((f) => /\bcreateClient(<[^>]*>)?\(/.test(readFileSync(f, 'utf8')))
       .map((f) => relative(ROOT, f));
     expect(callers).toEqual(['lib/supabase.ts']);
   });

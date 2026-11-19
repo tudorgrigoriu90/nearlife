@@ -85,7 +85,7 @@ describe('supabaseSoundSource', () => {
 
   it('reads the one row for the species from species_sounds', async () => {
     const fake = clientWith({ data: row, error: null });
-    const sound = await supabaseSoundSource(fake.client).soundFor('gbif:1');
+    const sound = await supabaseSoundSource(fake.client as never).soundFor('gbif:1');
     expect(fake.from).toHaveBeenCalledWith('species_sounds');
     expect(fake.eq).toHaveBeenCalledWith('species_id', 'gbif:1');
     expect(sound?.url).toBe(row.url);
@@ -93,7 +93,7 @@ describe('supabaseSoundSource', () => {
 
   it('treats an error as "not now", not as "no recording"', async () => {
     const fake = clientWith({ data: null, error: new Error('down') });
-    expect(await supabaseSoundSource(fake.client).soundFor('gbif:1')).toBeUndefined();
+    expect(await supabaseSoundSource(fake.client as never).soundFor('gbif:1')).toBeUndefined();
   });
 });
 

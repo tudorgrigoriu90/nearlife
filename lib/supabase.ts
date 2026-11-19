@@ -1,6 +1,7 @@
 import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from './database.types';
 import { getSupabaseConfig } from './supabaseConfig';
 
 // Supabase client (T-129, session persistence T-027). Created lazily so importing this module
@@ -9,12 +10,15 @@ import { getSupabaseConfig } from './supabaseConfig';
 // persisted in AsyncStorage and auto-refreshed, so a signed-in (anonymous) user survives app
 // restarts; `detectSessionInUrl` is off since there is no URL to parse on native.
 
-let client: SupabaseClient | null = null;
+/** The app's client, typed with the generated schema (T-335 · review I-03). */
+export type AppClient = SupabaseClient<Database>;
 
-export function getSupabase(): SupabaseClient {
+let client: AppClient | null = null;
+
+export function getSupabase(): AppClient {
   if (client === null) {
     const { url, publishableKey } = getSupabaseConfig();
-    client = createClient(url, publishableKey, {
+    client = createClient<Database>(url, publishableKey, {
       auth: {
         storage: AsyncStorage,
         autoRefreshToken: true,

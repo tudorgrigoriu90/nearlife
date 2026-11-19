@@ -1,3 +1,4 @@
+import type { AppClient } from './supabase';
 import type { CollectionRecord } from './collection';
 import type { ConsentState } from './consent';
 import type { Household } from './family';
@@ -159,26 +160,15 @@ export function buildDataExport(input: {
   };
 }
 
-type Result = { data: unknown; error: { message: string } | null };
-
-/** The slice of the supabase-js client this needs, so tests can fake it. */
-export interface ExportClient {
-  from(table: 'entitlements'): {
-    select(columns: string): { eq(column: string, value: unknown): PromiseLike<Result> };
-  };
-  rpc?(fn: 'my_data_export'): PromiseLike<Result>;
-}
-
 export class SupabaseExportSource {
   constructor(
-    private readonly client: ExportClient,
+    private readonly client: AppClient,
     private readonly ensureUser: () => Promise<string>,
   ) {}
 
   /** Everything else the server keeps about the user, in one call (T-280). */
   async server(): Promise<ServerExport> {
     await this.ensureUser();
-    if (!this.client.rpc) throw new Error('no rpc');
     const { data, error } = await this.client.rpc('my_data_export');
     if (error) throw new Error(`export read failed: ${error.message}`);
     const d = (data ?? {}) as Partial<ServerExport>;

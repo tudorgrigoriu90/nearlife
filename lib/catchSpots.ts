@@ -1,3 +1,4 @@
+import type { AppClient } from './supabase';
 import {
   DEFAULT_CATCH_RANGE_M,
   haversineMeters,
@@ -123,24 +124,11 @@ export interface CatchSpotSource {
   habitatsOf(speciesId: string): Promise<SpotHabitat[] | null>;
 }
 
-type Page = PromiseLike<{ data: unknown; error: { message: string } | null }>;
-
-/** The slice of the supabase-js client this needs, so tests can fake it. */
-export interface CatchSpotClient {
-  from(table: 'catch_spots' | 'species'): {
-    select(columns: string): {
-      eq(column: string, value: string): {
-        order(column: string): { range(from: number, to: number): Page };
-        maybeSingle(): Page;
-      };
-    };
-  };
-}
-
 const PAGE = 1000; // PostgREST's row cap per request
 
 export class SupabaseCatchSpotSource implements CatchSpotSource {
-  constructor(private readonly client: CatchSpotClient) {}
+  // The generated client type (T-335 · review I-03): a renamed column fails to compile here.
+  constructor(private readonly client: AppClient) {}
 
   async forRegion(regionId: string): Promise<CatchSpot[]> {
     const all: CatchSpot[] = [];
@@ -153,7 +141,7 @@ export class SupabaseCatchSpotSource implements CatchSpotSource {
         .order('id')
         .range(from, from + PAGE - 1);
       if (error) throw new Error(`catch spots read failed: ${error.message}`);
-      const rows = Array.isArray(data) ? data : [];
+      const rows = data ?? [];
       all.push(...parseSpots(rows));
       if (rows.length < PAGE) return all;
     }
@@ -162,6 +150,6 @@ export class SupabaseCatchSpotSource implements CatchSpotSource {
   async habitatsOf(speciesId: string): Promise<SpotHabitat[] | null> {
     const { data, error } = await this.client.from('species').select('catch_habitats').eq('id', speciesId).maybeSingle();
     if (error) throw new Error(`species habitats read failed: ${error.message}`);
-    return parseHabitats((data as { catch_habitats?: unknown } | null)?.catch_habitats);
+    return parseHabitats(data?.catch_habitats);
   }
 }
