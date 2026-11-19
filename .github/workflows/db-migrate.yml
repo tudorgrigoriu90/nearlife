@@ -84,7 +84,7 @@ jobs:
       # T-335 · review I-03: the app's Supabase client is typed with lib/database.types.ts, so a
       # renamed column fails to compile. After a schema change the file must follow, or the types
       # describe a database that no longer exists: regenerate and compare, and fail when they differ.
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         if: ${{ inputs.mode == 'apply' || inputs.mode == 'verify' }}
         with:
           version: 3.2.0

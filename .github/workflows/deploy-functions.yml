@@ -77,7 +77,7 @@ jobs:
 
       # Pinned (T-303): a new CLI changes deploy behaviour without notice (T-206 met one that began
       # asking for confirmation). Raise it deliberately.
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         with:
           version: 3.2.0
 
