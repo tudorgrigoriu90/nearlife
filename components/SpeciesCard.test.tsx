@@ -352,3 +352,24 @@ describe('SpeciesCard pledge follow-through', () => {
     expect(screen.queryByText(`✓ ${tr('card.markDone')}`)).toBeNull();
   });
 });
+
+// T-347 · review F-07: notes belong to sightings, so only a spotted species offers them.
+describe('SpeciesCard field notes', () => {
+  const owl = KRONOBERG_SPECIES[0];
+  const content = contentFor(owl.id, 'en')!;
+  const tr = createTranslator('en');
+
+  it('offers notes on a spotted species', async () => {
+    await render(
+      <SpeciesCard species={owl} content={content} locale="en" tier={{ spotted: true, caught: false, helped: false }} onAddNote={() => true} />,
+    );
+    expect(screen.getByText(`✎ ${tr('notes.add')}`)).toBeTruthy();
+  });
+
+  it('not before it is spotted', async () => {
+    await render(
+      <SpeciesCard species={owl} content={content} locale="en" tier={{ spotted: false, caught: false, helped: false }} onAddNote={() => true} />,
+    );
+    expect(screen.queryByTestId('field-notes')).toBeNull();
+  });
+});

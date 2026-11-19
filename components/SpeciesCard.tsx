@@ -24,6 +24,8 @@ import { READ_ALOUD_ENABLED } from '../lib/readAloud';
 import { buildShareMessage } from '../lib/shareSpecies';
 import type { SpeciesContent } from '../lib/species/content';
 import type { IucnStatus, LegalStatus, RedlistSeStatus, Month, Species } from '../lib/species/types';
+import FieldNotes from './FieldNotes';
+import type { FieldNote } from '../lib/fieldNotes';
 import { INVASIVE_REPORT_URL } from '../lib/legal';
 import DualText from './DualText';
 import SpeciesHero from './SpeciesHero';
@@ -62,6 +64,8 @@ export default function SpeciesCard({
   backAround,
   onPledge,
   onMarkDone,
+  notes = [],
+  onAddNote,
   nearbyNote,
   soundSource,
   county = null,
@@ -105,6 +109,9 @@ export default function SpeciesCard({
   onPledge?: (species: Species, kind: HelpKind) => void;
   /** Mark the pledge as done (T-344 · review F-08); honour system, as the pledge. */
   onMarkDone?: (species: Species) => void;
+  /** This species' field notes and how to add one (T-347); shown once the species is spotted. */
+  notes?: FieldNote[];
+  onAddNote?: (date: string, text: string) => boolean;
   /** Small caption under the find-nearby CTA — e.g. the free-catch counter (T-034). */
   nearbyNote?: string;
   /** Where a bird's recording comes from (T-246). Absent: no song button. Playable with the Full
@@ -340,6 +347,7 @@ export default function SpeciesCard({
             ) : record?.helpedKind === 'protect' ? (
               <PledgedLine record={record} species={species} tr={tr} onMarkDone={onMarkDone} />
             ) : null}
+            {tier.spotted && onAddNote ? <FieldNotes locale={locale} notes={notes} onAdd={onAddNote} /> : null}
             {adviceScope(species.id) === 'group' ? (
               <Text style={styles.groupAdvice}>
                 {tr('card.groupAdvice', {

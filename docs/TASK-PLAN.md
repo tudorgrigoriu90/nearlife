@@ -5022,6 +5022,18 @@ document until it is started, when it takes the next free `T-###`.
   - The review lists it only because it is the basis of "the same almanac on phone and tablet";
     it is the same change as B-07, built in T-271. No separate work.
 
+- **T-347 · Field notes on a sighting** — *Claude · M · `DONE` · deps: — · review F-07 (text)*
+  - Done when notes survive restarts, account deletion removes them, and the export lists them.
+  - ✅ `lib/fieldNotes.ts` (pure: add, list, parse; at most 1,000 characters, a YYYY-MM-DD date,
+    today by default) and `lib/fieldNotesStore.ts` (`nearby.notes.v1`, so `eraseDevice` removes it
+    by prefix; App also clears the notes in memory). A spotted species' card shows "Your notes" and
+    "Add a note"; the editor says notes stay on the phone and no place is attached. The export's
+    device section lists them as text. Tests: model 5, component 3, hook 2, card 2.
+- **T-348 · Photos on field notes** — *Claude + Director · S · `TODO` · deps: T-347 · review F-07 (photos)*
+  - An optional photo from the camera or gallery, kept on the phone and exported as a file name.
+    Needs `expo-image-picker` (free, Expo's own; the reason to record when adding it) and a new
+    build to reach phones.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

@@ -61,6 +61,9 @@ import {
 } from './lib/dualLanguage';
 import { AsyncStorageDualLanguageStore } from './lib/dualLanguageStore';
 import { AsyncStorageEasyModeStore } from './lib/easyModeStore';
+import { useFieldNotes } from './components/useFieldNotes';
+import { notesFor } from './lib/fieldNotes';
+import { AsyncStorageFieldNotesStore } from './lib/fieldNotesStore';
 import { useNotifPrefs } from './components/useNotifPrefs';
 import { SupabaseNotifPrefsGateway } from './lib/notifPrefsGateway';
 import { useEasyMode } from './components/useEasyMode';
@@ -298,6 +301,9 @@ const DUAL_LANGUAGE_STORE = new AsyncStorageDualLanguageStore();
 // Easy catching (T-331) — the person's choice, else the system's reduced-motion setting.
 const EASY_MODE_STORE = new AsyncStorageEasyModeStore();
 
+// Field notes on sightings (T-347) — on the phone only, erased with the account.
+const FIELD_NOTES_STORE = new AsyncStorageFieldNotesStore();
+
 // Prototype app shell (E2). Onboarding (T-022+) runs first; once complete, a minimal tab
 // switcher between the "This week" pull surface (T-117) and the Almanac grid (T-025); tapping a
 // species opens its card (T-026). No navigation library yet — local state is enough for the
@@ -443,6 +449,7 @@ export default function App() {
   // The phone's other language, offered at onboarding (T-343 · review F-05).
   const motherTongue = useMemo(() => motherTongueOffer(deviceLanguageTags()), []);
   const notifChoices = useNotifPrefs(NOTIF_PREFS_GATEWAY, consent.notifications);
+  const fieldNotes = useFieldNotes(FIELD_NOTES_STORE);
   // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
   const [analyticsLocked, setAnalyticsLocked] = useState(false);
   const track = useTracker(consent);
@@ -946,6 +953,8 @@ export default function App() {
       },
       agePath: onboardingRecord?.agePath ?? null,
       badges: rememberedBadges,
+      // Field notes, as text (T-347); no place is ever attached.
+      notes: fieldNotes.notes,
     };
     const bundle = buildDataExport({
       exportedAt: new Date().toISOString(),
@@ -1026,6 +1035,7 @@ export default function App() {
     setHometown(null);
     setRecognized(new Set());
     setRememberedBadges({});
+    fieldNotes.reset();
     setOnboarded(false);
   };
 
@@ -1548,6 +1558,8 @@ export default function App() {
                 }
           }
           onMarkDone={(species) => collection.markHelpedDone(species.id)}
+          notes={notesFor(fieldNotes.notes, selected.id)}
+          onAddNote={(date, text) => fieldNotes.add(selected.id, date, text)}
           onPledge={(species, kind) => {
             // Helped tier: one-tap honor-system pledge (GDD §5) → mark Helped + confirm.
             collection.help(species.id, kind);
