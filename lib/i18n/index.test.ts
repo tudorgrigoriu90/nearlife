@@ -2,8 +2,10 @@ import {
   ALPHA_LOCALES,
   BASE_LOCALE,
   createTranslator,
+  en,
   hasCatalog,
   SUPPORTED_LOCALES,
+  sv,
   t,
 } from './index';
 
@@ -45,5 +47,31 @@ describe('i18n runtime', () => {
   it('createTranslator binds a locale', () => {
     const tr = createTranslator('sv');
     expect(tr('thisWeek.title')).toBe('Denna vecka');
+  });
+});
+
+// T-309 · review B-42: plural forms for every string that takes {count}.
+describe('plural forms', () => {
+  it('"1 free catch", "2 free catches", in both languages', () => {
+    expect(t('en', 'catch.remaining', { count: 1 })).toBe('1 free catch left this season');
+    expect(t('en', 'catch.remaining', { count: 2 })).toBe('2 free catches left this season');
+    expect(t('sv', 'catch.remaining', { count: 1 })).toBe('1 gratis fångst kvar denna säsong');
+    expect(t('sv', 'catch.remaining', { count: 0 })).toBe('0 gratis fångster kvar denna säsong');
+  });
+
+  it('a count already formatted as text still picks its form', () => {
+    expect(t('en', 'county.records', { count: '1', county: 'Kronoberg' })).toBe('1 record in Kronoberg.');
+    expect(t('en', 'county.records', { count: '1 250', county: 'Kronoberg' })).toBe('1 250 records in Kronoberg.');
+  });
+
+  it('every key with {count} has a .one form in English and Swedish', () => {
+    const counted = (Object.keys(en) as string[]).filter(
+      (k) => !k.endsWith('.one') && (en as Record<string, string>)[k].includes('{count}'),
+    );
+    expect(counted.length).toBeGreaterThan(10);
+    for (const k of counted) {
+      expect((en as Record<string, string>)[`${k}.one`]).toBeDefined();
+      expect((sv as Record<string, string>)[`${k}.one`]).toBeDefined();
+    }
   });
 });

@@ -20,6 +20,7 @@ export const en = {
     'region.kronoberg': 'Kronoberg',
     'thisWeek.title': 'This week',
     'thisWeek.subtitle': '{region} · {count} species active in your area this season',
+    'thisWeek.subtitle.one': '{region} · {count} species active in your area this season',
     'thisWeek.new': 'NEW',
     'thisWeek.loadError': 'This county’s species could not be loaded. Check your connection.',
     'thisWeek.retry': 'Try again',
@@ -91,8 +92,11 @@ export const en = {
     'county.visitor.winter': 'A winter visitor.',
     'county.now': 'Now is its best time here.',
     'county.rank': 'No. {rank} of {total} {group} recorded in {county}: {count} records.',
+    'county.rank.one': 'No. {rank} of {total} {group} recorded in {county}: {count} record.',
     'county.uncommon': 'Uncommon here: only {count} records in {county}.',
+    'county.uncommon.one': 'Uncommon here: only {count} record in {county}.',
     'county.records': '{count} records in {county}.',
+    'county.records.one': '{count} record in {county}.',
     'county.source': 'From records shared on GBIF. They show where people looked, not where every animal is.',
     'county.group.bird': 'birds',
     'county.group.mammal': 'mammals',
@@ -110,6 +114,7 @@ export const en = {
     'offline.savingText': 'Saving species and cards…',
     'offline.savingPhotos': 'Saving photos {done} of {total}…',
     'offline.saved': 'Saved {date} · {count} species · {mb} MB',
+    'offline.saved.one': 'Saved {date} · {count} species · {mb} MB',
     'offline.autoNote': 'Updates itself once a week when you are online.',
     'offline.update': 'Update now',
     'offline.remove': 'Remove from phone',
@@ -199,6 +204,7 @@ export const en = {
     'minigame.plant.capture': 'Frame it',
     // Catch flow + free-catch counter (T-034)
     'catch.remaining': '{count} free catches left this season',
+    'catch.remaining.one': '{count} free catch left this season',
     'catch.caught': 'You caught {name}!',
     'catch.continue': 'Keep exploring',
     'catch.prime': 'Prime catch: found in its season',
@@ -329,13 +335,20 @@ export const en = {
     'badges.progress': '{earned} of {total} earned',
     'badges.empty': 'No badges yet — spot and help species to earn your first.',
     'badge.groupTier': '{count} {category} spotted',
+    'badge.groupTier.one': '{count} {category} spotted',
     'badge.groupAll': 'All {count} {category} spotted',
+    'badge.groupAll.one': 'All {count} {category} spotted',
     'badge.seasonOpener': 'First spot of the season',
     'badge.progressOf': '{have} of {count}',
+    'badge.progressOf.one': '{have} of {count}',
     'badge.spotted': '{count} species spotted',
+    'badge.spotted.one': '{count} species spotted',
     'badge.helped': 'Helped {count} species',
+    'badge.helped.one': 'Helped {count} species',
     'badge.recognized': 'Recognised {count} species in the quiz',
+    'badge.recognized.one': 'Recognised {count} species in the quiz',
     'badge.recognizedGroup': 'Recognised {count} {category}',
+    'badge.recognizedGroup.one': 'Recognised {count} {category}',
     // Impact (T-081)
     'catchSpot.title': 'Catch {species}',
     'catchSpot.finding': 'Finding the nearest place to catch it…',
@@ -444,11 +457,12 @@ export const en = {
     'impact.communityTotals': 'This season, {helpers} people pledged {pledges} actions for wildlife: {give} give, {protect} protect.',
 };
 // Swedish — full coverage for the alpha. Reviewed before shipping (INTERNATIONALIZATION.md).
-const sv = {
+export const sv = {
     'app.name': 'Nearby',
     'region.kronoberg': 'Kronoberg',
     'thisWeek.title': 'Denna vecka',
     'thisWeek.subtitle': '{region} · {count} arter aktiva i ditt område den här säsongen',
+    'thisWeek.subtitle.one': '{region} · {count} art aktiv i ditt område den här säsongen',
     'thisWeek.new': 'NY',
     'thisWeek.loadError': 'Länets arter kunde inte laddas. Kontrollera anslutningen.',
     'thisWeek.retry': 'Försök igen',
@@ -520,8 +534,11 @@ const sv = {
     'county.visitor.winter': 'En vintergäst.',
     'county.now': 'Nu är dess bästa tid här.',
     'county.rank': 'Nr {rank} av {total} {group} i {county}: {count} fynd.',
+    'county.rank.one': 'Nr {rank} av {total} {group} i {county}: {count} fynd.',
     'county.uncommon': 'Ovanlig här: bara {count} fynd i {county}.',
+    'county.uncommon.one': 'Ovanlig här: bara {count} fynd i {county}.',
     'county.records': '{count} fynd i {county}.',
+    'county.records.one': '{count} fynd i {county}.',
     'county.source': 'Från fynd delade på GBIF. De visar var folk har letat, inte var varje djur finns.',
     'county.group.bird': 'fåglar',
     'county.group.mammal': 'däggdjur',
@@ -539,6 +556,7 @@ const sv = {
     'offline.savingText': 'Sparar arter och kort…',
     'offline.savingPhotos': 'Sparar bilder {done} av {total}…',
     'offline.saved': 'Sparat {date} · {count} arter · {mb} MB',
+    'offline.saved.one': 'Sparat {date} · {count} art · {mb} MB',
     'offline.autoNote': 'Uppdateras av sig själv en gång i veckan när du har nät.',
     'offline.update': 'Uppdatera nu',
     'offline.remove': 'Ta bort från telefonen',
@@ -626,6 +644,7 @@ const sv = {
     'minigame.plant.capture': 'Rama in',
     // Catch flow + free-catch counter (T-034)
     'catch.remaining': '{count} gratis fångster kvar denna säsong',
+    'catch.remaining.one': '{count} gratis fångst kvar denna säsong',
     'catch.caught': 'Du fångade {name}!',
     'catch.continue': 'Fortsätt utforska',
     'catch.prime': 'Toppfångst: hittad under sin säsong',
@@ -756,13 +775,20 @@ const sv = {
     'badges.progress': '{earned} av {total} intjänade',
     'badges.empty': 'Inga märken än – hitta och hjälp arter för att tjäna ditt första.',
     'badge.groupTier': '{count} {category} sedda',
+    'badge.groupTier.one': '{count} {category} sedda',
     'badge.groupAll': 'Alla {count} {category} sedda',
+    'badge.groupAll.one': 'Alla {count} {category} sedda',
     'badge.seasonOpener': 'Säsongens första fynd',
     'badge.progressOf': '{have} av {count}',
+    'badge.progressOf.one': '{have} av {count}',
     'badge.spotted': '{count} arter sedda',
+    'badge.spotted.one': '{count} art sedd',
     'badge.helped': 'Hjälpt {count} arter',
+    'badge.helped.one': 'Hjälpt {count} art',
     'badge.recognized': 'Kände igen {count} arter i quizet',
+    'badge.recognized.one': 'Kände igen {count} art i quizet',
     'badge.recognizedGroup': 'Kände igen {count} {category}',
+    'badge.recognizedGroup.one': 'Kände igen {count} {category}',
     // Impact (T-081)
     'catchSpot.title': 'Fånga {species}',
     'catchSpot.finding': 'Letar efter närmaste platsen att fånga den…',
@@ -881,8 +907,28 @@ function interpolate(template, params) {
  */
 export function t(locale, key, params) {
     const catalog = CATALOGS[locale] ?? CATALOGS[BASE_LOCALE];
-    const template = catalog?.[key] ?? en[key] ?? key;
+    const plural = pluralKey(locale, key, params);
+    const template = (plural ? catalog?.[plural] : undefined) ??
+        catalog?.[key] ??
+        (plural ? en[plural] : undefined) ??
+        en[key] ??
+        key;
     return interpolate(template, params);
+}
+/**
+ * Plural forms (T-309 · review B-42): with a `{count}`, the key's `.one` form is used where the
+ * language's plural rule says "one" ("1 free catch"); the key itself is the other form. A count
+ * already formatted as text ("1 250") is read back as a number.
+ */
+function pluralKey(locale, key, params) {
+    const raw = params?.count;
+    if (raw === undefined)
+        return null;
+    const n = typeof raw === 'number' ? raw : Number(String(raw).replace(/[^\d.-]/g, ''));
+    if (!Number.isFinite(n))
+        return null;
+    const form = new Intl.PluralRules(locale).select(n);
+    return form === 'one' ? `${key}.one` : null;
 }
 /** Bind a locale once (e.g. per screen): `const tr = createTranslator(locale)`. */
 export function createTranslator(locale) {

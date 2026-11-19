@@ -23,9 +23,11 @@ const KIND_KEY: Record<string, TranslationKey> = {
   fishing: 'spot.fishing',
 };
 
-/** 40 → "40 m", 1250 → "1.3 km". */
-export function formatDistance(m: number): string {
-  return m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1)} km`;
+/** 40 → "40 m", 1250 → "1.3 km" ("1,3 km" in Swedish, T-309 · review B-43). */
+export function formatDistance(m: number, locale: string = 'en'): string {
+  if (m < 1000) return `${Math.round(m / 10) * 10} m`;
+  const km = (m / 1000).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return `${km} km`;
 }
 
 export function directionsUrl(lat: number, lon: number): string {
@@ -101,7 +103,7 @@ export default function CatchSpotScreen({
             </Pressable>
           ) : null}
           {view.distanceM !== null && view.state === 'too-far' ? (
-            <Text style={styles.distance}>{tr('catchSpot.distance', { distance: formatDistance(view.distanceM) })}</Text>
+            <Text style={styles.distance}>{tr('catchSpot.distance', { distance: formatDistance(view.distanceM, locale) })}</Text>
           ) : null}
           {view.state === 'in-range' ? (
             <>

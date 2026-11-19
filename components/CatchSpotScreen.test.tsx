@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Linking } from 'react-native';
-import CatchSpotScreen from './CatchSpotScreen';
+import CatchSpotScreen, { formatDistance } from './CatchSpotScreen';
 import { createTranslator } from '../lib/i18n';
 import type { CatchSpotView } from '../lib/catchSpots';
 
@@ -111,5 +111,14 @@ describe('CatchSpotScreen without a position', () => {
     );
     await fireEvent.press(screen.getByText(tr('catchSpot.allowLocation')));
     expect(onAllow).toHaveBeenCalled();
+  });
+});
+
+// T-309 · review B-43: distances in the reader's number format.
+describe('formatDistance in a language', () => {
+  it('uses the language’s decimal mark', () => {
+    expect(formatDistance(1250, 'sv')).toBe('1,3 km');
+    expect(formatDistance(1250, 'en')).toBe('1.3 km');
+    expect(formatDistance(40, 'sv')).toBe('40 m');
   });
 });

@@ -4639,6 +4639,15 @@ document until it is started, when it takes the next free `T-###`.
     `gateway={new …}` in App. An App-level count of `mine()` calls would need the backend's
     Family screen, which App tests do not run.
 
+- **T-309 · Plural forms and distances in the reader's language** — *Claude · XS · `DONE` · deps: T-120 · review B-42, B-43 (I-28)*
+  - ✅ B-42: `t()` picks a key's `.one` form when the language's plural rule says "one" for
+    `{count}` (`Intl.PluralRules`; a count already formatted as text is read back as a number);
+    the key itself is the other form. All 13 `{count}` strings have `.one` in English and
+    Swedish ("1 free catch left", "1 gratis fångst kvar", "1 art sedd"). Tests: 3, including one
+    that requires both forms for every `{count}` key.
+  - ✅ B-43: `formatDistance(m, locale)` uses the language's decimal mark ("1,3 km" in Swedish).
+    Test: 1.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
