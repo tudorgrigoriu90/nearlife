@@ -4718,6 +4718,13 @@ document until it is started, when it takes the next free `T-###`.
     changes the version; rollback leaves it; pruning keeps it moving; anon reads, cannot write).
     On the old design the blocking test times out.
 
+- **T-318 · Stacked banners share one status-bar gap** — *Claude · XS · `DONE` (visual check on a phone: Director, with T-141) · deps: T-252 · review B-38*
+  - ✅ The offline, preview and other-county banners sit in one `BannerStack` that clears the status
+    bar once (44 px); each banner pads only itself (8 px), so two together no longer leave a 44 px
+    hole between them. The stack takes no space when no banner shows. Tests: 2. The 44 px stays a
+    constant rather than the safe-area inset because App renders without a safe-area provider in
+    tests; the phone check (T-141) confirms it.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

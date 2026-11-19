@@ -32,6 +32,7 @@ import { usePushRegistration } from './components/usePushRegistration';
 import { useThisWeek } from './components/useThisWeek';
 import { useAlmanacCatalogue } from './components/useAlmanacCatalogue';
 import { useNotificationPermissionSync } from './components/useNotificationPermissionSync';
+import BannerStack from './components/BannerStack';
 import { usePurchaseRereads } from './components/usePurchaseRereads';
 import {
   onNotificationTap,
@@ -1557,38 +1558,40 @@ export default function App() {
 
   return (
     <View style={styles.root}>
-      {connectivity.offline && usablePack ? (
-        <View style={styles.previewBanner} accessibilityLiveRegion="polite">
-          <Text style={styles.previewText}>
-            📡 {tr('offline.banner', { date: usablePack.savedAt.slice(0, 10) })}
-          </Text>
-        </View>
-      ) : null}
-      {previewMode ? (
-        <Pressable
-          style={styles.previewBanner}
-          onPress={() => void setHomeCounty()}
-          accessibilityRole="button"
-        >
-          <Text style={styles.previewText}>{tr('preview.banner')}</Text>
-          <Text style={[styles.previewText, styles.previewAction]}>{tr('preview.setHome')} →</Text>
-          {homeLookupNote ? <Text style={styles.previewText}>{tr(homeLookupNote)}</Text> : null}
-        </Pressable>
-      ) : null}
-      {viewCounty ? (
-        <View style={styles.previewBanner}>
-          <Text style={styles.previewText}>
-            {canCollect
-              ? viewCounty.name
-              : tr('counties.previewBanner', { county: viewCounty.name })}
-          </Text>
-          <Pressable onPress={() => setViewCounty(null)} accessibilityRole="button">
-            <Text style={[styles.previewText, styles.previewLink]}>
-              {tr('counties.backHome', { county: hometown?.name ?? '' })}
+      <BannerStack>
+        {connectivity.offline && usablePack ? (
+          <View style={styles.previewBanner} accessibilityLiveRegion="polite">
+            <Text style={styles.previewText}>
+              📡 {tr('offline.banner', { date: usablePack.savedAt.slice(0, 10) })}
             </Text>
+          </View>
+        ) : null}
+        {previewMode ? (
+          <Pressable
+            style={styles.previewBanner}
+            onPress={() => void setHomeCounty()}
+            accessibilityRole="button"
+          >
+            <Text style={styles.previewText}>{tr('preview.banner')}</Text>
+            <Text style={[styles.previewText, styles.previewAction]}>{tr('preview.setHome')} →</Text>
+            {homeLookupNote ? <Text style={styles.previewText}>{tr(homeLookupNote)}</Text> : null}
           </Pressable>
-        </View>
-      ) : null}
+        ) : null}
+        {viewCounty ? (
+          <View style={styles.previewBanner}>
+            <Text style={styles.previewText}>
+              {canCollect
+                ? viewCounty.name
+                : tr('counties.previewBanner', { county: viewCounty.name })}
+            </Text>
+            <Pressable onPress={() => setViewCounty(null)} accessibilityRole="button">
+              <Text style={[styles.previewText, styles.previewLink]}>
+                {tr('counties.backHome', { county: hometown?.name ?? '' })}
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </BannerStack>
       <View style={styles.screen}>
         {tab === 'thisWeek' ? (
           <ThisWeekScreen
@@ -1685,9 +1688,10 @@ function TabButton({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#f4f8f2' },
   screen: { flex: 1 },
+  // The status-bar gap is the stack's (BannerStack), once for all banners (T-318).
   previewBanner: {
     backgroundColor: '#fbe9c6',
-    paddingTop: 44,
+    paddingTop: 8,
     paddingBottom: 8,
     paddingHorizontal: 16,
   },
