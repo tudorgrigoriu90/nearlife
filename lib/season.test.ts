@@ -76,3 +76,27 @@ describe('isActiveInMonth / activeSpecies', () => {
     expect(activeSpecies(list, 1)).toEqual([spruce]);
   });
 });
+
+// T-310 · review B-66: one definition of the season, on the server's clock (Europe/Stockholm),
+// whatever the phone's time zone.
+describe('seasonKeyOf on Swedish time', () => {
+  it('00:30 on 1 December in Stockholm is already winter', () => {
+    expect(seasonKeyOf(new Date('2026-11-30T23:30:00Z'))).toBe('2027-winter');
+  });
+
+  it('23:30 on 30 November in Stockholm is still autumn', () => {
+    expect(seasonKeyOf(new Date('2026-11-30T22:30:00Z'))).toBe('2026-autumn');
+  });
+
+  it('a summer boundary, in daylight saving time', () => {
+    expect(seasonKeyOf(new Date('2026-05-31T22:30:00Z'))).toBe('2026-summer'); // 00:30 CEST, 1 June
+    expect(seasonKeyOf(new Date('2026-05-31T21:30:00Z'))).toBe('2026-spring');
+  });
+});
+
+describe('seasonKeyOf with a malformed time', () => {
+  it('never throws, and matches no real season', () => {
+    expect(() => seasonKeyOf(new Date('not a date'))).not.toThrow();
+    expect(seasonKeyOf(new Date('not a date'))).not.toBe(seasonKeyOf(new Date()));
+  });
+});

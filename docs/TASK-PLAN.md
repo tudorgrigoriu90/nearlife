@@ -4648,6 +4648,13 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ B-43: `formatDistance(m, locale)` uses the language's decimal mark ("1,3 km" in Swedish).
     Test: 1.
 
+- **T-310 · The app's season on the server's clock** — *Claude · XS · `DONE` · deps: T-110 · review B-66*
+  - ✅ `seasonKeyOf` reads the year and month in `Europe/Stockholm` (`Intl.DateTimeFormat`), the
+    zone `public.season_key` uses, so a phone on another time zone no longer disagrees with the
+    server about free catches or this season's pledges around a boundary. Tests: 3 boundaries
+    (1 December at 00:30 and 23:30 the day before; 1 June in summer time), red before the change,
+    and green under `TZ=America/New_York` too.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

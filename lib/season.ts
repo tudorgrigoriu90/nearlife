@@ -20,17 +20,31 @@ export function seasonOf(month: Month): Season {
   return 'autumn';
 }
 
+/** The season's clock: the same zone as `public.season_key`. */
+const SEASON_CLOCK = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Stockholm',
+  year: 'numeric',
+  month: '2-digit',
+});
+
 /**
  * Stable per-season key used to reset the free-catch allowance (TSD §5b).
  * December is grouped with the following January/February so a winter that spans the
  * year boundary counts as one season, e.g. Dec 2026 and Jan 2027 → "2027-winter".
  */
 export function seasonKeyOf(date: Date): string {
-  const month = monthOf(date);
-  const season = seasonOf(month);
-  const seasonYear = month === 12 ? date.getFullYear() + 1 : date.getFullYear();
-  return `${seasonYear}-${season}`;
+  // On the server's clock (T-310 · review B-66): public.season_key reads Europe/Stockholm, so a
+  // phone on another time zone must not disagree about the free catches or pledges of a season in
+  // the hours around a boundary.
+  // A malformed stored timestamp belongs to no season; it must not crash a screen.
+  if (Number.isNaN(date.getTime())) return 'invalid';
+  const parts = SEASON_CLOCK.formatToParts(date);
+  const year = Number(parts.find((p) => p.type === 'year')?.value);
+  const month = Number(parts.find((p) => p.type === 'month')?.value) as Month;
+  const seasonYear = month === 12 ? year + 1 : year;
+  return `${seasonYear}-${seasonOf(month)}`;
 }
+
 
 /** Whether a species is in its honest "active this season" window for the given month. */
 export function isActiveInMonth(species: Species, month: Month): boolean {
