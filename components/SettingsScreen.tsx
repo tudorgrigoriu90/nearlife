@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import appJson from '../app.json';
 import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { CONSENT_KINDS, type ConsentKind, type ConsentState } from '../lib/consent';
 import { DEFAULT_DUAL_LANGUAGE, type DualLanguageSettings } from '../lib/dualLanguage';
@@ -289,7 +290,7 @@ export default function SettingsScreen({
           <Text style={[styles.attribution, styles.rowBorder]}>{tr('attribution.naturalEarth')}</Text>
         </View>
 
-        <Text style={styles.about}>{tr('settings.about')}</Text>
+        <Text style={styles.about}>{tr('settings.about', { version: appJson.expo.version })}</Text>
       </ScrollView>
     </View>
   );

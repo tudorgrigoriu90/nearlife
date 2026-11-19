@@ -4669,6 +4669,14 @@ document until it is started, when it takes the next free `T-###`.
     the phone's language as the second language is F-05. Tests: 2 new (every tag lands on a
     picker row), 1 old expectation (`de` → `de`) replaced.
 
+- **T-313 · Text the user sees goes through the catalogue** — *Claude · XS · `DONE` · deps: T-120 · review B-63*
+  - ✅ The photo credit ("Foto: … · från Wikimedia Commons"), the missing-author word
+    ("Okänd"), and the photo button's accessibility label (the species' name in the reader's
+    language) and hint are translated; records keep an empty author instead of the English
+    "Unknown". About reads "Nearby {version}" from app.json instead of "Kronoberg alpha"; the
+    build number needs `expo-application`, a new dependency, and is left out. Tests: 4 in
+    Swedish; two old tests now check the displayed "Unknown" instead of the stored one.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

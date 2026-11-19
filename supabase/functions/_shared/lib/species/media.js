@@ -5,6 +5,7 @@
 // unmodified. Actual photos are sourced in T-119; until then the UI falls back to the category
 // emoji. This module is the schema + attribution + license guard the sourcing and UI consume.
 import { KRONOBERG_MEDIA as KRONOBERG_MEDIA_LIST } from './media.kronoberg.js';
+import { t } from '../i18n/index.js';
 export const ALLOWED_LICENSES = ['CC0', 'CC-BY', 'CC-BY-SA'];
 /** True if the license permits commercial use (all of ALLOWED_LICENSES do). */
 export function isCommercialUseAllowed(license) {
@@ -31,10 +32,12 @@ export function photoSourceName(sourceUrl) {
         return null;
     return PHOTO_SOURCES.find(([domain]) => host === domain || host.endsWith(`.${domain}`))?.[1] ?? null;
 }
-/** Human-readable credit line for the About/card attribution surface. */
-export function attributionFor(media) {
+/** Human-readable credit line for the About/card attribution surface, in the reader's language. */
+export function attributionFor(media, locale = 'en') {
     const via = photoSourceName(media.sourceUrl);
-    return `Photo: ${media.author} · ${media.license}${via ? ` · via ${via}` : ''}`;
+    const author = media.author || t(locale, 'photo.unknownAuthor');
+    return (t(locale, 'photo.credit', { author, license: media.license }) +
+        (via ? t(locale, 'photo.via', { source: via }) : ''));
 }
 /** The primary photo for a species (or the first, or null if none sourced yet). */
 export function primaryPhoto(media, speciesId) {

@@ -5,6 +5,7 @@
 // emoji. This module is the schema + attribution + license guard the sourcing and UI consume.
 
 import { KRONOBERG_MEDIA as KRONOBERG_MEDIA_LIST } from './media.kronoberg';
+import { t, type Locale } from '../i18n';
 import type { Species } from './types';
 
 /** Licenses allowed for commercial use (with attribution). NC and ND are never allowed. */
@@ -52,10 +53,14 @@ export function photoSourceName(sourceUrl: string): string | null {
   return PHOTO_SOURCES.find(([domain]) => host === domain || host.endsWith(`.${domain}`))?.[1] ?? null;
 }
 
-/** Human-readable credit line for the About/card attribution surface. */
-export function attributionFor(media: SpeciesMedia): string {
+/** Human-readable credit line for the About/card attribution surface, in the reader's language. */
+export function attributionFor(media: SpeciesMedia, locale: Locale = 'en'): string {
   const via = photoSourceName(media.sourceUrl);
-  return `Photo: ${media.author} · ${media.license}${via ? ` · via ${via}` : ''}`;
+  const author = media.author || t(locale, 'photo.unknownAuthor');
+  return (
+    t(locale, 'photo.credit', { author, license: media.license }) +
+    (via ? t(locale, 'photo.via', { source: via }) : '')
+  );
 }
 
 /** The primary photo for a species (or the first, or null if none sourced yet). */

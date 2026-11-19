@@ -29,14 +29,17 @@ export function soundRowToSound(row: SoundRow): SpeciesSound | undefined {
     speciesId: row.species_id,
     url: row.url,
     license: row.license as MediaLicense,
-    author: row.author || 'Unknown',
+    author: row.author || '', // shown as "Unknown" in the reader's language (T-313)
     sourceUrl: row.source_url || row.url,
   };
 }
 
 /** The credit line. "Shortened" is the change notice CC-BY asks for: the pipeline cuts a clip. */
 export function soundCredit(sound: SpeciesSound, tr: ReturnType<typeof createTranslator>): string {
-  return tr('card.songCredit', { author: sound.author, license: sound.license });
+  return tr('card.songCredit', {
+    author: sound.author || tr('photo.unknownAuthor'),
+    license: sound.license,
+  });
 }
 
 export interface SoundSource {

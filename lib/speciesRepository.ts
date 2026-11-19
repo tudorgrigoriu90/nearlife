@@ -150,7 +150,7 @@ export function mediaRowToPhoto(row: MediaRow): SpeciesMedia | undefined {
     speciesId: row.species_id,
     url: row.url,
     license: row.license as MediaLicense,
-    author: row.author || 'Unknown',
+    author: row.author || '', // shown as "Unknown" in the reader's language (T-313)
     sourceUrl: row.source_url || row.url,
     isPrimary: true,
   };

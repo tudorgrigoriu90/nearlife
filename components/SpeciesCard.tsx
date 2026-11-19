@@ -194,7 +194,7 @@ export default function SpeciesCard({
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
-          <SpeciesHero species={species} spotted={spotted} />
+          <SpeciesHero species={species} spotted={spotted} locale={locale} />
           <Text style={[styles.name, { writingDirection: chromeDirection }]}>{name}</Text>
           <Text style={styles.scientific}>{species.scientificName}</Text>
           {threat ? (

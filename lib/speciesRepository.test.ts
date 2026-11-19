@@ -240,7 +240,8 @@ describe('mediaRowToPhoto (T-215)', () => {
   });
 
   it('fills a missing author and source rather than rendering blanks', () => {
-    expect(mediaRowToPhoto({ ...row, author: null, source_url: null })).toMatchObject({ author: 'Unknown', sourceUrl: 'u' });
+    // The author stays empty in the record; the credit line names it in the reader's language (T-313).
+    expect(mediaRowToPhoto({ ...row, author: null, source_url: null })).toMatchObject({ author: '', sourceUrl: 'u' });
   });
 
   it('a catalogue row without photo columns (pre-T-215 function) still maps', () => {

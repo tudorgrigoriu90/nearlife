@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { attributionFor, photoFor } from '../lib/species/media';
+import { createTranslator, type Locale } from '../lib/i18n';
+import { commonNameFor } from '../lib/species/localized';
 import type { Species } from '../lib/species/types';
 import { groupOf } from '../lib/species/group';
 import { speciesGlyph } from './speciesVisual';
@@ -16,7 +18,16 @@ import { speciesGlyph } from './speciesVisual';
 // every Nordic species would exhaust the 1 GB free tier — and it has the happy property that the
 // "bigger photo" destination is also the page carrying the licence and author, which is what the
 // attribution terms actually ask for.
-export default function SpeciesHero({ species, spotted }: { species: Species; spotted: boolean }) {
+export default function SpeciesHero({
+  species,
+  spotted,
+  locale = 'en',
+}: {
+  species: Species;
+  spotted: boolean;
+  locale?: Locale;
+}) {
+  const tr = createTranslator(locale);
   const [failed, setFailed] = useState(false);
   // Bundled photo for the curated 54, the catalogue photo for everyone else (T-215).
   const photo = spotted ? photoFor(species) : null;
@@ -32,8 +43,8 @@ export default function SpeciesHero({ species, spotted }: { species: Species; sp
             void Linking.openURL(photo.sourceUrl).catch(() => undefined);
           }}
           accessibilityRole="imagebutton"
-          accessibilityLabel={species.commonName}
-          accessibilityHint="Opens the full-size photo and its licence"
+          accessibilityLabel={commonNameFor(species, locale)}
+          accessibilityHint={tr('photo.openHint')}
         >
           <Image
             source={{ uri: photo.url }}
@@ -42,7 +53,7 @@ export default function SpeciesHero({ species, spotted }: { species: Species; sp
             onError={() => setFailed(true)}
           />
         </Pressable>
-        <Text style={styles.credit}>{attributionFor(photo)}</Text>
+        <Text style={styles.credit}>{attributionFor(photo, locale)}</Text>
       </View>
     );
   }

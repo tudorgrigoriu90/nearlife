@@ -33,7 +33,10 @@ describe('soundRowToSound', () => {
   });
 
   it('credits an unknown recordist rather than dropping the credit', () => {
-    expect(soundRowToSound({ ...row, author: null })?.author).toBe('Unknown');
+    // The record keeps no English placeholder; the credit names the unknown in the reader's language.
+    const sound = soundRowToSound({ ...row, author: null })!;
+    expect(sound.author).toBe('');
+    expect(soundCredit(sound, createTranslator('en'))).toContain('Unknown');
   });
 });
 
