@@ -150,7 +150,9 @@ winter fails.
 407 KB raw / 59 KB gzipped, catalogue (`region_catalogue`, Swedish) 1.85 MB raw / 270 KB gzipped,
 so about 330 KB per county per launch before the cache. The app now keeps each county's presence
 and catalogue (per language) in its cache directory with the server's data version
-(`public.data_version()`, bumped by a statement trigger on every species table, migration 0035);
+(`public.data_version()`: every write statement on a species table inserts a row in
+`species_data_bumps`, and the version is their count and largest id, so it changes when the data
+commits and no writer ever waits on another; migrations 0035, 0042 · T-317);
 a launch with unchanged data costs the version request only. Offline, the saved county is shown;
 with nothing saved, This Week and the Almanac say so with a retry. The bundled Kronoberg set answers
 for Kronoberg only. Catch spots are kept 30 days.

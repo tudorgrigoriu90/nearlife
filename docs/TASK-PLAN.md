@@ -4704,6 +4704,20 @@ document until it is started, when it takes the next free `T-###`.
     ~2/13); Jest 2 (fixture) + 1 (the sender reads none of those tables). `verify.py` checks users
     cannot call it.
 
+- **T-317 · The data version no longer makes writers wait** — *Claude · XS · `DONE` (migration 0042 applied with this push) · deps: T-275*
+  - Found in the T-279 follow-up runs: Species photos failed with a statement timeout. T-275's
+    version bump updated one shared row after every write statement on a species table, and the
+    row lock lasts until commit, so the facts backfill (committing per language, minutes apart)
+    made every other writer wait.
+  - ✅ Each statement now inserts its own row in `species_data_bumps` (inserts never wait); the
+    version is the row count plus the largest id, so it still changes only when data commits,
+    including a writer that commits after a later one (a sequence would have exposed versions
+    before their data, letting a phone cache old data under a new version). A rolled-back write
+    leaves no row. A daily cron prunes to one row. The old table is dropped.
+  - Tests in a real Postgres: 6 (a long open writer does not block another; a late commit still
+    changes the version; rollback leaves it; pruning keeps it moving; anon reads, cannot write).
+    On the old design the blocking test times out.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
