@@ -10,6 +10,9 @@ export interface FrameConfig {
 
 export const DEFAULT_FRAME: FrameConfig = { successThreshold: 0.5 };
 
+/** Easy mode (T-331 · review I-25): at least twice as forgiving, for anyone who wants it. */
+export const EASY_FRAME: FrameConfig = { successThreshold: 0.25 };
+
 export interface FrameResult {
   /** 1 at dead-centre, 0 at/beyond the target radius. */
   accuracy: number;

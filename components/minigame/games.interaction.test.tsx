@@ -74,3 +74,27 @@ describe('minigame interaction → result', () => {
     await continueOut(onComplete);
   });
 });
+
+// T-331 · review I-25: easy mode has no give-up timer, so a slow player is never timed out.
+describe('easy mode', () => {
+  it('bird timing: waits for the tap however long it takes', async () => {
+    const onComplete = jest.fn();
+    await render(<TimingRingMinigame onComplete={onComplete} easy />);
+    await advance(30000);
+    expect(screen.queryByText(tr('minigame.continue'))).toBeNull();
+    await fireEvent.press(screen.getByLabelText(tr('minigame.bird.hint')));
+    await continueOut(onComplete);
+  });
+
+  it('mammal stealth: no give-up budget', async () => {
+    await render(<StealthMinigame onComplete={jest.fn()} easy />);
+    await advance(25000);
+    expect(screen.queryByText(tr('minigame.continue'))).toBeNull();
+  });
+
+  it('mammal stealth: still times out without it', async () => {
+    await render(<StealthMinigame onComplete={jest.fn()} />);
+    await advance(25000);
+    expect(await screen.findByText(tr('minigame.continue'))).toBeTruthy();
+  });
+});

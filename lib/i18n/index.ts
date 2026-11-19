@@ -331,6 +331,9 @@ export const en = {
 
   // Mother-tongue dual display (F13.3 — T-148/T-150/T-151)
   'dual.title': 'Second language',
+  'easy.title': 'Catching',
+  'easy.toggle': 'Easy catching',
+  'easy.note': 'Twice as forgiving, with no time limit. A catch counts the same.',
   'dual.toggle': 'Show a second language',
   'dual.hint':
     'Read species text in your own language alongside the app language. Off by default.',
@@ -824,6 +827,9 @@ export const sv: Catalog = {
 
   // Mother-tongue dual display (F13.3 — T-148/T-150/T-151)
   'dual.title': 'Andra språk',
+  'easy.title': 'Fånga',
+  'easy.toggle': 'Lätt fångst',
+  'easy.note': 'Dubbelt så förlåtande och utan tidsgräns. En fångst räknas likadant.',
   'dual.toggle': 'Visa ett andra språk',
   'dual.hint':
     'Läs artternas text på ditt eget språk vid sidan av appens språk. Avstängt som standard.',

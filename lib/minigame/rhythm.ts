@@ -11,6 +11,9 @@ export interface RhythmConfig {
 /** Forgiving but not trivial: hold the zone ~60% of the fight (GDD §4 "fair success curve"). */
 export const DEFAULT_RHYTHM: RhythmConfig = { successRatio: 0.6 };
 
+/** Easy mode (T-331 · review I-25): at least twice as forgiving, for anyone who wants it. */
+export const EASY_RHYTHM: RhythmConfig = { successRatio: 0.3 };
+
 export interface RhythmResult {
   /** Fraction of ticks spent in the sweet zone (0–1). */
   ratio: number;

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator } from '../../lib/i18n';
 import {
   DEFAULT_STEALTH,
+  EASY_STEALTH,
   evaluateStealth,
   type StealthConfig,
   type StealthTick,
@@ -32,12 +33,15 @@ function phaseAt(elapsedMs: number): Phase {
 
 export default function StealthMinigame({
   locale = 'en',
-  config = DEFAULT_STEALTH,
+  config: given = DEFAULT_STEALTH,
+  easy = false,
   onComplete,
   onCancel,
   onRetry,
   glyph,
 }: MinigameProps & { config?: StealthConfig }) {
+  // Easy mode (T-331 · review I-25): the forgiving tuning, whatever config was passed.
+  const config = easy ? EASY_STEALTH : given;
   const tr = createTranslator(locale);
   const animal = glyph ?? '🦊';
   const [phase, setPhase] = useState<Phase>('calm');
@@ -60,7 +64,7 @@ export default function StealthMinigame({
       const r = evaluateStealth(ticksRef.current, config);
       setProgress(r.progress);
 
-      const timedOut = elapsed >= MAX_MS;
+      const timedOut = !easy && elapsed >= MAX_MS; // easy mode has no time limit
       if (r.spotted || r.success || timedOut) {
         if (tickRef.current) clearInterval(tickRef.current);
         tickRef.current = null;

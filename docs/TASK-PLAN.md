@@ -4850,10 +4850,20 @@ document until it is started, when it takes the next free `T-###`.
     setting is honoured where it matters by T-331, which starts the games in easy mode under it.
   - ✅ `__tests__/reducedMotion.test.js` fails on any file that animates without reading
     `useReducedMotion` (shown red on a throwaway file), so decoration cannot arrive ungated.
-- **T-331 · Easy mode for every minigame** — *Claude · M · `TODO` · deps: T-330 · review I-25*
+- **T-331 · Easy mode for every minigame** — *Claude · M · `DONE` · deps: T-330 · review I-25*
   - A Settings switch: double tolerance and no time limit in all five games, so a catch never
     depends on fine motor timing. The result counts the same (no lesser badge). On by default
     when the system asks for reduced motion (`useReducedMotion`).
+  - ✅ Each core has an `EASY_*` config beside its default: timing windows ×2, fish ratio ½, trace
+    tolerance and forgiven breaks ×2 (the drawn ring grows with it), stealth distance ½, framing
+    accuracy ½. `MinigameProps.easy` switches every game to it; the bird and mammal games drop
+    their give-up timers. Nothing downstream knows: a catch is a catch.
+  - ✅ `lib/easyModeStore.ts` (`nearby.easyMode.v1`, erased with the device): the person's choice,
+    or the system's reduced motion until they make one (`components/useEasyMode.ts`, which follows
+    the setting live). Settings → Catching → Easy catching, with "Twice as forgiving, with no time
+    limit. A catch counts the same." (en, sv).
+  - ✅ Tests: configs 4, games 3 (no give-up in easy, still times out without), store 4, hook 4,
+    Settings 2.
 
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what

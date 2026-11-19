@@ -120,3 +120,19 @@ describe('SettingsScreen — second language', () => {
     expect(screen.getByText(tr('dual.machineTranslatedHint'))).toBeTruthy();
   });
 });
+
+// T-331 · review I-25.
+describe('SettingsScreen easy catching', () => {
+  it('shows the switch with its promise, and reports a change', async () => {
+    const onToggleEasyCatching = jest.fn();
+    await render(<SettingsScreen {...renderSettings({ easyCatching: false, onToggleEasyCatching })} />);
+    expect(screen.getByText(tr('easy.note'))).toBeTruthy();
+    await fireEvent(screen.getByTestId('easy-catching'), 'valueChange', true);
+    expect(onToggleEasyCatching).toHaveBeenCalledWith(true);
+  });
+
+  it('is absent where the app does not offer it', async () => {
+    await render(<SettingsScreen {...renderSettings()} />);
+    expect(screen.queryByText(tr('easy.toggle'))).toBeNull();
+  });
+});

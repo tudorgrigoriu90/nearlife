@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
 import { createTranslator } from '../../lib/i18n';
-import { DEFAULT_TRACE, evaluateTrace, type TraceConfig } from '../../lib/minigame/trace';
+import { DEFAULT_TRACE, EASY_TRACE, evaluateTrace, type TraceConfig } from '../../lib/minigame/trace';
 import MinigameShell, { type ShellResult } from './MinigameShell';
 import { type MinigameProps } from './types';
 
@@ -28,12 +28,17 @@ function bugCenterAt(elapsedMs: number): { x: number; y: number } {
 
 export default function TraceMinigame({
   locale = 'en',
-  config = DEFAULT_TRACE,
+  config: given = DEFAULT_TRACE,
+  easy = false,
   onComplete,
   onCancel,
   onRetry,
   glyph,
 }: MinigameProps & { config?: TraceConfig }) {
+  // Easy mode (T-331 · review I-25): the forgiving tuning, whatever config was passed.
+  const config = easy ? EASY_TRACE : given;
+  // The drawn ring grows with the tolerance, so easy mode shows how much room there is.
+  const ring = RING * (config.tolerancePx / DEFAULT_TRACE.tolerancePx);
   const tr = createTranslator(locale);
   const [bug, setBug] = useState({ x: C, y: C });
   const [onPath, setOnPath] = useState(false);
@@ -103,7 +108,11 @@ export default function TraceMinigame({
             cover it (T-277). Children ignore touches, so positions are the stage's (B-62). */}
         <View
           pointerEvents="none"
-          style={[styles.ring, onPath ? styles.ringOn : null, { left: bug.x - RING / 2, top: bug.y - RING / 2 }]}
+          style={[
+            styles.ring,
+            onPath ? styles.ringOn : null,
+            { left: bug.x - ring / 2, top: bug.y - ring / 2, width: ring, height: ring, borderRadius: ring / 2 },
+          ]}
         />
         <Text
           pointerEvents="none"

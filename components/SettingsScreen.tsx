@@ -34,6 +34,8 @@ export default function SettingsScreen({
   onToggleConsent,
   onSelectLocale,
   onToggleDualLanguage,
+  easyCatching = false,
+  onToggleEasyCatching,
   onSelectSecondaryLocale,
   onExportData,
   onLinkEmail,
@@ -56,6 +58,9 @@ export default function SettingsScreen({
   onToggleConsent: (kind: ConsentKind, value: boolean) => void;
   onSelectLocale: (locale: Locale) => void;
   onToggleDualLanguage?: (enabled: boolean) => void;
+  /** Easy catching (T-331 · review I-25). */
+  easyCatching?: boolean;
+  onToggleEasyCatching?: (on: boolean) => void;
   onSelectSecondaryLocale?: (locale: ContentLocale) => void;
   onExportData: () => void;
   /** Open the link-email flow (T-133 · make the account durable across reinstall/devices). */
@@ -125,6 +130,25 @@ export default function SettingsScreen({
             </Pressable>
           ))}
         </View>
+
+        {onToggleEasyCatching ? (
+          <>
+            <Text style={styles.sectionLabel}>{tr('easy.title')}</Text>
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>{tr('easy.toggle')}</Text>
+                <Switch
+                  testID="easy-catching"
+                  accessibilityLabel={tr('easy.toggle')}
+                  value={easyCatching}
+                  onValueChange={onToggleEasyCatching}
+                  trackColor={{ true: '#3a7d44', false: '#cdd8ca' }}
+                />
+              </View>
+            </View>
+            <Text style={styles.subLabel}>{tr('easy.note')}</Text>
+          </>
+        ) : null}
 
         <Text style={styles.sectionLabel}>{tr('dual.title')}</Text>
         <View style={styles.card}>

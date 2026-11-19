@@ -15,6 +15,9 @@ export interface TraceConfig {
 // confirmed by the Director's phone test (T-277).
 export const DEFAULT_TRACE: TraceConfig = { tolerancePx: 44, allowedBreaks: 25 };
 
+/** Easy mode (T-331 · review I-25): at least twice as forgiving, for anyone who wants it. */
+export const EASY_TRACE: TraceConfig = { tolerancePx: 88, allowedBreaks: 50 };
+
 export interface TraceResult {
   breaks: number;
   success: boolean;

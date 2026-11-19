@@ -23,4 +23,6 @@ export interface MinigameProps {
   glyph?: string;
   /** Varies the layout per species and day (T-321); a fixed default without one. */
   seed?: number;
+  /** Twice as forgiving and no give-up timer (T-331 · review I-25); a catch counts the same. */
+  easy?: boolean;
 }

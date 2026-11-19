@@ -23,6 +23,9 @@ export interface TimingConfig {
 /** Tuned for a ~10–20s one-thumb interaction; forgiving enough to feel fair (GDD §4). */
 export const DEFAULT_TIMING: TimingConfig = { perfectWindowMs: 120, goodWindowMs: 320 };
 
+/** Easy mode (T-331 · review I-25): at least twice as forgiving, for anyone who wants it. */
+export const EASY_TIMING: TimingConfig = { perfectWindowMs: 240, goodWindowMs: 640 };
+
 /**
  * Grade a tap against the perfect moment. `targetMs` and `tapMs` are on the same clock
  * (e.g. ms since the ring appeared). Early and late taps are treated symmetrically.

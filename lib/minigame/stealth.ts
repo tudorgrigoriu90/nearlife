@@ -15,6 +15,9 @@ export interface StealthConfig {
 
 export const DEFAULT_STEALTH: StealthConfig = { progressNeeded: 12 };
 
+/** Easy mode (T-331 · review I-25): at least twice as forgiving, for anyone who wants it. */
+export const EASY_STEALTH: StealthConfig = { progressNeeded: 6 };
+
 export interface StealthResult {
   /** Safe advances made. */
   progress: number;

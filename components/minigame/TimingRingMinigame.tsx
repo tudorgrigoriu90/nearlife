@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View, Text } from 'react-native';
 import { createTranslator } from '../../lib/i18n';
 import {
   DEFAULT_TIMING,
+  EASY_TIMING,
   evaluateTiming,
   type TimingConfig,
   type TimingResult,
@@ -30,12 +31,15 @@ function scoreOf(result: TimingResult): number {
 
 export default function TimingRingMinigame({
   locale = 'en',
-  config = DEFAULT_TIMING,
+  config: given = DEFAULT_TIMING,
+  easy = false,
   onComplete,
   onCancel,
   onRetry,
   glyph,
 }: MinigameProps & { config?: TimingConfig }) {
+  // Easy mode (T-331 · review I-25): the forgiving tuning, whatever config was passed.
+  const config = easy ? EASY_TIMING : given;
   const tr = createTranslator(locale);
   const [scale, setScale] = useState(START_SCALE);
   const [result, setResult] = useState<ShellResult | null>(null);
@@ -59,7 +63,8 @@ export default function TimingRingMinigame({
       const inCycle = (Date.now() - startRef.current) % CYCLE_MS;
       setScale(START_SCALE + (END_SCALE - START_SCALE) * (inCycle / CYCLE_MS));
     }, 30);
-    // No tap within the budget → a forced miss (tap far from the target).
+    // No tap within the budget → a forced miss (tap far from the target). Easy mode has no budget.
+    if (easy) return stop;
     budgetRef.current = setTimeout(() => {
       finish(evaluateTiming(TARGET_MS, TARGET_MS + config.goodWindowMs + 999, config));
       stop();

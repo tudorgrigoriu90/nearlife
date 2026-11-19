@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
 import { createTranslator } from '../../lib/i18n';
-import { DEFAULT_FRAME, evaluateFrame, frameLayout, type FrameConfig } from '../../lib/minigame/frame';
+import { DEFAULT_FRAME, EASY_FRAME, evaluateFrame, frameLayout, type FrameConfig } from '../../lib/minigame/frame';
 import MinigameShell, { type ShellResult } from './MinigameShell';
 import { type MinigameProps } from './types';
 
@@ -20,13 +20,16 @@ const DEFAULT_SEED = 1;
 
 export default function FrameMinigame({
   locale = 'en',
-  config = DEFAULT_FRAME,
+  config: given = DEFAULT_FRAME,
+  easy = false,
   onComplete,
   onCancel,
   onRetry,
   glyph,
   seed,
 }: MinigameProps & { config?: FrameConfig }) {
+  // Easy mode (T-331 · review I-25): the forgiving tuning, whatever config was passed.
+  const config = easy ? EASY_FRAME : given;
   const tr = createTranslator(locale);
   const layout = useMemo(() => frameLayout(seed ?? DEFAULT_SEED, STAGE), [seed]);
   const SUBJECT = { ...layout.subject, glyph: glyph ?? '🌸' };

@@ -60,6 +60,8 @@ import {
   type DualLanguageSettings,
 } from './lib/dualLanguage';
 import { AsyncStorageDualLanguageStore } from './lib/dualLanguageStore';
+import { AsyncStorageEasyModeStore } from './lib/easyModeStore';
+import { useEasyMode } from './components/useEasyMode';
 import type { ContentLocale } from './lib/i18n/contentLocale';
 import { deleteAccount, SupabaseDeletionGateway } from './lib/accountDeletion';
 import { SupabaseAuthGateway } from './lib/accountLinking';
@@ -292,6 +294,9 @@ const HOMETOWN_STORE = new AsyncStorageHometownStore();
 // Mother-tongue dual display preference (T-148) — device-local, off by default, survives restarts.
 const DUAL_LANGUAGE_STORE = new AsyncStorageDualLanguageStore();
 
+// Easy catching (T-331) — the person's choice, else the system's reduced-motion setting.
+const EASY_MODE_STORE = new AsyncStorageEasyModeStore();
+
 // Prototype app shell (E2). Onboarding (T-022+) runs first; once complete, a minimal tab
 // switcher between the "This week" pull surface (T-117) and the Almanac grid (T-025); tapping a
 // species opens its card (T-026). No navigation library yet — local state is enough for the
@@ -307,6 +312,7 @@ function closed(close: () => void): true {
 }
 
 export default function App() {
+  const { easy: easyCatching, setEasy: setEasyCatching } = useEasyMode(EASY_MODE_STORE);
   // Device locale by default; a user override from Settings takes precedence (T-123).
   const [localeOverride, setLocaleOverride] = useState<Locale | null>(null);
   // Held back with onboarding (below) so a Swedish user never sees an English first frame.
@@ -1336,6 +1342,8 @@ export default function App() {
           consent={consent}
           analyticsLocked={analyticsLocked}
           dualLanguage={dualLanguage}
+          easyCatching={easyCatching}
+          onToggleEasyCatching={setEasyCatching}
           onToggleConsent={toggleConsent}
           onSelectLocale={(loc) => {
             setLocaleOverride(loc);
@@ -1449,6 +1457,7 @@ export default function App() {
           category={target.category}
           species={target}
           locale={locale}
+          easy={easyCatching}
           onCancel={() => setCatching(null)}
           onComplete={({ success, score }) => {
             setCatching(null);

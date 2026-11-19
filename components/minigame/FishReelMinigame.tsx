@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator } from '../../lib/i18n';
-import { DEFAULT_RHYTHM, evaluateRhythm, type RhythmConfig } from '../../lib/minigame/rhythm';
+import { DEFAULT_RHYTHM, EASY_RHYTHM, evaluateRhythm, type RhythmConfig } from '../../lib/minigame/rhythm';
 import MinigameShell, { type ShellResult } from './MinigameShell';
 import { type MinigameProps } from './types';
 
@@ -29,12 +29,15 @@ function fishCenterAt(elapsedMs: number): number {
 
 export default function FishReelMinigame({
   locale = 'en',
-  config = DEFAULT_RHYTHM,
+  config: given = DEFAULT_RHYTHM,
+  easy = false,
   onComplete,
   onCancel,
   onRetry,
   glyph,
 }: MinigameProps & { config?: RhythmConfig }) {
+  // Easy mode (T-331 · review I-25): the forgiving tuning, whatever config was passed.
+  const config = easy ? EASY_RHYTHM : given;
   const tr = createTranslator(locale);
   const [bandTop, setBandTop] = useState(TRACK_H - BAND_H);
   const [fishTop, setFishTop] = useState(CENTER - FISH / 2);
