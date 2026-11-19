@@ -5106,6 +5106,16 @@ document until it is started, when it takes the next free `T-###`.
     user's own act on SLU's site, under its own account. An invasive card keeps only its own report
     link (T-336). Tests: link and exact URL 1, invasive card 1.
 
+- **T-355 · Caught-tier badges and county completion** — *Claude · S · `DONE` · deps: T-297 · review F-16*
+  - Done when the rules are in `lib/badges.ts` with tests, computed over the home county (B-27).
+  - ✅ Badges for 1 / 10 / 25 species caught, and one per group caught ("Caught one of the
+    birds"). The group ones appear after a first catch, as the recognised ones do, so a new user
+    is not shown ten locked goals at once. Badges → "{county}: x of y species spotted" over the same
+    home-county list the badges use (`countyCompletion`). Earned catch badges are remembered like
+    the others (T-297). Tests: rules 3, screen 1 (and the existing totals moved from 17 to 20).
+  - Note: the list is the home county plus anything collected elsewhere (T-208), so a species
+    spotted outside the county counts in both x and y; the figure stays a fraction of a real list.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

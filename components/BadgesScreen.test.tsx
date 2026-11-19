@@ -7,7 +7,7 @@ import type { Species } from '../lib/species/types';
 const tr = createTranslator('en');
 
 // 2 birds + 1 mammal → "all 2 birds" + "all 1 mammal" + season opener + 6 spotted + 3 helped
-// + 5 recognised milestones (T-243) = 17. Recognised group tiers appear only after a recognition.
+// + 5 recognised milestones (T-243) + 3 catch milestones (T-355) = 20. Recognised group tiers appear only after a recognition.
 const species: Species[] = [
   {
     id: 'swift',
@@ -52,7 +52,7 @@ function rec(id: string, over: Partial<CollectionRecord> = {}): CollectionRecord
 describe('BadgesScreen', () => {
   it('shows every badge, locked with its progress, for an empty collection', async () => {
     await render(<BadgesScreen locale="en" species={species} records={[]} now={NOW} />);
-    expect(screen.getByText(tr('badges.progress', { earned: 0, total: 17 }))).toBeTruthy();
+    expect(screen.getByText(tr('badges.progress', { earned: 0, total: 20 }))).toBeTruthy();
     expect(screen.getByText(tr('badge.groupAll', { count: 2, category: 'birds' }))).toBeTruthy();
     expect(screen.getByText(tr('badge.seasonOpener'))).toBeTruthy();
     expect(
@@ -67,14 +67,14 @@ describe('BadgesScreen', () => {
     ];
     await render(<BadgesScreen locale="en" species={species} records={records} now={NOW} />);
     // all 2 birds + season opener
-    expect(screen.getByText(tr('badges.progress', { earned: 2, total: 17 }))).toBeTruthy();
+    expect(screen.getByText(tr('badges.progress', { earned: 2, total: 20 }))).toBeTruthy();
   });
 
   it('counts a helped milestone as earned', async () => {
     const records = [rec('fox', { spottedAt: IN_SEASON, helpedAt: 't', helpedKind: 'give' })];
     await render(<BadgesScreen locale="en" species={species} records={records} now={NOW} />);
     // all 1 mammal + season opener + helped-1
-    expect(screen.getByText(tr('badges.progress', { earned: 3, total: 17 }))).toBeTruthy();
+    expect(screen.getByText(tr('badges.progress', { earned: 3, total: 20 }))).toBeTruthy();
   });
 
   it('shows recognised badges from the quiz, with group tiers once a group has one (T-243)', async () => {
@@ -107,6 +107,20 @@ describe('BadgesScreen with remembered badges', () => {
         remembered={{ 'spotted-10': '2026-05-01T00:00:00Z' }}
       />,
     );
-    expect(screen.getByText(tr('badges.progress', { earned: 1, total: 17 }))).toBeTruthy();
+    expect(screen.getByText(tr('badges.progress', { earned: 1, total: 20 }))).toBeTruthy();
+  });
+});
+
+// T-355 · review F-16.
+describe('BadgesScreen catches and county', () => {
+  it('shows the catch badges once something is caught, and the county count', async () => {
+    const records = [rec('fox', { spottedAt: IN_SEASON, caughtAt: IN_SEASON })];
+    await render(<BadgesScreen locale="en" species={species} records={records} now={NOW} county="Kronoberg" />);
+    expect(screen.getByText(tr('badge.caught', { count: 1 }))).toBeTruthy();
+    expect(screen.getByText(tr('badge.caughtGroup', { category: 'mammals' }))).toBeTruthy();
+    expect(screen.getByText(tr('badge.caughtGroup', { category: 'birds' }))).toBeTruthy();
+    expect(screen.getByText(tr('badges.county', { county: 'Kronoberg', have: 1, total: 3 }))).toBeTruthy();
+    // all 1 mammal + season opener + caught-1 + caught-mammal, of 20 + 2 group catch badges
+    expect(screen.getByText(tr('badges.progress', { earned: 4, total: 22 }))).toBeTruthy();
   });
 });

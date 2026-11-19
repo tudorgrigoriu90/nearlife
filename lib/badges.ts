@@ -18,7 +18,9 @@ export type BadgeKind =
   | 'helped-milestone'
   | 'season-opener'
   | 'recognized-milestone'
-  | 'recognized-group';
+  | 'recognized-group'
+  | 'caught-milestone'
+  | 'caught-group';
 
 export const GROUP_TIERS = [10, 50, 150] as const;
 export const SPOTTED_MILESTONES = [10, 25, 50, 100, 250, 500] as const;
@@ -27,6 +29,9 @@ export const HELPED_MILESTONES = [1, 5, 10] as const;
 // has recognised something in that group, so ten empty ladders don't crowd the screen.
 export const RECOGNIZED_MILESTONES = [1, 10, 25, 50, 100] as const;
 export const RECOGNIZED_GROUP_TIERS = [5, 25, 100] as const;
+// T-355 · review F-16: species caught, and one badge per group caught. The group badges appear
+// after a first catch, as the recognised ones do, so a new user's screen is not ten locked goals.
+export const CAUGHT_MILESTONES = [1, 10, 25] as const;
 
 export interface BadgeStatus {
   id: string;
@@ -138,7 +143,39 @@ export function badgeStatuses(
       });
     }
   }
+
+  const caught = new Set(records.filter((r) => r.caughtAt !== null).map((r) => r.speciesId));
+  for (const count of CAUGHT_MILESTONES) {
+    statuses.push({
+      id: `caught-${count}`,
+      kind: 'caught-milestone',
+      count,
+      all: false,
+      progress: Math.min(caught.size, count),
+      earned: caught.size >= count,
+    });
+  }
+  if (caught.size > 0) {
+    for (const [group, members] of groups) {
+      const have = members.some((s) => caught.has(s.id));
+      statuses.push({
+        id: `caught-${group}`,
+        kind: 'caught-group',
+        group,
+        count: 1,
+        all: false,
+        progress: have ? 1 : 0,
+        earned: have,
+      });
+    }
+  }
   return statuses;
+}
+
+/** "Spotted x of y" over a county's list (T-355 · review F-16): the home county's, as badges (B-27). */
+export function countyCompletion(records: CollectionRecord[], species: Species[]): { have: number; total: number } {
+  const spotted = spottedIds(records);
+  return { have: species.filter((s) => spotted.has(s.id)).length, total: species.length };
 }
 
 /** Earned badge ids and when they were first earned (T-297 · review B-27). */

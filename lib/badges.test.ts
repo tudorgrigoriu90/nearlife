@@ -1,7 +1,9 @@
 import type { CollectionRecord } from './collection';
 import {
   badgeStatuses,
+  countyCompletion,
   groupTiers,
+  CAUGHT_MILESTONES,
   rememberEarned,
   withRemembered,
   GROUP_TIERS,
@@ -188,5 +190,30 @@ describe('remembered badges', () => {
     const statuses = badgeStatuses(reptiles.map((s) => spotted(s.id)), bigger, new Date('2026-06-01'));
     const shown = withRemembered(statuses, { 'spotted-10': 'then' });
     expect(shown.find((b) => b.id === 'spotted-10')).toMatchObject({ earned: true, progress: 10 });
+  });
+});
+
+// T-355 · review F-16: caught-tier badges and county completion.
+describe('caught badges', () => {
+  const list = [sp('a', 'bird'), sp('b', 'bird'), sp('c', 'mammal'), sp('d', 'insect')];
+  const now = new Date('2026-06-10T10:00:00Z');
+
+  it('has 1 / 10 / 25 catch milestones, and none of the group badges before a first catch', () => {
+    expect(CAUGHT_MILESTONES).toEqual([1, 10, 25]);
+    const before = badgeStatuses([spotted('a')], list, now);
+    expect(before.filter((b) => b.kind === 'caught-milestone').map((b) => b.id)).toEqual(['caught-1', 'caught-10', 'caught-25']);
+    expect(before.some((b) => b.kind === 'caught-group')).toBe(false);
+  });
+
+  it('earns the first catch and one badge per group caught, offering the other groups as goals', () => {
+    const records = [spotted('a', { caughtAt: '2026-06-02T10:00:00Z' }), spotted('c')];
+    const statuses = badgeStatuses(records, list, now);
+    const caught = statuses.filter((b) => b.kind === 'caught-milestone' || b.kind === 'caught-group');
+    expect(caught.filter((b) => b.earned).map((b) => b.id)).toEqual(['caught-1', 'caught-bird']);
+    expect(caught.filter((b) => !b.earned).map((b) => b.id)).toEqual(['caught-10', 'caught-25', 'caught-mammal', 'caught-insect']);
+  });
+
+  it('counts the county: spotted species of the list, out of all of them', () => {
+    expect(countyCompletion([spotted('a'), spotted('c'), spotted('elsewhere')], list)).toEqual({ have: 2, total: 4 });
   });
 });

@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { badgeStatuses, withRemembered, type BadgeStatus, type RememberedBadges } from '../lib/badges';
+import { badgeStatuses, countyCompletion, withRemembered, type BadgeStatus, type RememberedBadges } from '../lib/badges';
 import type { CollectionRecord } from '../lib/collection';
 import { createTranslator, type Locale } from '../lib/i18n';
 import type { Species } from '../lib/species/types';
@@ -28,6 +28,7 @@ export default function BadgesScreen({
   now,
   recognized,
   remembered = {},
+  county = null,
   onDone,
 }: {
   locale?: Locale;
@@ -39,6 +40,8 @@ export default function BadgesScreen({
   recognized?: ReadonlySet<string>;
   /** Badges earned before, with their date (T-297): never shown locked again. */
   remembered?: RememberedBadges;
+  /** The home county's name, for "spotted x of y" over `species` (T-355 · review F-16). */
+  county?: string | null;
   onDone?: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -72,6 +75,12 @@ export default function BadgesScreen({
         label: tr('badge.recognizedGroup', { count: b.count, category }),
       };
     }
+    if (b.kind === 'caught-milestone')
+      return { emoji: '🎣', label: tr('badge.caught', { count: b.count }) };
+    if (b.kind === 'caught-group' && b.group) {
+      const category = tr(GROUP_LABEL_KEY[b.group]).toLocaleLowerCase(locale);
+      return { emoji: `🎣${CATEGORY_EMOJI[b.group]}`, label: tr('badge.caughtGroup', { category }) };
+    }
     return { emoji: '🤝', label: tr('badge.helped', { count: b.count }) };
   };
   const items: BadgeItem[] = statuses.map((b) => ({
@@ -95,6 +104,11 @@ export default function BadgesScreen({
       <Text style={styles.subtitle}>
         {tr('badges.progress', { earned: earnedCount, total: items.length })}
       </Text>
+      {county ? (
+        <Text style={styles.subtitle}>
+          {tr('badges.county', { county, ...countyCompletion(records, species) })}
+        </Text>
+      ) : null}
 
       <ScrollView contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
         {items.map((b) => (

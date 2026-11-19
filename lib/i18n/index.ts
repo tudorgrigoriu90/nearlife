@@ -463,6 +463,10 @@ export const en = {
   'badge.recognized.one': 'Recognised {count} species in the quiz',
   'badge.recognizedGroup': 'Recognised {count} {category}',
   'badge.recognizedGroup.one': 'Recognised {count} {category}',
+  'badge.caught': 'Caught {count} species',
+  'badge.caught.one': 'Caught {count} species',
+  'badge.caughtGroup': 'Caught one of the {category}',
+  'badges.county': '{county}: {have} of {total} species spotted',
 
   // Impact (T-081)
   'catchSpot.title': 'Catch {species}',
@@ -1031,6 +1035,10 @@ export const sv: Catalog = {
   'badge.recognized.one': 'Kände igen {count} art i quizet',
   'badge.recognizedGroup': 'Kände igen {count} {category}',
   'badge.recognizedGroup.one': 'Kände igen {count} {category}',
+  'badge.caught': 'Fångat {count} arter',
+  'badge.caught.one': 'Fångat {count} art',
+  'badge.caughtGroup': 'Fångat en av {category}',
+  'badges.county': '{county}: {have} av {total} arter sedda',
 
   // Impact (T-081)
   'catchSpot.title': 'Fånga {species}',

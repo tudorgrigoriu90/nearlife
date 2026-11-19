@@ -1431,6 +1431,7 @@ export default function App() {
           records={collection.records}
           recognized={recognized}
           remembered={rememberedBadges}
+          county={hometown?.name ?? null}
           onDone={() => setShowBadges(false)}
         />
         <StatusBar style="auto" />
