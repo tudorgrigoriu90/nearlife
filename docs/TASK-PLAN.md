@@ -4421,6 +4421,19 @@ document until it is started, when it takes the next free `T-###`.
     unknown species is refused, and that after a removal the old code is refused and the code
     changed. Tests: 3 in a real Postgres, 1 screen.
 
+- **T-287 · Documents that describe the shipped product** — *Claude · S · `DONE` · deps: — · review B-57*
+  - ✅ README: Full Game 49 SEK, Family and packs in SEK, 10,078 species / 99.75 %, v1 is Sweden;
+    `docs/README.md` scope is Sweden; CLAUDE.md's headline is the current catalogue.
+  - ✅ `pipeline/README.md` lists the real workflows; the placeholder `pipeline/run.py` (and its
+    smoke test) and the empty `app/` directory are deleted; CONTRIBUTING says there is no router.
+  - ✅ `supabase/README.md` names all three Edge Functions and their secrets and points at the
+    Database migrate workflow instead of a hand-kept list of 3 migrations.
+  - ✅ ECONOMY and the USER-FLOWS Store wireframe promise no depth tiers and quote packs in SEK;
+    pipeline docstrings no longer carry the 6,824 / 18-locale counts; the component "not visually
+    verified" notes point at T-141.
+  - ✅ `__tests__/catalogueDocs.test.js` checks README and CLAUDE.md against
+    `pipeline/data/catalogue.json` meta, and each corrected row.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

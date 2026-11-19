@@ -25,7 +25,7 @@ import { CATEGORY_EMOJI, GROUP_LABEL_KEY, speciesGlyph } from './speciesVisual';
 // species show as a greyed silhouette; category filter chips narrow the grid. Empty and loading
 // states included. All chrome runs through i18n (invariant #7); species names localize via
 // commonNameFor. Collection is passed in — an in-memory store now (T-116), Supabase later (T-056).
-// NOTE: logic is unit-tested (lib/almanac.test.ts); on-device layout not yet visually verified.
+// NOTE: logic is unit-tested (lib/almanac.test.ts); layout awaits the device check (T-141).
 
 function TierOverlay({ entry }: { entry: AlmanacEntry }) {
   // ● Spotted / ◐ Caught / ◑ Helped — lit glyphs for reached tiers, faint for unreached.

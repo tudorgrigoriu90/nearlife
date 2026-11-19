@@ -25,7 +25,7 @@ import SpeciesCard from './SpeciesCard';
 // (lib/onboarding.ts) and advances on the CTA. Each permission ask is preceded by our own
 // pre-prompt explainer so it has context (USER-FLOWS §1). Onboarding ends with an immediate
 // first Spotted card so the payoff is felt in the first minute (T-024). NOTE: OS permission
-// behaviour needs a device run to verify; the flow machine + selection logic are unit-tested.
+// behaviour awaits the device check (T-141); the flow machine + selection logic are unit-tested.
 
 export interface OnboardingResult {
   locationOutcome: PermissionOutcome;

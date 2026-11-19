@@ -9,7 +9,7 @@ import { seasonKeyOf } from '../lib/season';
 // (lib/impact.ts), and the community's real totals for the season when there are enough of them
 // (lib/communityImpact.ts). Honest by construction (invariant #1): only real pledges are counted,
 // and without a usable community total the screen says so plainly rather than show a figure. No
-// upsell (invariant #4). NOTE: on-device layout not visually verified.
+// upsell (invariant #4). NOTE: layout awaits the device check (T-141).
 
 export default function ImpactScreen({
   locale = 'en',

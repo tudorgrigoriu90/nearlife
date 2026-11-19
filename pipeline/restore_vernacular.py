@@ -1,7 +1,7 @@
 """Resume vernacular names from the previous pipeline run's artifact (T-198).
 
 build_vernacular.py is resumable within a run, but data/vernacular.json lives only in the run
-artifact, so a retried run started from a clean checkout and re-fetched all 6,824 species (~52 min,
+artifact, so a retried run started from a clean checkout and re-fetched every species (~52 min for 6,824,
 two GBIF calls each). This restores the newest earlier `pipeline-data` artifact's vernacular.json
 before the fetch, which then only does what is still pending.
 

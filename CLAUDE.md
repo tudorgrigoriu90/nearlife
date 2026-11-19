@@ -1,9 +1,9 @@
 # Way of Working — Nearby (nearlife)
 
 > **v1 scope (Director, 2026-08-18 — T-177):** **Sweden only.** Every species that clears the
-> T-136 noise filter ships — **8,064 species**, fauna and flora, carrying **99.87%** of all
+> T-136 noise filter ships — **10,078 species**, fauna and flora, carrying **99.75%** of all
 > recorded observations (6,824 until T-194 added well-recorded local species, Director
-> 2026-10-31; 10,078 / 99.75% since T-268 stopped GBIF's facet cap from hiding species, 2026-11-18). There is **no per-species human verification gate**: the noise filter
+> 2026-10-31; 8,064 / 99.87% until T-268 stopped GBIF's facet cap from hiding species, 2026-11-18). There is **no per-species human verification gate**: the noise filter
 > is the quality bar. The other four Nordic countries are v2. The 54-species Kronoberg set
 > remains the content-voice benchmark, not the catalogue. **All shipped content is translated
 > into the full immigrant-language roster, free for every user (T-178)** — no language paywall.

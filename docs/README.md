@@ -37,7 +37,7 @@ avoid duplication.
 Does passive collecting feel *rewarding* or *hollow*? Everything else is execution; this is
 the thesis. The Kronoberg fake-it prototype existed to answer it before the data layer was built.
 
-**v1 scope:** the five Nordic countries — Sweden, Norway, Denmark, Finland, Iceland — with as many
-genuinely encounterable species as the data supports, fauna and flora, noise filtered (**T-167**).
+**v1 scope:** Sweden only (**T-177**) — every species that clears the noise filter, fauna and
+flora. Norway, Denmark, Finland and Iceland are v2.
 The 54-species Kronoberg set is the validation prototype and the content-quality benchmark, not
 the shipping catalogue.

@@ -5,7 +5,7 @@ reads "Lutra lutra" as though that were what people call it. Names are the most 
 app and the last big gap in v1.
 
 GBIF's /species/{key}/vernacularNames returns **every language it holds in one call**, so this is
-6,824 calls for all 18 locales rather than 18 separate passes. Its language codes are ISO 639-3
+one call per species for every locale rather than a pass per locale. Its language codes are ISO 639-3
 ("swe"), sometimes 639-1 ("sv"), so both are accepted — and anything unmapped is **dropped rather
 than guessed**, because putting a name in front of the wrong reader is worse than showing none.
 

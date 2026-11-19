@@ -1,7 +1,7 @@
 """Localised give/protect/habitat templates and season phrasing (T-180).
 
 `give`, `protect` and the habitat half of `whenAndHow` are taxon templates, not per-species text —
-so roughly 46 strings translate all three fields for every one of the 6,824 shipped species. With
+so roughly 46 strings translate all three fields for every shipped species. With
 facts sourced per language rather than translated (T-179), this file *is* the translation job.
 
 The season phrase deliberately is not a translated string. English composes it — "from May to

@@ -27,9 +27,8 @@ locally before every push: pushes go straight to `main`, so CI runs *after* the 
 
 | Path | Purpose |
 |------|---------|
-| `App.tsx`, `index.ts` | App entry (expo-router / `app/` routes introduced when multi-screen nav lands) |
-| `app/` | Screens / routes (per [USER-FLOWS.md](docs/USER-FLOWS.md)) |
-| `components/` | Reusable UI components |
+| `App.tsx`, `index.ts` | App entry; `App.tsx` switches between screens itself (there is no router) |
+| `components/` | Screens and UI components (per [USER-FLOWS.md](docs/USER-FLOWS.md)) |
 | `lib/` | Non-UI logic: Supabase client, data access, domain helpers (unit-tested) |
 | `pipeline/` | Python data pipeline (GBIF/OSM → Supabase); see [TSD §6](docs/TSD.md) |
 | `supabase/` | Database migrations, Edge Functions, seed data |

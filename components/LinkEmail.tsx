@@ -8,7 +8,7 @@ import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n'
 // reinstall or a second device; linking an email (Supabase sends a confirmation) makes the
 // collection durable. The AuthGateway is injected so this is fully unit-testable without a live
 // Supabase. The tested state machine (validate → signed-in → not-already-linked → link) lives in
-// lib/accountLinking; this screen only renders it. NOTE: on-device layout not visually verified.
+// lib/accountLinking; this screen only renders it. NOTE: layout awaits the device check (T-141).
 
 const FAILURE_KEY: Record<LinkFailure, TranslationKey> = {
   'invalid-email': 'link.error.invalid',

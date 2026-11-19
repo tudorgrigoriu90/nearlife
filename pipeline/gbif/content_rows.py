@@ -36,7 +36,7 @@ def build_content_rows(
 
     Each item carries its own ``locale`` (T-181/T-183). The ``locale`` argument is only the fallback
     for payloads written before that field existed. Stamping every row with one locale instead would
-    collapse all 18 languages onto the same dedupe key and silently keep whichever arrived first —
+    collapse all the languages onto the same dedupe key and silently keep whichever arrived first —
     a successful-looking load that discards seventeen languages of work.
 
     ``curated_id_by_gbif_key`` lists the species the database already holds under a curated id

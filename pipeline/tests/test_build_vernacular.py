@@ -1,8 +1,8 @@
 """The vernacular-name ingest (T-188) — pure parts only, no network.
 
-6,824 species is ~40 minutes of polite GBIF calls, so the job has to be resumable: a failure at
+~10,000 species is over an hour of polite GBIF calls, so the job has to be resumable: a failure at
 species 6,000 must not throw away the first 5,999. And because coverage is expected to be very
-uneven across the 18 locales, the run has to *report* what it got rather than let anyone assume.
+uneven across the locales, the run has to *report* what it got rather than let anyone assume.
 """
 
 import sys

@@ -17,7 +17,7 @@ import { LIVE_EVENT_META } from './liveEventVisual';
 // Kronoberg seed list via the tested `thisWeek` logic (T-111). All chrome strings run through i18n (T-121); species names
 // and content localize in T-122. NEW markers reflect the user's collection via `spottedIds`
 // (T-028). This surface is fully self-contained — it never depends on notifications, proving the
-// app isn't notification-driven. NOTE: not yet visually verified on a device.
+// app isn't notification-driven. NOTE: layout awaits the device check (T-141).
 
 interface RowData {
   species: Species;

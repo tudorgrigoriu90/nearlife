@@ -6,7 +6,7 @@ import { createTranslator, type Locale } from '../../lib/i18n';
 // minimization — never a full date of birth). The caller maps the year to an AgePath (lib/ageGate)
 // and routes the restricted, minimal-data path for under-13s. General-audience, not a kids-category
 // app: no one is blocked — the year only decides whether behavioural analytics can be offered.
-// NOTE: on-device keyboard/layout not visually verified; the validation + submit are unit-tested.
+// NOTE: keyboard and layout await the device check (T-141); the validation + submit are unit-tested.
 
 const MAX_PLAUSIBLE_AGE = 120;
 

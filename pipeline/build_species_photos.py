@@ -1,6 +1,6 @@
 """Give every catalogue species a licence-clear hero photo, hosted in Storage (T-202).
 
-For each of the 6,824 shipped species (data/catalogue.json) it asks Wikipedia for the article's lead
+For each shipped species (data/catalogue.json) it asks Wikipedia for the article's lead
 image, keeps it only if the licence is commercial-safe (CC0 / CC BY / CC BY-SA, invariant #8),
 re-hosts the ~400 px thumbnail in the `species-media` bucket, and records url + author + licence +
 source page in `public.species_media`.

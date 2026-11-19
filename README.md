@@ -53,9 +53,9 @@ see [docs/TSD.md](docs/TSD.md).
 
 One-time premium, no subscription, **no ads — ever**. The freemium experience is anchored to
 your **hometown region** — derived from your phone's location at signup, set once: **Free**
-(full Spotted tier + 3 catches per season) → **Full Game $9.99** (unlimited catching, all
-depth). Other regions are paid packs for travelers; Family, region packs, and World Pass ship
-post-validation (v2). Details in [docs/ECONOMY.md](docs/ECONOMY.md).
+(full Spotted tier + 3 catches per season) → **Full Game 49 SEK** (unlimited catching, bird song,
+offline home county). **Family** (99 SEK) shares the Full Game with up to 5 people; other counties
+are 29 SEK packs, or 99 SEK for all of Sweden. Details in [docs/ECONOMY.md](docs/ECONOMY.md).
 
 ---
 
@@ -172,9 +172,9 @@ Docs follow the Helix studio taxonomy. Start with the index: **[docs/README.md](
 
 ## Scope (v1)
 
-**Sweden.** Every species that clears the GBIF noise filter ships — **6,824 species**, fauna and
-flora, spanning all 21 counties. That set carries **99.63%** of all observations recorded in
-Sweden; the ~5,000 species filtered out are vagrants, escapees and single-record noise worth 0.37%.
+**Sweden.** Every species that clears the GBIF noise filter ships — **10,078 species**, fauna and
+flora, spanning all 21 counties. That set carries **99.75%** of all observations recorded in
+Sweden; the ~5,500 species filtered out are vagrants, escapees and single-record noise worth 0.25%.
 
 There is no per-species human review gate: the noise filter is the quality bar (Director decision,
 T-177). Norway, Denmark, Finland and Iceland are v2 — their ingest already works, it is scope that
@@ -187,5 +187,6 @@ was cut, not capability.
 
 > Does passive collecting feel *rewarding* or *hollow*?
 
-Work is now on widening the catalogue to the Nordics (T-167) — regional ingest, noise filtering
-against each country's authoritative checklist, and content at scale.
+v1 is the whole of Sweden (T-177). The work now is the pre-launch fixes from the November code
+review ([docs/REVIEW-2026-11.md](docs/REVIEW-2026-11.md)), tracked as tasks in
+[docs/TASK-PLAN.md](docs/TASK-PLAN.md).

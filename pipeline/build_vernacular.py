@@ -1,11 +1,11 @@
 """Fetch vernacular (common) names for every shipped species, in every locale (T-188).
 
-Card titles are the most visible text in the app, and without this every one of the 6,824 shipped
+Card titles are the most visible text in the app, and without this every shipped
 species shows its Latin binomial. GBIF's /species/{key}/vernacularNames returns all languages in a
-single call, so one pass covers all 18 locales.
+single call, so one pass covers every locale.
 
-Resumable on purpose: ~6,824 polite calls is around 40 minutes, and a failure at species 6,000 must
-not discard the first 5,999. Results are written incrementally to data/vernacular.json and a re-run
+Resumable on purpose: one polite call per species (~10,000) takes over an hour, and a failure at
+species 6,000 must not discard the first 5,999. Results are written incrementally to data/vernacular.json and a re-run
 skips whatever is already recorded — including species recorded as having *no* name, since "GBIF
 holds nothing here" is an answer rather than a gap to retry forever.
 

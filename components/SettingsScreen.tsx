@@ -15,7 +15,7 @@ import {
 // for privacy controls — granular consent toggles that default off (no pre-ticked boxes, no ad
 // consent), a language override, and the required data attribution. Consent/locale state is owned
 // by the app; this screen is presentational. Data export + account deletion rows land with
-// T-092/T-093. NOTE: on-device layout not visually verified.
+// T-092/T-093. NOTE: layout awaits the device check (T-141).
 
 const CONSENT_KEY: Record<ConsentKind, TranslationKey> = {
   location: 'consent.location',

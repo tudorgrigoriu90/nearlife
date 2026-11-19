@@ -63,8 +63,8 @@ had is fun. So:
     a code.
 - **Region packs in v1 (Director, 2026-10-29).** v1 is Sweden only, so a region pack opens
   another **county**, and the World Pass becomes an **all-of-Sweden** pass. **Prices (Director,
-  2026-10-30): 29 SEK per county, 99 SEK for all of Sweden.** These replace the $2.99 / $19.99
-  figures in the table below, which predate the 49 SEK anchor. All of Sweden costs the same as
+  2026-10-30): 29 SEK per county, 99 SEK for all of Sweden.** They replaced the original $2.99 /
+  $19.99 figures, which predated the 49 SEK anchor. All of Sweden costs the same as
   Family, and buying it is cheaper than opening four counties one by one.
   - **Packs open places, not catches (2026-10-30).** A county pack or All of Sweden decides
     *where* you can spot and catch. The Full Game (or Family) decides *how many* catches you get.
@@ -79,8 +79,8 @@ had is fun. So:
 | SKU | Price | Notes |
 |-----|-------|-------|
 | **Family, shared almanac** | (included in Family) | The v2 half of Family: a **shared almanac / Caught / Helped / impact** for the household, so it plays as a team. This is the complex part (shared collection model, member activity), which is why v1 ships the shared unlock alone. |
-| **Region pack** | $2.99 | See "Regions are growth spend, not DLC revenue" below. |
-| **World Pass** | $19.99 | All current + future regions. |
+| **Region pack** | 29 SEK | One county. See "Regions are growth spend, not DLC revenue" below. |
+| **World Pass** | 99 SEK | In v1 this is All of Sweden; in v2, all current + future regions. |
 
 ---
 
@@ -126,8 +126,8 @@ cleaner funnel with zero tonal cost.
   **in the home region only**.
 - **Hometown is locked.** Freely switching it would be a free tour of the world and no pack
   would ever sell. Changeable only via a support request for genuine relocation.
-- **Every other region is paid:** Region packs ($2.99) for travelers, expats, and
-  collectors; World Pass ($19.99) for everything.
+- **Every other region is paid:** a county pack (29 SEK) for travelers, expats, and
+  collectors; All of Sweden (99 SEK) for everything.
 - **What a new region costs us — kept light by design:** the data side is automated
   (GBIF/OSM pipeline). The content side stays cheap because Helped advice is species-level,
   defaults to universally safe actions, and always highlights "follow local law" (rules in

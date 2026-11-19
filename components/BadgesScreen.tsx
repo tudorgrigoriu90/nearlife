@@ -9,7 +9,7 @@ import { CATEGORY_EMOJI, GROUP_LABEL_KEY } from './speciesVisual';
 // pure core (lib/badges.ts). Shows the full badge set — earned ones lit, the rest as locked goals
 // so there's always something to reach for, with progress on each locked one. Group tiers
 // (T-212), the season opener and spotted/helped milestones. No upsell (invariant #4).
-// NOTE: on-device layout not visually verified.
+// NOTE: layout awaits the device check (T-141).
 
 interface BadgeItem {
   id: string;
