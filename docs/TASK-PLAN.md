@@ -4842,12 +4842,18 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Almanac cells say "European Robin, Spotted, Caught" or "Not yet spotted"; the tier totals say
     "Spotted: 3". Tests: scan 1, almanac 3.
   - Largest font size and TalkBack added to the device check (T-141).
-- **T-330 · Respect the system's reduced-motion setting** — *Claude · S · `TODO` · deps: — · review I-25*
+- **T-330 · Respect the system's reduced-motion setting** — *Claude · XS · `DONE` · deps: — · review I-25*
   - With `AccessibilityInfo.isReduceMotionEnabled()` true, nothing animates for decoration (banners,
     transitions); minigame motion is the play itself and stays, slowed (T-331).
-- **T-331 · Easy mode for every minigame** — *Claude · M · `TODO` · deps: — · review I-25*
+  - ✅ Found: the app has no decorative animation at all (no `Animated`, `LayoutAnimation` or
+    Reanimated); only the five minigames move, on timers, and that motion is the game. So the
+    setting is honoured where it matters by T-331, which starts the games in easy mode under it.
+  - ✅ `__tests__/reducedMotion.test.js` fails on any file that animates without reading
+    `useReducedMotion` (shown red on a throwaway file), so decoration cannot arrive ungated.
+- **T-331 · Easy mode for every minigame** — *Claude · M · `TODO` · deps: T-330 · review I-25*
   - A Settings switch: double tolerance and no time limit in all five games, so a catch never
-    depends on fine motor timing. The result counts the same (no lesser badge).
+    depends on fine motor timing. The result counts the same (no lesser badge). On by default
+    when the system asks for reduced motion (`useReducedMotion`).
 
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
