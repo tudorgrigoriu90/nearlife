@@ -5079,6 +5079,17 @@ document until it is started, when it takes the next free `T-###`.
     clears it in memory) and the export's device section lists it as `nameTrainer`.
   - ✅ Tests: schedule and languages 6, screen 3, hook 1, Almanac entry 1, app flow 1.
 
+- **T-352 · "Often confused with" on the card** — *Claude · XS · `DONE` · deps: — · review F-13*
+  - Done when the section shows when at least one lookalike has a photo, and never shows the same
+    photo twice (as T-253).
+  - ✅ `lib/confusedWith.ts` (pure): up to three species of the same genus in the county, each with
+    a photo, the commonest there first; the T-253 picture check is shared with the quiz (moved
+    here with `genusOf`). Only the genus counts: the quiz falls back to anything of the same group
+    to fill four choices, but a card claiming a moose is "often confused with" a roe deer would be
+    wrong, so a species with no genus mate in the county shows no section.
+  - ✅ The card lists them with photo and name; each opens its own card. Tests: model 3,
+    component 2, card 1.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

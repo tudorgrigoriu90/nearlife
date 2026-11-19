@@ -25,6 +25,7 @@ import { buildShareMessage } from '../lib/shareSpecies';
 import type { SpeciesContent } from '../lib/species/content';
 import type { IucnStatus, LegalStatus, RedlistSeStatus, Month, Species } from '../lib/species/types';
 import FieldNotes from './FieldNotes';
+import ConfusedWith from './ConfusedWith';
 import type { FieldNote } from '../lib/fieldNotes';
 import { INVASIVE_REPORT_URL } from '../lib/legal';
 import DualText from './DualText';
@@ -66,6 +67,8 @@ export default function SpeciesCard({
   onMarkDone,
   notes = [],
   onAddNote,
+  lookalikes = [],
+  onOpenSpecies,
   nearbyNote,
   soundSource,
   county = null,
@@ -112,6 +115,9 @@ export default function SpeciesCard({
   /** This species' field notes and how to add one (T-347); shown once the species is spotted. */
   notes?: FieldNote[];
   onAddNote?: (date: string, text: string) => boolean;
+  /** "Often confused with" (T-352 · review F-13): `confusedWith`'s picks, each opening its card. */
+  lookalikes?: Species[];
+  onOpenSpecies?: (species: Species) => void;
   /** Small caption under the find-nearby CTA — e.g. the free-catch counter (T-034). */
   nearbyNote?: string;
   /** Where a bird's recording comes from (T-246). Absent: no song button. Playable with the Full
@@ -391,6 +397,8 @@ export default function SpeciesCard({
             })}
           </View>
         </View>
+
+        {onOpenSpecies ? <ConfusedWith locale={locale} species={lookalikes} onOpen={onOpenSpecies} /> : null}
 
         {onReportMistake ? (
           <Pressable onPress={onReportMistake} accessibilityRole="button" style={styles.report}>

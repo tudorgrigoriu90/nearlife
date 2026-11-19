@@ -373,3 +373,13 @@ describe('SpeciesCard field notes', () => {
     expect(screen.queryByTestId('field-notes')).toBeNull();
   });
 });
+
+// T-352 · review F-13: "Often confused with" opens the lookalike's card.
+it('shows "Often confused with" and opens the lookalike', async () => {
+  const other = KRONOBERG_SPECIES.find((s) => s.id !== swift.id)!;
+  const onOpenSpecies = jest.fn();
+  await render(<SpeciesCard species={swift} lookalikes={[other]} onOpenSpecies={onOpenSpecies} />);
+  expect(screen.getByText(tr('card.confusedWith'))).toBeTruthy();
+  await fireEvent.press(screen.getByLabelText(commonNameFor(other, 'en')));
+  expect(onOpenSpecies).toHaveBeenCalledWith(other);
+});

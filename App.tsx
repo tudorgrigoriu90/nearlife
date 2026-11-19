@@ -69,6 +69,7 @@ import { AsyncStorageFieldNotesStore } from './lib/fieldNotesStore';
 import NameTrainerScreen from './components/NameTrainerScreen';
 import { useNameTrainer } from './components/useNameTrainer';
 import { trainerLocale } from './lib/nameTrainer';
+import { confusedWith } from './lib/confusedWith';
 import { AsyncStorageNameTrainerStore } from './lib/nameTrainerStore';
 import { useNotifPrefs } from './components/useNotifPrefs';
 import { SupabaseNotifPrefsGateway } from './lib/notifPrefsGateway';
@@ -1636,6 +1637,8 @@ export default function App() {
           onMarkDone={(species) => collection.markHelpedDone(species.id)}
           notes={notesFor(fieldNotes.notes, selected.id)}
           onAddNote={(date, text) => fieldNotes.add(selected.id, date, text)}
+          lookalikes={confusedWith(selected, almanacSpecies)}
+          onOpenSpecies={setSelected}
           onPledge={(species, kind) => {
             // Helped tier: one-tap honor-system pledge (GDD §5) → mark Helped + confirm.
             collection.help(species.id, kind);

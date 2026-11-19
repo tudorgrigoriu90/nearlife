@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { normaliseName } from './almanac';
+import { genusOf, pictureKey } from './confusedWith';
 import type { ContentLocale } from './i18n/contentLocale';
 import { groupOf } from './species/group';
 import { commonNameFor } from './species/localized';
@@ -31,7 +32,6 @@ export function findByExactName(pool: Species[], input: string, locale: ContentL
   return pool.filter((s) => namesOf(s, locale).some((n) => normaliseName(n) === wanted));
 }
 
-const genusOf = (s: Species) => s.scientificName.trim().split(/\s+/)[0]?.toLowerCase() ?? '';
 
 /** A small deterministic generator, so the same seed gives the same choices (mulberry32). */
 function seededRandom(seed: string): () => number {
@@ -98,11 +98,6 @@ export function pickLookalikes(
     picks.push(s);
   }
   return picks;
-}
-
-function pictureKey(s: Species): string {
-  const p = photoFor(s);
-  return p ? p.sourceUrl || p.url : `none:${s.id}`;
 }
 
 /** The four choices in a stable, seed-dependent order. */
