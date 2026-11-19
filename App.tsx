@@ -32,6 +32,7 @@ import { usePushRegistration } from './components/usePushRegistration';
 import { useThisWeek } from './components/useThisWeek';
 import { useAlmanacCatalogue } from './components/useAlmanacCatalogue';
 import { useNotificationPermissionSync } from './components/useNotificationPermissionSync';
+import { usePurchaseRereads } from './components/usePurchaseRereads';
 import {
   onNotificationTap,
   requestLocationAccess,
@@ -425,6 +426,12 @@ export default function App() {
     if (consentLoaded) crashReporter.setConsent(hasConsent(consent, 'analytics'));
   }, [crashReporter, consent, consentLoaded]);
   // Every purchase screen reports the same funnel steps (T-087).
+  // Cancelled when the unlock arrives or the app goes away (T-302 · review B-47).
+  const startPurchaseRereads = usePurchaseRereads(
+    refreshEntitlements,
+    JSON.stringify(entitlements),
+    AFTER_PURCHASE_REREAD_MS,
+  );
   const purchases = useMemo(
     () => new TrackingPurchaseGateway(purchaseGateway(), { track }),
     [track],
@@ -1157,7 +1164,7 @@ export default function App() {
             setTab('thisWeek');
           }}
           onPurchased={() => {
-            for (const ms of AFTER_PURCHASE_REREAD_MS) setTimeout(refreshEntitlements, ms);
+            startPurchaseRereads();
           }}
           onDone={() => setShowCounties(false)}
         />
@@ -1174,7 +1181,7 @@ export default function App() {
           gateway={purchases}
           entitlements={entitlements}
           onPurchased={() => {
-            for (const ms of AFTER_PURCHASE_REREAD_MS) setTimeout(refreshEntitlements, ms);
+            startPurchaseRereads();
           }}
           onDone={() => setShowStore(false)}
         />

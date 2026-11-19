@@ -4581,6 +4581,12 @@ document until it is started, when it takes the next free `T-###`.
     engine now say H3 is adopted but not shipped, and returns with the first cell-level feature;
     the README no longer lists it.
 
+- **T-302 · Purchase re-reads stop when the unlock arrives** — *Claude · XS · `DONE` · deps: T-285 · review B-47*
+  - ✅ The re-reads after a payment (every 5 s for 2 minutes, T-285) were `setTimeout`s fired and
+    forgotten. `usePurchaseRereads` keeps the handles, cancels them as soon as the entitlements
+    change (the unlock arrived) or the app goes away, and a second purchase restarts the schedule
+    instead of adding another. `App.tsx` has no `setTimeout` left. Tests: 4.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
