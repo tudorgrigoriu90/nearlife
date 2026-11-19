@@ -1767,6 +1767,8 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
     Settings (consent, export, language). Fix layout/runtime issues so testers get a working app.
     Confirm Supabase anonymous auth + collection persistence work on-device (closes the T-027
     device-run gap). This pays down the "not visually verified" debt across the screens.
+  - Also at the largest system font size and with TalkBack on (T-329 · review I-25): every screen
+    still fits, and every control is read out by name.
 - **T-162 · Align SDK-57 dependencies + add expo-dev-client (dev-build enablement)** — *Claude · S · `DONE` · deps: T-140 · [TSD §1](TSD.md)*
   - ✅ Expo Go can't run this SDK-57 app, so device testing needs an EAS **dev build** — which needs
     `expo-dev-client`. Installing it required aligning the SDK-57 patch set: `expo` ~57.0.2 → ~57.0.10,
@@ -4828,6 +4830,24 @@ document until it is started, when it takes the next free `T-###`.
 - **T-328 · Hunting-season months per county** — *Director · XS · `TODO` · deps: — · review I-22 (b)*
   - Fill the table T-327 reads from Naturvårdsverket's published hunting seasons (moose is the
     largest: early September in most counties). One row per county, months only.
+
+- **T-329 · Every control has a name a screen reader can say** — *Claude · S · `DONE` · deps: — · review I-25 (labels)*
+  - Done when an automated check finds a role and a name for every button, and the tier marks are
+    read as words.
+  - ✅ `__tests__/accessibleNames.test.js` parses every `Pressable` in `components/` and `App.tsx`:
+    it needs `accessibilityRole` and either `accessibilityLabel` or readable text inside (a
+    translated string, literal words, or a value that is not a glyph). It found three: the bird and
+    fish play areas (only an emoji inside; labelled with their hint) and the photo-only quiz
+    options ("Photo 1"…, never the species, which would answer the question).
+  - ✅ Almanac cells say "European Robin, Spotted, Caught" or "Not yet spotted"; the tier totals say
+    "Spotted: 3". Tests: scan 1, almanac 3.
+  - Largest font size and TalkBack added to the device check (T-141).
+- **T-330 · Respect the system's reduced-motion setting** — *Claude · S · `TODO` · deps: — · review I-25*
+  - With `AccessibilityInfo.isReduceMotionEnabled()` true, nothing animates for decoration (banners,
+    transitions); minigame motion is the play itself and stays, slowed (T-331).
+- **T-331 · Easy mode for every minigame** — *Claude · M · `TODO` · deps: — · review I-25*
+  - A Settings switch: double tolerance and no time limit in all five games, so a catch never
+    depends on fine motor timing. The result counts the same (no lesser badge).
 
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what

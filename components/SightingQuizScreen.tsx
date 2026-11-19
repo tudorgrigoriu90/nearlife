@@ -148,12 +148,14 @@ export default function SightingQuizScreen({
 
   const photoGrid = (options: Species[], onPick: (picked: Species) => void) => (
     <View style={styles.grid}>
-      {options.map((option) => (
+      {options.map((option, i) => (
         <Pressable
           key={option.id}
           testID={`quiz-option-${option.id}`}
           onPress={() => onPick(option)}
           accessibilityRole="button"
+          // The species stays unnamed: naming it would answer the question (T-329).
+          accessibilityLabel={tr('quiz.photoOption', { n: i + 1 })}
           style={styles.option}
         >
           <Image

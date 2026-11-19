@@ -70,6 +70,7 @@ export const en = {
     'tier.spotted': 'Spotted',
     'tier.caught': 'Caught',
     'tier.helped': 'Helped',
+    'almanac.undiscovered': 'Not yet spotted',
     // Species card (T-026)
     'card.give': 'Give',
     'card.listen': 'Listen',
@@ -268,6 +269,7 @@ export const en = {
     'quiz.noPhoto': 'We don’t have a photo of {name} yet, so we can’t quiz you on it.',
     'quiz.tomorrow': 'You’ve already tried {name} today. Try again tomorrow!',
     'quiz.question': 'Which of these did you see?',
+    'quiz.photoOption': 'Photo {n}',
     'quiz.added': 'Correct! {name} is now in your almanac.',
     'quiz.wrong': 'Not quite. This is what {name} looks like. Try again tomorrow.',
     'quiz.open': 'See the species',
@@ -527,6 +529,7 @@ export const sv = {
     'tier.spotted': 'Sedd',
     'tier.caught': 'Fångad',
     'tier.helped': 'Hjälpt',
+    'almanac.undiscovered': 'Inte sedd än',
     // Species card (T-026)
     'card.give': 'Ge',
     'card.listen': 'Lyssna',
@@ -722,6 +725,7 @@ export const sv = {
     'quiz.noPhoto': 'Vi har ingen bild av {name} än, så vi kan inte fråga om den.',
     'quiz.tomorrow': 'Du har redan försökt med {name} i dag. Försök igen i morgon!',
     'quiz.question': 'Vilken av de här såg du?',
+    'quiz.photoOption': 'Bild {n}',
     'quiz.added': 'Rätt! {name} finns nu i din almanacka.',
     'quiz.wrong': 'Inte riktigt. Så här ser {name} ut. Försök igen i morgon.',
     'quiz.open': 'Visa arten',

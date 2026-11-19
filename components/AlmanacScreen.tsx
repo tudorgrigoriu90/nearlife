@@ -84,12 +84,16 @@ function Cell({
 }) {
   const { species, discovered } = entry;
   const name = discovered ? commonNameFor(species, locale) : '—';
+  const tr = createTranslator(locale);
+  // Read as words (T-329 · review I-25): the overlay's ● ◐ ◑ would be spoken as shapes.
+  const reached = (['spotted', 'caught', 'helped'] as const).filter((k) => entry.tier[k]).map((k) => tr(`tier.${k}`));
+  const label = discovered ? [name, ...reached].join(', ') : tr('almanac.undiscovered');
   return (
     <Pressable
       style={[styles.cell, !discovered && styles.cellUndiscovered]}
       onPress={() => onSelect?.(species)}
       accessibilityRole="button"
-      accessibilityLabel={discovered ? commonNameFor(species, locale) : undefined}
+      accessibilityLabel={label}
     >
       <CellVisual species={species} discovered={discovered} />
       <Text style={styles.cellName} numberOfLines={1}>
@@ -314,7 +318,7 @@ const HABITAT_CHIPS: [Habitat, string, TranslationKey][] = [
 
 function TierStat({ glyph, label, count }: { glyph: string; label: string; count: number }) {
   return (
-    <View style={styles.tierStat}>
+    <View style={styles.tierStat} accessible accessibilityLabel={`${label}: ${count}`}>
       <Text style={styles.tierStatCount}>
         {glyph} {count}
       </Text>

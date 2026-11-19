@@ -85,7 +85,12 @@ export default function TimingRingMinigame({
       onCancel={onCancel}
       onRetry={onRetry}
     >
-      <Pressable style={styles.tapLayer} onPress={onTap} accessibilityRole="button">
+      <Pressable
+        style={styles.tapLayer}
+        onPress={onTap}
+        accessibilityRole="button"
+        accessibilityLabel={tr('minigame.bird.hint')}
+      >
         <View style={[styles.targetRing, { transform: [{ scale: TARGET_SCALE }] }]} />
         <View style={[styles.ring, { transform: [{ scale }] }]} />
         <Text style={styles.diver}>{glyph ?? '🐦'}</Text>

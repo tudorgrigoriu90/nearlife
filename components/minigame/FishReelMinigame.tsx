@@ -92,6 +92,7 @@ export default function FishReelMinigame({
         onPressIn={() => (holdingRef.current = true)}
         onPressOut={() => (holdingRef.current = false)}
         accessibilityRole="button"
+        accessibilityLabel={tr('minigame.fish.hint')}
       >
         <View style={[styles.band, fishInBand ? styles.bandHot : null, { top: bandTop }]} />
         <Text style={[styles.fish, { top: fishTop }]}>{glyph ?? '🐟'}</Text>

@@ -252,3 +252,27 @@ describe('AlmanacScreen when the county could not be loaded', () => {
     expect(onRetry).toHaveBeenCalled();
   });
 });
+
+// T-329 · review I-25: a screen reader says the tiers in words, never "black circle".
+describe('AlmanacScreen cell names', () => {
+  const robin = KRONOBERG_SPECIES.find((s) => s.id === 'european-robin')!;
+  const record = (over: object) => ({
+    speciesId: robin.id, spottedAt: '2026-06-01T10:00:00Z', caughtAt: null, helpedAt: null,
+    helpedKind: null, primeBonus: false, ...over,
+  });
+
+  it('names the species and the tiers reached', async () => {
+    await render(<AlmanacScreen species={[robin]} records={[record({ caughtAt: '2026-06-02T10:00:00Z' })]} />);
+    expect(screen.getByLabelText(`European Robin, ${tr('tier.spotted')}, ${tr('tier.caught')}`)).toBeTruthy();
+  });
+
+  it('calls an undiscovered species not yet spotted, without naming it', async () => {
+    await render(<AlmanacScreen species={[robin]} records={[]} />);
+    expect(screen.getByLabelText(tr('almanac.undiscovered'))).toBeTruthy();
+  });
+});
+
+it('reads the tier totals as words and numbers (T-329)', async () => {
+  await render(<AlmanacScreen species={KRONOBERG_SPECIES.slice(0, 2)} records={[]} />);
+  expect(screen.getByLabelText(`${tr('tier.spotted')}: 0`)).toBeTruthy();
+});
