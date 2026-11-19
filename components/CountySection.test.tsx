@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 import CountySection, { monthRange } from './CountySection';
 import SpeciesCard from './SpeciesCard';
@@ -6,6 +6,7 @@ import type { CountyStats } from '../lib/countyStats';
 import { createTranslator } from '../lib/i18n';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
 import { contentFor } from '../lib/species/localized';
+import { INVASIVE_REPORT_URL } from '../lib/legal';
 
 const sv = createTranslator('sv');
 const warbler: CountyStats = {
@@ -135,5 +136,33 @@ describe('SpeciesCard out of season', () => {
   it('keeps the catch button in season', async () => {
     await render(<SpeciesCard species={swift} locale="sv" onFindNearby={jest.fn()} />);
     expect(screen.getByText(`${sv('card.findNearby')} →`)).toBeTruthy();
+  });
+});
+
+// T-336 · review F-01: an invasive species says so, with where to report it, and its give advice
+// and pledge are about not spreading it (generated advice could suggest letting it grow).
+describe('SpeciesCard invasive mark', () => {
+  const lupin = KRONOBERG_SPECIES.find((s) => s.category === 'plant')!;
+  const content = contentFor(lupin.id, 'en')!;
+
+  it('shows the legal line, the report link, and the invasive give advice and pledge', async () => {
+    const { Linking } = jest.requireActual('react-native');
+    const open = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    await render(
+      <SpeciesCard species={lupin} content={content} locale="en" legalStatus="invasive" onPledge={jest.fn()} />,
+    );
+    const tr = createTranslator('en');
+    expect(screen.getByTestId('card-invasive').props.children.join('')).toContain(tr('legal.invasive'));
+    expect(screen.getByText(tr('invasive.give'))).toBeTruthy();
+    expect(screen.queryByText(content.give)).toBeNull();
+    expect(screen.getByText(`✓ ${tr('card.pledgeInvasive')}`)).toBeTruthy();
+    await fireEvent.press(screen.getByText(tr('legal.reportSighting')));
+    expect(open).toHaveBeenCalledWith(INVASIVE_REPORT_URL);
+  });
+
+  it('says nothing and keeps its own advice for a species without a status', async () => {
+    await render(<SpeciesCard species={lupin} content={content} locale="en" onPledge={jest.fn()} />);
+    expect(screen.queryByTestId('card-invasive')).toBeNull();
+    expect(screen.getByText(content.give)).toBeTruthy();
   });
 });

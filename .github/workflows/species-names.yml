@@ -56,3 +56,8 @@ jobs:
       - name: Threat status in Sweden from the Swedish Red List (T-332)
         if: always()
         run: python pipeline/build_redlist_se.py
+
+      # GBIF, CC0 (DATA-SOURCING §10). Refuses to clear the marks if the answer comes back short.
+      - name: Invasive species of Union concern (T-336)
+        if: always()
+        run: python pipeline/build_legal_status.py

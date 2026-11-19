@@ -61,7 +61,11 @@ export interface Species {
   iucn?: IucnStatus;
   /** Sweden's own Red List category when near threatened or worse, or regionally extinct (T-332). */
   redlistSe?: RedlistSeStatus;
+  /** Protected by Swedish law (T-337) or on the EU invasive list (T-336); absent otherwise. */
+  legalStatus?: LegalStatus;
 }
+
+export type LegalStatus = 'protected' | 'invasive';
 
 export type IucnStatus = 'NT' | 'VU' | 'EN' | 'CR' | 'EW' | 'EX';
 export type RedlistSeStatus = 'NT' | 'VU' | 'EN' | 'CR' | 'RE';

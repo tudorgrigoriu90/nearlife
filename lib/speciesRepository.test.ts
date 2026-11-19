@@ -283,6 +283,13 @@ describe('mediaRowToPhoto (T-215)', () => {
     expect(catalogueRowToSpecies(base, 'sv').iucn).toBeUndefined();
   });
 
+  it('carries an invasive legal status, and ignores an unknown one (T-336)', () => {
+    const base = { id: 'gbif:3170247', scientific_name: 'Asclepias syriaca', common_name: null, local_name: null, category: 'plant' as const, rarity: 'common' as const, active_months: [7], occurrences: 2 };
+    expect(catalogueRowToSpecies({ ...base, legal_status: 'invasive' }, 'sv').legalStatus).toBe('invasive');
+    expect(catalogueRowToSpecies({ ...base, legal_status: 'banned' }, 'sv').legalStatus).toBeUndefined();
+    expect(catalogueRowToSpecies(base, 'sv').legalStatus).toBeUndefined();
+  });
+
   it('carries Sweden’s own Red List category beside it (T-332)', () => {
     const base = { id: 'gbif:1', scientific_name: 'Lutra lutra', common_name: null, local_name: null, category: 'mammal' as const, rarity: 'common' as const, active_months: [5], occurrences: 9 };
     expect(catalogueRowToSpecies({ ...base, iucn_status: 'NT', redlist_se: 'VU' }, 'sv')).toMatchObject({ iucn: 'NT', redlistSe: 'VU' });

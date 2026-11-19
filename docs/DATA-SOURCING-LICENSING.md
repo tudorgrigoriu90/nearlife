@@ -149,6 +149,20 @@ conservation institutions under licenses written for *research and non-commercia
   members. Data deficient and "not on the list" stay null: the list holds only red-listed taxa, so
   absence is not "least concern", and the card says nothing. Refreshed by `species-names.yml`.
 
+### 10. The EU invasive species list — invasive mark (T-336 · review F-01, decided 2026-11-19)
+- **Source:** "List of Invasive Alien Species of Union concern", Research Institute for Nature and
+  Forest (INBO), on GBIF (`79d65658-526c-4c78-9d24-1870d67f8439`, doi:10.15468/97aucj, updated
+  2025-09-30): the species of Regulation (EU) 1143/2014 and its implementing lists to the 2025
+  update. SLU Artdatabanken's Swedish copy (`7aaca3df…`) stops before the 2022 update, so it is not
+  used. The Union list applies in Sweden as in every member state.
+- **Licence:** CC0 1.0. **Decision: use.** The card names the regulation.
+- **Use:** `species.legal_status = 'invasive'` by backbone key (species rank only); the card shows
+  "Invasive in Sweden: do not plant, spread or release it", a link to the national reporting page
+  (invasivaarter.nu, confirmed by the Director in T-339), and give advice about not spreading it.
+- **Not yet:** Sweden's national list of invasive species of national concern, set in agency
+  regulations since the ordinance's annex was repealed (SFS 2025:840). Protected species (the
+  Species Protection Ordinance, SFS 2007:845) are T-337.
+
 ---
 
 ## Decision matrix
@@ -163,6 +177,7 @@ conservation institutions under licenses written for *research and non-commercia
 | Natural Earth admin-1 (public domain) | Yes | **Use — bundled county outlines for the hometown lookup** |
 | GADM geometry | No (non-commercial licence) | **Ids only — geometry never shipped** |
 | Swedish Red List 2025, SLU Artdatabanken (CC0, via GBIF) | Yes | **Use — threat status in Sweden on the card (T-332)** |
+| EU invasive species list, INBO (CC0, via GBIF) | Yes | **Use — invasive mark on the card (T-336)** |
 
 **Net:** the MVP can launch on **GBIF (filtered) + OSM**, with hand-curated/region-reviewed
 threat content — **no blocking dependency on eBird or the IUCN API.** That is the go path.

@@ -538,6 +538,7 @@ export default function App() {
   const cardSpecies = selected ? (almanacSpecies.find((s) => s.id === selected.id) ?? selected) : null;
   const cardThreat = cardSpecies?.iucn;
   const cardThreatSe = cardSpecies?.redlistSe;
+  const cardLegalStatus = cardSpecies?.legalStatus;
   // The season gate (T-268 · review B-26), on the species' active months in the viewed county.
   const seasonOf = (species: Species) =>
     catchSeason(
@@ -1512,6 +1513,7 @@ export default function App() {
           county={cardCounty}
           threat={cardThreat}
           threatSe={cardThreatSe}
+          legalStatus={cardLegalStatus}
           month={monthOf(new Date())}
           backAround={cardSeason && !cardSeason.open ? cardSeason.backAround : null}
           onBack={() => setSelected(null)}

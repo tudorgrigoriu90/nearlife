@@ -4930,6 +4930,31 @@ document until it is started, when it takes the next free `T-###`.
     live with `db-migrate.yml` `verify` (rolled back), which is the substitute until a second
     project is worth its cost.
 
+- **T-336 · Invasive mark on the card** — *Claude · S · `IN-PROGRESS` · deps: T-332 · review F-01 (invasive)*
+  - Done when `species.legal_status` is loaded, the card shows the line for every species with a
+    status, a test checks an invasive species, and the source is in DATA-SOURCING-LICENSING.md.
+  - ✅ Source: the EU Union list (Regulation (EU) 1143/2014, to the 2025 update) from INBO's CC0
+    GBIF checklist, 117 species; SLU's Swedish copy predates the 2022 update (DATA-SOURCING §10).
+  - ✅ Migration 0045 (`20261119000008_species_legal_status.sql`): `species.legal_status`
+    ('protected' / 'invasive'), returned by `region_catalogue`; `lib/database.types.ts` follows.
+    `pipeline/build_legal_status.py` writes only `invasive` (protected rows untouched) and refuses
+    to clear when fewer than 80 come back; `species-names.yml` runs it monthly.
+  - ✅ Card: "🚫 Invasive in Sweden: do not plant, spread or release it (EU Regulation 1143/2014)",
+    a "Report where you saw it" link (invasivaarter.nu), fixed give advice about not spreading it in
+    place of the generated one (which could suggest letting a plant grow), pledge "I won't spread it".
+  - ✅ Tests: pipeline 3, real Postgres 2, mapping 1, card 2.
+  - Remaining: apply 0045, run the first load, record how many catalogue species are marked.
+- **T-337 · Protected mark on the card** — *Claude + Director · M · `TODO` · deps: T-336 · review F-01 (protected)*
+  - Parse the Species Protection Ordinance (SFS 2007:845, as amended to SFS 2026:1504, from
+    data.riksdagen.se): annex 1 animals marked N or n and plants marked N, and annex 2 with its
+    levels (strict, reinforced, basic, limited) and county limits; family-level entries (all
+    orchids) by GBIF family. Every wild bird is protected (4 §) with hunting excepted, so birds get
+    their own wording. Write `legal_status = 'protected'` and a level; card copy per level.
+  - The Director signs off the copy before it ships (legal wording).
+- **T-339 · Confirm the invasive-species reporting link** — *Director · XS · `TODO` · deps: T-336*
+  - `INVASIVE_REPORT_URL` in `lib/legal.ts` is https://www.invasivaarter.nu/, which forwards to
+    Artportalen's form for wanted invasive species. Confirm it is the page to send people to.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

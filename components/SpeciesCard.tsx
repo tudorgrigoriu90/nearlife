@@ -23,7 +23,8 @@ import { commonNameFor, commonNameInLocale } from '../lib/species/localized';
 import { READ_ALOUD_ENABLED } from '../lib/readAloud';
 import { buildShareMessage } from '../lib/shareSpecies';
 import type { SpeciesContent } from '../lib/species/content';
-import type { IucnStatus, RedlistSeStatus, Month, Species } from '../lib/species/types';
+import type { IucnStatus, LegalStatus, RedlistSeStatus, Month, Species } from '../lib/species/types';
+import { INVASIVE_REPORT_URL } from '../lib/legal';
 import DualText from './DualText';
 import SpeciesHero from './SpeciesHero';
 import ReadAloud from './ReadAloud';
@@ -66,6 +67,7 @@ export default function SpeciesCard({
   month,
   threat,
   threatSe,
+  legalStatus,
   onBack,
   onReportMistake,
   record = null,
@@ -119,6 +121,9 @@ export default function SpeciesCard({
   threat?: IucnStatus;
   /** Sweden's own Red List category (T-332 · review I-35), on its own labelled line. */
   threatSe?: RedlistSeStatus;
+  /** Invasive (T-336) or protected (T-337) in Sweden: a line under the name, and for an invasive
+   * species give advice and a pledge about not spreading it. */
+  legalStatus?: LegalStatus;
   onBack?: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -212,6 +217,19 @@ export default function SpeciesCard({
               ⚠️ {tr(`redlistSe.${threatSe}` as TranslationKey)} · {tr('redlistSe.source')}
             </Text>
           ) : null}
+          {legalStatus === 'invasive' ? (
+            <>
+              <Text style={styles.threat} testID="card-invasive">
+                🚫 {tr('legal.invasive')}
+              </Text>
+              <Pressable
+                onPress={() => void Linking.openURL(INVASIVE_REPORT_URL).catch(() => undefined)}
+                accessibilityRole="link"
+              >
+                <Text style={styles.legalLink}>{tr('legal.reportSighting')}</Text>
+              </Pressable>
+            </>
+          ) : null}
           {mainMachineText ? (
             <Text style={[styles.mtNotice, { writingDirection: chromeDirection }]}>
               {tr('card.machineText')}
@@ -290,11 +308,19 @@ export default function SpeciesCard({
             )}
             <Section
               title={tr('card.give')}
-              input={dual(content.give, secondaryContent?.give)}
+              input={
+                // Generated give advice can suggest letting a plant grow: never for an invasive one.
+                legalStatus === 'invasive'
+                  ? dual(tr('invasive.give'), undefined)
+                  : dual(content.give, secondaryContent?.give)
+              }
               accent="give"
             />
             {onPledge && !tier.helped ? (
-              <PledgeButton label={tr('card.pledge')} onPress={() => onPledge(species, 'give')} />
+              <PledgeButton
+                label={tr(legalStatus === 'invasive' ? 'card.pledgeInvasive' : 'card.pledge')}
+                onPress={() => onPledge(species, 'give')}
+              />
             ) : record?.helpedKind === 'give' ? (
               <Text style={styles.pledged}>{tr('card.pledged')}</Text>
             ) : null}
@@ -467,6 +493,7 @@ const styles = StyleSheet.create({
   hero: { alignItems: 'center', paddingVertical: 20 },
   name: { marginTop: 8, fontSize: 26, fontWeight: '700', color: '#22331f', textAlign: 'center' },
   scientific: { marginTop: 2, fontSize: 14, fontStyle: 'italic', color: '#566658' },
+  legalLink: { marginTop: 2, fontSize: 13, fontWeight: '600', color: '#336f3c', textDecorationLine: 'underline' },
   threat: {
     marginTop: 6,
     fontSize: 13,

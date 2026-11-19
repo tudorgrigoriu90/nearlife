@@ -394,6 +394,7 @@ export type Database = {
           id: string
           in_catalogue: boolean
           iucn_status: string | null
+          legal_status: string | null
           rarity: string
           redlist_se: string | null
           scientific_name: string
@@ -410,6 +411,7 @@ export type Database = {
           id: string
           in_catalogue?: boolean
           iucn_status?: string | null
+          legal_status?: string | null
           rarity: string
           redlist_se?: string | null
           scientific_name: string
@@ -426,6 +428,7 @@ export type Database = {
           id?: string
           in_catalogue?: boolean
           iucn_status?: string | null
+          legal_status?: string | null
           rarity?: string
           redlist_se?: string | null
           scientific_name?: string
@@ -689,6 +692,7 @@ export type Database = {
           common_name: string
           id: string
           iucn_status: string
+          legal_status: string
           local_name: string
           month_counts: number[]
           occurrences: number
