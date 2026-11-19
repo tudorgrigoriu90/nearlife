@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { getSupabase } from './supabase';
 import type { Locale } from './i18n';
 import type { ContentLocale } from './i18n/contentLocale';
 
@@ -13,7 +13,7 @@ import {
   type SpeciesRepository,
   type SpeciesSummary,
 } from './speciesRepository';
-import { getSupabaseConfig, hasSupabaseConfig } from './supabaseConfig';
+import { hasSupabaseConfig } from './supabaseConfig';
 import type { PackSource } from './offlinePack';
 import { CachingSpeciesRepository, type CacheFiles } from './countyCache';
 
@@ -87,8 +87,9 @@ export class FallbackSpeciesRepository implements SpeciesRepository {
 /** The server reads the offline county pack needs (T-256); null without a backend. */
 export function createPackSource(): PackSource | null {
   if (!hasSupabaseConfig()) return null;
-  const { url, publishableKey } = getSupabaseConfig();
-  return new SupabaseSpeciesGateway(createClient(url, publishableKey));
+  // The app's one client (T-308 · review B-36): species tables are readable by anon and
+  // authenticated alike, so the user's session costs nothing here.
+  return new SupabaseSpeciesGateway(getSupabase());
 }
 
 /** The server source and the bundled set, separately: the offline pack sits between them (T-257). */
@@ -97,8 +98,7 @@ export function createPackSource(): PackSource | null {
  * when the server's data version changes (T-275 · review B-20). Without `cache` (tests), uncached.
  */
 function onlineRepository(cache?: CacheFiles): SpeciesRepository {
-  const { url, publishableKey } = getSupabaseConfig();
-  const gateway = new SupabaseSpeciesGateway(createClient(url, publishableKey));
+  const gateway = new SupabaseSpeciesGateway(getSupabase());
   const server = new SupabaseSpeciesRepository(gateway);
   return cache ? new CachingSpeciesRepository(server, cache, () => gateway.fetchDataVersion()) : server;
 }

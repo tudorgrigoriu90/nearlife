@@ -199,6 +199,19 @@ function entitlementSource(): EntitlementSource | null {
 // catching then works as before, with no spot to walk to.
 const CATCH_SPOT_STORE = new AsyncStorageCatchSpotStore();
 let catchSpotSourceInstance: CatchSpotSource | null | undefined;
+// Screen gateways, created once (T-308 · review B-35): a new one on every render re-ran the
+// screen's load (Family's my_household, Link email's getUser) each time App re-rendered. Only
+// reached on screens that exist with a backend.
+let signInGatewayInstance: SupabaseSignInGateway | undefined;
+const signInGateway = () => (signInGatewayInstance ??= new SupabaseSignInGateway(getSupabase()));
+let familyGatewayInstance: SupabaseFamilyGateway | undefined;
+const familyGateway = () => (familyGatewayInstance ??= new SupabaseFamilyGateway(getSupabase()));
+let authGatewayInstance: SupabaseAuthGateway | undefined;
+const authGateway = () => (authGatewayInstance ??= new SupabaseAuthGateway(getSupabase()));
+let accessCodeGatewayInstance: SupabaseAccessCodeGateway | undefined;
+const accessCodeGateway = () =>
+  (accessCodeGatewayInstance ??= new SupabaseAccessCodeGateway(getSupabase()));
+
 /** Recognitions on the account (T-299); null without a backend. */
 function recognitionGateway(): RecognitionGateway | null {
   return hasSupabaseConfig() ? new SupabaseRecognitionGateway(getSupabase()) : null;
@@ -1093,7 +1106,7 @@ export default function App() {
       <>
         <SignIn
           locale={locale}
-          gateway={new SupabaseSignInGateway(getSupabase())}
+          gateway={signInGateway()}
           onSignedIn={() => void onSignedIn()}
           onCancel={() => setShowSignIn(false)}
         />
@@ -1197,7 +1210,7 @@ export default function App() {
       <>
         <FamilyScreen
           locale={locale}
-          gateway={new SupabaseFamilyGateway(getSupabase())}
+          gateway={familyGateway()}
           ownsFamily={entitlements.family}
           onChanged={refreshEntitlements}
           onDone={() => setShowFamily(false)}
@@ -1212,7 +1225,7 @@ export default function App() {
       <>
         <LinkEmail
           locale={locale}
-          gateway={new SupabaseAuthGateway(getSupabase())}
+          gateway={authGateway()}
           onDone={() => setShowLinkEmail(false)}
         />
         <StatusBar style="auto" />
@@ -1263,7 +1276,7 @@ export default function App() {
       <>
         <AccessCodeScreen
           locale={locale}
-          gateway={new SupabaseAccessCodeGateway(getSupabase())}
+          gateway={accessCodeGateway()}
           onUnlocked={refreshEntitlements}
           onDone={() => setShowAccessCode(false)}
         />

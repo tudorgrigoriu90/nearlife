@@ -4628,6 +4628,17 @@ document until it is started, when it takes the next free `T-###`.
     Writes made before `hydrate` began are merged over the stored copy, with their queued sends
     after the stored ones. Tests: 3.
 
+- **T-308 · One Supabase client; screen gateways created once** — *Claude · XS · `DONE` · deps: T-129 · review B-35, B-36*
+  - ✅ B-36: the species factory used three more `createClient`s (each its own auth client, with
+    supabase-js warning about a shared storage key); it now uses `getSupabase()`. No species
+    grant is anon-only (checked), so reads with the user's session are unaffected.
+  - ✅ B-35: the sign-in, Family, Link-email and access-code gateways are module-level singletons,
+    no longer created in render, so the Family and Link-email screens stop reloading from the
+    server on every App re-render.
+  - Tests: `__tests__/supabaseClients.test.js`: `createClient` only in `lib/supabase.ts`, and no
+    `gateway={new …}` in App. An App-level count of `mine()` calls would need the backend's
+    Family screen, which App tests do not run.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

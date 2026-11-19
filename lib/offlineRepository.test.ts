@@ -2,6 +2,11 @@ import { composeRepository, PackSpeciesRepository } from './offlineRepository';
 import type { OfflinePack } from './offlinePack';
 import { HardcodedSpeciesRepository, type CatalogueRow, type SpeciesRepository } from './speciesRepository';
 
+// The factory shares the app's one Supabase client, whose session lives in AsyncStorage (T-308).
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
+
 const row = (id: string, extra: Partial<CatalogueRow> = {}): CatalogueRow =>
   ({
     id,

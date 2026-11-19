@@ -5,6 +5,11 @@ import {
   type SpeciesRepository,
 } from './speciesRepositoryFactory';
 
+// The factory shares the app's one Supabase client, whose session lives in AsyncStorage (T-308).
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
+
 // T-057. Swapping the app onto Supabase is not a straight substitution: the bundled repository is
 // always available, and the network one is not. Without a fallback, one failed request empties the
 // almanac — a worse experience than the 54 bundled species, and a regression against the
