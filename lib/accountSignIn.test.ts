@@ -1,4 +1,10 @@
-import { requestSignInCode, verifySignInCode, type SignInGateway } from './accountSignIn';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import {
+  requestSignInCode,
+  SupabaseSignInGateway,
+  verifySignInCode,
+  type SignInGateway,
+} from './accountSignIn';
 
 // T-271 · review B-07: a linked email is how a collection survives a reinstall or a new phone.
 
@@ -67,5 +73,45 @@ describe('verifySignInCode', () => {
       ok: false,
       reason: 'wrong-code',
     });
+  });
+});
+
+describe('SupabaseSignInGateway', () => {
+  function client(auth: Record<string, jest.Mock>) {
+    return { auth } as unknown as SupabaseClient;
+  }
+
+  it('asks for a code without ever creating an account', async () => {
+    const signInWithOtp = jest.fn(async () => ({ error: null }));
+    await new SupabaseSignInGateway(client({ signInWithOtp })).sendCode('a@b.se');
+    expect(signInWithOtp).toHaveBeenCalledWith({
+      email: 'a@b.se',
+      options: { shouldCreateUser: false },
+    });
+  });
+
+  it('a refused code request is an error', async () => {
+    const signInWithOtp = jest.fn(async () => ({ error: { message: 'rate limited' } }));
+    await expect(
+      new SupabaseSignInGateway(client({ signInWithOtp })).sendCode('a@b.se'),
+    ).rejects.toThrow('rate limited');
+  });
+
+  it('a verified code returns the account it signed into', async () => {
+    const verifyOtp = jest.fn(async () => ({ data: { user: { id: 'u-1' } }, error: null }));
+    const id = await new SupabaseSignInGateway(client({ verifyOtp })).verifyCode('a@b.se', '123456');
+    expect(id).toBe('u-1');
+    expect(verifyOtp).toHaveBeenCalledWith({ email: 'a@b.se', token: '123456', type: 'email' });
+  });
+
+  it('a wrong code, or no user, is an error', async () => {
+    const wrong = jest.fn(async () => ({ data: { user: null }, error: { message: 'expired' } }));
+    await expect(
+      new SupabaseSignInGateway(client({ verifyOtp: wrong })).verifyCode('a@b.se', '1'),
+    ).rejects.toThrow('expired');
+    const noUser = jest.fn(async () => ({ data: { user: null }, error: null }));
+    await expect(
+      new SupabaseSignInGateway(client({ verifyOtp: noUser })).verifyCode('a@b.se', '1'),
+    ).rejects.toThrow('no user');
   });
 });

@@ -80,3 +80,74 @@ describe('CachingSpeciesRepository', () => {
     expect((await repo.regionPresence('SWE.10_1')).length).toBe(1);
   });
 });
+
+describe('CachingSpeciesRepository, partial failures', () => {
+  it('serves the saved county when the version changed but the download fails', async () => {
+    const files = new InMemoryCacheFiles();
+    const ok = server();
+    await new CachingSpeciesRepository(ok.repo, files, ok.versionOf).regionPresence('SWE.10_1');
+    const failingRepo = {
+      regionPresence: async () => {
+        throw new Error('timeout');
+      },
+    } as unknown as SpeciesRepository;
+    const repo = new CachingSpeciesRepository(failingRepo, files, async () => 'v2');
+    expect(await repo.regionPresence('SWE.10_1')).toEqual([
+      { speciesId: 'SWE.10_1-a', activeMonths: [5], occurrences: 9 },
+    ]);
+  });
+
+  it('a failed download with nothing saved is an error', async () => {
+    const failingRepo = {
+      regionPresence: async () => {
+        throw new Error('timeout');
+      },
+    } as unknown as SpeciesRepository;
+    const repo = new CachingSpeciesRepository(failingRepo, new InMemoryCacheFiles(), async () => 'v1');
+    await expect(repo.regionPresence('SWE.10_1')).rejects.toThrow('timeout');
+  });
+
+  it('retries the version check after it failed', async () => {
+    let calls = 0;
+    const versionOf = async () => {
+      calls += 1;
+      if (calls === 1) throw new Error('offline');
+      return 'v1';
+    };
+    const repo = new CachingSpeciesRepository(server().repo, new InMemoryCacheFiles(), versionOf);
+    await expect(repo.regionPresence('SWE.10_1')).rejects.toThrow('offline');
+    await expect(repo.regionPresence('SWE.10_1')).resolves.toHaveLength(1);
+    expect(calls).toBe(2);
+  });
+
+  it('a corrupt saved file is downloaded again', async () => {
+    const files = new InMemoryCacheFiles();
+    await files.write('presence.SWE.10_1', '{broken');
+    const s = server();
+    await new CachingSpeciesRepository(s.repo, files, s.versionOf).regionPresence('SWE.10_1');
+    expect(s.calls.presence).toBe(1);
+  });
+
+  it('passes the per-species reads straight through', async () => {
+    const inner = {
+      listSpecies: jest.fn(async () => ['list']),
+      getContent: jest.fn(async () => 'content'),
+      getContentInLocale: jest.fn(async () => 'in-locale'),
+      describeSpecies: jest.fn(async () => ['summary']),
+    } as unknown as SpeciesRepository;
+    const repo = new CachingSpeciesRepository(inner, new InMemoryCacheFiles(), async () => 'v1');
+    expect(await repo.listSpecies('sv')).toEqual(['list']);
+    expect(await repo.getContent('a', 'sv')).toBe('content');
+    expect(await repo.getContentInLocale('a', 'ar')).toBe('in-locale');
+    expect(await repo.describeSpecies(['a'], 'en')).toEqual(['summary']);
+  });
+});
+
+describe('InMemoryCacheFiles', () => {
+  it('clear forgets every file', async () => {
+    const files = new InMemoryCacheFiles();
+    await files.write('a', '1');
+    await files.clear();
+    expect(await files.read('a')).toBeNull();
+  });
+});

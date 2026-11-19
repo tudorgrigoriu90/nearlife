@@ -4465,6 +4465,17 @@ document until it is started, when it takes the next free `T-###`.
     protection**. Then confirm here, and Claude records it. (Claude has no tool that changes
     repository settings.)
 
+- **T-291 · CI green again: coverage back above the floors** — *Claude · XS · `DONE` · deps: T-289*
+  - CI was red from T-287 to T-289: tests passed, but global coverage had slipped to 89.62 %
+    statements / 84.94 % functions against floors of 90 / 85. The local gate ran `npm run
+    verify` while CI runs `verify:ci` (with coverage), so the drop went unseen. The local gate now
+    runs the same command as CI.
+  - ✅ Tests for the code the recent fixes left thin: `catchSpotStore` (the T-275 30-day rule:
+    saved time, the pre-T-275 format, corrupt values, failed writes), the Supabase sign-in
+    gateway (T-271: no account creation, errors, no user), and the county cache's partial failures
+    (a changed version whose download fails serves the saved county; a failed version check is
+    retried). Coverage 90.4 % / 86.0 %.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
