@@ -109,3 +109,38 @@ describe('the bundled set answers only for Kronoberg', () => {
     await expect(repo.regionCatalogue('SWE.10_1', 'sv')).rejects.toThrow();
   });
 });
+
+// T-333 · review I-17: what the app builds with and without a backend configured.
+describe('createRepositoryParts and createPackSource', () => {
+  // Keys are set and deleted, never `process.env` replaced: Expo's Babel preset captures the env
+  // object when a module loads, so a replaced one is invisible to the code under test.
+  const KEYS = ['EXPO_PUBLIC_SUPABASE_URL', 'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY'] as const;
+  const saved = KEYS.map((k) => process.env[k]);
+  afterEach(() => {
+    KEYS.forEach((k, i) => {
+      if (saved[i] === undefined) delete process.env[k];
+      else process.env[k] = saved[i];
+    });
+  });
+
+  it('has only the bundled set without config', () => {
+    delete process.env.EXPO_PUBLIC_SUPABASE_URL;
+    delete process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const { createPackSource, createRepositoryParts } = jest.requireActual('./speciesRepositoryFactory');
+    expect(createPackSource()).toBeNull();
+    const parts = createRepositoryParts();
+    expect(parts.online).toBeNull();
+    expect(parts.bundled).toBeDefined();
+  });
+
+  it('adds the server source, cached when given a cache, once configured', () => {
+    process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://example.supabase.co';
+    process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_test';
+    const { createPackSource, createRepositoryParts } = jest.requireActual('./speciesRepositoryFactory');
+    const { CachingSpeciesRepository } = jest.requireActual('./countyCache');
+    expect(createPackSource()).not.toBeNull();
+    expect(createRepositoryParts().online).not.toBeNull();
+    const files = { read: async () => null, write: async () => undefined, clear: async () => undefined };
+    expect(createRepositoryParts(files).online).toBeInstanceOf(CachingSpeciesRepository);
+  });
+});

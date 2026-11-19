@@ -22,6 +22,7 @@ module.exports = {
   // ~45% → ~91% statements / ~92% lines. Floors sit just under the achieved level so a real
   // regression fails CI (via `npm run verify:ci`) without brittleness. Raise as coverage grows.
   coverageThreshold: {
-    global: { statements: 90, branches: 80, functions: 85, lines: 90 },
+    // Raised to the achieved level (T-333 · review I-17): a floor below it lets coverage slide.
+    global: { statements: 91, branches: 85, functions: 86, lines: 93 },
   },
 };

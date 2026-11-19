@@ -4880,6 +4880,23 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Tests: pipeline 5, real Postgres 5, mapping 1, card 2.
   - Remaining: apply 0044 and run the first load; record how many catalogue species got a line.
 
+- **T-333 · Raise coverage where it was thin** — *Claude · S · `DONE` · deps: — · review I-17 (part)*
+  - Done when each listed file is at or above 85 % lines and the floors match the achieved level.
+  - ✅ `CatchSpotRoute.tsx` 0 → 100 % (end to end on fakes, with the ice line in January and the
+    location prompt), `supabase.ts` 8 → 100 %, `countyCacheFiles.ts` 15 → 100 %,
+    `speciesRepositoryFactory.ts` 71 → 100 %, `travelStore.ts` 45 → 91 %, `useCollection.ts`
+    74 → 91 % (every action, the foreground sync, a failed sync, a failed save), `catchSpotStore.ts`
+    100 % (T-291).
+  - ✅ Floors raised to statements 91, branches 85, functions 86, lines 93 (achieved 91.9 / 85.7 /
+    87.1 / 93.8), each just under so one new untested function does not turn CI red.
+  - Learned: Expo's Babel preset captures `process.env` when a module loads; a test that replaces
+    `process.env` instead of setting keys is invisible to the code under test.
+  - `App.tsx` (76 %) is T-334.
+- **T-334 · App.tsx coverage to 85 %** — *Claude · M · `TODO` · deps: T-333 · review I-17 (rest)*
+  - The flows the review found most bugs in run through App: drive them at App level (catch with a
+    spent allowance, a notification tap over an open sheet, account deletion, sign-in) until App is
+    at 85 % lines, then raise the floors again.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
