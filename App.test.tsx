@@ -528,3 +528,105 @@ describe('App', () => {
     FLOW_TIMEOUT,
   );
 });
+
+// T-296 · review B-24, B-39: a notification tap opens the species card in front of whatever is
+// open; a minigame, the catch tip after it, a sign-in and the delete confirmation finish first.
+describe('notification tap over an open screen', () => {
+  const moose = KRONOBERG_SPECIES.find((s) => s.id === 'moose')!;
+  const mooseName = () => commonNameFor(moose, 'en');
+  const tap = async () => act(async () => tapListener?.('moose'));
+
+  it(
+    'closes Settings and the export to show the card',
+    async () => {
+      await completeOnboarding();
+      await press(tr('nav.settings'), { exact: false });
+      await press(tr('settings.exportData'));
+      expect(await screen.findByText(tr('export.title'))).toBeTruthy();
+      await tap();
+      expect(await screen.findByText(mooseName())).toBeTruthy();
+      expect(screen.queryByText(tr('export.title'))).toBeNull();
+      expect(await systemBack()).toBe(true); // back from the card goes home, not to the export
+      expect(await screen.findByText(tr('thisWeek.honesty'))).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'closes the "I saw…" quiz to show the card',
+    async () => {
+      await completeOnboarding();
+      await press(tr('quiz.entry'), { exact: false });
+      expect(await screen.findByPlaceholderText(tr('quiz.placeholder'))).toBeTruthy();
+      await tap();
+      expect(await screen.findByText(mooseName())).toBeTruthy();
+      expect(screen.queryByPlaceholderText(tr('quiz.placeholder'))).toBeNull();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'lets a minigame and its catch tip finish, then opens the card',
+    async () => {
+      await completeOnboarding();
+      await press(commonNameFor(topRow, 'en'));
+      await press(tr('card.findNearby'), { exact: false });
+      expect(await screen.findByText('__WIN__')).toBeTruthy();
+      await tap();
+      expect(screen.getByText('__WIN__')).toBeTruthy(); // not interrupted
+      await press('__WIN__');
+      expect(await screen.findByText(tr('catch.continue'))).toBeTruthy(); // the tip stays
+      await press(tr('catch.continue'));
+      expect(await screen.findByText(mooseName())).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'waits for the delete confirmation to be answered',
+    async () => {
+      await completeOnboarding();
+      await press(tr('nav.settings'), { exact: false });
+      await press(tr('settings.deleteAccount'));
+      expect(await screen.findByText(tr('delete.title'))).toBeTruthy();
+      await tap();
+      expect(screen.getByText(tr('delete.title'))).toBeTruthy();
+      await press(tr('delete.cancel'));
+      expect(await screen.findByText(mooseName())).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'does not carry the out-of-catches sheet onto the new card',
+    async () => {
+      await completeOnboarding();
+      // Three other species caught this season use the free catches (the count is derived from
+      // the stored collection, T-200); a restart picks them up.
+      const now = new Date().toISOString();
+      const caught = KRONOBERG_SPECIES.filter((sp) => sp.id !== 'moose' && sp.id !== topRow.id)
+        .slice(0, 3)
+        .map((sp) => ({
+          speciesId: sp.id,
+          spottedAt: now,
+          caughtAt: now,
+          helpedAt: null,
+          helpedKind: null,
+          primeBonus: false,
+        }));
+      await AsyncStorage.setItem(
+        'nearby.collection.v1',
+        JSON.stringify({ version: 1, records: caught, pending: [] }),
+      );
+      await screen.unmount();
+      await render(<App />);
+      await press(commonNameFor(topRow, 'en'));
+      await press(tr('card.findNearby'), { exact: false });
+      expect(await screen.findByText(tr('paywall.title'))).toBeTruthy();
+      await tap();
+      expect(await screen.findByText(mooseName())).toBeTruthy();
+      expect(screen.queryByText(tr('paywall.title'))).toBeNull();
+    },
+    FLOW_TIMEOUT,
+  );
+});

@@ -4520,6 +4520,16 @@ document until it is started, when it takes the next free `T-###`.
     Y/N with a note, and send it back. Claude records the error rate per language here and opens
     tasks for any pattern (a wrong name source, a template that reads badly, a bad translation).
 
+- **T-296 · A notification tap opens the card in front** — *Claude · XS · `DONE` · deps: T-031 · review B-24, B-39*
+  - ✅ B-24: a tap closes every screen that renders in front of the card (export, Counties,
+    Store, Family, Link email, Access code, the quiz, Badges, Impact, Settings, the pledge
+    confirmation, the catch-spot screen). It waits, and opens the card when they close, while a
+    minigame, the catch tip after it (a delight moment), a sign-in or the delete confirmation
+    is on screen.
+  - ✅ B-39: the out-of-catches sheet and an open report belong to the previous card and close.
+  - Tests: 5 App flows (export, quiz, minigame + tip, delete confirmation, sheet); the sheet
+    test fails without the fix.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

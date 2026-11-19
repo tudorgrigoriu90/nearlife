@@ -481,8 +481,12 @@ export default function App() {
     showNotificationsInForeground();
     return onNotificationTap(setTappedSpeciesId);
   }, []);
+  // A tap waits while something must finish first (T-296 · review B-24): a minigame in progress,
+  // the catch tip right after it (a delight moment), a sign-in, and the delete confirmation. When
+  // that closes, this effect runs again and the card opens.
+  const tapMustWait = catching !== null || caughtTip !== null || showSignIn || showDelete;
   useEffect(() => {
-    if (!onboarded || tappedSpeciesId === null) return;
+    if (!onboarded || tappedSpeciesId === null || tapMustWait) return;
     const speciesId = tappedSpeciesId;
     track('notification_opened', { speciesId });
     speciesRepo.describeSpecies([speciesId], locale)
@@ -492,9 +496,22 @@ export default function App() {
         // Opening from a notification marks it Spotted, same as a This Week tap (USER-FLOWS §4).
         collection.spot(speciesId);
         track('species_spotted', { speciesId, source: 'notification' });
-        setShowSettings(false);
+        // Everything that would render in front of the card closes (USER-FLOWS §5); so do the
+        // sheets that belonged to the previous card (B-39).
+        setExportJson(null);
+        setShowCounties(false);
+        setShowStore(false);
+        setShowFamily(false);
+        setShowLinkEmail(false);
+        setShowAccessCode(false);
+        setShowSighting(false);
         setShowBadges(false);
         setShowImpact(false);
+        setShowSettings(false);
+        setPledge(null);
+        setGoCatch(null);
+        setPaywall(false);
+        setReportingFor(null);
         setSelected(summary.species);
       })
       .catch((e: unknown) => console.warn('notification species lookup failed', e))
@@ -502,7 +519,7 @@ export default function App() {
       .finally(() => setTappedSpeciesId(null));
     // collection/track/locale are read at tap time; re-running on their identity would reopen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboarded, tappedSpeciesId]);
+  }, [onboarded, tappedSpeciesId, tapMustWait]);
 
   // A catch the server refused is explained once, away from the catch screens (T-274 · review
   // B-13): the success moment stays clean (invariant #4), and the notice comes on the next screen.
