@@ -4955,6 +4955,19 @@ document until it is started, when it takes the next free `T-###`.
   - `INVASIVE_REPORT_URL` in `lib/legal.ts` is https://www.invasivaarter.nu/, which forwards to
     Artportalen's form for wanted invasive species. Confirm it is the page to send people to.
 
+- **T-340 · Arriving soon / leaving soon on This Week** — *Claude · S · `DONE` · deps: T-261 · review F-02*
+  - Done when the lists are computed by a pure, tested function from monthly counts, are empty
+    rather than padded when no species qualifies, and the honesty test covers their strings.
+  - ✅ `lib/seasonShift.ts`: arriving = next month's records ≥ 3 × this month's and ≥ 20; leaving =
+    next month's < ¼ of this month's, with ≥ 20 this month (the spec left leaving's floor open; one
+    stray record is not a departure). Biggest change first, at most 5 each, December wraps to
+    January, rows without monthly counts are skipped. `liveThisWeek` describes them in the same
+    read as the list.
+  - ✅ This Week shows two strips of photo cards above the list, only when non-empty: "Usually
+    arrives in {county} in {month}" and "Usually much rarer in {county} from {month}" (sv: "Brukar
+    …"). The catalogue honesty test scans them; a test also requires "usually" / "brukar".
+  - ✅ Tests: rules 5, live 1, screen 3.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

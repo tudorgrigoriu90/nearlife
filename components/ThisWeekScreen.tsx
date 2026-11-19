@@ -1,12 +1,12 @@
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { monthOf } from '../lib/season';
 import { thisWeek, type ThisWeekEntry } from '../lib/thisWeek';
 import { activeEvents } from '../lib/liveEvents';
 import { commonNameFor, contentFor } from '../lib/species/localized';
 import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
-import type { Species } from '../lib/species/types';
-import type { LiveThisWeek } from '../lib/thisWeekLive';
+import type { Month, Species } from '../lib/species/types';
+import type { LiveThisWeek, LiveThisWeekItem } from '../lib/thisWeekLive';
 import { BUNDLED_REGION_ID } from '../lib/speciesRepository';
 import { groupOf } from '../lib/species/group';
 import { CATEGORY_EMOJI } from './speciesVisual';
@@ -52,6 +52,47 @@ function Row({
         <Text style={styles.detail}>{detail}</Text>
       </View>
     </Pressable>
+  );
+}
+
+// Arriving soon / leaving soon (T-340 · review F-02): a short strip of cards, photo and name, under
+// a heading that says what past years' records show ("usually"), never who is here now (#1).
+function ShiftStrip({
+  title,
+  items,
+  testID,
+  onSelect,
+}: {
+  title: string;
+  items: LiveThisWeekItem[];
+  testID: string;
+  onSelect?: (species: Species) => void;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <View style={styles.shift} testID={testID}>
+      <Text style={styles.shiftTitle}>{title}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.shiftRow}>
+        {items.map(({ species, commonName }) => (
+          <Pressable
+            key={species.id}
+            onPress={() => onSelect?.(species)}
+            accessibilityRole="button"
+            accessibilityLabel={commonName}
+            style={styles.shiftCard}
+          >
+            {species.photo ? (
+              <Image source={{ uri: species.photo.url }} style={styles.shiftPhoto} resizeMode="cover" />
+            ) : (
+              <Text style={styles.shiftGlyph}>{CATEGORY_EMOJI[groupOf(species)]}</Text>
+            )}
+            <Text style={styles.shiftName} numberOfLines={2}>
+              {commonName}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -112,6 +153,7 @@ export default function ThisWeekScreen({
   travel,
   onIdentify,
   onOpenSighting,
+  month: monthProp,
 }: {
   locale?: Locale;
   spottedIds?: ReadonlySet<string>;
@@ -135,9 +177,12 @@ export default function ThisWeekScreen({
   onIdentify?: () => void;
   /** "I saw…" sighting quiz (T-242). */
   onOpenSighting?: () => void;
+  /** The month shown; this month by default (tests pass one). */
+  month?: Month;
 }) {
   const tr = createTranslator(locale);
-  const month = monthOf(new Date());
+  const month = monthProp ?? monthOf(new Date());
+  const nextMonthName = tr('county.months').split('|')[month % 12];
   const mode = status ?? (live !== null ? 'ready' : 'preview');
   const rows: RowData[] =
     mode === 'ready' && live !== null
@@ -232,7 +277,27 @@ export default function ThisWeekScreen({
         renderItem={({ item }) => (
           <Row row={item} newLabel={tr('thisWeek.new')} onSelect={onSelectSpecies} />
         )}
-        ListHeaderComponent={<EventsHeader locale={locale} tr={tr} countyId={eventsCounty} />}
+        ListHeaderComponent={
+          <>
+            {mode === 'ready' && live !== null ? (
+              <>
+                <ShiftStrip
+                  testID="thisweek-arriving"
+                  title={tr('thisWeek.arriving', { region, month: nextMonthName })}
+                  items={live.arriving}
+                  onSelect={onSelectSpecies}
+                />
+                <ShiftStrip
+                  testID="thisweek-leaving"
+                  title={tr('thisWeek.leaving', { region, month: nextMonthName })}
+                  items={live.leaving}
+                  onSelect={onSelectSpecies}
+                />
+              </>
+            ) : null}
+            <EventsHeader locale={locale} tr={tr} countyId={eventsCounty} />
+          </>
+        }
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           mode === 'loading' || mode === 'error' ? null : (
@@ -246,6 +311,13 @@ export default function ThisWeekScreen({
 }
 
 const styles = StyleSheet.create({
+  shift: { marginBottom: 12 },
+  shiftTitle: { fontSize: 15, fontWeight: '700', color: '#22331f', marginBottom: 6 },
+  shiftRow: { gap: 8 },
+  shiftCard: { width: 92, alignItems: 'center', backgroundColor: '#fff', borderRadius: 10, padding: 6 },
+  shiftPhoto: { width: 64, height: 64, borderRadius: 8 },
+  shiftGlyph: { fontSize: 40, lineHeight: 64 },
+  shiftName: { marginTop: 4, fontSize: 12, color: '#22331f', textAlign: 'center' },
   loading: { marginTop: 32 },
   loadError: { marginTop: 24, alignItems: 'center', gap: 12 },
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingTop: 64, paddingHorizontal: 20 },

@@ -41,6 +41,20 @@ describe('liveThisWeek', () => {
 
   it('reports a quiet month honestly', async () => {
     const out = await liveThisWeek([presence('off', 5, [1])], 6, new Set(), 'en', describeAll);
-    expect(out).toEqual({ state: 'quiet', total: 0, items: [] });
+    expect(out).toEqual({ state: 'quiet', total: 0, items: [], arriving: [], leaving: [] });
+  });
+});
+
+// T-340 · review F-02.
+describe('liveThisWeek season shifts', () => {
+  it('describes who usually arrives next month in the same read as the list', async () => {
+    const counts = Array.from({ length: 12 }, () => 0);
+    counts[4] = 80; // May
+    const swift = { speciesId: 'swift', activeMonths: [5], occurrences: 80, monthCounts: counts };
+    const describe = jest.fn(describeAll);
+    const out = await liveThisWeek([swift], 4, new Set(), 'en', describe);
+    expect(out.arriving.map((i) => i.species.id)).toEqual(['swift']);
+    expect(out.leaving).toEqual([]);
+    expect(describe).toHaveBeenCalledTimes(1);
   });
 });

@@ -13,6 +13,8 @@ describe('ThisWeekScreen', () => {
 
   it('shows the user\'s county with every active species counted, not only the rows shown', async () => {
     const live = {
+      arriving: [],
+      leaving: [],
       state: 'active' as const,
       total: 1834,
       items: [
@@ -58,5 +60,39 @@ describe('ThisWeekScreen with a county', () => {
     expect(screen.getByText(tr('thisWeek.loadError'))).toBeTruthy();
     await fireEvent.press(screen.getByText(tr('thisWeek.retry')));
     expect(onRetry).toHaveBeenCalled();
+  });
+});
+
+// T-340 · review F-02: arriving soon / leaving soon, worded as what usually happens.
+describe('ThisWeekScreen season shifts', () => {
+  const item = (id: string, name: string) => ({
+    species: { id, scientificName: name, category: 'bird' } as never,
+    commonName: name,
+    detail: null,
+    isNew: true,
+  });
+
+  it('shows who usually arrives next month and who usually leaves, and opens their cards', async () => {
+    const onSelectSpecies = jest.fn();
+    const live = { state: 'active' as const, total: 1, items: [], arriving: [item('swift', 'Swift')], leaving: [item('crane', 'Crane')] };
+    await render(<ThisWeekScreen locale="en" live={live} regionName="Skåne" month={4} onSelectSpecies={onSelectSpecies} />);
+    expect(screen.getByText(tr('thisWeek.arriving', { region: 'Skåne', month: 'May' }))).toBeTruthy();
+    expect(screen.getByText(tr('thisWeek.leaving', { region: 'Skåne', month: 'May' }))).toBeTruthy();
+    await fireEvent.press(screen.getByText('Swift'));
+    expect(onSelectSpecies).toHaveBeenCalledWith(expect.objectContaining({ id: 'swift' }));
+  });
+
+  it('shows neither heading when nothing qualifies', async () => {
+    const live = { state: 'active' as const, total: 0, items: [], arriving: [], leaving: [] };
+    await render(<ThisWeekScreen locale="en" live={live} regionName="Skåne" month={4} />);
+    expect(screen.queryByText(tr('thisWeek.arriving', { region: 'Skåne', month: 'May' }))).toBeNull();
+  });
+
+  it('says "usually" in both languages: past records, never a claim about now', () => {
+    for (const loc of ['en', 'sv'] as const) {
+      const t = createTranslator(loc);
+      expect(t('thisWeek.arriving', { region: 'X', month: 'Y' })).toMatch(loc === 'en' ? /usually/i : /brukar/i);
+      expect(t('thisWeek.leaving', { region: 'X', month: 'Y' })).toMatch(loc === 'en' ? /usually/i : /brukar/i);
+    }
   });
 });
