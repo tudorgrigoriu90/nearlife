@@ -654,3 +654,99 @@ describe('notification tap over an open screen', () => {
     FLOW_TIMEOUT,
   );
 });
+
+// T-334 · review I-17: Android's back button closes whatever is on top, one layer at a time, and
+// only leaves the app from the tabs (T-232). Every overlay a test can open without a backend.
+describe('system back from each overlay', () => {
+  it(
+    'closes Settings, the data export and the delete confirmation in turn',
+    async () => {
+      await completeOnboarding();
+      await press(`⚙ ${tr('nav.settings')}`);
+      expect(await screen.findByText(tr('settings.title'))).toBeTruthy();
+
+      await press(tr('settings.exportData'));
+      expect(await screen.findByText(tr('export.title'))).toBeTruthy();
+      expect(await systemBack()).toBe(true);
+      expect(await screen.findByText(tr('settings.title'))).toBeTruthy();
+
+      await press(tr('settings.deleteAccount'));
+      expect(await screen.findAllByText(tr('delete.title'))).not.toHaveLength(0);
+      expect(await systemBack()).toBe(true);
+      expect(await screen.findByText(tr('settings.title'))).toBeTruthy();
+
+      expect(await systemBack()).toBe(true);
+      expect(await screen.findByText(tr('thisWeek.honesty'))).toBeTruthy();
+      // From the tabs, back leaves the app.
+      expect(await systemBack()).toBe(false);
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'closes Badges, Impact and "I saw…" back to the Almanac',
+    async () => {
+      await completeOnboarding();
+      await press(tr('almanac.title'));
+      for (const [open, title] of [
+        // Each title carries its emoji, so match the words.
+        [new RegExp(tr('nav.badges')), new RegExp(`^${tr('badges.title')} `)],
+        [new RegExp(tr('nav.impact')), new RegExp(`^${tr('impact.title')} `)],
+        [new RegExp(tr('quiz.entry')), new RegExp(` ${tr('quiz.title')}$`)],
+      ] as const) {
+        await press(open);
+        expect(await screen.findAllByText(title)).not.toHaveLength(0);
+        expect(await systemBack()).toBe(true);
+        expect(await screen.findByText(new RegExp(tr('nav.badges')))).toBeTruthy();
+      }
+    },
+    FLOW_TIMEOUT,
+  );
+});
+
+// T-334 · review B-09, I-17: when the home county cannot be set from preview mode, the banner says
+// why, and a "no" that only the system settings can lift opens them.
+describe('setting the home county from preview mode', () => {
+  async function toPreview() {
+    (requestLocationPermission as jest.Mock).mockResolvedValueOnce('denied');
+    await render(<App />);
+    await press(tr('onboarding.welcome.cta'));
+    await fireEvent.changeText(await screen.findByPlaceholderText(tr('onboarding.age.placeholder')), ADULT_BIRTH_YEAR);
+    await press(tr('onboarding.age.cta'));
+    await press(tr('onboarding.location.cta'));
+    await press(tr('onboarding.notif.cta'));
+    await press(tr('onboarding.firstSpotted.cta'));
+    await screen.findByText(tr('preview.banner'));
+  }
+
+  it(
+    'opens the phone settings after a blocked request, and explains',
+    async () => {
+      const { Linking } = jest.requireActual('react-native');
+      const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined);
+      await toPreview();
+      (requestLocationAccess as jest.Mock).mockResolvedValueOnce('blocked');
+      await press(`${tr('preview.setHome')} →`);
+      expect(await screen.findByText(tr('preview.denied'), { exact: false })).toBeTruthy();
+      expect(openSettings).toHaveBeenCalled();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'says so when the phone finds no position, and when it is outside Sweden',
+    async () => {
+      await toPreview();
+      (requestLocationAccess as jest.Mock).mockResolvedValueOnce('granted');
+      (getLocationFixOnce as jest.Mock).mockResolvedValueOnce(null);
+      await press(`${tr('preview.setHome')} →`);
+      expect(await screen.findByText(tr('preview.noFix'), { exact: false })).toBeTruthy();
+      (requestLocationAccess as jest.Mock).mockResolvedValueOnce('granted');
+      (getLocationFixOnce as jest.Mock).mockResolvedValueOnce({ latitude: 48.85, longitude: 2.35 }); // Paris
+      await press(`${tr('preview.setHome')} →`);
+      expect(await screen.findByText(tr('onboarding.outside.body'), { exact: false })).toBeTruthy();
+      expect(await AsyncStorage.getItem(HOMETOWN_STORAGE_KEY)).toBeNull();
+    },
+    FLOW_TIMEOUT,
+  );
+});

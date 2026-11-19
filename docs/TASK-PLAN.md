@@ -4892,10 +4892,21 @@ document until it is started, when it takes the next free `T-###`.
   - Learned: Expo's Babel preset captures `process.env` when a module loads; a test that replaces
     `process.env` instead of setting keys is invisible to the code under test.
   - `App.tsx` (76 %) is T-334.
-- **T-334 · App.tsx coverage to 85 %** — *Claude · M · `TODO` · deps: T-333 · review I-17 (rest)*
+- **T-334 · App.tsx coverage to 85 %** — *Claude · M · `DONE` · deps: T-333 · review I-17 (rest)*
   - The flows the review found most bugs in run through App: drive them at App level (catch with a
     spent allowance, a notification tap over an open sheet, account deletion, sign-in) until App is
     at 85 % lines, then raise the floors again.
+  - ✅ App.tsx 76 → 85.2 % lines. `App.test.tsx`: Android back from every overlay reachable without a
+    backend (Settings, export, delete confirmation, Badges, Impact, "I saw…"), and the preview-mode
+    refusals (a blocked permission opens the phone settings; no fix; a position outside Sweden).
+  - ✅ New `AppConfigured.test.tsx`: App with a backend configured, which no test reached before (a
+    third of App). A chainable fake client answers every query empty; species come from the bundled
+    set. Covered: Store, Counties, Family, Link email, Access code and Sign in open and close with
+    back; the export with its server parts, and with them unreadable (the export still opens and
+    lists them as unavailable); deletion refused by the server leaves the phone untouched, then
+    succeeds; from a card, a report is sent, and an unmapped county's catch spot leads to the catch.
+  - ✅ Floors raised to statements 93, branches 87, functions 89, lines 94 (achieved 93.7 / 88.4 /
+    89.9 / 95.2).
 
 - **T-335 · One Supabase client with generated types** — *Claude · M · `DONE` · deps: T-308 · review I-03*
   - Done when `createClient` is called once; no `as unknown as` cast remains for a Supabase client;
