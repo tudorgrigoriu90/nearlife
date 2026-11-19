@@ -4925,7 +4925,7 @@ document until it is started, when it takes the next free `T-###`.
     client interface made TypeScript give up comparing it with the generated client ("excessively
     deep"), which is why the narrow interfaces went rather than staying beside the types.
 
-- **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
+- **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
     season, give, protect), names (GBIF + Wikidata), photo and thumbnail, translated facts, and
@@ -4935,6 +4935,13 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Data pipeline `content_scope=missing` (`build_content.py --missing`): content only for
     catalogue species with no content row, so the run fits in six hours. Then: names (GBIF +
     Wikidata), photos and thumbnails, translated facts, bird song.
+  - ✅ **Live counts, 2026-11-19** (after Species photos, Translate facts and Species names finished):
+    10,240 catalogue species; **0** without content, **0** missing a Swedish or an Arabic row
+    (spot-checked locales); **0** unsourced facts. Photo: 7,579 (**74 %**), up from 70 % of the
+    6,824-species catalogue (T-119 record above). Swedish name: 7,208 (**70 %**); any name at all:
+    8,988 (88 %); English fact: 7,201 (70 %). No Swedish-name share was recorded for the earlier
+    catalogue, so that one has no baseline. 1,252 species have no common name in any language:
+    they show their scientific name, as designed (T-234).
 - **T-269 · Account deletion erases the device** — *Claude · S · `DONE` · deps: T-093 · review B-05, B-12, B-52 (device part)*
   - The collection cache and outbox, language choices, cached catch spots and in-memory state are
     cleared; RevenueCat and PostHog identities are reset.
