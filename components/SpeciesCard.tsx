@@ -33,6 +33,8 @@ import BirdSong from './BirdSong';
 import type { SoundSource } from '../lib/birdSound';
 import { groupOf } from '../lib/species/group';
 import { tierMarks } from '../lib/tierMarks';
+import { adviceScope } from '../lib/adviceScope';
+import { GROUP_LABEL_KEY } from './speciesVisual';
 
 // Species card (T-026 · USER-FLOWS §4). The always-free Tier-1 layer: fact, when/how trivia,
 // and the give + protect mission actions (never gated — invariant #2). Below sits the depth-tier
@@ -301,6 +303,13 @@ export default function SpeciesCard({
             ) : record?.helpedKind === 'protect' ? (
               <Text style={styles.pledged}>{tr('card.pledged')}</Text>
             ) : null}
+            {adviceScope(species.id) === 'group' ? (
+              <Text style={styles.groupAdvice}>
+                {tr('card.groupAdvice', {
+                  group: tr(GROUP_LABEL_KEY[groupOf(species)]).toLocaleLowerCase(locale),
+                })}
+              </Text>
+            ) : null}
             <Text style={styles.law}>⚖ {tr('card.followLaw')}</Text>
           </>
         ) : textState === 'loading' ? (
@@ -426,6 +435,7 @@ function Section({
 }
 
 const styles = StyleSheet.create({
+  groupAdvice: { marginTop: 8, fontSize: 12, fontStyle: 'italic', color: '#566658' },
   marks: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 8 },
   mark: { fontSize: 12, fontWeight: '700', color: '#336f3c' },
   pledged: { marginTop: 6, marginBottom: 4, fontSize: 13, fontWeight: '700', color: '#336f3c' },

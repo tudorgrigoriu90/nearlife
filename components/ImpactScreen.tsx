@@ -1,4 +1,6 @@
 import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { distinctActions } from '../lib/adviceScope';
+import type { SpeciesGroup } from '../lib/species/group';
 import type { CollectionRecord } from '../lib/collection';
 import { createTranslator, type Locale } from '../lib/i18n';
 import { communityToShow, type CommunityImpact } from '../lib/communityImpact';
@@ -16,6 +18,7 @@ export default function ImpactScreen({
   records = [],
   community = null,
   seasonKey = seasonKeyOf(new Date()),
+  groupOf = () => null,
   onDone,
 }: {
   locale?: Locale;
@@ -24,10 +27,16 @@ export default function ImpactScreen({
   community?: CommunityImpact | null;
   /** The season the personal numbers cover, matching the subtitle (T-216). */
   seasonKey?: string;
+  /** A species' group, to count a group's advice as one action (T-319); unknown → per species. */
+  groupOf?: (speciesId: string) => SpeciesGroup | null;
   onDone?: () => void;
 }) {
   const tr = createTranslator(locale);
   const summary = impactSummary(records, seasonKey);
+  const actions = distinctActions(
+    records.filter((r) => r.helpedAt !== null && seasonKeyOf(new Date(r.helpedAt)) === seasonKey),
+    groupOf,
+  );
   const hasPledges = summary.totalPledges > 0;
   const shown = communityToShow(community);
 
@@ -49,6 +58,7 @@ export default function ImpactScreen({
             <Stat glyph="🐾" label={tr('impact.helpedSpecies')} count={summary.helpedSpecies} />
             <Stat glyph="🎁" label={tr('impact.give')} count={summary.give} />
             <Stat glyph="🛡" label={tr('impact.protect')} count={summary.protect} />
+            <Stat glyph="✨" label={tr('impact.actions')} count={actions} testID="impact-actions" />
           </View>
         ) : (
           <Text style={styles.empty}>{tr('impact.empty')}</Text>
@@ -72,11 +82,23 @@ export default function ImpactScreen({
   );
 }
 
-function Stat({ glyph, label, count }: { glyph: string; label: string; count: number }) {
+function Stat({
+  glyph,
+  label,
+  count,
+  testID,
+}: {
+  glyph: string;
+  label: string;
+  count: number;
+  testID?: string;
+}) {
   return (
     <View style={styles.stat}>
       <Text style={styles.statGlyph}>{glyph}</Text>
-      <Text style={styles.statCount}>{count}</Text>
+      <Text style={styles.statCount} testID={testID}>
+        {count}
+      </Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );

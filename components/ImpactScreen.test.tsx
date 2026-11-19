@@ -27,8 +27,8 @@ describe('ImpactScreen', () => {
     expect(screen.getByText(tr('impact.helpedSpecies'))).toBeTruthy();
     expect(screen.getByText(tr('impact.give'))).toBeTruthy();
     expect(screen.getByText(tr('impact.protect'))).toBeTruthy();
-    // The counts render (two "1"s for give/protect, one "2" for species helped).
-    expect(screen.getByText('2')).toBeTruthy();
+    // The counts render: "2" species helped and "2" different actions (T-319), "1" give, "1" protect.
+    expect(screen.getAllByText('2')).toHaveLength(2);
     expect(screen.getAllByText('1')).toHaveLength(2);
     // Empty state is gone.
     expect(screen.queryByText(tr('impact.empty'))).toBeNull();
@@ -57,8 +57,8 @@ describe('ImpactScreen', () => {
       rec('robin', { helpedAt: '2026-10-20T10:00:00Z', helpedKind: 'protect' }),
     ];
     await render(<ImpactScreen locale="en" records={records} seasonKey="2026-autumn" />);
-    // 1 species helped, 0 give, 1 protect: the summer pledge is last season's.
-    expect(screen.getAllByText('1')).toHaveLength(2);
+    // 1 species helped, 0 give, 1 protect, 1 action: the summer pledge is last season's.
+    expect(screen.getAllByText('1')).toHaveLength(3);
     expect(screen.getByText('0')).toBeTruthy();
   });
 
@@ -66,5 +66,19 @@ describe('ImpactScreen', () => {
     const records = [rec('swift', { helpedAt: '2026-06-10T10:00:00Z', helpedKind: 'give' })];
     await render(<ImpactScreen locale="en" records={records} seasonKey="2026-autumn" />);
     expect(screen.getByText(tr('impact.empty'))).toBeTruthy();
+  });
+});
+
+// T-319 · review B-67: ten pledges of the same group action are one action, not ten.
+describe('ImpactScreen distinct actions', () => {
+  it('counts a group action once however many species it was pledged on', async () => {
+    const records = ['gbif:1', 'gbif:2', 'gbif:3'].map((id) =>
+      rec(id, { helpedAt: '2026-10-20T10:00:00Z', helpedKind: 'give' }),
+    );
+    await render(
+      <ImpactScreen locale="en" records={records} seasonKey="2026-autumn" groupOf={() => 'bird'} />,
+    );
+    expect(screen.getByText(tr('impact.actions'))).toBeTruthy();
+    expect(screen.getByTestId('impact-actions').props.children).toBe(1);
   });
 });

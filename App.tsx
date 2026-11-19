@@ -78,6 +78,8 @@ import { sendContentReport, SupabaseReportGateway } from './lib/contentReports';
 import { badgeStatuses, rememberEarned, type RememberedBadges } from './lib/badges';
 import { AsyncStorageBadgeStore } from './lib/badgeStore';
 import { caughtThisSeason } from './lib/tierMarks';
+import { KRONOBERG_SPECIES } from './lib/species/kronoberg';
+import { groupOf } from './lib/species/group';
 import {
   SupabaseRecognitionGateway,
   syncRecognitions,
@@ -1309,6 +1311,10 @@ export default function App() {
           locale={locale}
           records={collection.records}
           community={community}
+          groupOf={(id) => {
+            const sp = almanacSpecies.find((s) => s.id === id) ?? KRONOBERG_SPECIES.find((s) => s.id === id);
+            return sp ? groupOf(sp) : null;
+          }}
           onDone={() => setShowImpact(false)}
         />
         <StatusBar style="auto" />

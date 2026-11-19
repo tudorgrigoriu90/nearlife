@@ -4725,6 +4725,23 @@ document until it is started, when it takes the next free `T-###`.
     constant rather than the safe-area inset because App renders without a safe-area provider in
     tests; the phone check (T-141) confirms it.
 
+- **T-319 · Group advice said as such, and counted once** — *Claude · S · `DONE` · deps: T-076, T-128 · review B-67 (part a)*
+  - Help and protect advice is written per species for the **54** curated species only; the other
+    ~10,000 catalogue species show their group's advice (one give and one protect text per group,
+    `pipeline/media/content_templates.py`). Species with species-level advice: **54** (2026-11-19).
+  - ✅ The card says so under the advice for a catalogue species ("General advice for all birds,
+    not written for this species yet"), so a pledge is honest about its scope.
+  - ✅ Impact shows "Different actions": a group's give (or protect) advice pledged on ten birds is
+    one action; curated advice, and a species of unknown group, count per species
+    (`distinctActions`). Tests: 7 logic, 2 card, 1 Impact; two old Impact tests count the new stat.
+  - The scope is derived (curated → species, else group), which is exact today. Writing reviewed
+    species-level advice for a first set, with a stored scope, is T-320.
+
+- **T-320 · Species-level help and protect advice for a first set** — *Claude + native reviewer · L · `TODO` · deps: T-319 · review B-67 (part b)*
+  - Write give and protect advice for a stated first set (the 300 most recorded species across
+    counties), sourced from threat data, reviewed before shipping; `species_content.advice_scope`
+    ('species' / 'group') replaces the derived rule; the count in T-319 is updated.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

@@ -148,3 +148,19 @@ describe('SpeciesCard tier marks', () => {
     expect(screen.queryByText(en('card.findNearby'), { exact: false })).toBeNull();
   });
 });
+
+// T-319 · review B-67: group advice is labelled as such.
+describe('SpeciesCard advice scope', () => {
+  const catalogueBird = { ...swift, id: 'gbif:5228676' };
+  const content = contentFor(swift.id, 'en')!;
+
+  it('a catalogue species says its advice is for the whole group', async () => {
+    await render(<SpeciesCard species={catalogueBird} locale="en" content={{ ...content, speciesId: catalogueBird.id }} />);
+    expect(screen.getByText(en('card.groupAdvice', { group: en('category.bird').toLocaleLowerCase('en') }))).toBeTruthy();
+  });
+
+  it('a curated species has its own advice and no such label', async () => {
+    await render(<SpeciesCard species={swift} locale="en" content={content} />);
+    expect(screen.queryByText(en('card.groupAdvice', { group: en('category.bird').toLocaleLowerCase('en') }))).toBeNull();
+  });
+});
