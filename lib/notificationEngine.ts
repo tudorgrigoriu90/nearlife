@@ -46,6 +46,8 @@ export interface DueUser {
    * tests and prototypes that have no id.
    */
   userId?: string;
+  /** A species the notification can show with a name and a photo (T-306); drawn from first. */
+  presentable?: (speciesId: string) => boolean;
 }
 
 /** Why a cycle produced no send. `notifications-off`/`no-candidate` sit alongside cadence blocks. */
@@ -89,6 +91,7 @@ export function decideNotification(user: DueUser, opts: EngineOptions = {}): Eng
     user.collectedIds,
     opts.rng ?? Math.random,
     opts.tuning ?? DEFAULT_TUNING,
+    user.presentable,
   );
   if (picked === null) return { send: false, reason: 'no-candidate' };
 

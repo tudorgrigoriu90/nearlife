@@ -100,6 +100,10 @@ export function planSends(users, presenceByRegion, nowMs, opts = {}) {
             month: clock.month,
             nowMs,
             userId: opts.ignoreSlot ? undefined : user.userId,
+            // In the language the notification will be written in: the user's first device's.
+            presentable: opts.presentable
+                ? (speciesId) => opts.presentable(speciesId, pushLocale(devices[0].locale))
+                : undefined,
         }, {
             cadence: opts.cadence ?? DEFAULT_CADENCE,
             tuning: opts.tuning ?? DEFAULT_TUNING,

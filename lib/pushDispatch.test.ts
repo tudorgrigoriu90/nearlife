@@ -236,3 +236,23 @@ describe('sendLogged', () => {
     expect(release).toHaveBeenCalledWith(3);
   });
 });
+
+// T-306 · review B-55: presentable means a name in the device's language and a photo.
+describe('planSends with presentable species', () => {
+  const bare: RegionPresence = { speciesId: 'bare', activeMonths: [6], occurrences: 1_000_000 };
+  const both = new Map<string, RegionPresence[]>([[KRONOBERG, [bare, robin]]]);
+
+  it('asks with the device language and keeps to presentable species', () => {
+    const asked: string[] = [];
+    const plan = planSends([user({ devices: [device({ locale: 'sv' })] })], both, SUMMER_EVENING, {
+      rng: () => 0,
+      presentable: (id, locale) => {
+        asked.push(`${id}:${locale}`);
+        return id === 'european-robin';
+      },
+    });
+    expect(plan.sends[0].speciesId).toBe('european-robin');
+    // The language the notification is written in (pushLocale), which is the name it will carry.
+    expect(asked).toContain('european-robin:sv');
+  });
+});

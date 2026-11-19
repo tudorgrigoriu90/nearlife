@@ -4612,6 +4612,14 @@ document until it is started, when it takes the next free `T-###`.
     the range counts exactly what `season_key` assigns at three boundaries (including 00:30 on
     1 December in Stockholm), an empty season is a row of zeros, and the plan uses the index.
 
+- **T-306 · Notifications about species with a name and a photo** — *Claude · XS · `DONE` · deps: T-201 · review B-55*
+  - ✅ Selection draws only from presentable candidates (a name in the language the notification
+    is written in, and a photo) whenever any exist, and from all of them otherwise
+    (`selectFromPresence(…, presentable)`, through `decideNotification` and `planSends`). The
+    sender builds the two sets once per run, reading only species in season this month and only
+    the languages devices use. Tests: selection 3 (never an unnamed or photo-less species while a
+    presentable one exists, over five rng draws), planning 1 (asked in the device's language).
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

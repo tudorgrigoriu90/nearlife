@@ -64,6 +64,11 @@ export interface PlanOptions {
    * up to thirteen hours for a slot; scheduled runs never set it.
    */
   ignoreSlot?: boolean;
+  /**
+   * Whether a species has a name in `locale` and a photo (T-306 · review B-55). The sender builds it
+   * from the rows it reads; absent, every candidate counts.
+   */
+  presentable?: (speciesId: string, locale: Locale) => boolean;
 }
 
 export interface LocalClock {
@@ -167,6 +172,10 @@ export function planSends(
         month: clock.month,
         nowMs,
         userId: opts.ignoreSlot ? undefined : user.userId,
+        // In the language the notification will be written in: the user's first device's.
+        presentable: opts.presentable
+          ? (speciesId: string) => opts.presentable!(speciesId, pushLocale(devices[0].locale))
+          : undefined,
       },
       {
         cadence: opts.cadence ?? DEFAULT_CADENCE,

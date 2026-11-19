@@ -23,7 +23,7 @@ export function decideNotification(user, opts = {}) {
         !isAtOrAfterSlot(user.localHour, user.userId, opts.cadence ?? DEFAULT_CADENCE)) {
         return { send: false, reason: 'before-slot' };
     }
-    const picked = selectFromPresence(user.presence, user.month, user.collectedIds, opts.rng ?? Math.random, opts.tuning ?? DEFAULT_TUNING);
+    const picked = selectFromPresence(user.presence, user.month, user.collectedIds, opts.rng ?? Math.random, opts.tuning ?? DEFAULT_TUNING, user.presentable);
     if (picked === null)
         return { send: false, reason: 'no-candidate' };
     return {

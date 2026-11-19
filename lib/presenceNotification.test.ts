@@ -64,3 +64,28 @@ describe('presenceWeight in a month', () => {
     );
   });
 });
+
+// T-306 · review B-55: the day's one notification is about a species with a name and a photo
+// whenever the county has one in season.
+describe('selectFromPresence prefers presentable species', () => {
+  const bare: RegionPresence = { speciesId: 'bare', activeMonths: [6], occurrences: 1_000_000 };
+  const shown: RegionPresence = { speciesId: 'shown', activeMonths: [6], occurrences: 1 };
+
+  it('never picks an unnamed or photo-less species while a presentable one exists', () => {
+    for (const r of [0, 0.25, 0.5, 0.75, 0.999]) {
+      const picked = selectFromPresence([bare, shown], 6, new Set(), () => r, undefined, (id) => id === 'shown');
+      expect(picked?.speciesId).toBe('shown');
+    }
+  });
+
+  it('falls back to every candidate when none is presentable', () => {
+    expect(selectFromPresence([bare], 6, new Set(), () => 0, undefined, () => false)?.speciesId).toBe('bare');
+  });
+
+  it('a collected presentable species does not count', () => {
+    expect(
+      selectFromPresence([bare, shown], 6, new Set(['shown']), () => 0, undefined, (id) => id === 'shown')
+        ?.speciesId,
+    ).toBe('bare');
+  });
+});

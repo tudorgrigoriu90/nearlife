@@ -45,18 +45,23 @@ export function pickWeightedPresence(
   return candidates[candidates.length - 1]; // float-rounding fallback
 }
 
-/** Full pipeline: season-gate → dedupe (T-061) → weighted sample. Null if nothing to send. */
+/**
+ * Full pipeline: season-gate → dedupe (T-061) → weighted sample. Null if nothing to send.
+ *
+ * `presentable` (T-306 · review B-55): a species the notification can show with a name in the
+ * reader's language and a photo. While any candidate is presentable only those are drawn from, so
+ * the day's one notification is not titled with a Latin binomial and no image; with none, every
+ * candidate is.
+ */
 export function selectFromPresence(
   presence: RegionPresence[],
   month: Month,
   collectedIds: ReadonlySet<string>,
   rng: Rng = Math.random,
   tuning: NotificationTuning = DEFAULT_TUNING,
+  presentable?: (speciesId: string) => boolean,
 ): RegionPresence | null {
-  return pickWeightedPresence(
-    candidatesForMonth(presence, month, collectedIds),
-    rng,
-    tuning,
-    month,
-  );
+  const candidates = candidatesForMonth(presence, month, collectedIds);
+  const shown = presentable ? candidates.filter((c) => presentable(c.speciesId)) : [];
+  return pickWeightedPresence(shown.length > 0 ? shown : candidates, rng, tuning, month);
 }

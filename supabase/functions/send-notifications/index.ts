@@ -22,6 +22,7 @@ import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 import {
   buildFcmMessage,
   isDeadTokenResponse,
+  localClock,
   planSends,
   pushCopy,
   pushLocale,
@@ -182,7 +183,41 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const plan = planSends(users, presenceByRegion, nowMs, opts.testUserId ? { ignoreSlot: true } : {});
+    // Presentable species (T-306 · review B-55): a name in the language the notification is written
+    // in, and a photo. Read only for species in season this month and the languages in use, so the
+    // hourly run does not read every name of every species.
+    const month = localClock(nowMs).month;
+    const inSeason = [
+      ...new Set(
+        [...presenceByRegion.values()]
+          .flat()
+          .filter((p: { activeMonths: number[] }) => p.activeMonths.includes(month))
+          .map((p: { speciesId: string }) => p.speciesId),
+      ),
+    ];
+    const localesInPlay = [...new Set(users.flatMap((u) => u.devices.map((d) => pushLocale(d.locale))))];
+    const photographed = new Set(
+      (
+        await readIn(db, 'species_media', 'species_id', 'species_id', inSeason, ['species_id'], (q) =>
+          q.not('url', 'is', null),
+        )
+      ).map((r) => r.species_id as string),
+    );
+    const named = new Set(
+      (
+        await readIn(db, 'species_content', 'species_id, locale', 'species_id', inSeason, ['species_id', 'locale'], (q) =>
+          q.in('locale', localesInPlay).not('common_name', 'is', null),
+        )
+      ).map((r) => `${r.species_id}|${r.locale}`),
+    );
+    const presentable = (speciesId: string, locale: string) =>
+      named.has(`${speciesId}|${locale}`) &&
+      (photographed.has(speciesId) || primaryPhoto(KRONOBERG_MEDIA, speciesId) !== null);
+
+    const plan = planSends(users, presenceByRegion, nowMs, {
+      ...(opts.testUserId ? { ignoreSlot: true } : {}),
+      presentable,
+    });
     if (opts.dryRun || plan.sends.length === 0) {
       return json({ users: users.length, planned: plan.sends.length, sent: 0, skipped: plan.skipped, dryRun: !!opts.dryRun });
     }
