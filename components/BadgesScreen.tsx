@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34' },
-  done: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
+  done: { fontSize: 16, fontWeight: '600', color: '#336f3c' },
   subtitle: {
     marginTop: 4,
     marginBottom: 12,
@@ -154,6 +154,6 @@ const styles = StyleSheet.create({
     color: '#22331f',
     textAlign: 'center',
   },
-  lockedLabel: { color: '#7a8a7c', fontWeight: '500' },
-  progress: { marginTop: 4, fontSize: 12, color: '#7a8a7c' },
+  lockedLabel: { color: '#566658', fontWeight: '500' },
+  progress: { marginTop: 4, fontSize: 12, color: '#566658' },
 });

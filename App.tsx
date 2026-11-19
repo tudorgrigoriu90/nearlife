@@ -1544,6 +1544,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   tab: { flex: 1, alignItems: 'center', paddingVertical: 8 },
-  tabText: { fontSize: 14, color: '#7a8a7c', fontWeight: '600' },
+  tabText: { fontSize: 14, color: '#566658', fontWeight: '600' },
   tabTextActive: { color: '#2f5d34' },
 });

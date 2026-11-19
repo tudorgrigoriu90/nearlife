@@ -63,6 +63,6 @@ const styles = StyleSheet.create({
   ctaBusy: { backgroundColor: '#7fa886' },
   ctaText: { fontSize: 16, fontWeight: '700', color: '#fff' },
   secondary: { marginTop: 12, paddingVertical: 14, alignItems: 'center' },
-  secondaryText: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
-  note: { fontSize: 13, lineHeight: 19, color: '#6b7d6e', textAlign: 'center' },
+  secondaryText: { fontSize: 16, fontWeight: '600', color: '#336f3c' },
+  note: { fontSize: 13, lineHeight: 19, color: '#566658', textAlign: 'center' },
 });

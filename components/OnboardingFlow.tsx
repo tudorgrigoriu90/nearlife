@@ -272,7 +272,7 @@ function OnMount({ run }: { run: () => void }) {
 const styles = StyleSheet.create({
   spottedWrap: { flex: 1, backgroundColor: '#f4f8f2' },
   badge: { paddingTop: 52, paddingBottom: 8, alignItems: 'center', backgroundColor: '#eaf4ea' },
-  badgeText: { fontSize: 14, fontWeight: '700', color: '#2f7d4f' },
+  badgeText: { fontSize: 14, fontWeight: '700', color: '#296f46' },
   spottedCta: { margin: 20, paddingVertical: 16, borderRadius: 14, backgroundColor: '#3a7d44', alignItems: 'center' },
   spottedCtaText: { fontSize: 16, fontWeight: '700', color: '#fff' },
 });

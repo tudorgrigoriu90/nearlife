@@ -38,7 +38,7 @@ export default function AgeGateStep({
         keyboardType="number-pad"
         inputMode="numeric"
         placeholder={tr('onboarding.age.placeholder')}
-        placeholderTextColor="#9fb0a0"
+        placeholderTextColor="#566658"
         accessibilityLabel={tr('onboarding.age.placeholder')}
         maxLength={4}
       />

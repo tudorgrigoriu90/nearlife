@@ -93,9 +93,9 @@ const styles = StyleSheet.create({
   row: { paddingVertical: 14 },
   rowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#e2ebe0' },
   rowLabel: { fontSize: 16, color: '#22331f' },
-  locked: { color: '#8a948b' },
+  locked: { color: '#566658' },
   status: { paddingTop: 14, fontSize: 15, fontWeight: '600', color: '#2f5d34' },
-  note: { fontSize: 12, lineHeight: 17, color: '#7a8a7c' },
+  note: { fontSize: 12, lineHeight: 17, color: '#566658' },
   failed: { marginTop: 8, fontSize: 13, color: '#8a4b1f', fontWeight: '600' },
   danger: { color: '#b3261e' },
 });

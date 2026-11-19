@@ -265,13 +265,13 @@ const styles = StyleSheet.create({
   travelLaterText: { color: '#4a5c4d', fontSize: 14, fontWeight: '600' },
   links: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 20, marginTop: -8, marginBottom: 12 },
   countiesLink: { paddingVertical: 4 },
-  countiesText: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
+  countiesText: { fontSize: 14, fontWeight: '600', color: '#296f46' },
   list: { paddingBottom: 24 },
   events: { marginBottom: 8 },
   eventsTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#7a8a7c',
+    color: '#566658',
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 8,
@@ -310,5 +310,5 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   detail: { marginTop: 2, fontSize: 13, color: '#4a5c4d' },
-  footnote: { paddingVertical: 12, fontSize: 12, color: '#7a8a7c', fontStyle: 'italic' },
+  footnote: { paddingVertical: 12, fontSize: 12, color: '#566658', fontStyle: 'italic' },
 });

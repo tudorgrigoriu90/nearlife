@@ -52,6 +52,6 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     borderLeftWidth: 2,
     borderLeftColor: '#cfe0cd',
-    color: '#5a6b5c',
+    color: '#566658',
   },
 });

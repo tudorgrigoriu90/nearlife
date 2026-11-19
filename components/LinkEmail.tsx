@@ -78,7 +78,7 @@ export default function LinkEmail({
             value={email}
             onChangeText={setEmail}
             placeholder={tr('link.placeholder')}
-            placeholderTextColor="#9fb0a0"
+            placeholderTextColor="#566658"
             accessibilityLabel={tr('link.placeholder')}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   emoji: { fontSize: 52, textAlign: 'center' },
   title: { marginTop: 16, fontSize: 24, fontWeight: '700', color: '#22331f', textAlign: 'center' },
   body: { marginTop: 12, fontSize: 15, lineHeight: 22, color: '#4a5c4d', textAlign: 'center' },
-  sent: { marginTop: 12, fontSize: 15, lineHeight: 22, color: '#2f7d4f', textAlign: 'center', fontWeight: '600' },
+  sent: { marginTop: 12, fontSize: 15, lineHeight: 22, color: '#296f46', textAlign: 'center', fontWeight: '600' },
   input: {
     marginTop: 20,
     backgroundColor: '#fff',
@@ -131,5 +131,5 @@ const styles = StyleSheet.create({
   ctaDisabled: { opacity: 0.7 },
   ctaText: { fontSize: 16, fontWeight: '700', color: '#fff' },
   doneBtn: { marginTop: 12, paddingVertical: 14, alignItems: 'center' },
-  doneText: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
+  doneText: { fontSize: 16, fontWeight: '600', color: '#336f3c' },
 });

@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingTop: 56, paddingHorizontal: 20 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { fontSize: 24, fontWeight: '700', color: '#2f5d34' },
-  done: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
-  hint: { marginTop: 6, marginBottom: 12, fontSize: 13, color: '#7a8a7c' },
+  done: { fontSize: 16, fontWeight: '600', color: '#336f3c' },
+  hint: { marginTop: 6, marginBottom: 12, fontSize: 13, color: '#566658' },
   share: {
     marginBottom: 12,
     paddingVertical: 12,

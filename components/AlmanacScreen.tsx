@@ -207,7 +207,7 @@ export default function AlmanacScreen({
         value={query}
         onChangeText={setQuery}
         placeholder={tr('almanac.search.placeholder')}
-        placeholderTextColor="#7a8a7c"
+        placeholderTextColor="#566658"
         accessibilityLabel={tr('almanac.search.placeholder')}
         autoCorrect={false}
         clearButtonMode="while-editing"
@@ -329,7 +329,7 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
 }
 
 const styles = StyleSheet.create({
-  retry: { marginTop: 12, fontSize: 15, fontWeight: '700', color: '#3a7d44' },
+  retry: { marginTop: 12, fontSize: 15, fontWeight: '700', color: '#336f3c' },
   container: { flex: 1, backgroundColor: '#f4f8f2', paddingTop: 64, paddingHorizontal: 16 },
   centered: { alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34', paddingHorizontal: 4 },
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
   },
-  linkText: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
+  linkText: { fontSize: 14, fontWeight: '600', color: '#296f46' },
   tierStat: {
     flex: 1,
     backgroundColor: '#fff',
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: 'center',
   },
-  tierStatCount: { fontSize: 16, fontWeight: '700', color: '#3a7d44' },
+  tierStatCount: { fontSize: 16, fontWeight: '700', color: '#336f3c' },
   tierStatLabel: { marginTop: 2, fontSize: 11, color: '#4a5c4d' },
   // The row must not shrink: the grid below takes all remaining height, and Android squeezed the
   // row until the chip labels were cut in half (T-239).
@@ -406,14 +406,14 @@ const styles = StyleSheet.create({
   cellName: { marginTop: 6, fontSize: 12, fontWeight: '600', color: '#22331f', maxWidth: '90%' },
   tierRow: { flexDirection: 'row', marginTop: 6, gap: 3 },
   tierGlyph: { fontSize: 11, marginHorizontal: 1 },
-  tierOn: { color: '#3a7d44' },
-  tierOff: { color: '#cdd8ca' },
+  tierOn: { color: '#336f3c' },
+  tierOff: { color: '#566658' },
   detail: { marginTop: 8, fontSize: 13, color: '#4a5c4d' },
   empty: {
     textAlign: 'center',
     marginTop: 40,
     fontSize: 14,
-    color: '#7a8a7c',
+    color: '#566658',
     fontStyle: 'italic',
   },
 });

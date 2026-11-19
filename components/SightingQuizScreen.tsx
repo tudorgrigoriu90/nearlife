@@ -213,7 +213,7 @@ export default function SightingQuizScreen({
               onChangeText={setInput}
               onSubmitEditing={start}
               placeholder={tr('quiz.placeholder')}
-              placeholderTextColor="#7a8a7c"
+              placeholderTextColor="#566658"
               accessibilityLabel={tr('quiz.placeholder')}
               autoCorrect={false}
               returnKeyType="next"
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e2ebe0',
   },
   optionPhoto: { width: '100%', height: '100%' },
-  right: { marginTop: 16, fontSize: 18, lineHeight: 26, fontWeight: '700', color: '#2f7d4f' },
+  right: { marginTop: 16, fontSize: 18, lineHeight: 26, fontWeight: '700', color: '#296f46' },
   wrong: { marginTop: 16, fontSize: 17, lineHeight: 24, fontWeight: '600', color: '#8a4b1f' },
   answerPhoto: {
     marginTop: 14,
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     borderColor: '#3a7d44',
     alignItems: 'center',
   },
-  songEntryText: { fontSize: 16, fontWeight: '700', color: '#3a7d44' },
+  songEntryText: { fontSize: 16, fontWeight: '700', color: '#336f3c' },
   doneBtn: { marginTop: 12, paddingVertical: 14, alignItems: 'center' },
-  doneText: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
+  doneText: { fontSize: 16, fontWeight: '600', color: '#336f3c' },
 });

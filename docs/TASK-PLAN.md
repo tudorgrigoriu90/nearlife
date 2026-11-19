@@ -4476,6 +4476,18 @@ document until it is started, when it takes the next free `T-###`.
     (a changed version whose download fails serves the saved county; a failed version check is
     retried). Coverage 90.4 % / 86.0 %.
 
+- **T-292 · Text contrast at WCAG AA** — *Claude · S · `DONE` · deps: — · review I-24*
+  - Secondary text `#7a8a7c` (27 uses) was 3.4 : 1 on the app background, placeholders `#9fb0a0`
+    2.1 : 1, and green text `#3a7d44` 3.8 : 1 on the pale chips; AA needs 4.5 : 1.
+  - ✅ `lib/theme.ts` lists every text colour with the surfaces it sits on (light, dark,
+    accent); `lib/theme.test.ts` checks every pair at ≥ 4.5 : 1 with the WCAG 2.1 formula.
+    Seven greys merge into one muted `#566658`; green text is `#336f3c` / `#296f46` (buttons
+    keep `#3a7d44`); amber `#7a5a1f`; warning red `#ab3d2d`. The unearned tier mark, nearly
+    invisible at 1.5 : 1, uses the muted colour.
+  - ✅ `__tests__/textColours.test.js` fails when a component colours text with anything not in
+    the theme, so new screens are covered. Components keep hex literals for now; moving them to
+    named imports comes with dark mode (I-26), which needs the second palette anyway.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `IN-PROGRESS` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
   // photo's 100% width with it (T-227).
   tap: { alignSelf: 'stretch' },
   photo: { width: '100%', height: 220, borderRadius: 16, backgroundColor: '#e2ebe0' },
-  credit: { marginTop: 6, fontSize: 11, color: '#7a8a7c', textAlign: 'center' },
+  credit: { marginTop: 6, fontSize: 11, color: '#566658', textAlign: 'center' },
   emoji: { fontSize: 72 },
 });

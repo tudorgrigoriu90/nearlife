@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   },
   buttonOn: { backgroundColor: '#cfe5cf' },
   buttonLocked: { backgroundColor: '#eceeea' },
-  buttonTextLocked: { color: '#8a948b' },
+  buttonTextLocked: { color: '#566658' },
   buttonText: { fontSize: 15, fontWeight: '600', color: '#2f5d34' },
-  credit: { marginTop: 4, fontSize: 11, color: '#6b7d6e', textAlign: 'center' },
+  credit: { marginTop: 4, fontSize: 11, color: '#566658', textAlign: 'center' },
 });

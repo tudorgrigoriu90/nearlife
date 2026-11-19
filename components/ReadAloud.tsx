@@ -91,5 +91,5 @@ export default function ReadAloud({
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 10, marginTop: 10 },
   btn: { backgroundColor: '#eaf4ea', borderRadius: 18, paddingHorizontal: 14, paddingVertical: 8 },
-  text: { fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
+  text: { fontSize: 14, fontWeight: '600', color: '#296f46' },
 });

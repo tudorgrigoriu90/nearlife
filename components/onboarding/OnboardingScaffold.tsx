@@ -55,9 +55,9 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '700', color: '#2f5d34', textAlign: 'center' },
   body: { marginTop: 16, fontSize: 16, lineHeight: 24, color: '#4a5c4d', textAlign: 'center' },
   footer: { gap: 12 },
-  footnote: { fontSize: 12, color: '#7a8a7c', textAlign: 'center', fontStyle: 'italic' },
+  footnote: { fontSize: 12, color: '#566658', textAlign: 'center', fontStyle: 'italic' },
   cta: { paddingVertical: 16, borderRadius: 14, backgroundColor: '#3a7d44', alignItems: 'center' },
   ctaText: { fontSize: 16, fontWeight: '700', color: '#fff' },
   secondary: { paddingVertical: 12, alignItems: 'center' },
-  secondaryText: { fontSize: 15, fontWeight: '600', color: '#3a7d44' },
+  secondaryText: { fontSize: 15, fontWeight: '600', color: '#336f3c' },
 });

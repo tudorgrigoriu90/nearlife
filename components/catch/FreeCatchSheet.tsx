@@ -54,10 +54,10 @@ const styles = StyleSheet.create({
   sheet: { backgroundColor: '#f4f8f2', borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 24, paddingBottom: 40 },
   title: { fontSize: 22, fontWeight: '800', color: '#2f5d34' },
   body: { marginTop: 10, fontSize: 15, lineHeight: 22, color: '#4a5c4d' },
-  reassure: { marginTop: 10, fontSize: 14, fontWeight: '600', color: '#2f7d4f' },
+  reassure: { marginTop: 10, fontSize: 14, fontWeight: '600', color: '#296f46' },
   cta: { marginTop: 20, paddingVertical: 16, borderRadius: 14, backgroundColor: '#3a7d44', alignItems: 'center' },
   ctaText: { fontSize: 16, fontWeight: '700', color: '#fff' },
-  soon: { marginTop: 10, fontSize: 12, color: '#7a8a7c', textAlign: 'center', fontStyle: 'italic' },
+  soon: { marginTop: 10, fontSize: 12, color: '#566658', textAlign: 'center', fontStyle: 'italic' },
   later: { marginTop: 8, paddingVertical: 12, alignItems: 'center' },
   laterText: { fontSize: 15, color: '#4a5c4d', fontWeight: '600' },
 });

@@ -59,7 +59,7 @@ export default function SignIn({
         value={sentTo ? code : email}
         onChangeText={sentTo ? setCode : setEmail}
         placeholder={sentTo ? tr('signin.codePlaceholder') : tr('link.placeholder')}
-        placeholderTextColor="#9fb0a0"
+        placeholderTextColor="#566658"
         accessibilityLabel={sentTo ? tr('signin.codePlaceholder') : tr('link.placeholder')}
         keyboardType={sentTo ? 'number-pad' : 'email-address'}
         autoCapitalize="none"
@@ -121,5 +121,5 @@ const styles = StyleSheet.create({
   ctaDisabled: { opacity: 0.7 },
   ctaText: { fontSize: 16, fontWeight: '700', color: '#fff' },
   doneBtn: { marginTop: 12, paddingVertical: 14, alignItems: 'center' },
-  doneText: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
+  doneText: { fontSize: 16, fontWeight: '600', color: '#336f3c' },
 });

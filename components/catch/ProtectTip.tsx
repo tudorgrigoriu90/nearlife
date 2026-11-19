@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   badge: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#2f7d4f',
+    color: '#296f46',
     textAlign: 'center',
     marginBottom: 24,
   },
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     fontSize: 15,
     fontWeight: '600',
-    color: '#8a6d1f',
+    color: '#7a5a1f',
     textAlign: 'center',
   },
   tipCard: { backgroundColor: '#fff', borderRadius: 16, padding: 20 },
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   tipBody: { marginTop: 8, fontSize: 16, lineHeight: 23, color: '#2f3d2c' },
-  law: { marginTop: 16, fontSize: 12, color: '#7a8a7c', fontStyle: 'italic' },
+  law: { marginTop: 16, fontSize: 12, color: '#566658', fontStyle: 'italic' },
   cta: { paddingVertical: 16, borderRadius: 14, backgroundColor: '#3a7d44', alignItems: 'center' },
   ctaText: { fontSize: 16, fontWeight: '700', color: '#fff' },
 });

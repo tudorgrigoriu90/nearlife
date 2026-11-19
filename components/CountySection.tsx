@@ -114,8 +114,8 @@ const styles = StyleSheet.create({
   barTrack: { height: CHART_HEIGHT, width: '70%', justifyContent: 'flex-end' },
   bar: { width: '100%', borderRadius: 3, backgroundColor: '#a9c9a4' },
   barNow: { backgroundColor: '#2f7d4f' },
-  initial: { marginTop: 3, fontSize: 10, color: '#7a8a7c' },
+  initial: { marginTop: 3, fontSize: 10, color: '#566658' },
   initialNow: { color: '#2f5d34', fontWeight: '700' },
   line: { marginTop: 6, fontSize: 16, lineHeight: 23, color: '#22331f' },
-  source: { marginTop: 8, fontSize: 11, lineHeight: 15, color: '#7a8a7c' },
+  source: { marginTop: 8, fontSize: 11, lineHeight: 15, color: '#566658' },
 });

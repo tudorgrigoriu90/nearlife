@@ -80,5 +80,5 @@ const styles = StyleSheet.create({
   btnDisabled: { opacity: 0.7 },
   deleteText: { fontSize: 16, fontWeight: '700', color: '#fff' },
   cancelBtn: { marginTop: 12, paddingVertical: 14, alignItems: 'center' },
-  cancelText: { fontSize: 16, fontWeight: '600', color: '#3a7d44' },
+  cancelText: { fontSize: 16, fontWeight: '600', color: '#336f3c' },
 });
