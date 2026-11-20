@@ -5182,6 +5182,9 @@ document until it is started, when it takes the next free `T-###`.
 - **T-363 · Dark mode** — *Claude · `DEFERRED` (v2, Director 2026-11-20) · deps: — · review I-26*
   - A dark palette in lib/theme.ts (T-292) and userInterfaceStyle automatic, with screenshot tests and the contrast test for both palettes. Touches every screen's colours.
 
+- **T-364 · Winter content** — *Claude · `DEFERRED` (v2, Director 2026-11-20) · deps: — · review F-21*
+  - Tracks and signs, feeder birds, evergreens, lichens and mosses, with a winter ordering for This Week. The catalogue has no fungi, lichens or mosses today (checked live 2026-11-20), so this starts with a data run (taxa, content in every locale, photos); the mushroom-season event (T-357) appears by itself once fungi are in.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
