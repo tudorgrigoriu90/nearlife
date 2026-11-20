@@ -19,7 +19,10 @@ export default class ErrorBoundary extends Component<Props, { failed: boolean; r
     return { failed: true };
   }
 
-  componentDidCatch(error: Error) {
+  componentDidCatch(error: Error, info?: { componentStack?: string | null }) {
+    // Also to the device log (logcat), so a crash seen on a test phone or the emulator (T-367)
+    // can be read without crash-reporting consent. No user data is in an error's message.
+    console.error('[ErrorBoundary]', error?.message, error?.stack, info?.componentStack ?? '');
     this.props.report(error);
   }
 

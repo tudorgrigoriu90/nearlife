@@ -30,6 +30,8 @@ describe('ErrorBoundary', () => {
     );
     expect(screen.getByText(tr('error.title'))).toBeTruthy();
     expect(report).toHaveBeenCalledWith(expect.objectContaining({ message: 'boom' }));
+    // T-367: also to the device log, readable without crash-reporting consent.
+    expect(console.error).toHaveBeenCalledWith('[ErrorBoundary]', 'boom', expect.any(String), expect.any(String));
   });
 
   it('"Back to start" mounts the app again', async () => {

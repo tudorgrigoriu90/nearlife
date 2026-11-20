@@ -77,7 +77,7 @@ jobs:
           script: |
             mkdir -p e2e-shots
             adb install -r android/app/build/outputs/apk/release/app-release.apk
-            maestro test .maestro/ --format junit --output maestro-report.xml --debug-output maestro-debug
+            maestro test .maestro/ --format junit --output maestro-report.xml --debug-output maestro-debug; s=$?; adb logcat -d -v time ReactNativeJS:V ReactNative:V AndroidRuntime:E '*:S' > e2e-shots/logcat.txt; exit $s
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
