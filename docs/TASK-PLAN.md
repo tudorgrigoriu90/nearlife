@@ -5228,6 +5228,21 @@ document until it is started, when it takes the next free `T-###`.
     an English string of the app. Tests: switch 2, build checks 4.
   - Remaining: a green run on the emulator.
 
+- **T-368 · Share a species as an image** — *Claude · S · `DONE` · deps: — · review F-14*
+  - Done when the shared image contains the photo credit line (licence condition).
+  - ✅ The card's share button opens a sheet with a preview card: photo, name, "Active in
+    {county} this season" (or Sweden), the photo credit (`attributionFor`), "Found with Nearby".
+    "Share as image" draws it on the phone and hands the PNG to the system share sheet; "Share as
+    text" sends the message as before, and is used when the phone cannot share files. No upsell.
+  - ✅ New dependencies, both MIT and free: `react-native-view-shot` 5.1.0 (draws the view as an
+    image) and `expo-sharing` ~57.0.26 (React Native's Share cannot send a file on Android). Native
+    modules: they reach phones with the next build.
+  - Not done, on purpose: the `nearby://species/<id>` link. A custom-scheme link is not clickable in
+    messengers, and opening a card from one needs deep-link routing, which went to v2 with the
+    navigation rewrite (T-361).
+  - ✅ Tests: the words and the credit 2, sheet 2 (the credit is drawn on the captured view; the
+    text fallback), card 1 updated.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

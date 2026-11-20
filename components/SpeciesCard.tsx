@@ -1,9 +1,9 @@
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
   Pressable,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   View,
@@ -21,11 +21,11 @@ import {
 } from '../lib/i18n/contentLocale';
 import { commonNameFor, commonNameInLocale } from '../lib/species/localized';
 import { READ_ALOUD_ENABLED } from '../lib/readAloud';
-import { buildShareMessage } from '../lib/shareSpecies';
 import type { SpeciesContent } from '../lib/species/content';
 import type { IucnStatus, LegalStatus, RedlistSeStatus, Month, Species } from '../lib/species/types';
 import FieldNotes from './FieldNotes';
 import ConfusedWith from './ConfusedWith';
+import ShareSheet from './ShareSheet';
 import type { FieldNote } from '../lib/fieldNotes';
 import { ARTPORTALEN_URL, INVASIVE_REPORT_URL } from '../lib/legal';
 import DualText from './DualText';
@@ -192,11 +192,8 @@ export default function SpeciesCard({
   const textState = contentState ?? (content ? 'ready' : 'missing');
 
   // Share is a clean delight moment — no upsell (invariant #4); honest, season-framed copy
-  // (invariant #1). Text only for now; a deep link arrives with the store work. Failures/dismissal
-  // are swallowed (Share rejects if a share is already open, or the user cancels).
-  const shareSpecies = () => {
-    void Share.share({ message: buildShareMessage(name, locale) }).catch(() => {});
-  };
+  // (invariant #1). The sheet offers the card as an image, or the text as before (T-368).
+  const [sharing, setSharing] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -209,7 +206,7 @@ export default function SpeciesCard({
           <View />
         )}
         <Pressable
-          onPress={shareSpecies}
+          onPress={() => setSharing(true)}
           accessibilityRole="button"
           accessibilityLabel={tr('share.cta')}
           style={styles.share}
@@ -407,6 +404,14 @@ export default function SpeciesCard({
             <Text style={styles.reportText}>{tr('card.reportArtportalen')}</Text>
           </Pressable>
         ) : null}
+
+        <ShareSheet
+          species={species}
+          locale={locale}
+          county={county?.name ?? null}
+          visible={sharing}
+          onClose={() => setSharing(false)}
+        />
 
         {onOpenSpecies ? <ConfusedWith locale={locale} species={lookalikes} onOpen={onOpenSpecies} /> : null}
 

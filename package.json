@@ -17,6 +17,7 @@
     "expo-localization": "~57.0.1",
     "expo-location": "~57.0.7",
     "expo-notifications": "~57.0.8",
+    "expo-sharing": "~57.0.26",
     "expo-speech": "~57.0.1",
     "expo-status-bar": "~57.0.1",
     "posthog-react-native": "^4.61.2",
@@ -26,6 +27,7 @@
     "react-native-purchases": "10.14.0",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-url-polyfill": "^3.0.0",
+    "react-native-view-shot": "5.1.0",
     "react-native-web": "^0.21.2"
   },
   "devDependencies": {

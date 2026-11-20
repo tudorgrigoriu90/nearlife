@@ -45,6 +45,8 @@ describe('SpeciesCard', () => {
     const spy = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' } as never);
     await render(<SpeciesCard species={swift} content={swiftContent} locale="en" />);
     await fireEvent.press(screen.getByText(tr('share.cta'), { exact: false }));
+    // T-368: the share button opens the sheet; "Share as text" sends the message.
+    await fireEvent.press(screen.getByText(tr('share.text')));
     expect(spy).toHaveBeenCalledTimes(1);
     const message = (spy.mock.calls[0][0] as { message: string }).message;
     expect(message).toContain(commonNameFor(swift, 'en'));
