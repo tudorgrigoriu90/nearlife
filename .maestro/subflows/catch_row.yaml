@@ -11,3 +11,4 @@ appId: com.nearlife.nearby
 - tapOn: "Tap to start"
 - tapOn:
     id: "e2e-win"
+- takeScreenshot: e2e-shots/after-win-${ROW}

@@ -7,7 +7,7 @@ appId: com.nearlife.nearby
     env:
       ROW: 0
 - extendedWaitUntil:
-    visible: "You caught .*"
+    visible: ".*You caught .*"
     timeout: 20000
 # "Keep exploring" returns to the species' card.
 - tapOn: "Keep exploring"
