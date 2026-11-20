@@ -9,6 +9,11 @@ appId: com.nearlife.nearby
     clearState: true
     permissions:
       all: allow
+# A cold start on the emulator can take longer than Maestro's default wait (run 4, 2026-11-20).
+- takeScreenshot: e2e-shots/launch
+- extendedWaitUntil:
+    visible: "Get started"
+    timeout: 60000
 - tapOn: "Get started"
 - tapOn:
     text: "Year of birth.*"
