@@ -5179,6 +5179,9 @@ document until it is started, when it takes the next free `T-###`.
 - **T-362 · Home-screen widget** — *Claude · `DEFERRED` (v2, Director 2026-11-20) · deps: — · review F-11*
   - An Android widget with the last notified species (photo, name, "active this season"), tap opens the card. Needs a native widget library, a config plugin, a new build and a device check.
 
+- **T-363 · Dark mode** — *Claude · `DEFERRED` (v2, Director 2026-11-20) · deps: — · review I-26*
+  - A dark palette in lib/theme.ts (T-292) and userInterfaceStyle automatic, with screenshot tests and the contrast test for both palettes. Touches every screen's colours.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
