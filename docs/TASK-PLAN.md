@@ -4931,7 +4931,7 @@ document until it is started, when it takes the next free `T-###`.
     live with `db-migrate.yml` `verify` (rolled back), which is the substitute until a second
     project is worth its cost.
 
-- **T-336 · Invasive mark on the card** — *Claude · S · `IN-PROGRESS` · deps: T-332 · review F-01 (invasive)*
+- **T-336 · Invasive mark on the card** — *Claude · S · `DONE` · deps: T-332 · review F-01 (invasive)*
   - Done when `species.legal_status` is loaded, the card shows the line for every species with a
     status, a test checks an invasive species, and the source is in DATA-SOURCING-LICENSING.md.
   - ✅ Source: the EU Union list (Regulation (EU) 1143/2014, to the 2025 update) from INBO's CC0
@@ -4944,7 +4944,12 @@ document until it is started, when it takes the next free `T-###`.
     a "Report where you saw it" link (invasivaarter.nu), fixed give advice about not spreading it in
     place of the generated one (which could suggest letting a plant grow), pledge "I won't spread it".
   - ✅ Tests: pipeline 3, real Postgres 2, mapping 1, card 2.
-  - Remaining: apply 0045, run the first load, record how many catalogue species are marked.
+  - ✅ Live (2026-11-19): 0045 applied; the first load marked 32 species invasive, 16 of them in
+    the catalogue (Acridotheres tristis, Ailanthus altissima, Alopochen aegyptiaca, Celastrus
+    orbiculatus, Elodea nuttallii, Heracleum mantegazzianum, Impatiens glandulifera, Lepomis
+    gibbosus, Lysichiton americanus, Myriophyllum heterophyllum, Nyctereutes procyonoides, Ondatra
+    zibethicus, Oxyura jamaicensis, Reynoutria japonica, Reynoutria sachalinensis, Trachemys
+    scripta). The other 16 are below the noise filter; 85 of the 117 are not among Sweden's species.
 - **T-337 · Protected mark on the card** — *Claude + Director · M · `TODO` · deps: T-336 · review F-01 (protected)*
   - Parse the Species Protection Ordinance (SFS 2007:845, as amended to SFS 2026:1504, from
     data.riksdagen.se): annex 1 animals marked N or n and plants marked N, and annex 2 with its
