@@ -78,12 +78,12 @@ describe('plural forms', () => {
 // it the plural forms fall back to the rule English and Swedish share, instead of throwing.
 describe('plural forms without Intl.PluralRules', () => {
   const original = Intl.PluralRules;
+  const intl = Intl as unknown as { PluralRules?: typeof Intl.PluralRules };
   beforeEach(() => {
-    // @ts-expect-error -- simulating an engine without it
-    delete Intl.PluralRules;
+    delete intl.PluralRules; // simulating an engine without it
   });
   afterEach(() => {
-    Intl.PluralRules = original;
+    intl.PluralRules = original;
   });
 
   it('still picks "one" for 1 and the other form otherwise', () => {
