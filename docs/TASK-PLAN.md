@@ -1769,6 +1769,8 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
     device-run gap). This pays down the "not visually verified" debt across the screens.
   - Also at the largest system font size and with TalkBack on (T-329 · review I-25): every screen
     still fits, and every control is read out by name.
+  - Minigames (T-366 · review I-06): the ring, fish, band and insect move smoothly on a low-end
+    Android phone, the drawn fish/insect match what is scored, and a catch and a miss each vibrate.
 - **T-162 · Align SDK-57 dependencies + add expo-dev-client (dev-build enablement)** — *Claude · S · `DONE` · deps: T-140 · [TSD §1](TSD.md)*
   - ✅ Expo Go can't run this SDK-57 app, so device testing needs an EAS **dev build** — which needs
     `expo-dev-client`. Installing it required aligning the SDK-57 patch set: `expo` ~57.0.2 → ~57.0.10,
@@ -5187,6 +5189,23 @@ document until it is started, when it takes the next free `T-###`.
 
 - **T-365 · Offline map tiles** — *Claude · `DEFERRED` (v2, Director 2026-11-20) · deps: — · review F-18*
   - Save the map around a catch spot for offline use. OpenFreeMap's terms (tos, updated 2026-10-14) allow app offline downloads of at most 3,000 tiles or 50 MB each, with at most 4 parallel requests and an app-identifying User-Agent; MapLibre Android fixes 20 requests per host (MLRNTransformRequestModule), so complying needs a library patch, OpenFreeMap's agreement, or self-hosted tiles. Until then a saved spot works offline without the background map.
+
+- **T-366 · Minigame motion off the React render loop, and haptics** — *Claude · M · `DONE` · deps: — · review I-06*
+  - Done when no minigame calls `setState` on a timer more often than every 200 ms, success and
+    failure trigger a haptic, and it is checked on the Director's test phone (that check is listed
+    in T-141).
+  - ✅ The bird ring is one native-driver loop; the fish's drift and the insect's flight are
+    native-driver paths over elapsed time (`lib/minigame/motion.ts` samples the same functions the
+    scoring tick uses, every 50 ms, within a pixel); the reel band starts a native glide at the
+    tick's own speed on each press and release. The scoring ticks are unchanged but set no state;
+    the "in the band" / "on the path" cues re-render on a change, at most every 200 ms. The stealth
+    game already ticked every 200 ms. Rejected: Animated values set from the tick, which in tests
+    (and on Fabric) still re-render the animated component each time; Reanimated, a dependency the
+    native driver made unnecessary.
+  - ✅ `expo-haptics` (~57.0.3, Expo's own free module; added for this feedback, no permission
+    needed): MinigameShell vibrates "success" or "error" once when a result appears.
+  - ✅ Tests: renders per 4 s of play ≤ 23 for each timer game (a Profiler count, one act per 20 ms
+    so React cannot batch ticks; it was 66–133), path sampling 2, haptics 1.
 
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what

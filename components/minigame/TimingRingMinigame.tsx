@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View, Text } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, View, Text } from 'react-native';
 import { createTranslator } from '../../lib/i18n';
 import {
   DEFAULT_TIMING,
@@ -14,8 +14,9 @@ import { type MinigameProps } from './types';
 // Bird "tap when it dives" timing minigame (T-033 → T-069 · GDD §4). A ring shrinks and loops;
 // the player taps once when it lines up with the fixed target ring. Grading is the tested,
 // render-free core (lib/minigame/timing.ts, T-114) — this component only drives the visual.
-// One-thumb, a few loops within a 12s budget, clear success/fail feedback. NOTE: not
-// device-verified (animation timing tuned by eye, scoring is unit-tested).
+// One-thumb, a few loops within a 12s budget, clear success/fail feedback. The shrink loop runs
+// on the native driver (T-366 · review I-06): React does not re-render while the ring moves, and
+// the tap is graded from the clock, not from the drawn ring. NOTE: not device-verified.
 
 const CYCLE_MS = 2200; // one shrink loop
 const TARGET_MS = 1500; // point in the loop the ring meets the target
@@ -41,16 +42,17 @@ export default function TimingRingMinigame({
   // Easy mode (T-331 · review I-25): the forgiving tuning, whatever config was passed.
   const config = easy ? EASY_TIMING : given;
   const tr = createTranslator(locale);
-  const [scale, setScale] = useState(START_SCALE);
+  // One loop of the shrink, 0 → 1, repeated on the native thread.
+  const cycle = useState(() => new Animated.Value(0))[0];
+  const loopRef = useRef<Animated.CompositeAnimation | null>(null);
   const [result, setResult] = useState<ShellResult | null>(null);
   const startRef = useRef(0);
-  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const budgetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stop = () => {
-    if (tickRef.current) clearInterval(tickRef.current);
+    loopRef.current?.stop();
     if (budgetRef.current) clearTimeout(budgetRef.current);
-    tickRef.current = null;
+    loopRef.current = null;
     budgetRef.current = null;
   };
 
@@ -59,10 +61,10 @@ export default function TimingRingMinigame({
 
   useEffect(() => {
     startRef.current = Date.now();
-    tickRef.current = setInterval(() => {
-      const inCycle = (Date.now() - startRef.current) % CYCLE_MS;
-      setScale(START_SCALE + (END_SCALE - START_SCALE) * (inCycle / CYCLE_MS));
-    }, 30);
+    loopRef.current = Animated.loop(
+      Animated.timing(cycle, { toValue: 1, duration: CYCLE_MS, easing: Easing.linear, useNativeDriver: true }),
+    );
+    loopRef.current.start();
     // No tap within the budget → a forced miss (tap far from the target). Easy mode has no budget.
     if (easy) return stop;
     budgetRef.current = setTimeout(() => {
@@ -97,7 +99,9 @@ export default function TimingRingMinigame({
         accessibilityLabel={tr('minigame.bird.hint')}
       >
         <View style={[styles.targetRing, { transform: [{ scale: TARGET_SCALE }] }]} />
-        <View style={[styles.ring, { transform: [{ scale }] }]} />
+        <Animated.View
+          style={[styles.ring, { transform: [{ scale: cycle.interpolate({ inputRange: [0, 1], outputRange: [START_SCALE, END_SCALE] }) }] }]}
+        />
         <Text style={styles.diver}>{glyph ?? '🐦'}</Text>
       </Pressable>
     </MinigameShell>

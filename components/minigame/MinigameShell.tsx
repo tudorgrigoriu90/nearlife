@@ -1,4 +1,5 @@
-import { type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale, type TranslationKey } from '../../lib/i18n';
 import { gradeFromScore, type MinigameGrade } from '../../lib/minigame/grade';
@@ -42,6 +43,16 @@ export default function MinigameShell({
   children: ReactNode;
 }) {
   const tr = createTranslator(locale);
+  const outcome = result === null ? null : result.success;
+
+  // A short vibration on the result (T-366 · review I-06): one on the change from playing to a
+  // result, never per frame. Best effort: a phone without a vibrator simply stays still.
+  useEffect(() => {
+    if (outcome === null) return;
+    void Haptics.notificationAsync(
+      outcome ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error,
+    ).catch(() => undefined);
+  }, [outcome]);
 
   if (result) {
     return (

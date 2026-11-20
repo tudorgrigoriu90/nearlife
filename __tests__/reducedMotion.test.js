@@ -10,6 +10,13 @@ const { join, relative } = require('path');
 
 const ROOT = join(__dirname, '..');
 const ANIMATION = /\bAnimated\.|\bLayoutAnimation\b|react-native-reanimated|useAnimatedStyle/;
+// The minigames whose motion is the game (T-366 moved it to Animated). Under reduced motion they
+// start in easy mode instead (useEasyMode reads useReducedMotion, T-331); nothing else is exempt.
+const GAMEPLAY = new Set([
+  'components/minigame/TimingRingMinigame.tsx',
+  'components/minigame/FishReelMinigame.tsx',
+  'components/minigame/TraceMinigame.tsx',
+]);
 
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
@@ -25,7 +32,12 @@ describe('reduced motion', () => {
     const offenders = [...walk(join(ROOT, 'components')), join(ROOT, 'App.tsx')]
       .filter((f) => ANIMATION.test(readFileSync(f, 'utf8')))
       .filter((f) => !/useReducedMotion/.test(readFileSync(f, 'utf8')))
-      .map((f) => relative(ROOT, f));
+      .map((f) => relative(ROOT, f))
+      .filter((f) => !GAMEPLAY.has(f));
     expect(offenders).toEqual([]);
+  });
+
+  it('easy mode, which the minigames fall back to, follows the reduced-motion setting', () => {
+    expect(readFileSync(join(ROOT, 'components/useEasyMode.ts'), 'utf8')).toMatch(/useReducedMotion/);
   });
 });

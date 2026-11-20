@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
+import { Animated, Easing, StyleSheet, View, type GestureResponderEvent } from 'react-native';
 import { createTranslator } from '../../lib/i18n';
 import { DEFAULT_TRACE, EASY_TRACE, evaluateTrace, type TraceConfig } from '../../lib/minigame/trace';
+import { sampledPath } from '../../lib/minigame/motion';
 import MinigameShell, { type ShellResult } from './MinigameShell';
 import { type MinigameProps } from './types';
 
 // Insect "trace" minigame (T-071 · GDD §4). A flying insect traces a looping path; the player
 // keeps a fingertip on it without letting the line break. Each tick samples the distance between
 // finger and insect; grading is the tested render-free core (lib/minigame/trace.ts). One-thumb,
-// ~10s. NOTE: not device-verified.
+// ~10s. The flight is a native-driver path over time (T-366 · review I-06), so React does not
+// re-render while the insect moves; the "on the path" glow changes at most every 200 ms.
+// NOTE: not device-verified.
 
 const STAGE = 288;
 const BUG = 30;
@@ -26,6 +29,10 @@ function bugCenterAt(elapsedMs: number): { x: number; y: number } {
   return { x: C + AMP * Math.sin(t * 1.3), y: C + AMP * Math.sin(t * 2.1 + 0.5) };
 }
 
+// The flight for the native driver, sampled every 50 ms (within a pixel of the sines).
+const PATH_X = sampledPath((ms) => bugCenterAt(ms).x, DURATION_MS, 50);
+const PATH_Y = sampledPath((ms) => bugCenterAt(ms).y, DURATION_MS, 50);
+
 export default function TraceMinigame({
   locale = 'en',
   config: given = DEFAULT_TRACE,
@@ -40,8 +47,10 @@ export default function TraceMinigame({
   // The drawn ring grows with the tolerance, so easy mode shows how much room there is.
   const ring = RING * (config.tolerancePx / DEFAULT_TRACE.tolerancePx);
   const tr = createTranslator(locale);
-  const [bug, setBug] = useState({ x: C, y: C });
+  const clock = useState(() => new Animated.Value(0))[0];
+  const flightRef = useRef<Animated.CompositeAnimation | null>(null);
   const [onPath, setOnPath] = useState(false);
+  const onPathRef = useRef({ value: false, at: 0 });
   const [result, setResult] = useState<ShellResult | null>(null);
   const fingerRef = useRef<{ x: number; y: number } | null>(null);
   const distancesRef = useRef<number[]>([]);
@@ -53,7 +62,16 @@ export default function TraceMinigame({
   // The game's clock starts at the first touch on the stage (T-277 · review B-60): reading the
   // instruction and finding the insect cost nothing.
   const track = (e: GestureResponderEvent) => {
-    if (startRef.current === 0) startRef.current = Date.now();
+    if (startRef.current === 0) {
+      startRef.current = Date.now();
+      flightRef.current = Animated.timing(clock, {
+        toValue: DURATION_MS,
+        duration: DURATION_MS,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      });
+      flightRef.current.start();
+    }
     fingerRef.current = { x: e.nativeEvent.locationX, y: e.nativeEvent.locationY };
   };
   const clearFinger = () => (fingerRef.current = null);
@@ -63,12 +81,15 @@ export default function TraceMinigame({
       if (startRef.current === 0) return; // not touched yet
       const elapsed = Date.now() - startRef.current;
       const center = bugCenterAt(elapsed);
-      setBug(center);
 
       const f = fingerRef.current;
       const d = f ? Math.hypot(f.x - center.x, f.y - center.y) : OFF_PATH;
       distancesRef.current.push(d);
-      setOnPath(d <= config.tolerancePx);
+      const near = d <= config.tolerancePx;
+      if (near !== onPathRef.current.value && elapsed - onPathRef.current.at >= 200) {
+        onPathRef.current = { value: near, at: elapsed };
+        setOnPath(near);
+      }
 
       if (elapsed >= DURATION_MS) {
         if (tickRef.current) clearInterval(tickRef.current);
@@ -79,10 +100,14 @@ export default function TraceMinigame({
       }
     }, TICK_MS);
     return () => {
+      flightRef.current?.stop();
       if (tickRef.current) clearInterval(tickRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Before the first touch the clock is at 0, which is the path's start.
+  const flight = [{ translateX: clock.interpolate(PATH_X) }, { translateY: clock.interpolate(PATH_Y) }];
 
   return (
     <MinigameShell
@@ -106,20 +131,20 @@ export default function TraceMinigame({
       >
         {/* The point to follow is the ring; the insect is drawn above it so the finger does not
             cover it (T-277). Children ignore touches, so positions are the stage's (B-62). */}
-        <View
+        <Animated.View
           pointerEvents="none"
           style={[
             styles.ring,
             onPath ? styles.ringOn : null,
-            { left: bug.x - ring / 2, top: bug.y - ring / 2, width: ring, height: ring, borderRadius: ring / 2 },
+            { left: -ring / 2, top: -ring / 2, width: ring, height: ring, borderRadius: ring / 2, transform: flight },
           ]}
         />
-        <Text
+        <Animated.Text
           pointerEvents="none"
-          style={[styles.bug, onPath ? styles.bugOn : null, { left: bug.x - BUG / 2, top: bug.y - BUG / 2 - LIFT }]}
+          style={[styles.bug, onPath ? styles.bugOn : null, { left: -BUG / 2, top: -BUG / 2 - LIFT, transform: flight }]}
         >
           {glyph ?? '🦋'}
-        </Text>
+        </Animated.Text>
       </View>
     </MinigameShell>
   );
