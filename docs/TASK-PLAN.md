@@ -5260,6 +5260,19 @@ document until it is started, when it takes the next free `T-###`.
     English and Swedish, the interface languages. A scan test (`__tests__/hermesIntl.test.js`)
     fails on any unguarded use of an Intl API Hermes lacks. Tests: fallback 1, scan 1.
 
+- **T-370 · Residents no longer "arrive" or "leave"** — *Claude · XS · `DONE` · deps: T-340*
+  - The emulator screenshots (T-367) showed wild boar, a clubmoss and Swedish whitebeam under
+    "Usually arrives in Kronoberg in December". Checked against GBIF (2026-11-20): the boar's
+    December records (10 in November, 32 in December over 16 years) are live sightings, tracks in
+    snow and foraging, from Artportalen; no hunting-bag or roadkill dataset contributes, and moose
+    and roe deer records fall during the hunting season rather than rise. So it was not hunting
+    reporting: a resident's quiet month followed by a busier one passed the 3× rule.
+  - ✅ An arrival now also needs the three months up to it, and a departure the three months after
+    it, to average at most 10% of the species' busiest month (`SHIFT_ABSENT_SHARE`); the weekly
+    recap's count uses the same rule. Kronoberg, live: all three December "arrivals" drop; April →
+    May keeps 665 (cuckoo, swift, warblers…) and drops 24 (residents such as silver birch and
+    slow-worm, and the pied flycatcher, already there in April). Tests: residents 2.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

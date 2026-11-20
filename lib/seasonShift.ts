@@ -10,6 +10,32 @@ export const SHIFT_RATIO_DOWN = 0.25;
 /** Below this many records a ratio is noise: one record to three is not an arrival. */
 export const SHIFT_MIN_RECORDS = 20;
 export const SHIFT_SHOWN = 5;
+/**
+ * T-370: an arrival needs the three months up to it, and a departure the three months after it,
+ * to average at most this share of the species' busiest month. Without it a resident's quiet
+ * month followed by a busier one read as an arrival: wild boar, a clubmoss and a whitebeam
+ * "arrived" in Kronoberg in December (10 → 32 boar records; live sightings, not hunting reports).
+ */
+export const SHIFT_ABSENT_SHARE = 0.1;
+
+const at = (c: number[], m: number) => c[(((m - 1) % 12) + 12) % 12];
+const meanOf = (c: number[], months: number[]) => months.reduce((sum, m) => sum + at(c, m), 0) / months.length;
+
+/** Usually arrives in the month after `month`: a jump from a stretch with hardly any records. */
+function arrives(c: number[], month: number): boolean {
+  const now = at(c, month);
+  const then = at(c, month + 1);
+  if (then < SHIFT_MIN_RECORDS || then < SHIFT_RATIO_UP * now) return false;
+  return meanOf(c, [month - 2, month - 1, month]) <= SHIFT_ABSENT_SHARE * Math.max(...c);
+}
+
+/** Usually leaves after `month`: a drop into a stretch with hardly any records. */
+function leaves(c: number[], month: number): boolean {
+  const now = at(c, month);
+  const then = at(c, month + 1);
+  if (now < SHIFT_MIN_RECORDS || then >= SHIFT_RATIO_DOWN * now) return false;
+  return meanOf(c, [month + 1, month + 2, month + 3]) <= SHIFT_ABSENT_SHARE * Math.max(...c);
+}
 
 export interface SeasonShifts {
   arriving: string[];
@@ -26,8 +52,8 @@ export function seasonShifts(presence: RegionPresence[], month: Month): SeasonSh
     if (!counts || counts.length !== 12) continue;
     const now = counts[month - 1];
     const then = counts[next - 1];
-    if (then >= SHIFT_MIN_RECORDS && then >= SHIFT_RATIO_UP * now) arriving.push([p.speciesId, then - now]);
-    else if (now >= SHIFT_MIN_RECORDS && then < SHIFT_RATIO_DOWN * now) leaving.push([p.speciesId, now - then]);
+    if (arrives(counts, month)) arriving.push([p.speciesId, then - now]);
+    else if (leaves(counts, month)) leaving.push([p.speciesId, now - then]);
   }
   const top = (list: [string, number][]) =>
     list
@@ -39,9 +65,8 @@ export function seasonShifts(presence: RegionPresence[], month: Month): SeasonSh
 
 /** How many species usually arrive next month, all of them (the recap's count, T-350). */
 export function arrivingCount(presence: RegionPresence[], month: Month): number {
-  const next = (month % 12) + 1;
   return presence.filter((p) => {
     const c = p.monthCounts;
-    return !!c && c.length === 12 && c[next - 1] >= SHIFT_MIN_RECORDS && c[next - 1] >= SHIFT_RATIO_UP * c[month - 1];
+    return !!c && c.length === 12 && arrives(c, month);
   }).length;
 }
