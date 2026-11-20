@@ -5152,6 +5152,14 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ This Week shows the events App derives from the shown county's list; the preview shows
     none. Tests: model 6, strip 2, visuals 2.
 
+- **T-358 · An empty Overpass answer to the spots query is retried** — *Claude · XS · `DONE` · deps: T-326*
+  - The 2026-11-19 refresh (run 44521591749) lost 7 of 21 counties: SE-H, SE-T, SE-M and SE-E to
+    502/504s after every retry, and Gotland, Gävleborg and Uppsala to "spots: none found", an
+    HTTP 200 with no elements and no remark (a server without its area index). The other 14 loaded.
+  - ✅ `OverpassClient.run(require_elements=True)` counts an empty answer as a failure and retries
+    on the other server, as a timeout remark already is; the spots query uses it (a county is never
+    empty). Test 1. The 7 counties are fetched again in their own run.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

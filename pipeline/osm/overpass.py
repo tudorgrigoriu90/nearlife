@@ -95,7 +95,12 @@ class OverpassClient:
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": "nearby-nearlife-pipeline/0.1 (catch spots; yearly)"})
 
-    def run(self, query: str) -> dict:
+    def run(self, query: str, require_elements: bool = False) -> dict:
+        """
+        `require_elements`: an empty answer is a failure, retried on the other server. A server
+        without its area index answers an area query with HTTP 200, no elements and no remark
+        (T-358: Gotland, Gävleborg and Uppsala, 2026-11-19).
+        """
         delay = self.backoff
         failure = "no attempt made"
         for attempt in range(self.max_retries):
@@ -115,10 +120,13 @@ class OverpassClient:
                 # "runtime error" remark. Read as an empty answer, it silently dropped every
                 # road and coast flag in the largest counties (2026-10-30). It is a failure.
                 remark = body.get("remark") or ""
-                if "runtime error" not in remark.lower():
+                if "runtime error" in remark.lower():
+                    failure = f"{remark} ({endpoint})"
+                elif require_elements and not body.get("elements"):
+                    failure = f"no elements ({endpoint})"
+                else:
                     time.sleep(self.pause)
                     return body
-                failure = f"{remark} ({endpoint})"
             if attempt + 1 < self.max_retries:
                 time.sleep(delay)  # the shared server is busy: wait, never hammer
                 delay = min(delay * 2, 300.0)

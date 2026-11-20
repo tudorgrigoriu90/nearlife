@@ -38,13 +38,13 @@ DATA = Path(__file__).resolve().parent / "data"
 
 
 def build_county(client: OverpassClient, region_id: str, iso: str) -> list[dict]:
-    def step(name: str, query: str) -> dict:
+    def step(name: str, query: str, require_elements: bool = False) -> dict:
         try:
-            return client.run(query)
+            return client.run(query, require_elements=require_elements)
         except Exception as exc:
             raise RuntimeError(f"{name}: {exc}") from exc  # which query the county lost
 
-    spots = step("spots", spots_query(iso))
+    spots = step("spots", spots_query(iso), require_elements=True)
     # A spot's catch point is its location (a node, or a way's centre), so distance is measured
     # from there: it is where the app sends people.
     points = {

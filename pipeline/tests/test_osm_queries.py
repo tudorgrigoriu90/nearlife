@@ -256,3 +256,23 @@ def test_a_county_build_flags_a_spot_beside_a_motorway_and_marks_a_beach_coastal
     assert built["n3"]["habitat"] == "coast"  # ~110 m from the coastline
     assert built["n4"]["flags"] == ["cliff"]  # ~22 m from a cliff edge
     assert built["n5"]["flags"] == ["quarry"]
+
+
+def test_an_empty_answer_where_one_is_required_is_retried_on_the_other_server():
+    # T-358: 2026-11-19, Gotland, Gävleborg and Uppsala got HTTP 200 and no elements, no remark,
+    # for the spots query: a server without its area index answers "nothing". A county is never
+    # empty, so the spots query asks for elements and an empty answer counts as a failure.
+    from osm.overpass import OverpassClient
+
+    client = OverpassClient(endpoints=["https://a/api", "https://b/api"], pause=0, backoff=0, max_retries=2)
+    client.session = _BodySession([{"elements": []}, {"elements": [{"type": "node", "id": 1}]}])
+    assert client.run("q", require_elements=True)["elements"] == [{"type": "node", "id": 1}]
+    assert client.session.urls == ["https://a/api", "https://b/api"]
+
+    client.session = _BodySession([{"elements": []}, {"elements": []}])
+    try:
+        client.run("q", require_elements=True)
+    except RuntimeError as exc:
+        assert "no elements" in str(exc)
+    else:
+        raise AssertionError("an empty answer must fail when elements are required")
