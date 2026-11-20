@@ -22,9 +22,10 @@ appId: com.nearlife.nearby
 - hideKeyboard
 - tapOn: "Continue"
 - tapOn: "Continue"
+# The first flow after the emulator boots waits longest for a location fix (run 6).
 - extendedWaitUntil:
     visible: "Confirm Kronoberg"
-    timeout: 30000
+    timeout: 60000
 - tapOn: "Confirm Kronoberg"
 - tapOn: "Turn on nudges"
 - tapOn: "Start exploring"
