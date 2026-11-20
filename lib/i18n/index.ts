@@ -1218,8 +1218,19 @@ function pluralKey(locale: Locale, key: TranslationKey, params?: TParams): Trans
   if (raw === undefined) return null;
   const n = typeof raw === 'number' ? raw : Number(String(raw).replace(/[^\d.-]/g, ''));
   if (!Number.isFinite(n)) return null;
-  const form = new Intl.PluralRules(locale).select(n);
-  return form === 'one' ? (`${key}.one` as TranslationKey) : null;
+  return pluralIsOne(locale, n) ? (`${key}.one` as TranslationKey) : null;
+}
+
+/**
+ * Whether `n` takes the "one" form. Hermes on Android has no Intl.PluralRules (T-369, found by the
+ * emulator flows): calling it threw on every string with a count, so the app crashed on This Week.
+ * The fallback is the rule English and Swedish, the interface languages, share: exactly 1.
+ */
+function pluralIsOne(locale: Locale, n: number): boolean {
+  if (typeof Intl !== 'undefined' && typeof Intl.PluralRules === 'function') {
+    return new Intl.PluralRules(locale).select(n) === 'one';
+  }
+  return n === 1;
 }
 
 /** Bind a locale once (e.g. per screen): `const tr = createTranslator(locale)`. */

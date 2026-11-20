@@ -73,3 +73,24 @@ describe('plural forms', () => {
     }
   });
 });
+
+// T-369: Hermes on Android has no Intl.PluralRules (found by the emulator flows, T-367). Without
+// it the plural forms fall back to the rule English and Swedish share, instead of throwing.
+describe('plural forms without Intl.PluralRules', () => {
+  const original = Intl.PluralRules;
+  beforeEach(() => {
+    // @ts-expect-error -- simulating an engine without it
+    delete Intl.PluralRules;
+  });
+  afterEach(() => {
+    Intl.PluralRules = original;
+  });
+
+  it('still picks "one" for 1 and the other form otherwise', () => {
+    const tr = createTranslator('en');
+    expect(tr('badge.spotted', { count: 1 })).toBe('1 species spotted');
+    const sv = createTranslator('sv');
+    expect(sv('badge.spotted', { count: 1 })).toBe('1 art sedd');
+    expect(sv('badge.spotted', { count: 3 })).toBe('3 arter sedda');
+  });
+});

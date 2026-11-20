@@ -5243,6 +5243,16 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Tests: the words and the credit 2, sheet 2 (the credit is drawn on the captured view; the
     text fallback), card 1 updated.
 
+- **T-369 · Crash on This Week on Android: no Intl.PluralRules in Hermes** — *Claude · XS · `DONE` · deps: T-309 · found by T-367*
+  - The third emulator run showed "Something went wrong" right after onboarding. The plural forms
+    (T-309) called `Intl.PluralRules`, which Hermes on Android does not implement (only Collator,
+    DateTimeFormat and NumberFormat); every string with a `{count}` threw, This Week's subtitle
+    first. Jest runs on Node, which has it, so no test could see it. Every phone would have crashed
+    on first launch.
+  - ✅ `pluralIsOne` uses `Intl.PluralRules` when the engine has it, else "exactly 1", the rule of
+    English and Swedish, the interface languages. A scan test (`__tests__/hermesIntl.test.js`)
+    fails on any unguarded use of an Intl API Hermes lacks. Tests: fallback 1, scan 1.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
