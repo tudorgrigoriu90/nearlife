@@ -71,6 +71,8 @@ jobs:
           api-level: 34
           arch: x86_64
           target: google_apis
+          # A real phone's screen: the default 320x640 skin hid buttons under the keyboard.
+          profile: pixel_6
           disable-animations: true
           script: |
             adb install -r android/app/build/outputs/apk/release/app-release.apk
@@ -80,7 +82,9 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: maestro-results
+          # Maestro keeps each run's screenshots and logs under ~/.maestro/tests.
           path: |
             maestro-report.xml
             maestro-debug/
+            ~/.maestro/tests/
           retention-days: 14

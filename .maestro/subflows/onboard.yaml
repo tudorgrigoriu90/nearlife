@@ -13,6 +13,8 @@ appId: com.nearlife.nearby
 - tapOn:
     text: "Year of birth.*"
 - inputText: "1990"
+# The keyboard covers the button on a phone-sized screen (first run, 2026-11-20).
+- hideKeyboard
 - tapOn: "Continue"
 - tapOn: "Continue"
 - extendedWaitUntil:
