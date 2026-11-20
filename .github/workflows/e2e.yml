@@ -76,6 +76,7 @@ jobs:
           disable-animations: true
           script: |
             mkdir -p e2e-shots
+            adb shell settings put global hide_error_dialogs 1
             adb install -r android/app/build/outputs/apk/release/app-release.apk
             maestro test .maestro/ --format junit --output maestro-report.xml --debug-output maestro-debug; s=$?; adb logcat -d -v time ReactNativeJS:V ReactNative:V AndroidRuntime:E '*:S' > e2e-shots/logcat.txt; exit $s
 

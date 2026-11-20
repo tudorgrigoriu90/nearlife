@@ -9,6 +9,13 @@ appId: com.nearlife.nearby
     clearState: true
     permissions:
       all: allow
+# A busy CI emulator can freeze its own launcher and cover the app with "Pixel Launcher isn't
+# responding" (run 7); the workflow hides such dialogs, and this answers one that still shows.
+- runFlow:
+    when:
+      visible: ".*isn't responding"
+    commands:
+      - tapOn: "Wait"
 # A cold start on the emulator can take longer than Maestro's default wait (run 4, 2026-11-20).
 - takeScreenshot: e2e-shots/launch
 - extendedWaitUntil:

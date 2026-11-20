@@ -50,7 +50,9 @@ describe('Maestro flows', () => {
       .map((m) => m[1])
       .filter((l) => !/[.*]/.test(l.replace(/\.$/, ''))); // regex matches are checked on the emulator
     expect(labels.length).toBeGreaterThan(8);
-    const unknown = labels.filter((l) => !patterns.some((p) => p.test(l)));
+    // Android's own words, on its system dialogs: not the app's.
+    const SYSTEM = new Set(['Wait']);
+    const unknown = labels.filter((l) => !SYSTEM.has(l) && !patterns.some((p) => p.test(l)));
     expect(unknown).toEqual([]);
   });
 });
