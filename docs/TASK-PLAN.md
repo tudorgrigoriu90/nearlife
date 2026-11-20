@@ -5173,6 +5173,9 @@ document until it is started, when it takes the next free `T-###`.
     users read species content in their language beside Swedish (second-language display, T-150);
     Arabic stays a second language only, never the app's own.
 
+- **T-361 · Navigation library (expo-router)** — *Claude · `DEFERRED` (v2, Director 2026-11-20) · deps: — · review I-01*
+  - Replace App.tsx's screen-selection chain and hand-ordered back list with expo-router routes and a nearby://species/<id> link. A rewrite touching every screen; deferred so testers meet the screens as tested today (the back-button behaviour is covered by the existing tests).
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
