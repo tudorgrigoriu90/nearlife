@@ -111,3 +111,26 @@ describe('seasonal events strip', () => {
     expect(screen.queryByText(tr('events.title'))).toBeNull();
   });
 });
+
+// T-372: a name that is only the binomial is set in italics, as a field guide prints it, so it is
+// not read as a common name; a plant without a photo shows a leaf, not a flower (clubmosses, ferns).
+describe('species with no common name', () => {
+  const { StyleSheet } = jest.requireActual('react-native');
+  const clubmoss = { id: 'gbif:11185274', scientificName: 'Huperzia europaea', category: 'plant' } as never;
+  const live = {
+    arriving: [{ species: clubmoss, commonName: 'Huperzia europaea', detail: null, isNew: false }],
+    leaving: [],
+    state: 'active' as const,
+    total: 1,
+    items: [{ species: clubmoss, commonName: 'Huperzia europaea', detail: null, isNew: false }],
+  };
+
+  it('sets the binomial in italics in the list and the strip, with a leaf for a plant', async () => {
+    await render(<ThisWeekScreen locale="en" live={live} regionName="Kronoberg" />);
+    for (const el of screen.getAllByText('Huperzia europaea')) {
+      expect(StyleSheet.flatten(el.props.style).fontStyle).toBe('italic');
+    }
+    expect(screen.getAllByText('🌿').length).toBeGreaterThan(0);
+    expect(screen.queryByText('🌼')).toBeNull();
+  });
+});

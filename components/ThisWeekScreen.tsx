@@ -48,10 +48,10 @@ function Row({
       <Text style={styles.emoji}>{CATEGORY_EMOJI[groupOf(species)]}</Text>
       <View style={styles.rowText}>
         <View style={styles.rowHeader}>
-          <Text style={styles.name}>{name}</Text>
+          <Text style={[styles.name, name === species.scientificName && styles.binomial]}>{name}</Text>
           {isNew ? <Text style={styles.newBadge}>{newLabel}</Text> : null}
         </View>
-        <Text style={styles.detail}>{detail}</Text>
+        <Text style={[styles.detail, detail === species.scientificName && styles.binomial]}>{detail}</Text>
       </View>
     </Pressable>
   );
@@ -88,7 +88,7 @@ function ShiftStrip({
             ) : (
               <Text style={styles.shiftGlyph}>{CATEGORY_EMOJI[groupOf(species)]}</Text>
             )}
-            <Text style={styles.shiftName} numberOfLines={2}>
+            <Text style={[styles.shiftName, commonName === species.scientificName && styles.binomial]} numberOfLines={2}>
               {commonName}
             </Text>
           </Pressable>
@@ -368,6 +368,9 @@ const styles = StyleSheet.create({
   rowText: { flex: 1 },
   rowHeader: { flexDirection: 'row', alignItems: 'center' },
   name: { fontSize: 16, fontWeight: '600', color: '#22331f' },
+  // A scientific name, shown where no common name is known (T-372): italic, as field guides print
+  // it, so it is not read as what people call the species.
+  binomial: { fontStyle: 'italic' },
   newBadge: {
     marginLeft: 8,
     fontSize: 11,

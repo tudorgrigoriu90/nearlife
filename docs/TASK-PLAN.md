@@ -5280,6 +5280,23 @@ document until it is started, when it takes the next free `T-###`.
     which the data does not hold, so it is reworded to "Talgoxe – fångad!". Tests: article 9,
     title 1.
 
+- **T-372 · A leaf for plants; scientific names in italics** — *Claude · XS · `DONE` · deps: —*
+  - The emulator screenshot (T-367) showed the clubmoss *Huperzia europaea* as a 🌼 with its
+    binomial for a name. Its Swedish name is in the data ("äkta lopplummer", Dyntaxa); no source has
+    an English one for this recent split, so English falls back to the binomial, which is honest.
+  - ✅ Plants without a photo show 🌿, not 🌼 (clubmosses, ferns and horsetails are plants too),
+    in every place the group glyph appears. On This Week a name or detail line that is the
+    scientific name is set in italics, as field guides print it, so it is not read as a common
+    name. Test 1.
+- **T-373 · Duplicate species in the catalogue** — *Claude · S · `TODO` · deps: —*
+  - 19 scientific names appear twice among catalogue species (38 rows, 2026-11-20), e.g. *Huperzia
+    selago* (gbif:8190643 accepted, gbif:2688495 "doubtful" in GBIF), *Carex capitata*,
+    *Glareola nordmanni*: two cards for one species, with records split between them.
+  - Merge each pair into GBIF's accepted key: presence and media summed or kept from the accepted
+    one, collection rows re-pointed (a user who spotted both keeps one), the other left out of the
+    catalogue; and make the catalogue build skip doubtful keys so it cannot recur. Real Postgres
+    tests for the re-pointing; a live count before and after.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

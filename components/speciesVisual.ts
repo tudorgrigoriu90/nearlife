@@ -14,7 +14,8 @@ export const CATEGORY_EMOJI: Record<SpeciesGroup, string> = {
   insect: '🦋',
   arachnid: '🕷️',
   mollusc: '🐌',
-  plant: '🌼',
+  // A leaf, not a flower (T-372): clubmosses, ferns and horsetails are plants too.
+  plant: '🌿',
   fungus: '🍄',
 };
 
