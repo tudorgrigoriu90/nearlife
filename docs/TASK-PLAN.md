@@ -5273,6 +5273,13 @@ document until it is started, when it takes the next free `T-###`.
     May keeps 665 (cuckoo, swift, warblers…) and drops 24 (residents such as silver birch and
     slow-worm, and the pied flycatcher, already there in April). Tests: residents 2.
 
+- **T-371 · "You caught a Great Tit!"** — *Claude · XS · `DONE` · deps: —*
+  - The emulator screenshot (T-367) read "You caught Great Tit!". English now takes "a"/"an" by
+    sound (`lib/i18n/article.ts`: "an Osprey", "a Eurasian Jay", "a Ural Owl"). Swedish read "Du
+    fångade Talgoxe!", equally without its article, and Swedish needs the noun's gender (en/ett),
+    which the data does not hold, so it is reworded to "Talgoxe – fångad!". Tests: article 9,
+    title 1.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

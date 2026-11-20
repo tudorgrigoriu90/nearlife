@@ -58,3 +58,13 @@ describe('ProtectTip for a catalogue species', () => {
     expect(screen.getByText(loaded.protect)).toBeTruthy();
   });
 });
+
+// T-371: an article in English; Swedish needs none in its wording.
+describe('the catch title', () => {
+  it('reads "You caught a Common Swift!" and "Tornseglare – fångad!"', async () => {
+    const { rerender } = await render(<ProtectTip species={swift} locale="en" onDone={() => {}} />);
+    expect(screen.getByText('🎣 You caught a Common Swift!')).toBeTruthy();
+    await rerender(<ProtectTip species={swift} locale="sv" onDone={() => {}} />);
+    expect(screen.getByText(/^🎣 Tornseglare – fångad!$/)).toBeTruthy();
+  });
+});

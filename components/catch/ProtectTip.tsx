@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale } from '../../lib/i18n';
+import { withIndefiniteArticle } from '../../lib/i18n/article';
 import { commonNameFor, contentFor } from '../../lib/species/localized';
 import type { SpeciesContent } from '../../lib/species/content';
 import type { Species } from '../../lib/species/types';
@@ -34,7 +35,10 @@ export default function ProtectTip({
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.badge}>🎣 {tr('catch.caught', { name })}</Text>
+        {/* English takes "a"/"an" (T-371); the Swedish wording needs no article. */}
+        <Text style={styles.badge}>
+          🎣 {tr('catch.caught', { name: locale === 'en' ? withIndefiniteArticle(name) : name })}
+        </Text>
         {prime ? <Text style={styles.prime}>✨ {tr('catch.prime')}</Text> : null}
         {content ? (
           <View style={styles.tipCard}>

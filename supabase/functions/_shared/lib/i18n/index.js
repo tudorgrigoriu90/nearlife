@@ -805,7 +805,7 @@ export const sv = {
     // Catch flow + free-catch counter (T-034)
     'catch.remaining': '{count} gratis fångster kvar denna säsong',
     'catch.remaining.one': '{count} gratis fångst kvar denna säsong',
-    'catch.caught': 'Du fångade {name}!',
+    'catch.caught': '{name} – fångad!',
     'catch.continue': 'Fortsätt utforska',
     'catch.prime': 'Toppfångst: hittad under sin säsong',
     'catch.refused.title': '{name} kunde inte sparas',
