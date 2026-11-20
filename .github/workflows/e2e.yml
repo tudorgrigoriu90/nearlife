@@ -75,6 +75,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
+            mkdir -p e2e-shots
             adb install -r android/app/build/outputs/apk/release/app-release.apk
             maestro test .maestro/ --format junit --output maestro-report.xml --debug-output maestro-debug
 
@@ -82,9 +83,10 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: maestro-results
-          # Maestro keeps each run's screenshots and logs under ~/.maestro/tests.
+          # The flows' takeScreenshot steps write to e2e-shots/.
           path: |
             maestro-report.xml
             maestro-debug/
-            ~/.maestro/tests/
+            e2e-shots/
+            /home/runner/.maestro/tests/
           retention-days: 14

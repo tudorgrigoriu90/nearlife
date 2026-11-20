@@ -23,7 +23,10 @@ appId: com.nearlife.nearby
 - tapOn: "Confirm Kronoberg"
 - tapOn: "Turn on nudges"
 - tapOn: "Start exploring"
+- takeScreenshot: e2e-shots/after-onboarding
+# The county's list loads from the live backend after onboarding.
 - extendedWaitUntil:
     visible:
       id: "thisweek-row-0"
-    timeout: 30000
+    timeout: 60000
+- takeScreenshot: e2e-shots/this-week
