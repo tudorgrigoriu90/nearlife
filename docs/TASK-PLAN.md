@@ -5211,7 +5211,7 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Tests: renders per 4 s of play ≤ 23 for each timer game (a Profiler count, one act per 20 ms
     so React cannot batch ticks; it was 66–133), path sampling 2, haptics 1.
 
-- **T-367 · End-to-end tests on an emulator** — *Claude · M · `IN-PROGRESS` · deps: T-366 · review I-12*
+- **T-367 · End-to-end tests on an emulator** — *Claude · M · `DONE` · deps: T-366 · review I-12*
   - Done when the five flows pass on the emulator and the workflow file is committed.
   - ✅ `.github/workflows/e2e.yml` (manual): builds a release APK for x86_64 with
     `EXPO_PUBLIC_E2E=1` and a placeholder `google-services.json` (`scripts/e2eGoogleServices.js`;
@@ -5226,7 +5226,14 @@ document until it is started, when it takes the next free `T-###`.
     time; a test checks that no EAS profile or app config sets it and only e2e.yml does. This Week
     rows carry `thisweek-row-<n>` ids for the flows; a test checks every plain label a flow taps is
     an English string of the app. Tests: switch 2, build checks 4.
-  - Remaining: a green run on the emulator.
+  - ✅ Green on 2026-11-20, run 44810539244 (run 8): all five flows on an Android 14 emulator (Pixel
+    6 profile) against the live backend. On the way, run 3 found a real crash on every Android
+    phone (T-369: no Intl.PluralRules in Hermes, This Week threw after onboarding). The other
+    failures were the flows and the emulator: the keyboard over "Continue" on the default 320x640
+    screen, a slow first start and first location fix, the "🎣" before "You caught", and the
+    emulator's own launcher freezing ("Pixel Launcher isn't responding", runs 4 and 7; the
+    workflow now hides such dialogs and the flows answer "Wait"). The error screen now writes what
+    it caught to the device log, which the workflow keeps beside the screenshots.
 
 - **T-368 · Share a species as an image** — *Claude · S · `DONE` · deps: — · review F-14*
   - Done when the shared image contains the photo credit line (licence condition).
