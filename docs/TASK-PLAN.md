@@ -4805,7 +4805,7 @@ document until it is started, when it takes the next free `T-###`.
     checks (T-066, T-153), test support for bidi and the language roster (T-154, T-157) and the
     contrast palette (T-292). `cell.ts` was already gone (T-301); `seasonalWindow.ts` is wired.
 
-- **T-326 · Catch-spot hazards: cliffs, quarries, landfills, airports** — *Claude · S · `IN-PROGRESS` · deps: T-049 · review I-22 (a)*
+- **T-326 · Catch-spot hazards: cliffs, quarries, landfills, airports** — *Claude · S · `DONE` · deps: T-049 · review I-22 (a)*
   - Done when the four new flags appear in `catch_spots.flags`, are hidden by the read policy,
     and the build summary (the density audit's input, T-050) counts what each removed.
   - ✅ `pipeline/osm/rules.py` `EXCLUSION_FLAGS` is the one list of flags; a test pins migration
@@ -4816,7 +4816,11 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Tests: rules and queries (end to end through `build_county` with canned answers: a cliff
     flags the spot 22 m away, a quarry flags the spot inside it), real Postgres (every flag stored
     and invisible to a user, an unknown flag refused), and a live verify check for a cliff spot.
-  - Remaining: apply 0043, refresh all 21 counties (catch-spots.yml), record the counts.
+  - ✅ Live (2026-11-20): 0043 applied; all 21 counties refreshed (run 44521591749 loaded 14; the
+    other 7 failed on Overpass 502/504s or empty answers, fixed by T-358, and loaded in run
+    44699178414). 29,757 spots; flags: cliff 372, quarry 14, airport 8, landfill 1 (new), and
+    major_road 388, military 104, private 116, water 20, reserve 4,435. A flagged spot is never
+    shown; 24,473 spots carry no flag and are the ones users see.
 - **T-327 · Catch-spot screen: ice, hunting season and darkness** — *Claude · S · `DONE` · deps: T-326 · review I-22 (b, c)*
   - December–March, freshwater and coast spots show "Never go onto ice". Land spots show "Hunting
     season: keep to paths and wear something bright" in the county's hunting months, from a table
