@@ -5160,6 +5160,12 @@ document until it is started, when it takes the next free `T-###`.
     on the other server, as a timeout remark already is; the spots query uses it (a county is never
     empty). Test 1. The 7 counties are fetched again in their own run.
 
+- **T-359 · Classroom mode** — *Claude + Director · L · `DEFERRED` (v2, Director 2026-11-20) · deps: — · review F-20*
+  - A teacher's group of up to 35 pupils with a shared class list (counts per species only, never
+    which pupil spotted what) and a printable species list for the school's county. Needs new
+    tables like households, the children's-consent rules of B-53, and per-school agreements, so it
+    waits for v2. Until then a teacher can give a class access with a promo code (T-356).
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
