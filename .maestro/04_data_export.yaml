@@ -1,0 +1,12 @@
+# Flow 4 (review I-12): Settings → Export my data shows the bundle.
+appId: com.nearlife.nearby
+---
+- runFlow: subflows/onboard.yaml
+- tapOn: ".*Settings.*"
+- scrollUntilVisible:
+    element: "Export my data"
+- tapOn: "Export my data"
+- extendedWaitUntil:
+    visible: "Your data"
+    timeout: 20000
+- assertVisible: ".*nearby.export.v3.*"

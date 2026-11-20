@@ -5211,6 +5211,23 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Tests: renders per 4 s of play ≤ 23 for each timer game (a Profiler count, one act per 20 ms
     so React cannot batch ticks; it was 66–133), path sampling 2, haptics 1.
 
+- **T-367 · End-to-end tests on an emulator** — *Claude · M · `IN-PROGRESS` · deps: T-366 · review I-12*
+  - Done when the five flows pass on the emulator and the workflow file is committed.
+  - ✅ `.github/workflows/e2e.yml` (manual): builds a release APK for x86_64 with
+    `EXPO_PUBLIC_E2E=1` and a placeholder `google-services.json` (`scripts/e2eGoogleServices.js`;
+    the real file never enters CI), starts an Android 14 emulator and runs Maestro (free, pinned
+    1.39.13) on `.maestro/`: onboarding with location allowed; spot, catch and pledge; out of free
+    catches; data export; account deletion. Against the live backend with the public client keys.
+  - ✅ The emulator stands at Gamla Evedal, Kronoberg (56.92369, 14.81930), where a park and a
+    bathing place are 2 m apart, so land and freshwater species are in catch range. If that spot
+    leaves the data, the flows need a new one.
+  - ✅ A timing game cannot be played reliably by a script, so the test build adds "Win (test
+    build)" to the minigames (`lib/e2e.ts`, Director 2026-11-20). Expo inlines the variable at build
+    time; a test checks that no EAS profile or app config sets it and only e2e.yml does. This Week
+    rows carry `thisweek-row-<n>` ids for the flows; a test checks every plain label a flow taps is
+    an English string of the app. Tests: switch 2, build checks 4.
+  - Remaining: a green run on the emulator.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,

@@ -12,6 +12,7 @@ import FishReelMinigame from './FishReelMinigame';
 import TraceMinigame from './TraceMinigame';
 import StealthMinigame from './StealthMinigame';
 import FrameMinigame from './FrameMinigame';
+import { E2E_BUILD } from '../../lib/e2e';
 
 // Per-category catch-minigame dispatcher (T-069 · GDD §4). The catch flow hands us the species'
 // category and one identical set of callbacks; we pick the matching mechanic. Species within a
@@ -42,9 +43,12 @@ const INSTRUCTION: Record<SpeciesCategory, TranslationKey> = {
 export default function CatchMinigame({
   category,
   species,
+  e2eWin = E2E_BUILD,
   ...props
 }: MinigameProps & {
   category: SpeciesCategory;
+  /** End-to-end builds only (T-367): a button that wins the game outright, for scripted flows. */
+  e2eWin?: boolean;
   /** The species being caught (T-321 · review B-61): named, and its glyph is the game's creature. */
   species?: Species;
 }) {
@@ -56,7 +60,7 @@ export default function CatchMinigame({
   const glyph = species ? CATEGORY_EMOJI[groupOf(species)] : undefined;
   const seed = species ? catchSeed(species.id, new Date().toISOString().slice(0, 10)) + round : undefined;
   if (started) {
-    return (
+    const game = (
       <Game
         key={round}
         glyph={glyph}
@@ -64,6 +68,20 @@ export default function CatchMinigame({
         {...props}
         onRetry={() => setRound((n) => n + 1)}
       />
+    );
+    if (!e2eWin) return game;
+    return (
+      <View style={styles.e2eWrap}>
+        {game}
+        <Pressable
+          testID="e2e-win"
+          style={styles.e2eWin}
+          onPress={() => props.onComplete({ success: true, score: 1 })}
+          accessibilityRole="button"
+        >
+          <Text style={styles.cancelText}>Win (test build)</Text>
+        </Pressable>
+      </View>
     );
   }
   const tr = createTranslator(props.locale ?? 'en');
@@ -95,4 +113,6 @@ const styles = StyleSheet.create({
   startText: { fontSize: 20, fontWeight: '800', color: '#fff', letterSpacing: 1 },
   cancel: { position: 'absolute', bottom: 56 },
   cancelText: { fontSize: 14, color: '#7fa588' },
+  e2eWrap: { flex: 1 },
+  e2eWin: { position: 'absolute', top: 40, right: 16, padding: 12, backgroundColor: '#1c3a28' },
 });

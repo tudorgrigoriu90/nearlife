@@ -1,0 +1,86 @@
+name: End-to-end (emulator)
+
+# T-367 · review I-12: the five Maestro flows in .maestro/ (onboarding; spot, catch and pledge;
+# out of free catches; data export; account deletion) on an Android emulator, against the live
+# backend. Manual only: a run takes about 40 minutes.
+#
+# The APK is built here with EXPO_PUBLIC_E2E=1, which adds the minigames' "Win (test build)"
+# button (lib/e2e.ts); no store build sets it. The Supabase URL and publishable key are the app's
+# public client settings (as in store-screenshots.yml). Firebase gets a placeholder
+# google-services.json: the real one is never in CI, and push is not under test. Each run creates
+# a few anonymous accounts; flow 5 deletes its own, the retention job removes the rest.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Maestro flows on an emulator
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      EXPO_PUBLIC_E2E: "1"
+      EXPO_PUBLIC_SUPABASE_URL: https://subjdoiicfmiimtvlzsg.supabase.co
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_Wq-K09KGV8IDchkTicCkLA_22F8f5GB
+      GOOGLE_SERVICES_JSON: ${{ github.workspace }}/e2e-google-services.json
+      MAESTRO_VERSION: 1.39.13
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - run: npm ci
+
+      - name: Placeholder Firebase config
+        run: node scripts/e2eGoogleServices.js "$GOOGLE_SERVICES_JSON"
+
+      - name: Build the APK (x86_64, release, debug-signed)
+        run: |
+          npx expo prebuild --platform android --no-install
+          cd android && ./gradlew assembleRelease -PreactNativeArchitectures=x86_64 --no-daemon
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run the flows
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: |
+            adb install -r android/app/build/outputs/apk/release/app-release.apk
+            maestro test .maestro/ --format junit --output maestro-report.xml --debug-output maestro-debug
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: maestro-results
+          path: |
+            maestro-report.xml
+            maestro-debug/
+          retention-days: 14

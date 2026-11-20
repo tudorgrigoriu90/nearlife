@@ -28,3 +28,21 @@ describe('CatchMinigame dispatcher', () => {
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 });
+
+// T-367 · review I-12: the emulator build (and only it) can win a game outright, so the end-to-end
+// flows can test the whole catch path; a timing game cannot be played reliably by a script.
+describe('test-build win switch', () => {
+  it('in an end-to-end build, "win" completes the catch with a full score', async () => {
+    const onComplete = jest.fn();
+    await render(<CatchMinigame category="bird" locale="en" onComplete={onComplete} e2eWin />);
+    await fireEvent.press(screen.getByText(tr('minigame.tapToStart')));
+    await fireEvent.press(screen.getByTestId('e2e-win'));
+    expect(onComplete).toHaveBeenCalledWith({ success: true, score: 1 });
+  });
+
+  it('is absent from a normal build', async () => {
+    await render(<CatchMinigame category="bird" locale="en" onComplete={() => {}} />);
+    await fireEvent.press(screen.getByText(tr('minigame.tapToStart')));
+    expect(screen.queryByTestId('e2e-win')).toBeNull();
+  });
+});

@@ -1,0 +1,13 @@
+# Flow 5 (review I-12): Settings → Delete account & data → Delete permanently returns to the
+# welcome screen (the account is deleted on the server, then the phone is wiped).
+appId: com.nearlife.nearby
+---
+- runFlow: subflows/onboard.yaml
+- tapOn: ".*Settings.*"
+- scrollUntilVisible:
+    element: "Delete account & data"
+- tapOn: "Delete account & data"
+- tapOn: "Delete permanently"
+- extendedWaitUntil:
+    visible: "Get started"
+    timeout: 30000

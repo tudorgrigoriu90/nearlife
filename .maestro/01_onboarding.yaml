@@ -1,0 +1,6 @@
+# Flow 1 (review I-12): onboarding with location allowed lands on This Week for Kronoberg.
+appId: com.nearlife.nearby
+---
+- runFlow: subflows/onboard.yaml
+- assertVisible: ".*Kronoberg.*"
+- assertVisible: "Active this season, never “here right now”."

@@ -1,0 +1,27 @@
+# Onboarding with location allowed, standing at Gamla Evedal in Kronoberg (T-367). The spot pairs a
+# park and a bathing place 2 m apart, so land and freshwater species can both be caught there.
+appId: com.nearlife.nearby
+---
+- setLocation:
+    latitude: 56.923688
+    longitude: 14.819299
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- tapOn: "Get started"
+- tapOn:
+    text: "Year of birth.*"
+- inputText: "1990"
+- tapOn: "Continue"
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Confirm Kronoberg"
+    timeout: 30000
+- tapOn: "Confirm Kronoberg"
+- tapOn: "Turn on nudges"
+- tapOn: "Start exploring"
+- extendedWaitUntil:
+    visible:
+      id: "thisweek-row-0"
+    timeout: 30000

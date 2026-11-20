@@ -1,0 +1,44 @@
+# Flow 3 (review I-12): after the three free catches of the season, the next one shows the
+# "Out of free catches" sheet (enforced on the server, T-075).
+appId: com.nearlife.nearby
+---
+- runFlow: subflows/onboard.yaml
+- runFlow:
+    file: subflows/catch_row.yaml
+    env:
+      ROW: 0
+- extendedWaitUntil:
+    visible: "You caught .*"
+    timeout: 20000
+- tapOn: "Keep exploring"
+- back # from the card to This Week
+- runFlow:
+    file: subflows/catch_row.yaml
+    env:
+      ROW: 1
+- extendedWaitUntil:
+    visible: "You caught .*"
+    timeout: 20000
+- tapOn: "Keep exploring"
+- back # from the card to This Week
+- runFlow:
+    file: subflows/catch_row.yaml
+    env:
+      ROW: 2
+- extendedWaitUntil:
+    visible: "You caught .*"
+    timeout: 20000
+- tapOn: "Keep exploring"
+- back # from the card to This Week
+- tapOn:
+    id: "thisweek-row-3"
+- tapOn: "Find it nearby.*"
+# The sheet may come before the catch-spot screen or after "Catch": accept either.
+- runFlow:
+    when:
+      visible: "Catch"
+    commands:
+      - tapOn: "Catch"
+- extendedWaitUntil:
+    visible: "Out of free catches"
+    timeout: 20000

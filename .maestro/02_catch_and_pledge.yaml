@@ -1,0 +1,17 @@
+# Flow 2 (review I-12): spot a species, catch it, then pledge to help it.
+appId: com.nearlife.nearby
+---
+- runFlow: subflows/onboard.yaml
+- runFlow:
+    file: subflows/catch_row.yaml
+    env:
+      ROW: 0
+- extendedWaitUntil:
+    visible: "You caught .*"
+    timeout: 20000
+# "Keep exploring" returns to the species' card.
+- tapOn: "Keep exploring"
+- scrollUntilVisible:
+    element: ".*I’ll do this.*"
+- tapOn: ".*I’ll do this.*"
+- assertVisible: "You’re helping .*"

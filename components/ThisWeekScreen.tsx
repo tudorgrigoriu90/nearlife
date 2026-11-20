@@ -28,10 +28,13 @@ function Row({
   row,
   newLabel,
   onSelect,
+  testID,
 }: {
   row: RowData;
   newLabel: string;
   onSelect?: (species: Species) => void;
+  /** `thisweek-row-<n>`: the end-to-end flows (T-367) pick rows by position. */
+  testID?: string;
 }) {
   const { species, name, detail, isNew } = row;
   return (
@@ -40,6 +43,7 @@ function Row({
       onPress={() => onSelect?.(species)}
       accessibilityRole="button"
       accessibilityLabel={name}
+      testID={testID}
     >
       <Text style={styles.emoji}>{CATEGORY_EMOJI[groupOf(species)]}</Text>
       <View style={styles.rowText}>
@@ -268,8 +272,8 @@ export default function ThisWeekScreen({
       <FlatList
         data={rows}
         keyExtractor={(r) => r.species.id}
-        renderItem={({ item }) => (
-          <Row row={item} newLabel={tr('thisWeek.new')} onSelect={onSelectSpecies} />
+        renderItem={({ item, index }) => (
+          <Row row={item} newLabel={tr('thisWeek.new')} onSelect={onSelectSpecies} testID={`thisweek-row-${index}`} />
         )}
         ListHeaderComponent={
           <>

@@ -1,0 +1,13 @@
+# Open a This Week row, go to its catch spot and win the game with the test-build switch (T-367).
+appId: com.nearlife.nearby
+---
+- tapOn:
+    id: "thisweek-row-${ROW}"
+- tapOn: "Find it nearby.*"
+- extendedWaitUntil:
+    visible: "Catch"
+    timeout: 30000
+- tapOn: "Catch"
+- tapOn: "Tap to start"
+- tapOn:
+    id: "e2e-win"
