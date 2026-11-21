@@ -4967,9 +4967,10 @@ document until it is started, when it takes the next free `T-###`.
     orchids) by GBIF family. Every wild bird is protected (4 §) with hunting excepted, so birds get
     their own wording. Write `legal_status = 'protected'` and a level; card copy per level.
   - The Director signs off the copy before it ships (legal wording).
-- **T-339 · Confirm the invasive-species reporting link** — *Director · XS · `TODO` · deps: T-336*
+- **T-339 · Confirm the invasive-species reporting link** — *Director · XS · `DONE` · deps: T-336*
   - `INVASIVE_REPORT_URL` in `lib/legal.ts` is https://www.invasivaarter.nu/, which forwards to
     Artportalen's form for wanted invasive species. Confirm it is the page to send people to.
+  - ✅ Director, 2026-11-21: the link is the right page.
 
 - **T-340 · Arriving soon / leaving soon on This Week** — *Claude · S · `DONE` · deps: T-261 · review F-02*
   - Done when the lists are computed by a pure, tested function from monthly counts, are empty
