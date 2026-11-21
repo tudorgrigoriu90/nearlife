@@ -29,6 +29,8 @@ export default function SpeciesHero({
 }) {
   const tr = createTranslator(locale);
   const [failed, setFailed] = useState(false);
+  // The frame takes the photo's shape (T-388), so a tall or square photo is not cut to a strip.
+  const [aspect, setAspect] = useState(DEFAULT_ASPECT);
   // Bundled photo for the curated 54, the catalogue photo for everyone else (T-215).
   const photo = spotted ? photoFor(species) : null;
 
@@ -47,9 +49,14 @@ export default function SpeciesHero({
           accessibilityHint={tr('photo.openHint')}
         >
           <Image
+            testID="species-photo-image"
             source={{ uri: photo.url }}
-            style={styles.photo}
+            style={[styles.photo, { aspectRatio: aspect }]}
             resizeMode="cover"
+            onLoad={(e) => {
+              const { width, height } = e.nativeEvent.source ?? {};
+              if (width > 0 && height > 0) setAspect(heroAspect(width, height));
+            }}
             onError={() => setFailed(true)}
           />
         </Pressable>
@@ -60,12 +67,23 @@ export default function SpeciesHero({
   return <Text style={styles.emoji}>{speciesGlyph(groupOf(species), spotted)}</Text>;
 }
 
+/** Before the photo has loaded: the shape of most Commons photos. */
+const DEFAULT_ASPECT = 1.5;
+
+/**
+ * Width : height for the frame. A tall photo shows square: a portrait frame would push the name
+ * and the mission text below the fold. A panorama stops at 1.8:1 so the subject is not a sliver.
+ */
+export function heroAspect(width: number, height: number): number {
+  return Math.round(Math.min(1.8, Math.max(1, width / height)) * 100) / 100;
+}
+
 const styles = StyleSheet.create({
   wrap: { width: '100%', alignItems: 'center' },
   // Without its own width the tap target shrinks to zero inside the centring wrapper, and the
   // photo's 100% width with it (T-227).
   tap: { alignSelf: 'stretch' },
-  photo: { width: '100%', height: 220, borderRadius: 16, backgroundColor: '#e2ebe0' },
+  photo: { width: '100%', borderRadius: 16, backgroundColor: '#e2ebe0' },
   credit: { marginTop: 6, fontSize: 11, color: '#566658', textAlign: 'center' },
   emoji: { fontSize: 72 },
 });

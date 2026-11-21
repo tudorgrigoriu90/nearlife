@@ -5417,6 +5417,15 @@ document until it is started, when it takes the next free `T-###`.
     accessibility label; never when it repeats the first name or dual display is off.
   - ✅ Tests: hook 2, component 2.
 
+- **T-388 · Card photos cut to a strip** — *Claude · XS · `DONE` · deps: T-227*
+  - Director, 2026-11-21: on many cards the photo was not centred on the animal or plant. The hero
+    was a fixed 220-point band with `cover`, so a tall or square photo kept only its middle strip.
+  - ✅ The frame takes the photo's own shape once it loads (`heroAspect`: width ÷ height, from
+    square to 1.8:1; 3:2 before loading). A tall photo shows square, not portrait, so the name and
+    mission text stay near the top. Thumbnails (lists, lookalikes) stay square. Tests: 3.
+  - Director to check on the phone with the next build (T-141): if a photo still misses its subject,
+    the cause is the photo's own framing, which T-381's mistake reports would catch.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code

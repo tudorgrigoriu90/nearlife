@@ -61,3 +61,34 @@ describe('SpeciesHero', () => {
     expect(screen.getByText(/H\. Botanist · CC-BY-SA/)).toBeTruthy();
   });
 });
+
+// T-388: a fixed 220-point band cropped tall and square photos to their middle strip, often
+// cutting the animal. The frame now takes the photo's own shape, from square to 1.8:1.
+describe('SpeciesHero frame follows the photo', () => {
+  const ratio = () => StyleSheet.flatten(screen.getByTestId('species-photo-image').props.style).aspectRatio;
+  const load = (width: number, height: number) =>
+    fireEvent(screen.getByTestId('species-photo-image'), 'load', { nativeEvent: { source: { width, height } } });
+
+  it('starts at 3:2 and takes a landscape photo as it is', async () => {
+    await render(<SpeciesHero species={swift} spotted />);
+    expect(ratio()).toBe(1.5);
+    await load(1200, 800);
+    expect(ratio()).toBe(1.5);
+    await load(1600, 1000);
+    expect(ratio()).toBe(1.6);
+  });
+
+  it('shows a tall photo square, and a panorama no wider than 1.8:1', async () => {
+    await render(<SpeciesHero species={swift} spotted />);
+    await load(600, 900);
+    expect(ratio()).toBe(1);
+    await load(3000, 1000);
+    expect(ratio()).toBe(1.8);
+  });
+
+  it('ignores a load without a size', async () => {
+    await render(<SpeciesHero species={swift} spotted />);
+    await load(0, 0);
+    expect(ratio()).toBe(1.5);
+  });
+});
