@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import SpeciesCard from './SpeciesCard';
 import { createTranslator } from '../lib/i18n';
@@ -51,6 +52,28 @@ describe('SpeciesCard progress pills', () => {
     expect(screen.getByText(en('card.depth'))).toBeTruthy();
     expect(en('card.depth')).not.toMatch(/unlock/i);
     expect(screen.queryByText(/unlock/i)).toBeNull();
+  });
+});
+
+// T-386: the Director's card showed all five filled after only spotting it: they counted the Full
+// Game, which opens content, not progress. Progress is play only.
+describe('SpeciesCard progress pills count play, not the Full Game', () => {
+  const filled = () =>
+    [1, 2, 3, 4, 5].filter(
+      (n) => StyleSheet.flatten(screen.getByTestId(`depth-pill-${n}`).props.style).backgroundColor === '#3a7d44',
+    );
+
+  it('spotted only: two of five, with or without the Full Game', async () => {
+    const spotted = { spotted: true, caught: false, helped: false };
+    await render(<SpeciesCard species={swift} locale="en" tier={spotted} fullGame />);
+    expect(filled()).toEqual([1, 2]);
+    await render(<SpeciesCard species={swift} locale="en" tier={spotted} />);
+    expect(filled()).toEqual([1, 2]);
+  });
+
+  it('all five once spotted, caught and helped', async () => {
+    await render(<SpeciesCard species={swift} locale="en" tier={{ spotted: true, caught: true, helped: true }} />);
+    expect(filled()).toEqual([1, 2, 3, 4, 5]);
   });
 });
 

@@ -400,11 +400,13 @@ export default function SpeciesCard({
           <Text style={styles.depthLabel}>{tr('card.depth')}</Text>
           <View style={styles.depthRow}>
             {DEPTH_TIERS.map((level) => {
-              // Tier-1 always free; 2–5 climb-by-play or Full Game (T-060).
-              const unlocked = isDepthUnlocked(level, tier, fullGame);
+              // Progress is play only (T-386): the Full Game opens content, it is not progress, and
+              // counting it filled all five on a card only spotted.
+              const unlocked = isDepthUnlocked(level, tier, false);
               return (
                 <View
                   key={level}
+                  testID={`depth-pill-${level}`}
                   style={[styles.depthPill, unlocked ? styles.depthUnlocked : styles.depthLocked]}
                 >
                   <Text style={[styles.depthNum, unlocked && styles.depthNumUnlocked]}>

@@ -5401,6 +5401,13 @@ document until it is started, when it takes the next free `T-###`.
     card and the sighting quiz's lookalikes (T-241) both use it.
   - ✅ Tests: card 1, quiz 1.
 
+- **T-386 · Progress showed five of five on a species only spotted** — *Claude · XS · `DONE` · deps: T-060, T-283*
+  - Director, 2026-11-21: every card showed all five progress circles filled. The pills passed the
+    Full Game to `isDepthUnlocked`, which opens every level; since T-283 they are labelled progress,
+    and the Full Game is not progress.
+  - ✅ The pills count play only (spotted 2, caught 3, helped 4, all three 5); the Full Game still
+    opens the content it opens (the bird song, T-347). Tests: 2.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code
