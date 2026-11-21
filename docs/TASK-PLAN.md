@@ -5386,6 +5386,53 @@ document until it is started, when it takes the next free `T-###`.
   - Director: the next build uploaded to Play should clear the warning (Play Console → the release
     → device catalogue).
 
+- **T-375 · A legal change opens an issue** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: T-336, T-337*
+  - The monthly invasive and protected steps rewrite the marks silently. Before writing, compare
+    with what is stored and open a GitHub issue (or comment on the open one) when: the ordinance's
+    "Ändrad: t.o.m. SFS" changes; a catalogue species gains, loses or changes a mark or level; the
+    Union list's size changes; the Red List step changes a category.
+  - Done when an unchanged month opens nothing, a change names the species and old → new level,
+    and a refused write (layout changed, short answer) opens an issue too. Tests on the diff.
+
+- **T-376 · New species get their facts without a manual run** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: T-259*
+  - `backfill-facts.yml` runs only by hand. Chain it after the data pipeline (workflow_run, like
+    `translate-facts.yml`), with translation after the backfill, so newly admitted species ship
+    with a fact and every language.
+  - Done when a pipeline run ends with no catalogue species missing an English or Swedish fact that
+    Wikipedia has, and the order is pipeline → backfill → translate. Free tiers only.
+
+- **T-377 · End-to-end flows on a schedule** — *Claude · XS · `DEFERRED` (v2, Director 2026-11-21) · deps: T-367*
+  - Run `e2e.yml` weekly and after each merged dependency update, not only by hand, so a broken
+    build is found before a release build.
+  - Done when a red run notifies like CI does, and the schedule stays inside the free Actions
+    minutes (one run is about 25 minutes).
+
+- **T-378 · Safe dependency updates merge themselves** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: T-109*
+  - Dependabot opens pull requests that wait for the Director. Merge patch-level updates and
+    security fixes automatically once CI is green (verify, audit gate, Android bundle); minor and
+    major updates, and anything under `expo` / `react-native`, still wait.
+  - Done when a green patch PR merges with no action, a red one stays open, and the one-task-per-push
+    rule is noted as not applying to bot merges.
+
+- **T-379 · Upgrade deadlines open an issue** — *Claude · XS · `DEFERRED` (v2, Director 2026-11-21) · deps: —*
+  - A monthly check: Google Play's target-API deadline (each August) within 60 days of the app's
+    `targetSdkVersion` being behind; a new Expo SDK released; a dependency in `audit-accepted.json`
+    whose accepted reason has a fix available.
+  - Done when each condition opens one issue, once, with what to do. The upgrade itself stays manual.
+
+- **T-380 · The privacy policy publishes itself** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: T-095*
+  - `pipeline/legal_site.py` builds https://nytta-ai.se/nearby/privacy/ from
+    `docs/legal/PRIVACY-POLICY.md`, by hand. Run it on every push that changes the file (T-281's
+    paragraph is waiting for this now), and fail CI when the published page differs from the file.
+  - Done when a change to the file is live without a manual step. Needs the Director to give the
+    site's deploy credentials to GitHub as a secret.
+
+- **T-381 · A weekly digest of mistake reports** — *Claude · XS · `DEFERRED` (v2, Director 2026-11-21) · deps: T-293*
+  - `content-reports.yml` runs weekly; turn its output into one GitHub issue per week, grouped by
+    species and kind (name, photo, text, season), with the reports that repeat first.
+  - Done when a quiet week opens nothing and the issue links each species. Reports stay in the
+    database; the issue holds no user ids.
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
