@@ -70,7 +70,7 @@ jobs:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Seconds, and it runs first on purpose: the load steps are silently skipped when their
       # secret is missing, and that only becomes visible hours later, at the end of an ingest that
