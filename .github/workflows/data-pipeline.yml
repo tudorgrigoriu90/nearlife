@@ -163,7 +163,7 @@ jobs:
       # `always()`, so an explicit cancel still stops the DB writes.
       - name: Upload generated data as an artifact
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pipeline-data
           path: pipeline/data/*.json
