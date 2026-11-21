@@ -586,6 +586,9 @@ export default function App() {
   const cardThreat = cardSpecies?.iucn;
   const cardThreatSe = cardSpecies?.redlistSe;
   const cardLegalStatus = cardSpecies?.legalStatus;
+  const cardProtection = cardSpecies?.protection
+    ? { level: cardSpecies.protection, local: cardSpecies.protectionLocal === true }
+    : undefined;
   // The season gate (T-268 · review B-26), on the species' active months in the viewed county.
   const seasonOf = (species: Species) =>
     catchSeason(
@@ -1672,6 +1675,7 @@ export default function App() {
           threat={cardThreat}
           threatSe={cardThreatSe}
           legalStatus={cardLegalStatus}
+          protection={cardProtection}
           month={monthOf(new Date())}
           backAround={cardSeason && !cardSeason.open ? cardSeason.backAround : null}
           onBack={() => setSelected(null)}

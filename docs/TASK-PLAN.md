@@ -4977,13 +4977,39 @@ document until it is started, when it takes the next free `T-###`.
     gibbosus, Lysichiton americanus, Myriophyllum heterophyllum, Nyctereutes procyonoides, Ondatra
     zibethicus, Oxyura jamaicensis, Reynoutria japonica, Reynoutria sachalinensis, Trachemys
     scripta). The other 16 are below the noise filter; 85 of the 117 are not among Sweden's species.
-- **T-337 · Protected mark on the card** — *Claude + Director · M · `TODO` · deps: T-336 · review F-01 (protected)*
+- **T-337 · Protected mark on the card** — *Claude · M · `DONE` · deps: T-336 · review F-01 (protected)*
   - Parse the Species Protection Ordinance (SFS 2007:845, as amended to SFS 2026:1504, from
     data.riksdagen.se): annex 1 animals marked N or n and plants marked N, and annex 2 with its
     levels (strict, reinforced, basic, limited) and county limits; family-level entries (all
     orchids) by GBIF family. Every wild bird is protected (4 §) with hunting excepted, so birds get
     their own wording. Write `legal_status = 'protected'` and a level; card copy per level.
   - The Director signs off the copy before it ships (legal wording).
+  - ✅ Director, 2026-11-21: Claude does it in full; no human reviewer ("no harm in extra
+    protection"). Recorded in DATA-SOURCING-LICENSING §11.
+  - ✅ `pipeline/build_protected.py` parses the text from data.riksdagen.se (consolidated to SFS
+    2026:1504): annex 1 gives 866 N/n entries (birds are left to 4 §), annex 2 188 rows with their
+    level, three family entries and one county limit (ramsons, Kalmar and Stockholm). Skipped:
+    subspecies (the Gotland grass snake must not mark the grass snake; the bottnica subspecies must not
+    mark field wormwood) and populations outside Sweden ("ej svenska", "endast spanska"). Names are
+    matched EXACT on the GBIF backbone, synonyms to the accepted key ("Bufo calamita" → natterjack),
+    and joined on `gbif_key`, so curated ids match too. Family entries take the family's species with
+    records in Sweden; a species listed on its own keeps its own level; the strongest listing wins
+    (strict > annex > reinforced > basic > limited). Every bird gets `bird`. Refuses to write when
+    the annexes parse short. Runs monthly after the invasive step in `species-names.yml`.
+  - ✅ Invasive wins: `build_legal_status.py` now overwrites `protected` (an invasive bird is still a
+    wild bird under 4 §, but the card must warn against releasing it) and also matches on
+    `gbif_key`, which it missed for curated species.
+  - ✅ Migration 0052 (`20261121000002_species_protection.sql`): `species.protection` and
+    `protection_regions`, with checks; `region_catalogue` returns `protection` and
+    `protection_local`, and in a county outside a limit neither the level nor the protected status.
+    Verify: the catalogue returns the level; every protected species has one. Types follow.
+  - ✅ Card: "🛡️ Protected in Sweden …" (sv "Fridlyst i Sverige …") under the name, worded per level
+    and organism in `lib/protection.ts`: birds (4 §), animals at strict/reinforced/annex level (no
+    catching, harming, disturbing, damaging breeding or resting places), animals at basic level (no
+    catching, harming, collecting, taking eggs, spawn or nests), plants and fungi (no picking, digging
+    up, damaging), limited (no uprooting, no picking to sell). "In this county" for a county limit.
+    "Hunting has its own rules" for birds and mammals, "Fishing …" for fish (6 b §).
+  - ✅ Tests: parser 12, real Postgres 4, copy 7, mapping 1, card 4.
 - **T-339 · Confirm the invasive-species reporting link** — *Director · XS · `DONE` · deps: T-336*
   - `INVASIVE_REPORT_URL` in `lib/legal.ts` is https://www.invasivaarter.nu/, which forwards to
     Artportalen's form for wanted invasive species. Confirm it is the page to send people to.

@@ -22,7 +22,8 @@ import {
 import { commonNameFor, commonNameInLocale } from '../lib/species/localized';
 import { READ_ALOUD_ENABLED } from '../lib/readAloud';
 import type { SpeciesContent } from '../lib/species/content';
-import type { IucnStatus, LegalStatus, RedlistSeStatus, Month, Species } from '../lib/species/types';
+import type { IucnStatus, LegalStatus, Protection, RedlistSeStatus, Month, Species } from '../lib/species/types';
+import { protectionLine } from '../lib/protection';
 import FieldNotes from './FieldNotes';
 import type { PhotoSource } from '../lib/pickPhoto';
 import ConfusedWith from './ConfusedWith';
@@ -79,6 +80,7 @@ export default function SpeciesCard({
   threat,
   threatSe,
   legalStatus,
+  protection,
   onBack,
   onReportMistake,
   record = null,
@@ -146,6 +148,8 @@ export default function SpeciesCard({
   /** Invasive (T-336) or protected (T-337) in Sweden: a line under the name, and for an invasive
    * species give advice and a pledge about not spreading it. */
   legalStatus?: LegalStatus;
+  /** The Species Protection Ordinance level (T-337); `local` when it holds only in some counties. */
+  protection?: { level: Protection; local: boolean };
   onBack?: () => void;
 }) {
   const tr = createTranslator(locale);
@@ -236,6 +240,17 @@ export default function SpeciesCard({
               ⚠️ {tr(`redlistSe.${threatSe}` as TranslationKey)} · {tr('redlistSe.source')}
             </Text>
           ) : null}
+          {legalStatus === 'protected' && protection
+            ? (() => {
+                const line = protectionLine(protection.level, species, protection.local);
+                return (
+                  <Text style={styles.protected} testID="card-protected">
+                    🛡️ {tr(line.rule, { where: tr(line.where) })}
+                    {line.extra ? ` ${tr(line.extra)}` : ''}
+                  </Text>
+                );
+              })()
+            : null}
           {legalStatus === 'invasive' ? (
             <>
               <Text style={styles.threat} testID="card-invasive">
@@ -560,6 +575,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#8a4b1f',
+    textAlign: 'center',
+  },
+  protected: {
+    marginTop: 6,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#296f46',
     textAlign: 'center',
   },
   mtNotice: { marginTop: 6, fontSize: 11, color: '#566658' },

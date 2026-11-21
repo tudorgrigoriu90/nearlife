@@ -9,7 +9,7 @@ import { KRONOBERG_SPECIES } from './species/kronoberg';
 import { commonNameFor, contentFor, contentInLocale } from './species/localized';
 import type { SpeciesContent } from './species/content';
 import { isCommercialUseAllowed, type MediaLicense, type SpeciesMedia } from './species/media';
-import type { IucnStatus, LegalStatus, Month, Rarity, RedlistSeStatus, Species, SpeciesCategory } from './species/types';
+import type { IucnStatus, LegalStatus, Month, Protection, Rarity, RedlistSeStatus, Species, SpeciesCategory } from './species/types';
 
 // Species data-access seam (T-057 / T-059). The screens read the catalogue + localized content
 // through this interface instead of importing the hardcoded data directly, so the source can
@@ -166,11 +166,16 @@ export interface CatalogueRow extends SpeciesRow {
   redlist_se?: string | null;
   /** 'protected' or 'invasive' (T-336); absent from an older function. */
   legal_status?: string | null;
+  /** The protection level (T-337), null outside a county limit; absent from an older function. */
+  protection?: string | null;
+  /** True when the protection holds only in some counties (T-337). */
+  protection_local?: boolean | null;
 }
 
 const IUCN: readonly string[] = ['NT', 'VU', 'EN', 'CR', 'EW', 'EX'];
 const REDLIST_SE: readonly string[] = ['NT', 'VU', 'EN', 'CR', 'RE'];
 const LEGAL_STATUS: readonly string[] = ['protected', 'invasive'];
+const PROTECTION: readonly string[] = ['bird', 'annex', 'strict', 'reinforced', 'basic', 'limited'];
 
 export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Species {
   const base = speciesRowToSpecies(row);
@@ -184,6 +189,12 @@ export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Specie
   const catchHabitats = parseHabitats(row.catch_habitats);
   const monthCounts =
     Array.isArray(row.month_counts) && row.month_counts.length === 12 ? row.month_counts : null;
+  const protection = row.protection && PROTECTION.includes(row.protection) ? (row.protection as Protection) : null;
+  // A protected mark is shown with its level's wording; without a known level there is no line.
+  const legal =
+    row.legal_status && LEGAL_STATUS.includes(row.legal_status) && (row.legal_status !== 'protected' || protection)
+      ? (row.legal_status as LegalStatus)
+      : null;
   return {
     ...base,
     county: { occurrences: row.occurrences, monthCounts },
@@ -193,8 +204,9 @@ export function catalogueRowToSpecies(row: CatalogueRow, locale: string): Specie
     ...(row.redlist_se && REDLIST_SE.includes(row.redlist_se)
       ? { redlistSe: row.redlist_se as RedlistSeStatus }
       : {}),
-    ...(row.legal_status && LEGAL_STATUS.includes(row.legal_status)
-      ? { legalStatus: row.legal_status as LegalStatus }
+    ...(legal ? { legalStatus: legal } : {}),
+    ...(legal === 'protected' && protection
+      ? { protection, ...(row.protection_local === true ? { protectionLocal: true } : {}) }
       : {}),
     ...(row.local_name ? { names: { [locale]: asTitleName(row.local_name, locale) } } : {}),
     ...(photo ? { photo } : {}),

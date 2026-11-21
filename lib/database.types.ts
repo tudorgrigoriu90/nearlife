@@ -410,6 +410,8 @@ export type Database = {
           in_catalogue: boolean
           iucn_status: string | null
           legal_status: string | null
+          protection: string | null
+          protection_regions: string[] | null
           rarity: string
           redlist_se: string | null
           scientific_name: string
@@ -427,6 +429,8 @@ export type Database = {
           in_catalogue?: boolean
           iucn_status?: string | null
           legal_status?: string | null
+          protection?: string | null
+          protection_regions?: string[] | null
           rarity: string
           redlist_se?: string | null
           scientific_name: string
@@ -444,6 +448,8 @@ export type Database = {
           in_catalogue?: boolean
           iucn_status?: string | null
           legal_status?: string | null
+          protection?: string | null
+          protection_regions?: string[] | null
           rarity?: string
           redlist_se?: string | null
           scientific_name?: string
@@ -754,6 +760,8 @@ export type Database = {
           photo_license: string
           photo_source_url: string
           photo_url: string
+          protection: string
+          protection_local: boolean
           rarity: string
           redlist_se: string
           scientific_name: string

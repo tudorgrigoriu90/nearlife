@@ -399,8 +399,38 @@ describe('report to Artportalen', () => {
     open.mockRestore();
   });
 
+  it('stays on a protected card', async () => {
+    await render(<SpeciesCard species={swift} legalStatus="protected" protection={{ level: 'bird', local: false }} />);
+    expect(screen.getByText(tr('card.reportArtportalen'))).toBeTruthy();
+  });
+
   it('is left out on an invasive card, which has its own report link', async () => {
     await render(<SpeciesCard species={swift} legalStatus="invasive" />);
     expect(screen.queryByText(tr('card.reportArtportalen'))).toBeNull();
+  });
+});
+
+// T-337 · review F-01: the Species Protection Ordinance line.
+describe('SpeciesCard protected mark', () => {
+  it('shows the bird wording on a wild bird', async () => {
+    await render(<SpeciesCard species={swift} legalStatus="protected" protection={{ level: 'bird', local: false }} />);
+    expect(
+      screen.getByText(`🛡️ ${tr('legal.protected.bird', { where: tr('legal.where.sweden') })} ${tr('legal.hunting')}`),
+    ).toBeTruthy();
+  });
+
+  it('says "in this county" for a county-limited protection', async () => {
+    const plant = KRONOBERG_SPECIES.find((s) => s.category === 'plant' && !s.group)!;
+    await render(<SpeciesCard species={plant} legalStatus="protected" protection={{ level: 'limited', local: true }} />);
+    expect(
+      screen.getByText(`🛡️ ${tr('legal.protected.plantLimited', { where: tr('legal.where.county') })}`),
+    ).toBeTruthy();
+  });
+
+  it('shows nothing without a level, and nothing on an invasive card', async () => {
+    await render(<SpeciesCard species={swift} legalStatus="protected" />);
+    expect(screen.queryByTestId('card-protected')).toBeNull();
+    await render(<SpeciesCard species={swift} legalStatus="invasive" protection={{ level: 'bird', local: false }} />);
+    expect(screen.queryByTestId('card-protected')).toBeNull();
   });
 });

@@ -105,6 +105,9 @@ EXPECTED: dict[str, str] = {
     # T-373: duplicates merged into GBIF's accepted key; only the service role may merge.
     "no two catalogue species share a scientific name": "ok",
     "users cannot merge species": "permission denied",
+    # T-337: the protection level reaches the catalogue, and every protected mark has one.
+    "region_catalogue returns the protection level": "ok",
+    "every protected species has a level": "ok",
     "curated birds sit on the real species": "ok",
     "no summer migrant is active in winter": "ok",
     "a collection row for an unknown species is refused": "violates foreign key",
@@ -636,6 +639,12 @@ def run_catalogue_checks(cur) -> dict[str, str]:
     _step(cur, results, "no two catalogue species share a scientific name",
           "select case when count(*) = 0 then 'ok' else 'DUPLICATES: ' || string_agg(scientific_name, ', ') end from ("
           " select scientific_name from public.species where in_catalogue group by 1 having count(*) > 1) d")
+    _step(cur, results, "region_catalogue returns the protection level",
+          "select 'ok' from (select protection, protection_local from public.region_catalogue('SWE.9_1', 'en') limit 1) c "
+          "union all select 'ok' limit 1")
+    _step(cur, results, "every protected species has a level",
+          "select case when count(*) = 0 then 'ok' else 'NO LEVEL: ' || count(*) end "
+          "from public.species where legal_status = 'protected' and protection is null")
     cur.execute("set local role authenticated")
     _step(cur, results, "users cannot merge species", "select public.merge_species('gbif:1', 'gbif:2')")
     cur.execute("reset role")

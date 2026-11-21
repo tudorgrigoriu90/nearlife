@@ -63,9 +63,19 @@ export interface Species {
   redlistSe?: RedlistSeStatus;
   /** Protected by Swedish law (T-337) or on the EU invasive list (T-336); absent otherwise. */
   legalStatus?: LegalStatus;
+  /** The level under the Species Protection Ordinance (T-337), with `legalStatus` 'protected'. */
+  protection?: Protection;
+  /** True when that protection holds only in some counties, this one among them. */
+  protectionLocal?: boolean;
 }
 
 export type LegalStatus = 'protected' | 'invasive';
+
+/**
+ * Species Protection Ordinance (SFS 2007:845) levels: every wild bird (4 §); annex 1, marked N or
+ * n (4 a §, 7 §); annex 2's four levels (5 a, 6, 8, 9 §§). See pipeline/build_protected.py.
+ */
+export type Protection = 'bird' | 'annex' | 'strict' | 'reinforced' | 'basic' | 'limited';
 
 export type IucnStatus = 'NT' | 'VU' | 'EN' | 'CR' | 'EW' | 'EX';
 export type RedlistSeStatus = 'NT' | 'VU' | 'EN' | 'CR' | 'RE';

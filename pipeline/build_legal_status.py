@@ -8,7 +8,9 @@ Artdatabanken's Swedish copy stops before the 2022 one. Records join the catalog
 backbone key (`nubKey` → `gbif:<key>`), species rank only.
 
 Only `invasive` is written here, and every other `invasive` is cleared, so a species taken off the
-list loses its line. `protected` rows are never touched.
+list loses its line. Invasive replaces `protected` (an invasive bird is still a wild bird under 4 §
+of the Species Protection Ordinance, but releasing it is what the card must warn against);
+pipeline/build_protected.py (T-337) leaves invasive rows alone.
 
     SUPABASE_DB_URL=... python pipeline/build_legal_status.py
 """
@@ -57,8 +59,9 @@ def main() -> int:
     with psycopg.connect(dsn) as conn, conn.cursor() as cur:
         cur.execute("update public.species set legal_status = null where legal_status = 'invasive'")
         cur.executemany(
-            "update public.species set legal_status = 'invasive' where id = %(id)s and legal_status is null",
-            [{"id": i} for i in sorted(invasive)],
+            # Curated species keep a readable id; their backbone key is in gbif_key.
+            "update public.species set legal_status = 'invasive' where id = %(id)s or gbif_key = %(key)s",
+            [{"id": i, "key": int(i.removeprefix("gbif:"))} for i in sorted(invasive)],
         )
         cur.execute("select count(*) from public.species where in_catalogue and legal_status = 'invasive'")
         in_catalogue = cur.fetchone()[0]

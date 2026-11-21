@@ -161,7 +161,23 @@ conservation institutions under licenses written for *research and non-commercia
   (invasivaarter.nu, confirmed by the Director in T-339), and give advice about not spreading it.
 - **Not yet:** Sweden's national list of invasive species of national concern, set in agency
   regulations since the ordinance's annex was repealed (SFS 2025:840). Protected species (the
-  Species Protection Ordinance, SFS 2007:845) are T-337.
+  Species Protection Ordinance, SFS 2007:845) are §11.
+
+### 11. The Species Protection Ordinance — protected mark (T-337 · review F-01, decided 2026-11-21)
+- **Source:** Artskyddsförordningen (SFS 2007:845), the consolidated text as amended (to SFS
+  2026:1504 at first load), from riksdagen's open data (`data.riksdagen.se/dokument/sfs-2007-845.text`,
+  source Regeringskansliet / Lagrummet).
+- **Licence:** Swedish legislation is not under copyright (upphovsrättslagen 9 §). **Decision:
+  use.** The card names the ordinance.
+- **Use:** `species.protection` by backbone key: `bird` for every wild bird (4 §); `annex` for annex
+  1 animals marked N or n (4 a §) and plants marked N (7 §); annex 2's `strict`, `reinforced`,
+  `basic` and `limited` (5 a, 6, 8, 9 §§), with `protection_regions` where an entry is limited to
+  counties (ramsons: Kalmar and Stockholm). Family entries (club mosses, orchids) cover the family's
+  species with records in Sweden. Subspecies and non-Swedish populations are skipped; the strongest
+  listing wins; invasive species keep their invasive mark. The card line says what the level forbids,
+  per organism, and that hunting or fishing has its own rules for birds, mammals and fish (6 b §).
+- **Sign-off:** the Director waived a human review of the wording (2026-11-21): "no harm in extra
+  protection". The wording stays inside what each section forbids.
 
 ---
 

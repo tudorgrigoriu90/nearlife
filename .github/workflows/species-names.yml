@@ -67,3 +67,9 @@ jobs:
       - name: Invasive species of Union concern (T-336)
         if: always()
         run: python pipeline/build_legal_status.py
+
+      # Swedish legislation, not under copyright (DATA-SOURCING §11). Runs after the invasive step,
+      # whose rows it leaves alone; refuses to write if the annexes parse short.
+      - name: Protected species, Species Protection Ordinance (T-337)
+        if: always()
+        run: python pipeline/build_protected.py

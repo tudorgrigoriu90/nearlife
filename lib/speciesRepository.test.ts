@@ -290,6 +290,20 @@ describe('mediaRowToPhoto (T-215)', () => {
     expect(catalogueRowToSpecies(base, 'sv').legalStatus).toBeUndefined();
   });
 
+  it('carries the protection level and whether it holds only in some counties (T-337)', () => {
+    const base = { id: 'ramsons', scientific_name: 'Allium ursinum', common_name: null, local_name: null, category: 'plant' as const, rarity: 'common' as const, active_months: [5], occurrences: 9 };
+    expect(catalogueRowToSpecies({ ...base, legal_status: 'protected', protection: 'limited', protection_local: true }, 'sv')).toMatchObject({
+      legalStatus: 'protected',
+      protection: 'limited',
+      protectionLocal: true,
+    });
+    const whole = catalogueRowToSpecies({ ...base, legal_status: 'protected', protection: 'basic', protection_local: false }, 'sv');
+    expect(whole.protectionLocal).toBeUndefined();
+    expect(catalogueRowToSpecies({ ...base, legal_status: 'protected', protection: 'total' }, 'sv').protection).toBeUndefined();
+    // No level, no line: a protected mark without one is not shown.
+    expect(catalogueRowToSpecies({ ...base, legal_status: 'protected' }, 'sv').legalStatus).toBeUndefined();
+  });
+
   it('carries Sweden’s own Red List category beside it (T-332)', () => {
     const base = { id: 'gbif:1', scientific_name: 'Lutra lutra', common_name: null, local_name: null, category: 'mammal' as const, rarity: 'common' as const, active_months: [5], occurrences: 9 };
     expect(catalogueRowToSpecies({ ...base, iucn_status: 'NT', redlist_se: 'VU' }, 'sv')).toMatchObject({ iucn: 'NT', redlistSe: 'VU' });
