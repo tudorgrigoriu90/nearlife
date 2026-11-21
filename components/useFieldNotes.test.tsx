@@ -33,3 +33,22 @@ describe('useFieldNotes', () => {
     expect(result.current.notes).toEqual([]);
   });
 });
+
+// T-348: a photo is copied in under the note's id, and only for a note that is kept.
+describe('useFieldNotes with a photo', () => {
+  it('keeps the photo by file name, and copies nothing for a note that is refused', async () => {
+    const s = store();
+    const photos = { keep: jest.fn((_uri: string, id: string) => `${id}.jpg`), uri: (n: string) => n, clear: jest.fn() };
+    const { result } = await renderHook(() => useFieldNotes(s, photos));
+    await act(async () => {
+      expect(result.current.add('owl', '2026-11-02', '   ', 'file:///cache/a.jpg')).toBe(false);
+    });
+    expect(photos.keep).not.toHaveBeenCalled();
+    await act(async () => {
+      expect(result.current.add('owl', '2026-11-02', 'Heard it', 'file:///cache/a.jpg')).toBe(true);
+    });
+    const note = result.current.notes[0];
+    expect(photos.keep).toHaveBeenCalledWith('file:///cache/a.jpg', note.id);
+    expect(note.photo).toBe(`${note.id}.jpg`);
+  });
+});

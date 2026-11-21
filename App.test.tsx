@@ -53,6 +53,16 @@ jest.mock('./lib/supabase', () => ({
   getSupabase: () => ({}),
   ensureAnonymousSession: jest.fn(async () => 'user-1'),
 }));
+// T-348: note photos live in the app's folder; the deletion test checks they go with the account.
+const mockClearNotePhotos = jest.fn();
+jest.mock('./lib/notePhotos', () => ({
+  ExpoNotePhotoFiles: jest.fn().mockImplementation(() => ({
+    keep: jest.fn(() => null),
+    uri: (name: string) => name,
+    clear: () => mockClearNotePhotos(),
+  })),
+}));
+
 jest.mock('./lib/accountDeletion', () => ({
   ...jest.requireActual('./lib/accountDeletion'),
   deleteAccount: jest.fn(async () => ({ ok: true })),
@@ -296,6 +306,7 @@ describe('App', () => {
       expect(await screen.findByText(tr('onboarding.welcome.title'))).toBeTruthy();
       expect(await AsyncStorage.getItem(ONBOARDING_STORAGE_KEY)).toBeNull();
       expect(await AsyncStorage.getItem(HOMETOWN_STORAGE_KEY)).toBeNull();
+      expect(mockClearNotePhotos).toHaveBeenCalled(); // the note photos too (T-348)
     },
     FLOW_TIMEOUT,
   );

@@ -51,3 +51,22 @@ describe('field notes', () => {
     await expect(new AsyncStorageFieldNotesStore().save([])).resolves.toBeUndefined();
   });
 });
+
+// T-348 · review F-07 (photos): a note may carry one photo, kept on the phone by file name.
+describe('a photo on a note', () => {
+  it('keeps the file name with the note, and only a plain file name', () => {
+    const withPhoto = addNote([], 'owl', '2026-11-03', 'Saw two', () => 'n1', 'n1.jpg');
+    expect(withPhoto).toEqual([{ id: 'n1', speciesId: 'owl', date: '2026-11-03', text: 'Saw two', photo: 'n1.jpg' }]);
+    expect(addNote([], 'owl', '2026-11-03', 'x', () => 'n2')![0]).not.toHaveProperty('photo');
+  });
+
+  it('reads back a photo name, and drops one that is a path', () => {
+    const raw = JSON.stringify([
+      { id: 'a', speciesId: 'owl', date: '2026-11-03', text: 't', photo: 'a.jpg' },
+      { id: 'b', speciesId: 'owl', date: '2026-11-03', text: 't', photo: '../../etc/passwd' },
+    ]);
+    const notes = parseNotes(raw);
+    expect(notes[0].photo).toBe('a.jpg');
+    expect(notes[1]).not.toHaveProperty('photo');
+  });
+});

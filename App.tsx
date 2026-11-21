@@ -66,6 +66,8 @@ import { checkMove, SupabaseHomeMoveGateway } from './lib/homeMove';
 import { useFieldNotes } from './components/useFieldNotes';
 import { notesFor } from './lib/fieldNotes';
 import { AsyncStorageFieldNotesStore } from './lib/fieldNotesStore';
+import { ExpoNotePhotoFiles } from './lib/notePhotos';
+import { pickNotePhoto } from './lib/pickPhoto';
 import NameTrainerScreen from './components/NameTrainerScreen';
 import { useNameTrainer } from './components/useNameTrainer';
 import { trainerLocale } from './lib/nameTrainer';
@@ -314,6 +316,8 @@ const EASY_MODE_STORE = new AsyncStorageEasyModeStore();
 
 // Field notes on sightings (T-347) — on the phone only, erased with the account.
 const FIELD_NOTES_STORE = new AsyncStorageFieldNotesStore();
+// Their photos (T-348): in the app's own folder, never uploaded, removed with the account.
+const NOTE_PHOTOS = new ExpoNotePhotoFiles();
 // The name trainer's schedule (T-351) — on the phone only, erased with the account.
 const NAME_TRAINER_STORE = new AsyncStorageNameTrainerStore();
 
@@ -467,7 +471,7 @@ export default function App() {
   // The phone's other language, offered at onboarding (T-343 · review F-05).
   const motherTongue = useMemo(() => motherTongueOffer(deviceLanguageTags()), []);
   const notifChoices = useNotifPrefs(notifPrefsGateway(), consent.notifications);
-  const fieldNotes = useFieldNotes(FIELD_NOTES_STORE);
+  const fieldNotes = useFieldNotes(FIELD_NOTES_STORE, NOTE_PHOTOS);
   const nameTrainer = useNameTrainer(NAME_TRAINER_STORE);
   const [showTrainer, setShowTrainer] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -1050,6 +1054,7 @@ export default function App() {
     await resetEntitlements();
     resetAnalyticsIdentity();
     PACK_FILES?.clear(); // the offline pack holds no personal data, but a fresh start is empty
+    NOTE_PHOTOS.clear(); // the user's own photos on their notes (T-348)
     void COUNTY_CACHE?.clear().catch(() => undefined);
     await eraseDeviceStorage(AsyncStorage);
     setShowDelete(false);
@@ -1662,7 +1667,9 @@ export default function App() {
           }
           onMarkDone={(species) => collection.markHelpedDone(species.id)}
           notes={notesFor(fieldNotes.notes, selected.id)}
-          onAddNote={(date, text) => fieldNotes.add(selected.id, date, text)}
+          onAddNote={(date, text, photo) => fieldNotes.add(selected.id, date, text, photo)}
+          pickNotePhoto={pickNotePhoto}
+          notePhotoUri={(name) => NOTE_PHOTOS.uri(name)}
           lookalikes={confusedWith(selected, almanacSpecies)}
           onOpenSpecies={setSelected}
           onPledge={(species, kind) => {

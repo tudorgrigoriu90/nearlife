@@ -1771,6 +1771,9 @@ personal accounts. Ships the current prototype loop; IAP/data-layer/map are defe
     still fits, and every control is read out by name.
   - Minigames (T-366 · review I-06): the ring, fish, band and insect move smoothly on a low-end
     Android phone, the drawn fish/insect match what is scored, and a catch and a miss each vibrate.
+  - Field notes (T-348): "Take photo" and "Choose photo" each add a photo to a note, it shows under
+    the note after a restart, and deleting the account removes it.
+  - Share (T-368): "Share as image" sends a picture that carries the photo credit.
 - **T-162 · Align SDK-57 dependencies + add expo-dev-client (dev-build enablement)** — *Claude · S · `DONE` · deps: T-140 · [TSD §1](TSD.md)*
   - ✅ Expo Go can't run this SDK-57 app, so device testing needs an EAS **dev build** — which needs
     `expo-dev-client`. Installing it required aligning the SDK-57 patch set: `expo` ~57.0.2 → ~57.0.10,
@@ -5040,10 +5043,21 @@ document until it is started, when it takes the next free `T-###`.
     by prefix; App also clears the notes in memory). A spotted species' card shows "Your notes" and
     "Add a note"; the editor says notes stay on the phone and no place is attached. The export's
     device section lists them as text. Tests: model 5, component 3, hook 2, card 2.
-- **T-348 · Photos on field notes** — *Claude + Director · S · `TODO` · deps: T-347 · review F-07 (photos)*
+- **T-348 · Photos on field notes** — *Claude + Director · S · `DONE` · deps: T-347 · review F-07 (photos)*
   - An optional photo from the camera or gallery, kept on the phone and exported as a file name.
     Needs `expo-image-picker` (free, Expo's own; the reason to record when adding it) and a new
     build to reach phones.
+  - ✅ `expo-image-picker` ~57.0.21 (MIT, Expo's own, free): the only way to take a photo or pick
+    one from the gallery without writing native code; added for this. Its plugin in app.json sets
+    the camera and photo permission texts and turns off the microphone (no video).
+  - ✅ In the note editor: "Take photo" / "Choose photo", a preview with "Remove photo", and the
+    photo under each saved note. One image, recompressed (quality 0.6), metadata not requested.
+    The file is copied into the app's own `notes` folder under the note's id
+    (`lib/notePhotos.ts`), after the note is checked, so a refused note leaves no file; the note
+    and the data export hold only the file name (a stored name that is a path is dropped). Account
+    deletion removes the folder. Never uploaded: "The photo stays on this phone too".
+  - ✅ Tests: model 2, folder 2, picker 2, hook 1, editor 2, deletion 1. Reaches phones with the
+    next build; the Director checks camera and gallery on the device (T-141).
 
 - **T-349 · Move home county once a year** — *Claude · S · `DONE` · deps: T-314 · review F-09*
   - Done when a second move within 365 days is refused by the server (verify check), the

@@ -24,6 +24,7 @@ import { READ_ALOUD_ENABLED } from '../lib/readAloud';
 import type { SpeciesContent } from '../lib/species/content';
 import type { IucnStatus, LegalStatus, RedlistSeStatus, Month, Species } from '../lib/species/types';
 import FieldNotes from './FieldNotes';
+import type { PhotoSource } from '../lib/pickPhoto';
 import ConfusedWith from './ConfusedWith';
 import ShareSheet from './ShareSheet';
 import type { FieldNote } from '../lib/fieldNotes';
@@ -67,6 +68,8 @@ export default function SpeciesCard({
   onMarkDone,
   notes = [],
   onAddNote,
+  pickNotePhoto,
+  notePhotoUri,
   lookalikes = [],
   onOpenSpecies,
   nearbyNote,
@@ -114,7 +117,10 @@ export default function SpeciesCard({
   onMarkDone?: (species: Species) => void;
   /** This species' field notes and how to add one (T-347); shown once the species is spotted. */
   notes?: FieldNote[];
-  onAddNote?: (date: string, text: string) => boolean;
+  onAddNote?: (date: string, text: string, photo?: string | null) => boolean;
+  /** A photo for a note (T-348): the camera or the gallery, and where kept photos are. */
+  pickNotePhoto?: (source: PhotoSource) => Promise<string | null>;
+  notePhotoUri?: (name: string) => string;
   /** "Often confused with" (T-352 · review F-13): `confusedWith`'s picks, each opening its card. */
   lookalikes?: Species[];
   onOpenSpecies?: (species: Species) => void;
@@ -350,7 +356,7 @@ export default function SpeciesCard({
             ) : record?.helpedKind === 'protect' ? (
               <PledgedLine record={record} species={species} tr={tr} onMarkDone={onMarkDone} />
             ) : null}
-            {tier.spotted && onAddNote ? <FieldNotes locale={locale} notes={notes} onAdd={onAddNote} /> : null}
+            {tier.spotted && onAddNote ? <FieldNotes locale={locale} notes={notes} onAdd={onAddNote} pickPhoto={pickNotePhoto} photoUri={notePhotoUri} /> : null}
             {adviceScope(species.id) === 'group' ? (
               <Text style={styles.groupAdvice}>
                 {tr('card.groupAdvice', {

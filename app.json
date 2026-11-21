@@ -34,6 +34,14 @@
           "locationWhenInUsePermission": "Nearby uses your location once to set your home region, then discards the coordinates."
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Nearby uses the camera to add a photo to your field note. It stays on this phone.",
+          "photosPermission": "Nearby lets you add a photo to your field note. It stays on this phone.",
+          "microphonePermission": false
+        }
+      ],
       "@maplibre/maplibre-react-native",
       [
         "expo-build-properties",
