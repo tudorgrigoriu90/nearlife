@@ -4837,9 +4837,11 @@ document until it is started, when it takes the next free `T-###`.
     midnight sun and in the polar night). `CatchSpotScreen` shows the lines above the safety note
     (`accessibilityRole="alert"`); the route computes them for the shown spot on each render.
     Tests: 10 rules, 2 screen.
-- **T-328 · Hunting-season months per county** — *Director · XS · `TODO` · deps: — · review I-22 (b)*
+- **T-328 · Hunting-season months per county** — *Director · XS · `DEFERRED` (v2, Director 2026-11-21) · deps: — · review I-22 (b)*
   - Fill the table T-327 reads from Naturvårdsverket's published hunting seasons (moose is the
     largest: early September in most counties). One row per county, months only.
+  - ⏸ Moved to v2 (Director, 2026-11-21). v1 ships with `HUNTING_MONTHS` empty, so no hunting
+    line shows; the ice and darkness lines from T-327 are unaffected.
 
 - **T-329 · Every control has a name a screen reader can say** — *Claude · S · `DONE` · deps: — · review I-25 (labels)*
   - Done when an automated check finds a role and a name for every button, and the tier marks are
