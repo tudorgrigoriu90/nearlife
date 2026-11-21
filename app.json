@@ -43,6 +43,7 @@
         }
       ],
       "@maplibre/maplibre-react-native",
+      "./plugins/withOptionalFeatures",
       [
         "expo-build-properties",
         {

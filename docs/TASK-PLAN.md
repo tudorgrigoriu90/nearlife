@@ -5372,6 +5372,20 @@ document until it is started, when it takes the next free `T-###`.
     holds all 97,235). No user had collected either key, so no collection row moved. Catalogue
     10,240 → 10,221 species; no scientific name twice; live verify green.
 
+- **T-374 · Play: the portrait screen is not a required feature** — *Claude · XS · `DONE` · deps: T-348*
+  - Google Play warned that `android.hardware.screen.portrait` is required, so phones, tablets,
+    Chromebooks and Android XR devices without a portrait screen cannot install the app. Play infers
+    it from `orientation: "portrait"`.
+  - ✅ `plugins/withOptionalFeatures.js` (Expo config plugin, in app.json) declares
+    `android.hardware.screen.portrait`, `android.hardware.camera` and `camera.autofocus` with
+    `android:required="false"`. It replaces any entry that marks them required. The app stays
+    portrait-locked. The camera is only for a note photo (T-348), which the photo library also
+    gives, and the CAMERA permission would otherwise imply it too.
+  - ✅ Tests: 3 (the entries, replacing a required one, wired into app.json). `expo config
+    --type introspect` shows the three entries in the generated manifest.
+  - Director: the next build uploaded to Play should clear the warning (Play Console → the release
+    → device catalogue).
+
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
     every catalogue species has before testers see them: content rows in every locale (fact,
