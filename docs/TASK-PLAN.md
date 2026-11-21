@@ -5436,6 +5436,23 @@ document until it is started, when it takes the next free `T-###`.
     off. The sender files a fish under `fish` from the next Edge Function deploy.
   - ✅ Tests: rules 2, parity (against 0053), Settings 1, real Postgres 1.
 
+- **T-390 · "Show me": one species filter for the whole app** — *Claude · M · `DONE` · deps: T-342, T-389*
+  - Director, 2026-11-21: the group filter lived only in the notification settings; This Week and
+    the rest should show only the chosen kinds too.
+  - ✅ Settings → "Show me" (sv "Visa mig"), always shown, with the six groups (birds, mammals,
+    fish, insects, plants, everything else). It applies to This Week (the list, its count, the
+    arriving/leaving strips and the seasonal events), the nature calendar and notifications. The
+    Almanac is the user's collection and shows everything; badges, the quiz and the name trainer
+    are unchanged.
+  - ✅ This Week filters before the list is cut to its top rows (`useThisWeek`'s `hidden`), so a
+    narrowed list stays full, and says "Showing only Birds, Fish · Change" (Change opens Settings).
+    Groups come from the county catalogue; a species it does not know is never hidden.
+  - ✅ The choice lives on the phone (`nearby.interests.v1`, in the data export, erased with the
+    account). The notification groups follow it: `useInterests` writes it into
+    `profiles.notif_prefs` once they are read, and adopts a group choice made in the notification
+    settings before this (the group chips left NotifChoices).
+  - ✅ Tests: rules 5, store 1, hook 4, Settings 2, This Week 3 + 1 (hook), notification choices 1.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code

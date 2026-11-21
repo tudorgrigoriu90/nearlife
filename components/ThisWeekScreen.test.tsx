@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import ThisWeekScreen from './ThisWeekScreen';
 import { createTranslator } from '../lib/i18n';
+import { KRONOBERG_SPECIES } from '../lib/species/kronoberg';
+import { commonNameFor } from '../lib/species/localized';
 
 const tr = createTranslator('en');
 
@@ -132,5 +134,31 @@ describe('species with no common name', () => {
     }
     expect(screen.getAllByText('🌿').length).toBeGreaterThan(0);
     expect(screen.queryByText('🌼')).toBeNull();
+  });
+});
+
+// T-390: with "Show me" narrowed, the list says so and links to the choice.
+describe('ThisWeekScreen with a "Show me" choice', () => {
+  it('filters the preview list and says what it shows, with a way to change it', async () => {
+    const onChange = jest.fn();
+    await render(<ThisWeekScreen locale="en" month={5} interests={['bird', 'fish']} onChangeInterests={onChange} />);
+    expect(screen.getByText(tr('interests.showing', { groups: `${tr('notif.group.bird')}, ${tr('notif.group.fish')}` }))).toBeTruthy();
+    await fireEvent.press(screen.getByText(tr('interests.change')));
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('says nothing when everything is shown', async () => {
+    await render(<ThisWeekScreen locale="en" month={5} interests={null} onChangeInterests={() => undefined} />);
+    expect(screen.queryByText(tr('interests.change'))).toBeNull();
+  });
+
+  it('leaves out bundled species of other groups', async () => {
+    const birds = new Set(KRONOBERG_SPECIES.filter((sp) => sp.category === 'bird').map((sp) => commonNameFor(sp, 'en')));
+    const labels = () => screen.queryAllByTestId(/^thisweek-row-/).map((r) => r.props.accessibilityLabel as string);
+    await render(<ThisWeekScreen locale="en" month={5} />);
+    expect(labels().some((l) => birds.has(l))).toBe(true);
+    await render(<ThisWeekScreen locale="en" month={5} interests={['plant']} />);
+    expect(labels().length).toBeGreaterThan(0);
+    expect(labels().some((l) => birds.has(l))).toBe(false);
   });
 });

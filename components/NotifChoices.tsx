@@ -1,15 +1,10 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
-import {
-  FREQUENCIES,
-  PREF_GROUPS,
-  SEND_WINDOWS,
-  toggleGroup,
-  type NotifPrefs,
-} from '../lib/notifPrefs';
+import { FREQUENCIES, SEND_WINDOWS, type NotifPrefs } from '../lib/notifPrefs';
 
-// Notification choices in Settings (T-342 · review F-03): how often, at what time of day, about
-// which groups. Shown only while notifications are on; the consent switch above stays the master.
+// Notification choices in Settings (T-342 · review F-03): how often and at what time of day. Shown
+// only while notifications are on; the consent switch above stays the master. Which groups follow
+// Settings' "Show me" (T-390), saved into the same prefs by the app.
 
 export default function NotifChoices({
   locale,
@@ -21,7 +16,6 @@ export default function NotifChoices({
   onChange: (next: NotifPrefs) => void;
 }) {
   const tr = createTranslator(locale);
-  const groupsOn = prefs.groups ?? [...PREF_GROUPS];
   return (
     <View style={styles.card} testID="notif-choices">
       <Text style={styles.label}>{tr('notif.frequency')}</Text>
@@ -44,17 +38,6 @@ export default function NotifChoices({
             label={tr(`notif.window.${w}` as TranslationKey)}
             selected={prefs.window === w}
             onPress={() => onChange({ ...prefs, window: w })}
-          />
-        ))}
-      </View>
-      <Text style={styles.label}>{tr('notif.groups')}</Text>
-      <View style={styles.row}>
-        {PREF_GROUPS.map((g) => (
-          <Choice
-            key={g}
-            label={tr(`notif.group.${g}` as TranslationKey)}
-            selected={groupsOn.includes(g)}
-            onPress={() => onChange(toggleGroup(prefs, g))}
           />
         ))}
       </View>

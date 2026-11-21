@@ -190,3 +190,20 @@ describe('SettingsScreen for an under-13', () => {
     expect(screen.getByText(tr('consent.restricted'))).toBeTruthy();
   });
 });
+
+// T-390: one "Show me" choice for the whole app, shown whether or not notifications are on.
+describe('SettingsScreen "Show me"', () => {
+  it('shows every group on by default, and reports a change', async () => {
+    const onChangeInterests = jest.fn();
+    await render(<SettingsScreen {...renderSettings()} interests={null} onChangeInterests={onChangeInterests} />);
+    expect(screen.getByText(tr('interests.title'))).toBeTruthy();
+    expect(screen.getByText(tr('interests.hint'))).toBeTruthy();
+    await fireEvent.press(screen.getByText(tr('notif.group.fish')));
+    expect(onChangeInterests).toHaveBeenCalledWith(['bird', 'mammal', 'insect', 'plant', 'other']);
+  });
+
+  it('is absent where the app does not offer it', async () => {
+    await render(<SettingsScreen {...renderSettings()} />);
+    expect(screen.queryByText(tr('interests.title'))).toBeNull();
+  });
+});

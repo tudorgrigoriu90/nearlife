@@ -6,7 +6,6 @@ import {
   hoursFor,
   parseNotifPrefs,
   groupOfRow,
-  toggleGroup,
   prefGroupOf,
 } from './notifPrefs';
 
@@ -59,19 +58,7 @@ describe('groupOfRow', () => {
   });
 });
 
-describe('toggleGroup', () => {
-  const all = { frequency: 'daily' as const, window: null, groups: null };
-  it('turning one off from "all" keeps the other five', () => {
-    expect(toggleGroup(all, 'plant').groups).toEqual(['bird', 'mammal', 'fish', 'insect', 'other']);
-  });
-  it('turning the last missing one back on is "all" again', () => {
-    expect(toggleGroup(toggleGroup(all, 'plant'), 'plant').groups).toBeNull();
-  });
-  it('never turns off the last group: that would be "never", which is the consent switch', () => {
-    const one = { ...all, groups: ['bird' as const] };
-    expect(toggleGroup(one, 'bird')).toBe(one);
-  });
-});
+// Turning groups on and off moved to "Show me" (T-390): lib/interests.test.ts.
 
 // T-389: the one-time carry-over of "other" to fish is in migration 0053, not here: done on every
 // read, it would turn fish back on for someone who later switched it off.

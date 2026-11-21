@@ -63,6 +63,8 @@ export interface DeviceExport {
   notes?: unknown;
   /** The name trainer's schedule (T-351): per species, when it is due again or that it is known. */
   nameTrainer?: Record<string, unknown>;
+  /** "Show me" (T-390): the kinds of species shown; null = everything. */
+  interests?: string[] | null;
 }
 
 type Unavailable = 'purchases' | 'household' | 'server';

@@ -16,8 +16,13 @@ describe('NotifChoices', () => {
     expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_NOTIF_PREFS, frequency: 'weekly' });
     await fireEvent.press(screen.getByText(tr('notif.window.evening')));
     expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_NOTIF_PREFS, window: 'evening' });
-    await fireEvent.press(screen.getByText(tr('notif.group.plant')));
-    expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_NOTIF_PREFS, groups: ['bird', 'mammal', 'fish', 'insect', 'other'] });
+  });
+
+  // T-390: the groups moved to Settings' "Show me", which applies to the whole app.
+  it('has no group choice of its own', async () => {
+    await render(<NotifChoices locale="en" prefs={DEFAULT_NOTIF_PREFS} onChange={jest.fn()} />);
+    expect(screen.queryByText(tr('notif.group.plant'))).toBeNull();
+    expect(screen.queryByText(tr('notif.groups'))).toBeNull();
   });
 
   it('names every option in Swedish too', async () => {
@@ -25,6 +30,5 @@ describe('NotifChoices', () => {
     const sv = createTranslator('sv');
     expect(screen.getByText(sv('notif.frequency.everyOtherDay'))).toBeTruthy();
     expect(screen.getByText(sv('notif.window.midday'))).toBeTruthy();
-    expect(screen.getByText(sv('notif.group.insect'))).toBeTruthy();
   });
 });

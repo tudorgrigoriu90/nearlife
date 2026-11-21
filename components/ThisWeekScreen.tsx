@@ -1,5 +1,6 @@
 import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { createTranslator, type Locale } from '../lib/i18n';
+import { createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
+import { shows, type Interests } from '../lib/interests';
 import { monthOf } from '../lib/season';
 import { thisWeek, type ThisWeekEntry } from '../lib/thisWeek';
 import { commonNameFor, contentFor } from '../lib/species/localized';
@@ -153,6 +154,8 @@ export default function ThisWeekScreen({
   onIdentify,
   onOpenSighting,
   month: monthProp,
+  interests = null,
+  onChangeInterests,
 }: {
   locale?: Locale;
   spottedIds?: ReadonlySet<string>;
@@ -178,6 +181,12 @@ export default function ThisWeekScreen({
   onOpenSighting?: () => void;
   /** The month shown; this month by default (tests pass one). */
   month?: Month;
+  /**
+   * "Show me" (T-390). The county list arrives already filtered (useThisWeek); the bundled preview
+   * is filtered here. When narrowed, a line says what is shown, with a way to change it.
+   */
+  interests?: Interests;
+  onChangeInterests?: () => void;
 }) {
   const tr = createTranslator(locale);
   const month = monthProp ?? monthOf(new Date());
@@ -192,9 +201,11 @@ export default function ThisWeekScreen({
           isNew: item.isNew,
         }))
       : mode === 'preview'
-        ? thisWeek(KRONOBERG_SPECIES, month, spottedIds ?? new Set()).map((e) =>
-            bundledRow(e, locale),
-          )
+        ? thisWeek(
+            KRONOBERG_SPECIES.filter((s) => shows(interests, s)),
+            month,
+            spottedIds ?? new Set(),
+          ).map((e) => bundledRow(e, locale))
         : [];
   const count = mode === 'ready' && live !== null ? live.total : rows.length;
   const region = mode !== 'preview' && regionName ? regionName : tr('region.kronoberg');
@@ -207,6 +218,20 @@ export default function ThisWeekScreen({
       ) : (
         <Text style={styles.subtitle}>{tr('thisWeek.subtitle', { region, count })}</Text>
       )}
+      {interests !== null ? (
+        <View style={styles.filterNote}>
+          <Text style={styles.filterText}>
+            {tr('interests.showing', {
+              groups: interests.map((g) => tr(`notif.group.${g}` as TranslationKey)).join(', '),
+            })}
+          </Text>
+          {onChangeInterests ? (
+            <Pressable onPress={onChangeInterests} accessibilityRole="button" hitSlop={8}>
+              <Text style={styles.filterChange}>{tr('interests.change')}</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
       {travel ? (
         <View style={styles.travel}>
           <Text style={styles.travelText}>{tr('travel.banner', { county: travel.county })}</Text>
@@ -309,6 +334,9 @@ export default function ThisWeekScreen({
 }
 
 const styles = StyleSheet.create({
+  filterNote: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
+  filterText: { fontSize: 13, color: '#566658' },
+  filterChange: { fontSize: 13, fontWeight: '600', color: '#336f3c', textDecorationLine: 'underline' },
   shift: { marginBottom: 12 },
   shiftTitle: { fontSize: 15, fontWeight: '700', color: '#22331f', marginBottom: 6 },
   shiftRow: { gap: 8 },

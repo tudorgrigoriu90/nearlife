@@ -22,6 +22,8 @@ export function useThisWeek(
   month: Month,
   spottedIds: ReadonlySet<string>,
   locale: Locale,
+  /** Species "Show me" leaves out (T-390), applied before the list is cut; null = none. */
+  hidden: ReadonlySet<string> | null = null,
 ): ThisWeekState {
   const [presence, setPresence] = useState<{ regionId: string; rows: RegionPresence[] } | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
@@ -53,7 +55,8 @@ export function useThisWeek(
   useEffect(() => {
     if (presence === null || presence.regionId !== regionId) return;
     let cancelled = false;
-    liveThisWeek(presence.rows, month, new Set(spottedKey ? spottedKey.split(',') : []), locale, (ids, loc) =>
+    const rows = hidden ? presence.rows.filter((r) => !hidden.has(r.speciesId)) : presence.rows;
+    liveThisWeek(rows, month, new Set(spottedKey ? spottedKey.split(',') : []), locale, (ids, loc) =>
       repo.describeSpecies(ids, loc),
     )
       .then((next) => {
@@ -63,7 +66,7 @@ export function useThisWeek(
     return () => {
       cancelled = true;
     };
-  }, [repo, presence, regionId, month, spottedKey, locale]);
+  }, [repo, presence, regionId, month, spottedKey, locale, hidden]);
 
   const retry = () => setAttempt((n) => n + 1);
   if (regionId === null) return { live: null, status: 'preview', retry };

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import NotifChoices from './NotifChoices';
+import InterestChoices from './InterestChoices';
+import type { Interests } from '../lib/interests';
 import type { NotifPrefs } from '../lib/notifPrefs';
 import appJson from '../app.json';
 import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
@@ -40,6 +42,8 @@ export default function SettingsScreen({
   onToggleEasyCatching,
   notifPrefs = null,
   onChangeNotifPrefs,
+  interests = null,
+  onChangeInterests,
   onMoveHome,
   onSelectSecondaryLocale,
   onExportData,
@@ -71,6 +75,9 @@ export default function SettingsScreen({
   /** Notification choices (T-342 · review F-03); null until read from the profile. */
   notifPrefs?: NotifPrefs | null;
   onChangeNotifPrefs?: (next: NotifPrefs) => void;
+  /** "Show me" (T-390): the kinds of species the whole app shows; null = everything. */
+  interests?: Interests;
+  onChangeInterests?: (next: Interests) => void;
   /** "I've moved" (T-349 · review F-09); with a backend and a home county only. */
   onMoveHome?: () => void;
   onToggleEasyCatching?: (on: boolean) => void;
@@ -132,6 +139,14 @@ export default function SettingsScreen({
         {restricted ? <Text style={styles.hint}>{tr('consent.restricted')}</Text> : null}
         {consent.notifications && notifPrefs && onChangeNotifPrefs ? (
           <NotifChoices locale={locale} prefs={notifPrefs} onChange={onChangeNotifPrefs} />
+        ) : null}
+
+        {onChangeInterests ? (
+          <>
+            <Text style={styles.sectionLabel}>{tr('interests.title')}</Text>
+            <InterestChoices locale={locale} interests={interests} onChange={onChangeInterests} />
+            <Text style={styles.hint}>{tr('interests.hint')}</Text>
+          </>
         ) : null}
 
         <Text style={styles.sectionLabel}>{tr('settings.language')}</Text>

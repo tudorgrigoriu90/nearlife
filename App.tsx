@@ -66,6 +66,9 @@ import MoveHomeScreen from './components/MoveHomeScreen';
 import { checkMove, SupabaseHomeMoveGateway } from './lib/homeMove';
 import { useFieldNotes } from './components/useFieldNotes';
 import { useSecondaryNames } from './components/useSecondaryNames';
+import { useInterests } from './components/useInterests';
+import { AsyncStorageInterestsStore } from './lib/interestsStore';
+import { eventShown, hiddenIds, shows } from './lib/interests';
 import { notesFor } from './lib/fieldNotes';
 import { AsyncStorageFieldNotesStore } from './lib/fieldNotesStore';
 import { ExpoNotePhotoFiles } from './lib/notePhotos';
@@ -323,6 +326,8 @@ const FIELD_NOTES_STORE = new AsyncStorageFieldNotesStore();
 const NOTE_PHOTOS = new ExpoNotePhotoFiles();
 // The name trainer's schedule (T-351) — on the phone only, erased with the account.
 const NAME_TRAINER_STORE = new AsyncStorageNameTrainerStore();
+// "Show me" (T-390): the kinds of species the app shows and notifies about.
+const INTERESTS_STORE = new AsyncStorageInterestsStore();
 
 // Moving home county once a year (T-349); null without a backend.
 let homeMoveGatewayInstance: SupabaseHomeMoveGateway | undefined;
@@ -474,6 +479,8 @@ export default function App() {
   // The phone's other language, offered at onboarding (T-343 · review F-05).
   const motherTongue = useMemo(() => motherTongueOffer(deviceLanguageTags()), []);
   const notifChoices = useNotifPrefs(notifPrefsGateway(), consent.notifications);
+  const interestsChoice = useInterests(INTERESTS_STORE, notifChoices);
+  const interests = interestsChoice.interests;
   const fieldNotes = useFieldNotes(FIELD_NOTES_STORE, NOTE_PHOTOS);
   const nameTrainer = useNameTrainer(NAME_TRAINER_STORE);
   const [showTrainer, setShowTrainer] = useState(false);
@@ -534,7 +541,12 @@ export default function App() {
   );
   const badgeSpecies = viewCounty !== null ? homeCatalogue.species : almanacSpecies;
   // Seasonal events from the shown county's own monthly records (T-357 · review F-17).
-  const thisWeekEvents = useMemo(() => seasonalEvents(almanacSpecies, monthOf(new Date())), [almanacSpecies]);
+  const thisWeekEvents = useMemo(
+    () => seasonalEvents(almanacSpecies, monthOf(new Date())).filter((id) => eventShown(interests, id, almanacSpecies)),
+    [almanacSpecies, interests],
+  );
+  // What "Show me" leaves out of This Week (T-390), by id; the county catalogue gives the groups.
+  const hiddenSpecies = useMemo(() => hiddenIds(interests, almanacSpecies), [interests, almanacSpecies]);
   const badgeListReady = viewCounty !== null ? !homeCatalogue.loading : !speciesLoading;
   // Newly earned badges are remembered once the stored ones have loaded (so an older date is never
   // overwritten), and saved; the first date stays.
@@ -552,6 +564,7 @@ export default function App() {
     monthOf(new Date()),
     spottedIds(collection.records),
     locale,
+    hiddenSpecies,
   );
   // Server-side device registration follows notification consent (T-201).
   usePushRegistration({
@@ -1019,6 +1032,7 @@ export default function App() {
       // Field notes, as text (T-347); no place is ever attached.
       notes: fieldNotes.notes,
       nameTrainer: nameTrainer.state,
+      interests,
     };
     const bundle = buildDataExport({
       exportedAt: new Date().toISOString(),
@@ -1103,6 +1117,7 @@ export default function App() {
     setRememberedBadges({});
     fieldNotes.reset();
     nameTrainer.reset();
+    interestsChoice.reset();
     setOnboarded(false);
   };
 
@@ -1413,7 +1428,7 @@ export default function App() {
         <NatureCalendarScreen
           locale={locale}
           county={countyName}
-          species={almanacSpecies}
+          species={almanacSpecies.filter((s) => shows(interests, s))}
           month={monthOf(new Date())}
           onOpenSpecies={(species) => {
             setShowCalendar(false);
@@ -1510,6 +1525,8 @@ export default function App() {
           onToggleEasyCatching={setEasyCatching}
           notifPrefs={notifChoices.prefs}
           onChangeNotifPrefs={notifChoices.change}
+          interests={interests}
+          onChangeInterests={interestsChoice.change}
           onMoveHome={homeMoveGateway() && hometown ? () => setShowMoveHome(true) : undefined}
           onToggleConsent={toggleConsent}
           onSelectLocale={(loc) => {
@@ -1801,6 +1818,8 @@ export default function App() {
             status={thisWeekLive.status}
             onRetry={thisWeekLive.retry}
             events={thisWeekEvents}
+            interests={interests}
+            onChangeInterests={() => setShowSettings(true)}
             regionName={viewCounty?.name ?? hometown?.name}
             spottedIds={spottedIds(collection.records)}
             onOpenCounties={

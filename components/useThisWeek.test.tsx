@@ -33,10 +33,11 @@ function Host(props: {
   repo: SpeciesRepository;
   regionId: string | null;
   spotted?: string[];
+  hidden?: ReadonlySet<string> | null;
   onValue?: (value: LiveThisWeek | null) => void;
 }) {
   const { onValue = record } = props;
-  const state = useThisWeek(props.repo, props.regionId, 6, new Set(props.spotted ?? []), 'sv');
+  const state = useThisWeek(props.repo, props.regionId, 6, new Set(props.spotted ?? []), 'sv', props.hidden ?? null);
   recordState(state);
   onValue(state.live);
   return <Text>host</Text>;
@@ -112,5 +113,24 @@ describe('useThisWeek', () => {
     await act(async () => retry?.());
     await waitFor(() => expect(status).toBe('ready'));
     warn.mockRestore();
+  });
+});
+
+// T-390: "Show me" filters before the list is cut to its top rows, so a filtered list stays full.
+describe('useThisWeek with a "Show me" choice', () => {
+  it('leaves out the hidden species, from the count too, without reloading presence', async () => {
+    const r = repo({
+      regionPresence: jest.fn(async () => [
+        { speciesId: 'pike', activeMonths: [6], occurrences: 9 },
+        { speciesId: 'fox', activeMonths: [6], occurrences: 30 },
+      ]),
+    });
+    const view = await render(<Host repo={r} regionId="SWE.13_1" />);
+    await waitFor(() => expect(latest?.items.map((i) => i.species.id)).toEqual(['fox', 'pike']));
+    const hidden = new Set(['fox']);
+    await view.rerender(<Host repo={r} regionId="SWE.13_1" hidden={hidden} />);
+    await waitFor(() => expect(latest?.items.map((i) => i.species.id)).toEqual(['pike']));
+    expect(latest?.total).toBe(1);
+    expect(r.regionPresence).toHaveBeenCalledTimes(1);
   });
 });
