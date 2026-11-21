@@ -255,6 +255,9 @@ export default function OnboardingFlow({
       );
     }
     case 'notificationPrePrompt':
+      // Under-13s are never asked (T-281): push stores a device token, which needs parental consent.
+      // Keyed: the step before may also be an OnMount, and React would reuse it without a re-run.
+      if (userAgePath === 'restricted') return <OnMount key="skip-notifications" run={advance} />;
       return (
         <OnboardingScaffold
           emoji="🔔"

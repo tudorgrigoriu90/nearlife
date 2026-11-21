@@ -1,4 +1,4 @@
-import { RevenueCatPurchaseGateway, type RevenueCatModule } from './purchases';
+import { RevenueCatPurchaseGateway, WITHHELD_PURCHASES, type RevenueCatModule } from './purchases';
 
 function fakeModule(over: Partial<RevenueCatModule> = {}): RevenueCatModule & { configure: jest.Mock } {
   return {
@@ -118,5 +118,16 @@ describe('RevenueCat follows the current account', () => {
     await gw.purchase('full_game');
     await gw.restore();
     expect(mod.logIn).not.toHaveBeenCalled();
+  });
+});
+
+// T-281 · review B-53: the under-13 path. Screens that sell hide their buy buttons when the gateway
+// is unavailable; this one also refuses if something calls it anyway.
+describe('WITHHELD_PURCHASES', () => {
+  it('is unavailable, lists nothing, and refuses to buy or restore', async () => {
+    expect(WITHHELD_PURCHASES.available()).toBe(false);
+    await expect(WITHHELD_PURCHASES.products()).resolves.toEqual([]);
+    await expect(WITHHELD_PURCHASES.purchase('full_game')).rejects.toThrow('withheld');
+    await expect(WITHHELD_PURCHASES.restore()).rejects.toThrow('withheld');
   });
 });

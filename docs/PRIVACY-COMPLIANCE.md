@@ -53,6 +53,16 @@ Three facts about this product make compliance load-bearing, not optional:
   app. With **no ads in the product at all** (§4), the sharpest COPPA/GDPR-K exposure is gone;
   what remains is minimal-data handling for minors — the age-gate routes under-threshold users
   to a restricted, minimal-data path.
+- **What the restricted path withholds (Director, 2026-11-21 · T-281):** analytics and crash
+  reports (T-089), push registration, email linking and sign-in, and purchases — each withheld
+  outright until a parental gate exists (v2, with kids mode). GDPR Art. 8 needs a parent's consent
+  for consent-based processing of a child's data, and each of these stores something new about the
+  child (a device token, an email address, a purchase record). Location stays: it is resolved on
+  the phone and only the county is kept. Enforced in `applyConsentChange` (analytics and
+  notifications refused; an account restricted earlier has them switched off at the next start),
+  Settings (no toggles, no email or Store rows), onboarding (no notification ask), the
+  out-of-free-catches sheet and Counties (no buy buttons; `WITHHELD_PURCHASES`). Joining a
+  parent's Family stays open: it adds no personal data and is how a child gets the Full Game.
 - A dedicated kids mode and the **Family plan are post-validation (v2)** — see
   [ECONOMY.md](ECONOMY.md). When Family ships, parental-consent flows must be designed then.
 

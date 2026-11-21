@@ -4378,7 +4378,7 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ B-52: `delete-account` deletes the RevenueCat customer when the account never bought
     anything (`revenueCatErasure`, needs `REVENUECAT_SECRET_KEY`); the policy says so, and that
     analytics ids are not linked to accounts, are reset on deletion and expire in 365 days.
-- **T-281 · Under-13 users: what the restricted path withholds** — *Director + Claude · S · `BLOCKED` (legal decision) · deps: T-089 · review B-53*
+- **T-281 · Under-13 users: what the restricted path withholds** — *Director + Claude · S · `DONE` · deps: T-089 · review B-53*
   - Today the age gate only withholds analytics; an under-13 user can still turn on notifications
     (a device token is stored), link an email and buy. GDPR Art. 8 needs parental consent for
     consent-based processing of a child's data.
@@ -4387,6 +4387,21 @@ document until it is started, when it takes the next free `T-###`.
     implements it in `applyConsentChange`, Settings and the Store, with a test per item.
   - Recommendation: withhold all three on the restricted path until a parental gate exists; the
     pull surface, collection and mission content stay fully usable.
+  - ✅ Director, 2026-11-21: take the recommendation; a parental gate is v2 if needed. Recorded in
+    PRIVACY-COMPLIANCE.md §3 and the privacy policy (a 🆕 paragraph, for the reviewer pass).
+  - ✅ Push: `RESTRICTED_KINDS` (lib/consent.ts) adds notifications to analytics, so
+    `applyConsentChange` refuses both; `restrictConsent` switches them off for an account
+    restricted before this, once consent and onboarding are loaded (which unregisters the device).
+    Onboarding skips the notification ask, and Settings never asks the OS.
+  - ✅ Email: Settings shows neither "Link an email" nor "I already have an account". (The welcome
+    screen's sign-in comes before the age question, for people who already have an account.)
+  - ✅ Purchases: no Store row in Settings; the out-of-free-catches and refused-catch sheets say
+    "Buying is turned off for accounts under 13" instead of opening the Store; Counties gets
+    `WITHHELD_PURCHASES` (unavailable, so no prices or buy buttons; its calls refuse). Family join
+    stays open.
+  - ✅ One Settings note replaces the analytics one: `consent.restricted` (en, sv).
+  - ✅ Tests: consent 4, purchases 1, onboarding 1, Settings 2, sheet 1, app 2 (Settings on the
+    restricted path; notifications switched off at the next start).
 
 - **T-282 · The sender sends once, reads every row; sandbox purchases are a setting** — *Claude · S · `DONE` (Director: LAUNCH-CHECKLIST Step 12.4 at launch) · deps: T-064, T-217 · review B-22, B-23, B-54*
   - ✅ B-22: `sendLogged` (lib/pushDispatch.ts) writes the `notification_log` row before sending;

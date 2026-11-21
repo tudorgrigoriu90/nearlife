@@ -3,7 +3,7 @@ import NotifChoices from './NotifChoices';
 import type { NotifPrefs } from '../lib/notifPrefs';
 import appJson from '../app.json';
 import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { CONSENT_KINDS, type ConsentKind, type ConsentState } from '../lib/consent';
+import { CONSENT_KINDS, RESTRICTED_KINDS, type ConsentKind, type ConsentState } from '../lib/consent';
 import { DEFAULT_DUAL_LANGUAGE, type DualLanguageSettings } from '../lib/dualLanguage';
 import { PRIVACY_POLICY_URL } from '../lib/legal';
 import { ALPHA_LOCALES, createTranslator, type Locale, type TranslationKey } from '../lib/i18n';
@@ -31,7 +31,7 @@ const LOCALE_KEY: Record<string, TranslationKey> = { en: 'lang.en', sv: 'lang.sv
 export default function SettingsScreen({
   locale = 'en',
   consent,
-  analyticsLocked = false,
+  restricted = false,
   dualLanguage = DEFAULT_DUAL_LANGUAGE,
   onToggleConsent,
   onSelectLocale,
@@ -56,8 +56,11 @@ export default function SettingsScreen({
 }: {
   locale?: Locale;
   consent: ConsentState;
-  /** Under-13 (age-gate, T-089): the analytics opt-in is withheld — minimal-data path. */
-  analyticsLocked?: boolean;
+  /**
+   * Under-13 (age-gate, T-089 · T-281): the minimal-data path. Analytics and notifications are not
+   * offered, and neither are email linking, sign-in or the Store.
+   */
+  restricted?: boolean;
   /** Mother-tongue dual display (F13.3) — off by default. */
   dualLanguage?: DualLanguageSettings;
   onToggleConsent: (kind: ConsentKind, value: boolean) => void;
@@ -94,8 +97,11 @@ export default function SettingsScreen({
   onDone: () => void;
 }) {
   const tr = createTranslator(locale);
-  // Minors are never offered analytics (T-089) — the toggle is removed, not just defaulted off.
-  const consentKinds = analyticsLocked ? CONSENT_KINDS.filter((k) => k !== 'analytics') : CONSENT_KINDS;
+  // Minors are never offered these (T-089 · T-281): the toggles are removed, not just defaulted off.
+  const consentKinds = restricted ? CONSENT_KINDS.filter((k) => !RESTRICTED_KINDS.includes(k)) : CONSENT_KINDS;
+  const linkEmail = restricted ? undefined : onLinkEmail;
+  const signIn = restricted ? undefined : onSignIn;
+  const openStore = restricted ? undefined : onOpenStore;
   // Second-language options: everything with content, minus the language the app is already in
   // (pairing a language with itself renders every line twice — rejected in setSecondaryLocale).
   const secondaryOptions = dualDisplayLocales().filter((loc) => loc !== locale);
@@ -123,7 +129,7 @@ export default function SettingsScreen({
           ))}
         </View>
         <Text style={styles.hint}>{tr('consent.hint')}</Text>
-        {analyticsLocked ? <Text style={styles.hint}>{tr('consent.analyticsLocked')}</Text> : null}
+        {restricted ? <Text style={styles.hint}>{tr('consent.restricted')}</Text> : null}
         {consent.notifications && notifPrefs && onChangeNotifPrefs ? (
           <NotifChoices locale={locale} prefs={notifPrefs} onChange={onChangeNotifPrefs} />
         ) : null}
@@ -218,8 +224,8 @@ export default function SettingsScreen({
           <>
             <Text style={styles.sectionLabel}>{tr('family.title')}</Text>
             <View style={styles.card}>
-              {onOpenStore ? (
-                <Pressable onPress={onOpenStore} accessibilityRole="button" style={styles.row}>
+              {openStore ? (
+                <Pressable onPress={openStore} accessibilityRole="button" style={styles.row}>
                   <Text style={styles.rowLabel}>{tr('settings.store')}</Text>
                   <Text style={styles.chevron}>›</Text>
                 </Pressable>
@@ -227,7 +233,7 @@ export default function SettingsScreen({
               <Pressable
                 onPress={onOpenFamily}
                 accessibilityRole="button"
-                style={[styles.row, onOpenStore ? styles.rowBorder : null]}
+                style={[styles.row, openStore ? styles.rowBorder : null]}
               >
                 <Text style={styles.rowLabel}>{tr('settings.family')}</Text>
                 <Text style={styles.chevron}>›</Text>
@@ -271,9 +277,9 @@ export default function SettingsScreen({
             <Text style={styles.rowLabel}>{tr('settings.privacyPolicy')}</Text>
             <Text style={styles.chevron}>↗</Text>
           </Pressable>
-          {onLinkEmail ? (
+          {linkEmail ? (
             <Pressable
-              onPress={onLinkEmail}
+              onPress={linkEmail}
               accessibilityRole="button"
               style={[styles.row, styles.rowBorder]}
             >
@@ -291,9 +297,9 @@ export default function SettingsScreen({
               <Text style={styles.chevron}>›</Text>
             </Pressable>
           ) : null}
-          {onSignIn ? (
+          {signIn ? (
             <Pressable
-              onPress={onSignIn}
+              onPress={signIn}
               accessibilityRole="button"
               style={[styles.row, styles.rowBorder]}
             >

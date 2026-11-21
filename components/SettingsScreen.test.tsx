@@ -159,3 +159,34 @@ describe('SettingsScreen notification choices', () => {
     expect(screen.queryByTestId('notif-choices')).toBeNull();
   });
 });
+
+// T-281 · review B-53: the restricted path withholds analytics, push, email and purchases.
+describe('SettingsScreen for an under-13', () => {
+  const all = {
+    onLinkEmail: jest.fn(),
+    onSignIn: jest.fn(),
+    onOpenStore: jest.fn(),
+    onOpenFamily: jest.fn(),
+  };
+
+  it('offers analytics, notifications, email and the Store to everyone else', async () => {
+    await render(<SettingsScreen {...renderSettings()} {...all} />);
+    expect(screen.getByText(tr('consent.analytics'))).toBeTruthy();
+    expect(screen.getByText(tr('consent.notifications'))).toBeTruthy();
+    expect(screen.getByText(tr('settings.linkEmail'))).toBeTruthy();
+    expect(screen.getByText(tr('signin.entry'))).toBeTruthy();
+    expect(screen.getByText(tr('settings.store'))).toBeTruthy();
+    expect(screen.queryByText(tr('consent.restricted'))).toBeNull();
+  });
+
+  it('withholds all four and says so, keeping location', async () => {
+    await render(<SettingsScreen {...renderSettings()} {...all} restricted />);
+    expect(screen.queryByText(tr('consent.analytics'))).toBeNull();
+    expect(screen.queryByText(tr('consent.notifications'))).toBeNull();
+    expect(screen.queryByText(tr('settings.linkEmail'))).toBeNull();
+    expect(screen.queryByText(tr('signin.entry'))).toBeNull();
+    expect(screen.queryByText(tr('settings.store'))).toBeNull();
+    expect(screen.getByText(tr('consent.location'))).toBeTruthy();
+    expect(screen.getByText(tr('consent.restricted'))).toBeTruthy();
+  });
+});

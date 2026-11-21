@@ -11,6 +11,7 @@ export default function FreeCatchSheet({
   onClose,
   onOpenStore,
   refusedName,
+  restricted = false,
 }: {
   locale?: Locale;
   /**
@@ -21,6 +22,8 @@ export default function FreeCatchSheet({
   onClose: () => void;
   /** Open the Store; without one (no purchases in this build) the sheet only informs. */
   onOpenStore?: () => void;
+  /** Under-13 (T-281): no purchases, so no Store; the sheet says why. */
+  restricted?: boolean;
 }) {
   const tr = createTranslator(locale);
   return (
@@ -34,7 +37,9 @@ export default function FreeCatchSheet({
         </Text>
         <Text style={styles.reassure}>{tr('paywall.freeMission')}</Text>
         <Text style={styles.reassure}>{tr('paywall.noAds')}</Text>
-        {onOpenStore ? (
+        {restricted ? (
+          <Text style={styles.soon}>{tr('paywall.restricted')}</Text>
+        ) : onOpenStore ? (
           <Pressable style={styles.cta} accessibilityRole="button" onPress={onOpenStore}>
             <Text style={styles.ctaText}>{tr('paywall.cta')}</Text>
           </Pressable>

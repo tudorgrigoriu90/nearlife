@@ -278,6 +278,7 @@ export const en = {
     'paywall.cta': 'See the Full Game',
     'paywall.later': 'Maybe later',
     'paywall.soon': 'Purchases arrive with the Full Game (coming soon).',
+    'paywall.restricted': 'Buying is turned off for accounts under 13.',
     // Helped tier — give/protect pledge (T-076)
     'card.pledge': 'I’ll do this',
     'pledge.title': 'You’re helping {name}',
@@ -308,7 +309,7 @@ export const en = {
     'notif.group.other': 'Everything else',
     'notif.hint': 'Never between 21 and 08. Turn notifications off above to stop them altogether.',
     'settings.language': 'Language',
-    'consent.analyticsLocked': 'Analytics stays off for accounts under 13.',
+    'consent.restricted': 'Accounts under 13 have no analytics, no notifications, no linked email and no purchases.',
     'settings.dataAttribution': 'Data & attribution',
     'attribution.gbif': 'Species data: GBIF.org and its contributing datasets.',
     'attribution.osm': 'Habitat & maps: © OpenStreetMap contributors.',
@@ -827,6 +828,7 @@ export const sv = {
     'paywall.cta': 'Skaffa fullversionen',
     'paywall.later': 'Kanske senare',
     'paywall.soon': 'Köp kommer med fullversionen (snart).',
+    'paywall.restricted': 'Köp är avstängda för konton under 13 år.',
     // Helped tier — give/protect pledge (T-076)
     'card.pledge': 'Jag gör detta',
     'pledge.title': 'Du hjälper {name}',
@@ -857,7 +859,7 @@ export const sv = {
     'notif.group.other': 'Allt annat',
     'notif.hint': 'Aldrig mellan 21 och 08. Stäng av notiser ovan för att stoppa dem helt.',
     'settings.language': 'Språk',
-    'consent.analyticsLocked': 'Analys är avstängd för konton under 13 år.',
+    'consent.restricted': 'Konton under 13 år har ingen analys, inga aviseringar, ingen kopplad e-post och inga köp.',
     'settings.dataAttribution': 'Data & källor',
     'attribution.gbif': 'Artdata: GBIF.org och dess bidragande dataset.',
     'attribution.osm': 'Habitat & kartor: © OpenStreetMap contributors.',

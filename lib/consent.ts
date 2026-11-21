@@ -31,19 +31,34 @@ export function setConsent(state: ConsentState, kind: ConsentKind, value: boolea
 }
 
 /**
- * A consent change, with the age gate applied (T-089/T-197).
+ * The consents an under-13 account never grants (T-089 analytics · T-281 notifications). Push
+ * stores a device token on the server, which is consent-based processing of a child's data (GDPR
+ * Art. 8) until a parental gate exists. Location stays: it is resolved on the phone and only the
+ * county leaves it.
+ */
+export const RESTRICTED_KINDS: readonly ConsentKind[] = ['analytics', 'notifications'];
+
+/**
+ * A consent change, with the age gate applied (T-089/T-197/T-281).
  *
  * Returns the *same* state object when the change is refused, so a caller can skip persisting a
- * no-op. The lock is deliberately one-way: a minor can always turn analytics **off**, because
- * trapping them with it on is the opposite of what a minimal-data path is for. Only analytics is
- * age-gated — location and notifications are functional consents the app asks for openly.
+ * no-op. The lock is deliberately one-way: a minor can always turn a restricted kind **off**,
+ * because trapping them with it on is the opposite of what a minimal-data path is for.
  */
 export function applyConsentChange(
   state: ConsentState,
   kind: ConsentKind,
   value: boolean,
-  analyticsLocked: boolean,
+  restricted: boolean,
 ): ConsentState {
-  if (analyticsLocked && kind === 'analytics' && value) return state;
+  if (restricted && value && RESTRICTED_KINDS.includes(kind)) return state;
   return setConsent(state, kind, value);
+}
+
+/** Every restricted kind off (T-281); the same object when they already are. */
+export function restrictConsent(state: ConsentState): ConsentState {
+  if (RESTRICTED_KINDS.every((kind) => !state[kind])) return state;
+  const next = { ...state };
+  for (const kind of RESTRICTED_KINDS) next[kind] = false;
+  return next;
 }

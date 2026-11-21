@@ -119,6 +119,12 @@ Sweden the age of digital consent is **13**. Users under that age are routed to 
 minimal-data path**. Because the app carries no ads, there is no ad-related data collection from
 anyone, minors included.
 
+🆕 **What the restricted path leaves out.** On that path the app never offers analytics or crash
+reports, notifications (so no device token is stored), linking or signing in with an email, or
+purchases. Everything else works the same: the species cards and all their help, collecting,
+catching within the free catches, and location, which is read on the phone so that only the
+county is kept.
+
 🆕 **Family households.** Joining a parent's Family with an invite code adds no personal data. The
 child's account is anonymous like everyone's, and the age rules above apply to each member on their
 own device. The owner cannot see a member's collection. Everyone keeps their own almanac.

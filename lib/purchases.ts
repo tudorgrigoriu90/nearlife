@@ -144,3 +144,14 @@ export class RevenueCatPurchaseGateway implements PurchaseGateway {
 export function revenueCatKey(): string {
   return process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY ?? '';
 }
+
+/**
+ * The under-13 path (T-281 · review B-53): no purchases until a parental gate exists. Screens
+ * that sell hide their buttons for an unavailable gateway; the calls refuse as a second line.
+ */
+export const WITHHELD_PURCHASES: PurchaseGateway = {
+  available: () => false,
+  products: async () => [],
+  purchase: () => Promise.reject(new Error('Purchases are withheld for accounts under 13')),
+  restore: () => Promise.reject(new Error('Purchases are withheld for accounts under 13')),
+};

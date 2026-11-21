@@ -193,3 +193,26 @@ describe('OnboardingFlow mother-tongue offer', () => {
     expect(screen.queryByText(createTranslator('en')('onboarding.motherTongue.yes'))).toBeNull();
   });
 });
+
+// T-281 · review B-53: an under-13 is never asked for notifications.
+describe('OnboardingFlow for an under-13', () => {
+  it('skips the notification ask and records no notification grant', async () => {
+    const { requestNotificationPermission } = jest.requireMock('../lib/permissions');
+    (requestNotificationPermission as jest.Mock).mockClear();
+    const onComplete = jest.fn<void, [OnboardingResult]>();
+    await render(<OnboardingFlow onComplete={onComplete} resolveHome={async () => ({ region: null, reason: 'no-fix' })} />);
+    await press(tr('onboarding.welcome.cta'));
+    await fireEvent.changeText(
+      await screen.findByPlaceholderText(tr('onboarding.age.placeholder')),
+      String(new Date().getFullYear() - 9),
+    );
+    await press(tr('onboarding.age.cta'));
+    await press(tr('onboarding.location.cta'));
+    await press(tr('onboarding.firstSpotted.cta'));
+    expect(screen.queryByText(tr('onboarding.notif.cta'))).toBeNull();
+    expect(requestNotificationPermission).not.toHaveBeenCalled();
+    expect(onComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ agePath: 'restricted', notificationOutcome: 'denied' }),
+    );
+  });
+});

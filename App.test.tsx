@@ -118,7 +118,8 @@ async function completeOnboarding(
   await press(tr('onboarding.age.cta'));
   await press(tr('onboarding.location.cta'));
   await press(tr('onboarding.hometown.cta', { region: 'Kronoberg' })); // location granted → confirm
-  await press(tr('onboarding.notif.cta'));
+  // An under-13 is never asked for notifications (T-281).
+  if (year !== MINOR_BIRTH_YEAR) await press(tr('onboarding.notif.cta'));
   // The first-spotted card shows the starter's always-free mission content (T-059: content is
   // passed in — guards against the card losing its content when the source became a prop).
   expect(await screen.findByText(tr('card.give'))).toBeTruthy();
@@ -206,9 +207,13 @@ describe('App', () => {
       await press(tr('nav.settings'), { exact: false });
       // The analytics toggle is removed entirely (not merely defaulted off), with an explanatory note.
       expect(screen.queryByText(tr('consent.analytics'))).toBeNull();
-      expect(screen.getByText(tr('consent.analyticsLocked'))).toBeTruthy();
-      // The other granular consents remain available.
+      expect(screen.getByText(tr('consent.restricted'))).toBeTruthy();
+      // T-281: push, email linking and purchases are withheld as well; location stays.
+      expect(screen.queryByText(tr('consent.notifications'))).toBeNull();
+      expect(screen.queryByText(tr('settings.linkEmail'))).toBeNull();
+      expect(screen.queryByText(tr('settings.store'))).toBeNull();
       expect(screen.getByText(tr('consent.location'))).toBeTruthy();
+      expect(JSON.parse((await AsyncStorage.getItem(CONSENT_STORAGE_KEY)) ?? '{}').notifications).not.toBe(true);
     },
     FLOW_TIMEOUT,
   );
@@ -290,7 +295,23 @@ describe('App', () => {
       await render(<App />);
       await press(tr('nav.settings'), { exact: false });
       expect(screen.queryByText(tr('consent.analytics'))).toBeNull();
-      expect(screen.getByText(tr('consent.analyticsLocked'))).toBeTruthy();
+      expect(screen.getByText(tr('consent.restricted'))).toBeTruthy();
+    },
+    FLOW_TIMEOUT,
+  );
+
+  it(
+    'switches off notifications an under-13 account had on before T-281, at the next start',
+    async () => {
+      await completeOnboarding(MINOR_BIRTH_YEAR);
+      await screen.unmount();
+      const stored = JSON.parse((await AsyncStorage.getItem(CONSENT_STORAGE_KEY)) ?? '{}');
+      await AsyncStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify({ ...stored, notifications: true }));
+      await render(<App />);
+      await screen.findByText(tr('thisWeek.honesty'));
+      await waitFor(async () =>
+        expect(JSON.parse((await AsyncStorage.getItem(CONSENT_STORAGE_KEY)) ?? '{}').notifications).toBe(false),
+      );
     },
     FLOW_TIMEOUT,
   );

@@ -1,6 +1,7 @@
 import {
   applyConsentChange,
   CONSENT_KINDS,
+  restrictConsent,
   DEFAULT_CONSENT,
   grant,
   hasConsent,
@@ -57,10 +58,17 @@ describe('applyConsentChange', () => {
     expect(applyConsentChange(on, 'analytics', false, true).analytics).toBe(false);
   });
 
-  it('does not restrict a minor on location or notifications', () => {
-    // Those are functional consents the app asks for openly; only analytics is age-gated.
+  it('lets a minor turn location on: the catalogue and catch spots need it, and it never leaves the phone', () => {
     expect(applyConsentChange(off, 'location', true, true).location).toBe(true);
-    expect(applyConsentChange(off, 'notifications', true, true).notifications).toBe(true);
+  });
+
+  // T-281 · review B-53: push stores a device token, which is consent-based processing.
+  it('refuses to enable notifications for a minor', () => {
+    expect(applyConsentChange(off, 'notifications', true, true)).toBe(off);
+  });
+
+  it('lets a minor turn notifications off', () => {
+    expect(applyConsentChange(on, 'notifications', false, true).notifications).toBe(false);
   });
 
   it('returns the same state object identity-wise unchanged when refused, so no save is triggered', () => {
@@ -72,5 +80,21 @@ describe('applyConsentChange', () => {
     const before = { ...off };
     applyConsentChange(off, 'location', true, false);
     expect(off).toEqual(before);
+  });
+});
+
+// T-281: an account that was restricted before the rule existed may still have them on.
+describe('restrictConsent', () => {
+  it('turns analytics and notifications off and keeps location', () => {
+    expect(restrictConsent({ location: true, notifications: true, analytics: true })).toEqual({
+      location: true,
+      notifications: false,
+      analytics: false,
+    });
+  });
+
+  it('returns the same object when nothing changes, so no save is triggered', () => {
+    const state: ConsentState = { location: true, notifications: false, analytics: false };
+    expect(restrictConsent(state)).toBe(state);
   });
 });

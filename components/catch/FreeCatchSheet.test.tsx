@@ -22,3 +22,14 @@ describe('FreeCatchSheet for a refused catch', () => {
     expect(screen.getByText(tr('paywall.noAds'))).toBeTruthy();
   });
 });
+
+// T-281 · review B-53: no purchase path for an under-13; the sheet says why, and still reassures.
+describe('FreeCatchSheet for an under-13', () => {
+  it('offers no Store and explains, keeping the mission reassurance', async () => {
+    await render(<FreeCatchSheet onClose={() => {}} onOpenStore={() => {}} restricted />);
+    expect(screen.queryByText(tr('paywall.cta'))).toBeNull();
+    expect(screen.queryByText(tr('paywall.soon'))).toBeNull();
+    expect(screen.getByText(tr('paywall.restricted'))).toBeTruthy();
+    expect(screen.getByText(tr('paywall.freeMission'))).toBeTruthy();
+  });
+});

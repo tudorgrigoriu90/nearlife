@@ -46,6 +46,7 @@ import {
 import { useTracker } from './components/useTracker';
 import {
   applyConsentChange,
+  restrictConsent,
   DEFAULT_CONSENT,
   hasConsent,
   type ConsentKind,
@@ -130,6 +131,7 @@ import {
   RevenueCatPurchaseGateway,
   loadRevenueCat,
   revenueCatKey,
+  WITHHELD_PURCHASES,
   type PurchaseGateway,
 } from './lib/purchases';
 import { TrackingPurchaseGateway } from './lib/salesFunnel';
@@ -476,8 +478,11 @@ export default function App() {
   const [showTrainer, setShowTrainer] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showMoveHome, setShowMoveHome] = useState(false);
-  // Under-13 (age-gate, T-089) → minimal-data path: behavioural analytics is never offered.
-  const [analyticsLocked, setAnalyticsLocked] = useState(false);
+  // Under-13 (age-gate, T-089 · T-281) → minimal-data path: no analytics, notifications, linked
+  // email or purchases. The ref is what consent changes read: onboarding sets the path and records
+  // its consents in the same handler, before a re-render could refresh a closure.
+  const [restricted, setRestricted] = useState(false);
+  const restrictedRef = useRef(false);
   const track = useTracker(consent);
   // Crash reports follow the analytics consent, on and off (T-100).
   const crashReporter = useMemo(
@@ -711,6 +716,7 @@ export default function App() {
         locale={locale}
         refusedName={refusedNotice.name}
         onClose={closeRefused}
+        restricted={restricted}
         onOpenStore={
           hasSupabaseConfig()
             ? () => {
@@ -735,13 +741,25 @@ export default function App() {
     // vanishing without a test going red. It returns the same object when it refuses, so a
     // blocked change costs no write.
     const current = consentRef.current;
-    const next = applyConsentChange(current, kind, value, analyticsLocked);
+    const next = applyConsentChange(current, kind, value, restrictedRef.current);
     if (next === current) return;
     consentRef.current = next;
     // Persist every change so the choice survives a restart (GDPR consent record, T-088).
     setConsentState(next);
     void CONSENT_STORE.save(next);
   };
+
+  // An under-13 account restricted before T-281 may still have notifications on: switch them off
+  // once both records are loaded, which also unregisters the device.
+  useEffect(() => {
+    if (!consentLoaded || !restricted) return;
+    const current = consentRef.current;
+    const next = restrictConsent(current);
+    if (next === current) return;
+    consentRef.current = next;
+    setConsentState(next);
+    void CONSENT_STORE.save(next);
+  }, [consentLoaded, restricted]);
 
   // Notifications switched off in system settings switch the app's consent off too (T-300 ·
   // review B-33), which unregisters the device.
@@ -800,6 +818,7 @@ export default function App() {
     // it registers the device for pushes the phone then silently drops — the user believes they
     // opted in and nothing ever arrives. Already granted returns at once, with no dialog.
     if (kind === 'notifications' && value) {
+      if (restrictedRef.current) return; // never an OS ask on the under-13 path (T-281)
       void requestNotificationPermission().then((outcome) => {
         if (outcome === 'granted') applyConsent(kind, true);
       });
@@ -831,7 +850,8 @@ export default function App() {
     void ONBOARDING_STORE.load().then((record) => {
       if (cancelled) return;
       if (record !== null) {
-        setAnalyticsLocked(record.agePath === 'restricted');
+        restrictedRef.current = record.agePath === 'restricted';
+        setRestricted(restrictedRef.current);
         setOnboarded(true);
       }
       setOnboardingLoaded(true);
@@ -1063,7 +1083,8 @@ export default function App() {
     setViewCounty(null);
     setTab('thisWeek');
     setConsentState(DEFAULT_CONSENT);
-    setAnalyticsLocked(false);
+    restrictedRef.current = false;
+    setRestricted(false);
     setLocaleOverride(null);
     setDualLanguage(DEFAULT_DUAL_LANGUAGE);
     setHometown(null);
@@ -1206,7 +1227,8 @@ export default function App() {
           // A locked hometown from an earlier session stands even if location is denied this time.
           if (home !== null) setHometown(home);
           void ONBOARDING_STORE.save({ agePath });
-          setAnalyticsLocked(agePath === 'restricted');
+          restrictedRef.current = agePath === 'restricted';
+          setRestricted(restrictedRef.current);
           // "Turn on nudges" + an OS grant is the notification opt-in (T-201).
           if (notificationOutcome === 'granted') applyConsent('notifications', true);
           // Allowing location in onboarding is the location opt-in (T-272 · review B-08).
@@ -1246,7 +1268,7 @@ export default function App() {
           locale={locale}
           homeId={hometown?.id ?? null}
           entitlements={entitlements}
-          gateway={purchases}
+          gateway={restricted ? WITHHELD_PURCHASES : purchases}
           onView={(county) => {
             setViewCounty(county.id === hometown?.id ? null : county);
             // Land on that county's This Week, wherever Counties was opened from.
@@ -1471,7 +1493,7 @@ export default function App() {
         <SettingsScreen
           locale={locale}
           consent={consent}
-          analyticsLocked={analyticsLocked}
+          restricted={restricted}
           dualLanguage={dualLanguage}
           easyCatching={easyCatching}
           onToggleEasyCatching={setEasyCatching}
@@ -1689,6 +1711,7 @@ export default function App() {
           <FreeCatchSheet
             locale={locale}
             onClose={() => setPaywall(false)}
+            restricted={restricted}
             onOpenStore={
               hasSupabaseConfig()
                 ? () => {
