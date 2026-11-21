@@ -4467,10 +4467,11 @@ document until it is started, when it takes the next free `T-###`.
     in `eslint.config.js`. The other four are fixed. Tests: 9 (`__tests__/ciGate.test.js`).
   - Secret scanning and push protection are repository settings → T-290 (Director).
 
-- **T-290 · Turn on secret scanning and push protection** — *Director · XS · `TODO` · deps: — · review I-16, B-58*
+- **T-290 · Turn on secret scanning and push protection** — *Director · XS · `DONE` · deps: — · review I-16, B-58*
   - GitHub → the repository → Settings → Code security: enable **Secret scanning** and **Push
     protection**. Then confirm here, and Claude records it. (Claude has no tool that changes
     repository settings.)
+  - ✅ Director, 2026-11-21: secret scanning and push protection are on.
 
 - **T-291 · CI green again: coverage back above the floors** — *Claude · XS · `DONE` · deps: T-289*
   - CI was red from T-287 to T-289: tests passed, but global coverage had slipped to 89.62 %
