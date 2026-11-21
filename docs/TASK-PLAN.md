@@ -5369,12 +5369,17 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ B-21: `RevenueCatPurchaseGateway` calls `logIn(newId)` before a purchase or restore whenever
     the Supabase user differs from the one it acts for. Tests: 6 sign-in core, 2 screen, 2
     purchases.
-- **T-272 · Location consent that means what it says** — *Claude · S · `TODO` · deps: T-088, T-090 · review B-08, B-09, B-19*
+- **T-272 · Location consent that means what it says** — *Claude · S · `DONE` · deps: T-088, T-090 · review B-08, B-09, B-19*
   - Granting location in onboarding sets the consent; the Settings switch asks the OS when turned
     on and stops every location read when turned off.
   - A user in preview mode can set their home county later, from This Week and from Settings; the
     catch screen can ask for the permission.
   - Preview mode is look-only, as its comment says, or the Director records that it is not.
+  - ✅ Built in cebfeaa (2026-11-18; CI fix 2ad1ade); this entry was not updated then (found
+    2026-11-21). Onboarding's grant is the consent; the Settings switch asks the OS when turned on
+    and finds the home county; every location read outside onboarding goes through the consent
+    (`lib/locationAccess.ts`); the preview banner, a Settings row and the catch screen's GPS-off
+    state lead to the permission and the home county; preview mode is look-only.
 - **T-273 · Catch tip and pledge confirmation for every species** — *Claude · XS · `DONE` · deps: T-059 · review B-10*
   - Both screens take their text from the species repository, not the bundled 54.
   - ✅ `ProtectTip` and `PledgeConfirm` take the content the card loaded (`content` prop; App
