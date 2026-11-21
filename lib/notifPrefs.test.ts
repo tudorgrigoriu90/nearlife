@@ -39,7 +39,8 @@ describe('notification choices', () => {
     expect(MIN_INTERVAL_HOURS).toEqual({ daily: 20, everyOtherDay: 44, weekly: 164 });
   });
 
-  it('files every species group under one of the five choices', () => {
+  it('files every species group under one of the six choices; fish has its own (T-389)', () => {
+    expect(prefGroupOf('fish')).toBe('fish');
     expect(prefGroupOf('bird')).toBe('bird');
     expect(prefGroupOf('fungus')).toBe('other');
     expect(prefGroupOf('amphibian')).toBe('other');
@@ -60,8 +61,8 @@ describe('groupOfRow', () => {
 
 describe('toggleGroup', () => {
   const all = { frequency: 'daily' as const, window: null, groups: null };
-  it('turning one off from "all" keeps the other four', () => {
-    expect(toggleGroup(all, 'plant').groups).toEqual(['bird', 'mammal', 'insect', 'other']);
+  it('turning one off from "all" keeps the other five', () => {
+    expect(toggleGroup(all, 'plant').groups).toEqual(['bird', 'mammal', 'fish', 'insect', 'other']);
   });
   it('turning the last missing one back on is "all" again', () => {
     expect(toggleGroup(toggleGroup(all, 'plant'), 'plant').groups).toBeNull();
@@ -69,5 +70,14 @@ describe('toggleGroup', () => {
   it('never turns off the last group: that would be "never", which is the consent switch', () => {
     const one = { ...all, groups: ['bird' as const] };
     expect(toggleGroup(one, 'bird')).toBe(one);
+  });
+});
+
+// T-389: the one-time carry-over of "other" to fish is in migration 0053, not here: done on every
+// read, it would turn fish back on for someone who later switched it off.
+describe('fish is a choice of its own', () => {
+  it('is read like any other group', () => {
+    expect(parseNotifPrefs({ groups: ['bird', 'other'] }).groups).toEqual(['bird', 'other']);
+    expect(parseNotifPrefs({ groups: ['fish'] }).groups).toEqual(['fish']);
   });
 });

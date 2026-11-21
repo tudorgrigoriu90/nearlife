@@ -5426,6 +5426,16 @@ document until it is started, when it takes the next free `T-###`.
   - Director to check on the phone with the next build (T-141): if a photo still misses its subject,
     the cause is the photo's own framing, which T-381's mistake reports would catch.
 
+- **T-389 · Fish is a group of its own** — *Claude · XS · `DONE` · deps: T-341, T-342*
+  - Director, 2026-11-21: the notification groups had no fish. Fish were inside "Everything else"
+    with amphibians, reptiles, spiders and snails.
+  - ✅ `PREF_GROUPS` adds `fish` (en "Fish", sv "Fiskar"); migration 0053
+    (`20261121000003_notif_prefs_fish.sql`) lets the check accept it and, once, adds fish to every
+    stored choice that had "Everything else", so nobody stops hearing about fish because of the
+    split. Done in SQL, not on each read, which would turn fish back on after the user turned it
+    off. The sender files a fish under `fish` from the next Edge Function deploy.
+  - ✅ Tests: rules 2, parity (against 0053), Settings 1, real Postgres 1.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code

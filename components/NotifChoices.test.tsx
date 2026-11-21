@@ -17,7 +17,7 @@ describe('NotifChoices', () => {
     await fireEvent.press(screen.getByText(tr('notif.window.evening')));
     expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_NOTIF_PREFS, window: 'evening' });
     await fireEvent.press(screen.getByText(tr('notif.group.plant')));
-    expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_NOTIF_PREFS, groups: ['bird', 'mammal', 'insect', 'other'] });
+    expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_NOTIF_PREFS, groups: ['bird', 'mammal', 'fish', 'insect', 'other'] });
   });
 
   it('names every option in Swedish too', async () => {

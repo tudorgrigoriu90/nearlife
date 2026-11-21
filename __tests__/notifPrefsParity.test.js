@@ -10,6 +10,8 @@ const { join } = require('path');
 const ROOT = join(__dirname, '..');
 const ts = readFileSync(join(ROOT, 'lib', 'notifPrefs.ts'), 'utf8');
 const sql = readFileSync(join(ROOT, 'supabase', 'migrations', '20261119000009_notif_prefs.sql'), 'utf8');
+// The groups the check accepts, as last redefined (T-389 added fish).
+const validSql = readFileSync(join(ROOT, 'supabase', 'migrations', '20261121000003_notif_prefs_fish.sql'), 'utf8');
 
 const list = (s) => s.split(',').map((x) => x.trim().replace(/['"]/g, '')).filter(Boolean);
 
@@ -32,7 +34,7 @@ describe('notification choices: SQL and TypeScript agree', () => {
 
   it('on the allowed frequencies, windows and groups', () => {
     for (const name of ['FREQUENCIES', 'SEND_WINDOWS', 'PREF_GROUPS']) {
-      for (const v of list(new RegExp(`${name} = \\[([^\\]]*)\\]`).exec(ts)[1])) expect(sql).toContain(`'${v}'`);
+      for (const v of list(new RegExp(`${name} = \\[([^\\]]*)\\]`).exec(ts)[1])) expect(validSql).toContain(`'${v}'`);
     }
   });
 });

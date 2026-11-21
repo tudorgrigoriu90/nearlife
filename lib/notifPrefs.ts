@@ -9,7 +9,7 @@ import { GROUP_BY_TAXON, type SpeciesGroup } from './species/group';
 
 export const FREQUENCIES = ['daily', 'everyOtherDay', 'weekly'] as const;
 export const SEND_WINDOWS = ['morning', 'midday', 'evening'] as const;
-export const PREF_GROUPS = ['bird', 'mammal', 'insect', 'plant', 'other'] as const;
+export const PREF_GROUPS = ['bird', 'mammal', 'fish', 'insect', 'plant', 'other'] as const;
 
 export type Frequency = (typeof FREQUENCIES)[number];
 export type SendWindow = (typeof SEND_WINDOWS)[number];

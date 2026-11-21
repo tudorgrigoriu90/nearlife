@@ -8,7 +8,7 @@ import { GROUP_BY_TAXON } from './species/group.js';
 // user without a registered device gets nothing whatever these say. Quiet hours 21–08 never move.
 export const FREQUENCIES = ['daily', 'everyOtherDay', 'weekly'];
 export const SEND_WINDOWS = ['morning', 'midday', 'evening'];
-export const PREF_GROUPS = ['bird', 'mammal', 'insect', 'plant', 'other'];
+export const PREF_GROUPS = ['bird', 'mammal', 'fish', 'insect', 'plant', 'other'];
 export const DEFAULT_NOTIF_PREFS = { frequency: 'daily', window: null, groups: null };
 /**
  * Minimum hours between two sends. A gap rather than a count: "every other day" and "weekly" then

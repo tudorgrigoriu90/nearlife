@@ -98,3 +98,22 @@ def test_the_choices_reach_the_sender_and_no_choice_is_today(db):
     got = due(db, "2027-01-15 19:30+00")
     assert got[u] == {"groups": ["plant"]}
     assert got[plain] == {}
+
+
+# T-389: fish became a group of its own; until then it was inside "other".
+def test_fish_is_a_group_and_other_brings_it_along_once(db):
+    keeps_other = make_user(db, {"groups": ["bird", "other"]})
+    without_other = make_user(db, {"groups": ["bird"]})
+    db.execute((MIGRATIONS_DIR / "20261121000003_notif_prefs_fish.sql").read_text(encoding="utf-8"))
+    groups = dict(
+        db.execute(
+            "select user_id::text, notif_prefs->'groups' from public.profiles where user_id in (%s, %s)",
+            (keeps_other, without_other),
+        ).fetchall()
+    )
+    assert groups[keeps_other] == ["bird", "other", "fish"]
+    assert groups[without_other] == ["bird"]
+    # Fish is accepted from now on; an unknown group still is not.
+    db.execute("update public.profiles set notif_prefs = '{\"groups\": [\"fish\"]}' where user_id = %s", (without_other,))
+    with pytest.raises(psycopg.errors.CheckViolation):
+        db.execute("update public.profiles set notif_prefs = '{\"groups\": [\"dragon\"]}' where user_id = %s", (without_other,))
