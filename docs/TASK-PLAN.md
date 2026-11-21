@@ -5406,7 +5406,16 @@ document until it is started, when it takes the next free `T-###`.
     Full Game to `isDepthUnlocked`, which opens every level; since T-283 they are labelled progress,
     and the Full Game is not progress.
   - ✅ The pills count play only (spotted 2, caught 3, helped 4, all three 5); the Full Game still
-    opens the content it opens (the bird song, T-347). Tests: 2.
+    opens the content it opens (the bird song, T-249). Tests: 2.
+
+- **T-387 · "Often confused with" in the second language** — *Claude · S · `DONE` · deps: T-352*
+  - Director, 2026-11-21: with dual display on, the card's title had both languages but the
+    lookalikes only the first. The catalogue is read in the app language only.
+  - ✅ `useSecondaryNames` reads each lookalike's name in the second language (at most three
+    reads, the same `getContentInLocale` the card uses for its own); a failed read leaves that name
+    out. `ConfusedWith` shows it under the first name, in its own writing direction, and in the
+    accessibility label; never when it repeats the first name or dual display is off.
+  - ✅ Tests: hook 2, component 2.
 
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs

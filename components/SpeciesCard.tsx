@@ -72,6 +72,7 @@ export default function SpeciesCard({
   pickNotePhoto,
   notePhotoUri,
   lookalikes = [],
+  lookalikeNames = {},
   onOpenSpecies,
   nearbyNote,
   soundSource,
@@ -125,6 +126,8 @@ export default function SpeciesCard({
   notePhotoUri?: (name: string) => string;
   /** "Often confused with" (T-352 · review F-13): `confusedWith`'s picks, each opening its card. */
   lookalikes?: Species[];
+  /** The lookalikes' names in the second language, by id (T-387). */
+  lookalikeNames?: Record<string, string>;
   onOpenSpecies?: (species: Species) => void;
   /** Small caption under the find-nearby CTA — e.g. the free-catch counter (T-034). */
   nearbyNote?: string;
@@ -436,7 +439,15 @@ export default function SpeciesCard({
           onClose={() => setSharing(false)}
         />
 
-        {onOpenSpecies ? <ConfusedWith locale={locale} species={lookalikes} onOpen={onOpenSpecies} /> : null}
+        {onOpenSpecies ? (
+          <ConfusedWith
+            locale={locale}
+            species={lookalikes}
+            onOpen={onOpenSpecies}
+            secondaryLocale={secondaryLocale}
+            secondaryNames={lookalikeNames}
+          />
+        ) : null}
 
         {onReportMistake ? (
           <Pressable onPress={onReportMistake} accessibilityRole="button" style={styles.report}>

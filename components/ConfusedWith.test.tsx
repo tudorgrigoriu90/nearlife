@@ -22,3 +22,27 @@ describe('ConfusedWith', () => {
     expect(screen.queryByText(tr('card.confusedWith'))).toBeNull();
   });
 });
+
+// T-387: with dual display on, each lookalike also carries its name in the second language.
+describe('ConfusedWith in two languages', () => {
+  it('shows the second-language name under the first, where there is one', async () => {
+    await render(
+      <ConfusedWith
+        locale="en"
+        species={[sp('a', 'Linnet'), sp('b', 'Twite')]}
+        onOpen={() => undefined}
+        secondaryLocale="ro"
+        secondaryNames={{ a: 'Cânepar' }}
+      />,
+    );
+    expect(screen.getByText('Linnet')).toBeTruthy();
+    expect(screen.getByText('Cânepar')).toBeTruthy();
+    expect(screen.getByLabelText('Linnet, Cânepar')).toBeTruthy();
+    expect(screen.getByLabelText('Twite')).toBeTruthy();
+  });
+
+  it('shows one name when the second language is off', async () => {
+    await render(<ConfusedWith locale="en" species={[sp('a', 'Linnet')]} onOpen={() => undefined} secondaryNames={{ a: 'Cânepar' }} />);
+    expect(screen.queryByText('Cânepar')).toBeNull();
+  });
+});

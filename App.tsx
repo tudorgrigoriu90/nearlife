@@ -65,6 +65,7 @@ import { AsyncStorageEasyModeStore } from './lib/easyModeStore';
 import MoveHomeScreen from './components/MoveHomeScreen';
 import { checkMove, SupabaseHomeMoveGateway } from './lib/homeMove';
 import { useFieldNotes } from './components/useFieldNotes';
+import { useSecondaryNames } from './components/useSecondaryNames';
 import { notesFor } from './lib/fieldNotes';
 import { AsyncStorageFieldNotesStore } from './lib/fieldNotesStore';
 import { ExpoNotePhotoFiles } from './lib/notePhotos';
@@ -586,6 +587,13 @@ export default function App() {
   const cardThreat = cardSpecies?.iucn;
   const cardThreatSe = cardSpecies?.redlistSe;
   const cardLegalStatus = cardSpecies?.legalStatus;
+  // "Often confused with" and its names in the second language (T-352, T-387).
+  const cardLookalikes = useMemo(
+    () => (selected ? confusedWith(selected, almanacSpecies) : []),
+    [selected, almanacSpecies],
+  );
+  const lookalikeIds = useMemo(() => cardLookalikes.map((s) => s.id), [cardLookalikes]);
+  const lookalikeNames = useSecondaryNames(speciesRepo, lookalikeIds, secondaryLocale);
   const cardProtection = cardSpecies?.protection
     ? { level: cardSpecies.protection, local: cardSpecies.protectionLocal === true }
     : undefined;
@@ -1696,7 +1704,8 @@ export default function App() {
           onAddNote={(date, text, photo) => fieldNotes.add(selected.id, date, text, photo)}
           pickNotePhoto={pickNotePhoto}
           notePhotoUri={(name) => NOTE_PHOTOS.uri(name)}
-          lookalikes={confusedWith(selected, almanacSpecies)}
+          lookalikes={cardLookalikes}
+          lookalikeNames={lookalikeNames}
           onOpenSpecies={setSelected}
           onPledge={(species, kind) => {
             // Helped tier: one-tap honor-system pledge (GDD §5) → mark Helped + confirm.
