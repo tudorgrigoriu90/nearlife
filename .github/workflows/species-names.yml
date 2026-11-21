@@ -41,7 +41,13 @@ jobs:
 
       - run: pip install -r pipeline/requirements.txt
 
+      # T-373: one species under two GBIF keys is merged into the accepted key first, so the
+      # steps below fill one card, not two.
+      - name: Merge duplicate species (T-373)
+        run: python pipeline/merge_duplicates.py --apply
+
       - name: Fill names
+        if: always()
         run: python pipeline/build_wikidata_names.py --load
 
       - name: Resolve species filed under another name (T-260)

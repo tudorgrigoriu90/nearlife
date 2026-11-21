@@ -112,6 +112,7 @@ def main() -> None:
 
     import psycopg  # imported lazily so the module imports without the DB driver (tests/CLI help)
 
+    from gbif.aliases import apply_aliases
     from gbif.connect import connection_hint
 
     datasets = load_datasets()
@@ -136,6 +137,12 @@ def main() -> None:
         existing = {int(k): i for k, i in cur.fetchall()}
         species_rows, presence_rows = adopt_existing_ids(species_rows, presence_rows, existing)
         print(f"adopted {sum(1 for r in species_rows if not r['id'].startswith('gbif:'))} curated ids")
+        # Merged duplicates (T-373): GBIF still serves both keys, so fold the alias into the
+        # accepted species again before writing, or this load would split them once more.
+        cur.execute("select alias_id, species_id from public.species_aliases")
+        aliases = dict(cur.fetchall())
+        species_rows, presence_rows = apply_aliases(species_rows, presence_rows, aliases)
+        print(f"applied {len(aliases)} species aliases")
 
         # The annual refresh runs unattended (T-172), so the sanity check that a person would
         # have applied has to be automatic. Refuse a load that arrives with far less data than the

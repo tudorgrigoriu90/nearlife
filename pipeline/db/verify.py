@@ -102,6 +102,9 @@ EXPECTED: dict[str, str] = {
     "a code naming Family is refused": "ok",
     "no hybrid in the catalogue": "ok",
     "no two catalogue species share a photo": "ok",
+    # T-373: duplicates merged into GBIF's accepted key; only the service role may merge.
+    "no two catalogue species share a scientific name": "ok",
+    "users cannot merge species": "permission denied",
     "curated birds sit on the real species": "ok",
     "no summer migrant is active in winter": "ok",
     "a collection row for an unknown species is refused": "violates foreign key",
@@ -630,6 +633,12 @@ def run_catalogue_checks(cur) -> dict[str, str]:
           "select case when count(*) = 0 then 'ok' else 'SHARED: ' || count(*) end from ("
           " select m.source_url from public.species_media m join public.species s on s.id = m.species_id"
           " where s.in_catalogue and m.source_url is not null group by m.source_url having count(*) > 1) d")
+    _step(cur, results, "no two catalogue species share a scientific name",
+          "select case when count(*) = 0 then 'ok' else 'DUPLICATES: ' || string_agg(scientific_name, ', ') end from ("
+          " select scientific_name from public.species where in_catalogue group by 1 having count(*) > 1) d")
+    cur.execute("set local role authenticated")
+    _step(cur, results, "users cannot merge species", "select public.merge_species('gbif:1', 'gbif:2')")
+    cur.execute("reset role")
     _step(cur, results, "curated birds sit on the real species",
           "select case when count(*) = 3 then 'ok' else 'WRONG: ' || count(*) end from public.species "
           "where (id, gbif_key) in (('mallard', 9761484), ('blue-tit', 2487879), ('whooper-swan', 2498347))")

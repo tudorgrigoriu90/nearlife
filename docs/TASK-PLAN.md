@@ -5288,7 +5288,7 @@ document until it is started, when it takes the next free `T-###`.
     in every place the group glyph appears. On This Week a name or detail line that is the
     scientific name is set in italics, as field guides print it, so it is not read as a common
     name. Test 1.
-- **T-373 · Duplicate species in the catalogue** — *Claude · S · `TODO` · deps: —*
+- **T-373 · Duplicate species in the catalogue** — *Claude · S · `IN-PROGRESS` · deps: —*
   - 19 scientific names appear twice among catalogue species (38 rows, 2026-11-20), e.g. *Huperzia
     selago* (gbif:8190643 accepted, gbif:2688495 "doubtful" in GBIF), *Carex capitata*,
     *Glareola nordmanni*: two cards for one species, with records split between them.
@@ -5296,6 +5296,19 @@ document until it is started, when it takes the next free `T-###`.
     one, collection rows re-pointed (a user who spotted both keeps one), the other left out of the
     catalogue; and make the catalogue build skip doubtful keys so it cannot recur. Real Postgres
     tests for the re-pointing; a live count before and after.
+  - ✅ Migration 0051 (`20261121000001_species_aliases.sql`): `merge_species(from, into)`, service
+    role only. Collection rows are re-pointed; a user with both keeps one row, the one holding the
+    catch, re-pointed rather than re-dated, because writing `caught_at` would fire the free-catch
+    trigger and spend a catch twice. Recognitions, send log and reports follow; presence adds up
+    per county (they are different records); content and photo fill only what the accepted key
+    lacks; the old key leaves the catalogue. `species_aliases` records the pair, and a trigger
+    sends a phone's later write for the old id to the new one. Real Postgres: 6 tests.
+  - ✅ The loader applies the aliases before writing (`pipeline/gbif/aliases.py`), so a GBIF ingest
+    cannot split them again (tests 3). `pipeline/merge_duplicates.py` finds catalogue species
+    sharing a scientific name and keeps, in order: a curated species, GBIF's accepted key, more
+    records, the lower key (tests 4); it runs first in the monthly species-names workflow. Live
+    verify: no duplicated name in the catalogue; users cannot merge.
+  - Remaining: apply 0051, run the merge, verify, record the count.
 
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what

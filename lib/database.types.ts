@@ -452,6 +452,39 @@ export type Database = {
         }
         Relationships: []
       }
+      species_aliases: {
+        Row: {
+          alias_id: string
+          merged_at: string
+          species_id: string
+        }
+        Insert: {
+          alias_id: string
+          merged_at?: string
+          species_id: string
+        }
+        Update: {
+          alias_id?: string
+          merged_at?: string
+          species_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "species_aliases_alias_id_fkey"
+            columns: ["alias_id"]
+            isOneToOne: true
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "species_aliases_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       species_content: {
         Row: {
           always_free: boolean
@@ -668,6 +701,10 @@ export type Database = {
       data_version: { Args: never; Returns: string }
       join_household: { Args: { code: string }; Returns: undefined }
       leave_household: { Args: never; Returns: undefined }
+      merge_species: {
+        Args: { p_from: string; p_into: string }
+        Returns: undefined
+      }
       my_data_export: { Args: never; Returns: Json }
       my_household: { Args: never; Returns: Json }
       new_invite_code: { Args: never; Returns: string }
