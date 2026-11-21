@@ -120,6 +120,16 @@ describe('pickLookalikes', () => {
   });
 });
 
+// T-385: Linaria is a bird genus and a plant genus; a toadflax must not be a twite's lookalike.
+describe('pickLookalikes with a genus name shared across groups', () => {
+  it('takes genus mates of the same group only', () => {
+    const twite = sp('twite', 'Linaria flavirostris', 'Twite', 'Vinterhämpling', 'bird', [5]);
+    const toadflax = sp('toadflax', 'Linaria vulgaris', 'Toadflax', 'Gulsporre', 'plant', [5]);
+    const picks = pickLookalikes(twite, [...county, toadflax], 5, 3, 'seed').map((p) => p.id);
+    expect(picks).not.toContain('toadflax');
+  });
+});
+
 describe('quizOptions', () => {
   it('mixes the answer in with the lookalikes, each once', () => {
     const opts = quizOptions(tit, [blueTit, coalTit, crested], 'seed');

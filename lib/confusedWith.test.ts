@@ -44,3 +44,15 @@ describe('confusedWith', () => {
     expect(confusedWith(great, [great, sp('robin', 'Erithacus rubecula', 1)])).toEqual([]);
   });
 });
+
+// T-385: a genus name can be used twice across kingdoms. Linaria is the twite and linnet's genus
+// and the toadflaxes'; the twite's card showed two toadflaxes as lookalikes.
+describe('a genus name shared by a bird and a plant', () => {
+  it('lists only lookalikes of the same group', () => {
+    const twite = sp('twite', 'Linaria flavirostris', 50);
+    const linnet = sp('linnet', 'Linaria cannabina', 400);
+    const toadflax = { ...sp('toadflax', 'Linaria vulgaris', 900), category: 'plant' } as Species;
+    expect(confusedWith(twite, [toadflax, linnet]).map((s) => s.id)).toEqual(['linnet']);
+    expect(confusedWith(toadflax, [twite, linnet])).toEqual([]);
+  });
+});

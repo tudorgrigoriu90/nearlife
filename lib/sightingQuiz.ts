@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { normaliseName } from './almanac';
-import { genusOf, pictureKey } from './confusedWith';
+import { pictureKey, sameGenus } from './confusedWith';
 import type { ContentLocale } from './i18n/contentLocale';
 import { groupOf } from './species/group';
 import { commonNameFor } from './species/localized';
@@ -74,14 +74,13 @@ export function pickLookalikes(
   // photoFor: the bundled photo for the curated 54, else the catalogue one.
   const candidates = pool.filter((s) => s.id !== target.id && photoFor(s) !== null);
   const group = groupOf(target);
-  const genus = genusOf(target);
   const tiers = [
-    candidates.filter((s) => genusOf(s) === genus),
+    candidates.filter((s) => sameGenus(s, target)),
     candidates.filter(
-      (s) => genusOf(s) !== genus && groupOf(s) === group && s.activeMonths.includes(month),
+      (s) => !sameGenus(s, target) && groupOf(s) === group && s.activeMonths.includes(month),
     ),
     candidates.filter(
-      (s) => genusOf(s) !== genus && groupOf(s) === group && !s.activeMonths.includes(month),
+      (s) => !sameGenus(s, target) && groupOf(s) === group && !s.activeMonths.includes(month),
     ),
   ];
   // One picture per choice (T-253). Some species share a photo file: synonyms, and Wikipedia

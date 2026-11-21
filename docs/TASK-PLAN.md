@@ -5394,6 +5394,13 @@ document until it is started, when it takes the next free `T-###`.
   - Director: the next build uploaded to Play should clear the warning (Play Console → the release
     → device catalogue).
 
+- **T-385 · A bird's lookalikes were plants of the same genus name** — *Claude · XS · `DONE` · deps: T-352*
+  - Director, 2026-11-21: the twite's "Often confused with" showed the linnet and two toadflaxes.
+    Linaria is both a finch genus and a plant genus; the match compared the genus name only.
+  - ✅ `sameGenus` (lib/confusedWith.ts) also requires the same group (bird, plant, mollusc …); the
+    card and the sighting quiz's lookalikes (T-241) both use it.
+  - ✅ Tests: card 1, quiz 1.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code
