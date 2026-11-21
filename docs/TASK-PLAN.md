@@ -5386,13 +5386,25 @@ document until it is started, when it takes the next free `T-###`.
   - Director: the next build uploaded to Play should clear the warning (Play Console → the release
     → device catalogue).
 
+> **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
+> do the fixed, repeatable checks and open an issue labelled `automation` when something needs
+> attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code
+> session per run on the Director's Claude plan, with an email when the run ends) do the work that
+> needs judgment: fixing those issues, updating dependencies, correcting content (T-378, T-381,
+> T-382). Every run that changes the phone app ends in a "Play release needed" email (T-383).
+> Rules for the scheduled tasks: they follow CLAUDE.md (one task per push, gate green, task plan
+> updated), never touch secrets or store settings, and never publish to Google Play; anything
+> outside these rules becomes an issue for the Director. Cost: Actions stay inside the free
+> minutes; scheduled tasks use the Claude plan's usage, not a new bill.
+
 - **T-375 · A legal change opens an issue** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: T-336, T-337*
   - The monthly invasive and protected steps rewrite the marks silently. Before writing, compare
-    with what is stored and open a GitHub issue (or comment on the open one) when: the ordinance's
-    "Ändrad: t.o.m. SFS" changes; a catalogue species gains, loses or changes a mark or level; the
-    Union list's size changes; the Red List step changes a category.
+    with what is stored and open an `automation` issue (or comment on the open one) when: the
+    ordinance's "Ändrad: t.o.m. SFS" changes; a catalogue species gains, loses or changes a mark or
+    level; the Union list's size changes; the Red List step changes a category.
   - Done when an unchanged month opens nothing, a change names the species and old → new level,
     and a refused write (layout changed, short answer) opens an issue too. Tests on the diff.
+    T-382 picks these up.
 
 - **T-376 · New species get their facts without a manual run** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: T-259*
   - `backfill-facts.yml` runs only by hand. Chain it after the data pipeline (workflow_run, like
@@ -5402,36 +5414,69 @@ document until it is started, when it takes the next free `T-###`.
     Wikipedia has, and the order is pipeline → backfill → translate. Free tiers only.
 
 - **T-377 · End-to-end flows on a schedule** — *Claude · XS · `DEFERRED` (v2, Director 2026-11-21) · deps: T-367*
-  - Run `e2e.yml` weekly and after each merged dependency update, not only by hand, so a broken
-    build is found before a release build.
-  - Done when a red run notifies like CI does, and the schedule stays inside the free Actions
-    minutes (one run is about 25 minutes).
+  - Run `e2e.yml` weekly and after every automated push that changes the app, not only by hand.
+  - Done when a red run opens an `automation` issue with the failing flow and its screenshot, and
+    the schedule stays inside the free Actions minutes (one run is about 25 minutes).
 
-- **T-378 · Safe dependency updates merge themselves** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: T-109*
-  - Dependabot opens pull requests that wait for the Director. Merge patch-level updates and
-    security fixes automatically once CI is green (verify, audit gate, Android bundle); minor and
-    major updates, and anything under `expo` / `react-native`, still wait.
-  - Done when a green patch PR merges with no action, a red one stays open, and the one-task-per-push
-    rule is noted as not applying to bot merges.
+- **T-378 · Claude scheduled task: dependency updates** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: T-377, T-383*
+  - Weekly scheduled task (fresh session, email on). It reads the open Dependabot pull requests,
+    `npm outdated`, `pip list --outdated` and the audit gate, applies patch and minor updates and
+    every security fix, runs `npm run verify`, the Python checks and the e2e workflow, pushes one
+    task per push, and closes the Dependabot PRs it covered. Major updates, a new Expo SDK and
+    React Native become an issue with an upgrade plan (T-379 covers the deadlines).
+  - Done when a quiet week pushes nothing and the email says so, a green update lands with its
+    task entry, and a red one is reverted locally and reported instead of pushed.
 
 - **T-379 · Upgrade deadlines open an issue** — *Claude · XS · `DEFERRED` (v2, Director 2026-11-21) · deps: —*
-  - A monthly check: Google Play's target-API deadline (each August) within 60 days of the app's
-    `targetSdkVersion` being behind; a new Expo SDK released; a dependency in `audit-accepted.json`
-    whose accepted reason has a fix available.
-  - Done when each condition opens one issue, once, with what to do. The upgrade itself stays manual.
+  - A monthly Action: Google Play's target-API deadline (each August) within 60 days while the
+    app's `targetSdkVersion` is behind; a new Expo SDK released; an entry in `audit-accepted.json`
+    whose reason no longer holds because a fix exists.
+  - Done when each condition opens one `automation` issue, once. T-382 does the upgrade work; the
+    Director builds and publishes.
 
 - **T-380 · The privacy policy publishes itself** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: T-095*
   - `pipeline/legal_site.py` builds https://nytta-ai.se/nearby/privacy/ from
     `docs/legal/PRIVACY-POLICY.md`, by hand. Run it on every push that changes the file (T-281's
-    paragraph is waiting for this now), and fail CI when the published page differs from the file.
+    paragraph is waiting for this now), and open an issue when the published page differs.
   - Done when a change to the file is live without a manual step. Needs the Director to give the
     site's deploy credentials to GitHub as a secret.
 
-- **T-381 · A weekly digest of mistake reports** — *Claude · XS · `DEFERRED` (v2, Director 2026-11-21) · deps: T-293*
-  - `content-reports.yml` runs weekly; turn its output into one GitHub issue per week, grouped by
-    species and kind (name, photo, text, season), with the reports that repeat first.
-  - Done when a quiet week opens nothing and the issue links each species. Reports stay in the
-    database; the issue holds no user ids.
+- **T-381 · Claude scheduled task: mistake reports** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: T-293*
+  - Weekly scheduled task (fresh session, email on). It reads the week's "Report a mistake" rows,
+    checks each against the sources (GBIF, Wikipedia, Wikidata), fixes the content it can verify (a
+    wrong name, a mismatched photo, a season) through the pipeline's own tables, and records what
+    it did per report. What it cannot verify goes in the email with the species and the report.
+  - Done when a quiet week sends a one-line email, fixes are server-side (no Play release), and the
+    email and repo hold no user ids.
+
+- **T-382 · Claude scheduled task: the maintainer** — *Claude · M · `DEFERRED` (v2, Director 2026-11-21) · deps: T-375, T-377, T-379, T-383*
+  - Weekly scheduled task (fresh session, email on), plus one fired at once when an `automation`
+    issue opens. It reads the open `automation` issues and a red CI run on `main`, fixes what is in
+    scope (a source that changed layout, a failing test or flow, a legal-list change the parser
+    handles, an SDK upgrade), comments on and closes the issue, and leaves the rest open with a
+    diagnosis. Never: secrets, store settings, payments, deleting user data, legal wording beyond
+    what the source says.
+  - Done when the email lists each issue as fixed (with the commit), left open (with why), or needs
+    the Director (with the exact step), and states whether a Play release is needed (T-383).
+
+- **T-383 · An email when Google Play needs a release** — *Claude · S · `DEFERRED` (v2, Director 2026-11-21) · deps: —*
+  - The rule: a change to the phone app (App.tsx, `components/`, the app's `lib/`, `assets/`,
+    `app.json`, `plugins/`, an app dependency) needs a Play release; data, the pipeline, migrations,
+    Edge Functions and docs do not. An Action on every push to `main` applies it and keeps one open
+    issue, "Play release needed", listing the commits since the last release tag; GitHub emails the
+    Director when it opens or grows. Tagging a release (`release-<versionCode>`) closes it. The
+    scheduled tasks' own emails say "Play release needed: yes/no" in their first line.
+  - Done when a server-only push leaves the issue alone, an app push opens or updates it, and a
+    test fixes the path rule.
+
+- **T-384 · Over-the-air updates for JavaScript-only changes** — *Claude + Director · M · `DEFERRED` (v2, Director 2026-11-21) · deps: T-383*
+  - Most automated fixes touch only JavaScript. With EAS Update (`expo-updates`), those reach phones
+    without a Play release; native changes (a new module, a permission, the SDK) still need one, and
+    T-383 then says "Play release needed" only for those.
+  - Director decides first: EAS Update's free tier has a monthly-active-user limit (cost flag
+    beyond it, invariant #7), and Play's policy allows updating JavaScript this way only when it does
+    not change the app's purpose. Done when an update reaches the test phone and a native change
+    still raises the release email.
 
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
