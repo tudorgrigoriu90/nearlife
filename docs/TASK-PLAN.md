@@ -5010,6 +5010,14 @@ document until it is started, when it takes the next free `T-###`.
     up, damaging), limited (no uprooting, no picking to sell). "In this county" for a county limit.
     "Hunting has its own rules" for birds and mammals, "Fishing …" for fish (6 b §).
   - ✅ Tests: parser 12, real Postgres 4, copy 7, mapping 1, card 4.
+  - ✅ Live (2026-11-21): 0052 applied and verified; the monthly `species-names` run parsed 866
+    annex 1 entries and 188 annex 2 rows and matched 1,331 species on GBIF (69 names are not on the
+    backbone as written: misspellings in the ordinance and non-Swedish species; none is in the species
+    table). Catalogue species marked: bird 515, annex 77, basic 52, reinforced 23, strict 12, limited
+    11 (690 in all; the three invasive birds keep their invasive mark). Spot checks: ramsons limited
+    and local in Kalmar and Stockholm, unmarked in Kronoberg; hedgehog reinforced; eel strict; common
+    toad, grass snake and heath spotted orchid basic; lynx and wolf annex; field wormwood and ragwort
+    unmarked (subspecies-only entries); Egyptian goose invasive.
 - **T-339 · Confirm the invasive-species reporting link** — *Director · XS · `DONE` · deps: T-336*
   - `INVASIVE_REPORT_URL` in `lib/legal.ts` is https://www.invasivaarter.nu/, which forwards to
     Artportalen's form for wanted invasive species. Confirm it is the page to send people to.
