@@ -5288,7 +5288,7 @@ document until it is started, when it takes the next free `T-###`.
     in every place the group glyph appears. On This Week a name or detail line that is the
     scientific name is set in italics, as field guides print it, so it is not read as a common
     name. Test 1.
-- **T-373 · Duplicate species in the catalogue** — *Claude · S · `IN-PROGRESS` · deps: —*
+- **T-373 · Duplicate species in the catalogue** — *Claude · S · `DONE` · deps: —*
   - 19 scientific names appear twice among catalogue species (38 rows, 2026-11-20), e.g. *Huperzia
     selago* (gbif:8190643 accepted, gbif:2688495 "doubtful" in GBIF), *Carex capitata*,
     *Glareola nordmanni*: two cards for one species, with records split between them.
@@ -5308,7 +5308,10 @@ document until it is started, when it takes the next free `T-###`.
     sharing a scientific name and keeps, in order: a curated species, GBIF's accepted key, more
     records, the lower key (tests 4); it runs first in the monthly species-names workflow. Live
     verify: no duplicated name in the catalogue; users cannot merge.
-  - Remaining: apply 0051, run the merge, verify, record the count.
+  - ✅ Live (2026-11-21): 0051 applied; 19 pairs merged, each an ACCEPTED and a DOUBTFUL GBIF key,
+    the accepted one kept (and the curated dandelion card, which had no records of its own, now
+    holds all 97,235). No user had collected either key, so no collection row moved. Catalogue
+    10,240 → 10,221 species; no scientific name twice; live verify green.
 
 - **T-279 · Content for the species the facet cap had hidden** — *Claude · M · `DONE` · deps: T-268*
   - ~2,000 species entered the catalogue when T-268 paged past GBIF's facet cap. They need what
