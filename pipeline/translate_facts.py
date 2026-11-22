@@ -73,14 +73,33 @@ def with_local_name(text: str, english: str | None, local: str | None, locale: s
     return pattern.sub(replace, text)
 
 
+def without_swedish_name(
+    text: str, swedish: str | None, local: str | None, scientific: str, locale: str = ""
+) -> str:
+    """The Swedish name a Swedish-sourced fact kept through both translation steps (T-394).
+
+    Swedish → English → target leaves "Blåsippa, Hepatica nobilis, este …". The local name takes
+    its place; without one, the scientific name does, said once ("Hepatica nobilis este …").
+    Names under four letters are left alone: "ek" (oak) is a word in other languages.
+    """
+    if not swedish or len(swedish.strip()) < 4 or not scientific:
+        return text
+    if local:
+        return with_local_name(text, swedish, local, locale)
+    out = with_local_name(text, swedish, scientific, "de")  # "de": keep the binomial's capital
+    sci = re.escape(scientific)
+    out = re.sub(rf"{sci},? {sci},?", scientific, out)
+    return re.sub(rf"{sci} \({sci}\)", scientific, out)
+
+
 def translate_missing(
     plan: list[tuple[str, str, str]],
     target: str,
     translate: Translate,
-    names: dict[str, tuple[str | None, str | None]] | None = None,
+    names: dict[str, tuple] | None = None,
 ) -> dict[str, str]:
     """species_id -> translated fact. A failed or empty translation is left out, never written.
-    `names`: species_id -> (English common name, local common name), for `with_local_name`."""
+    `names`: species_id -> (English name, local name[, Swedish name, scientific name])."""
     out: dict[str, str] = {}
     for species_id, text, src in plan:
         try:
@@ -90,8 +109,11 @@ def translate_missing(
             print(f"  ! {species_id}: {exc}", flush=True)
             continue
         if result and result != text and result != english:
-            en_name, local_name = (names or {}).get(species_id, (None, None))
-            out[species_id] = with_local_name(result, en_name, local_name, target)
+            en_name, local_name, *swedish = (names or {}).get(species_id, (None, None))
+            result = with_local_name(result, en_name, local_name, target)
+            if src == "sv" and len(swedish) == 2:
+                result = without_swedish_name(result, swedish[0], local_name, swedish[1], target)
+            out[species_id] = result
     return out
 
 
@@ -117,7 +139,8 @@ def argos_translator(target: str) -> Translate | None:
 
 
 MISSING_SQL = """
-select t.species_id, en.fact, sv.fact, en.fact_source_url, sv.fact_source_url, en.common_name, t.common_name
+select t.species_id, en.fact, sv.fact, en.fact_source_url, sv.fact_source_url, en.common_name, t.common_name,
+       sv.common_name, s.scientific_name
 from public.species_content t
 join public.species s on s.id = t.species_id and s.in_catalogue
 left join public.species_content en on en.species_id = t.species_id and en.locale = 'en'
@@ -154,7 +177,7 @@ def main(argv: list[str]) -> int:
         fetched = cur.fetchall()
         rows = [{"species_id": r[0], "en": r[1], "sv": r[2]} for r in fetched]
         source = {r[0]: (r[3] if r[1] else r[4]) for r in fetched}
-        names = {r[0]: (r[5], r[6]) for r in fetched}
+        names = {r[0]: (r[5], r[6], r[7], r[8]) for r in fetched}
         plan = plan_translations(rows)
         print(f"[{target}] {len(plan)} facts to translate", flush=True)
         done = translate_missing(plan, target, translate, names)

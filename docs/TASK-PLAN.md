@@ -5497,6 +5497,16 @@ document until it is started, when it takes the next free `T-###`.
     otherwise. Monthly in `species-names.yml`, after the Wikidata names.
   - ✅ Tests: 20 (real sentences: 14 names found, 5 left alone, empty input).
 
+- **T-394 · Swedish names left in machine-translated text** — *Claude · XS · `DONE` · deps: T-391*
+  - Seen with T-393: a fact from Swedish Wikipedia goes Swedish → English → target, and the Swedish
+    name survives both steps ("Blåsippa, Hepatica nobilis, este o plantă…").
+  - ✅ `without_swedish_name` (pipeline/translate_facts.py): in a fact whose source is Swedish
+    Wikipedia, the Swedish common name becomes the local one, or, with none, the scientific name
+    said once ("Hepatica nobilis este o plantă…"). Names under four letters are left alone ("ek",
+    oak, is a word elsewhere). New translations get it as they are written; the monthly
+    `fix_translated_names.py` pass applies it to the facts written before.
+  - ✅ Tests: 3.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code

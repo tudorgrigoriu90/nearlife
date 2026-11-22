@@ -109,11 +109,47 @@ def test_the_one_time_pass_changes_only_what_the_rule_changes():
     from fix_translated_names import fixes
 
     rows = [
-        ("a", "ro", "Cunoscut ca vendace.", "Vendace", "Coregon-mic"),
-        ("b", "ro", "O pasăre mică.", "Twite", "inăriță"),
-        ("c", "de", "Der Twite ist klein.", "Twite", "Berghänfling"),
+        ("a", "ro", "Cunoscut ca vendace.", "Vendace", "Coregon-mic", None, "Coregonus albula", None),
+        ("b", "ro", "O pasăre mică.", "Twite", "inăriță", None, "Linaria flavirostris", None),
+        ("c", "de", "Der Twite ist klein.", "Twite", "Berghänfling", None, "Linaria flavirostris", None),
     ]
     assert fixes(rows) == [
         ("Cunoscut ca coregon-mic.", "a", "ro"),
         ("Der Berghänfling ist klein.", "c", "de"),
     ]
+
+
+# T-394: a fact from Swedish Wikipedia goes Swedish → English → target, and the Swedish name
+# survives both steps ("Blåsippa, Hepatica nobilis, este o plantă…").
+def test_the_swedish_name_becomes_the_local_one_or_the_scientific_name():
+    from translate_facts import without_swedish_name
+
+    text = "Blåsippa, Hepatica nobilis, este o plantă care creşte în zonele temperate."
+    assert without_swedish_name(text, "blåsippa", "trei-răi", "Hepatica nobilis", "ro") == (
+        "Trei-răi, Hepatica nobilis, este o plantă care creşte în zonele temperate."
+    )
+    # No local name: the scientific one, said once.
+    assert without_swedish_name(text, "blåsippa", None, "Hepatica nobilis", "ro") == (
+        "Hepatica nobilis este o plantă care creşte în zonele temperate."
+    )
+    assert without_swedish_name("Gädda (Esox lucius) este un pește.", "gädda", None, "Esox lucius", "ro") == (
+        "Esox lucius este un pește."
+    )
+
+
+def test_a_short_or_absent_swedish_name_is_left_alone():
+    from translate_facts import without_swedish_name
+
+    # "Ek" (oak) is a word in other languages; names under four letters are not touched.
+    assert without_swedish_name("Ek este un copac.", "ek", None, "Quercus robur", "ro") == "Ek este un copac."
+    assert without_swedish_name("Un text.", None, None, "Quercus robur", "ro") == "Un text."
+
+
+def test_the_one_time_pass_fixes_swedish_names_only_in_facts_from_swedish():
+    from fix_translated_names import fixes
+
+    rows = [
+        ("h", "ro", "Blåsippa, Hepatica nobilis, este o plantă.", None, None, "blåsippa", "Hepatica nobilis", "https://sv.wikipedia.org/wiki/Bl%C3%A5sippa"),
+        ("x", "ro", "Blåsippa este și un cuvânt aici.", None, None, "blåsippa", "Hepatica nobilis", "https://en.wikipedia.org/wiki/Hepatica"),
+    ]
+    assert fixes(rows) == [("Hepatica nobilis este o plantă.", "h", "ro")]
