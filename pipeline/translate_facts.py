@@ -20,6 +20,7 @@ Runs per language (the Translate facts workflow fans out over TARGET_LOCALES):
 from __future__ import annotations
 
 import os
+import re
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -43,8 +44,43 @@ def plan_translations(rows: list[dict]) -> list[tuple[str, str, str]]:
     return plan
 
 
-def translate_missing(plan: list[tuple[str, str, str]], target: str, translate: Translate) -> dict[str, str]:
-    """species_id -> translated fact. A failed or empty translation is left out, never written."""
+# Languages that capitalise every noun: a common name keeps its stored capital mid-sentence.
+CAPITALISED_NOUNS = {"de", "lb"}
+
+
+def with_local_name(text: str, english: str | None, local: str | None, locale: str = "") -> str:
+    """The English common name, left untranslated by the model, replaced by the local one (T-391).
+
+    Argos does not know most species names and copies them ("vendace", "Twite"), so the card's text
+    named the species in English while its title used the local name. Whole words only, any case.
+    At a sentence start the local name takes a capital; elsewhere its first letter is lower case,
+    except in languages that capitalise nouns.
+    """
+    if not english or not local or english.strip().lower() == local.strip().lower():
+        return text
+    pattern = re.compile(rf"(?<![\w-]){re.escape(english.strip())}(?![\w-])", re.IGNORECASE)
+
+    def replace(m: re.Match) -> str:
+        before = text[: m.start()].rstrip()
+        starts_sentence = before == "" or before[-1] in ".!?"
+        name = local.strip()
+        if starts_sentence:
+            return name[:1].upper() + name[1:]
+        if locale in CAPITALISED_NOUNS:
+            return name
+        return name[:1].lower() + name[1:]
+
+    return pattern.sub(replace, text)
+
+
+def translate_missing(
+    plan: list[tuple[str, str, str]],
+    target: str,
+    translate: Translate,
+    names: dict[str, tuple[str | None, str | None]] | None = None,
+) -> dict[str, str]:
+    """species_id -> translated fact. A failed or empty translation is left out, never written.
+    `names`: species_id -> (English common name, local common name), for `with_local_name`."""
     out: dict[str, str] = {}
     for species_id, text, src in plan:
         try:
@@ -54,7 +90,8 @@ def translate_missing(plan: list[tuple[str, str, str]], target: str, translate: 
             print(f"  ! {species_id}: {exc}", flush=True)
             continue
         if result and result != text and result != english:
-            out[species_id] = result
+            en_name, local_name = (names or {}).get(species_id, (None, None))
+            out[species_id] = with_local_name(result, en_name, local_name, target)
     return out
 
 
@@ -80,7 +117,7 @@ def argos_translator(target: str) -> Translate | None:
 
 
 MISSING_SQL = """
-select t.species_id, en.fact, sv.fact, en.fact_source_url, sv.fact_source_url
+select t.species_id, en.fact, sv.fact, en.fact_source_url, sv.fact_source_url, en.common_name, t.common_name
 from public.species_content t
 join public.species s on s.id = t.species_id and s.in_catalogue
 left join public.species_content en on en.species_id = t.species_id and en.locale = 'en'
@@ -115,11 +152,12 @@ def main(argv: list[str]) -> int:
     with psycopg.connect(dsn) as conn, conn.cursor() as cur:
         cur.execute(MISSING_SQL, (target,))
         fetched = cur.fetchall()
-        rows = [{"species_id": a, "en": b, "sv": c} for a, b, c, _, _ in fetched]
-        source = {a: (eu if b else su) for a, b, _, eu, su in fetched}
+        rows = [{"species_id": r[0], "en": r[1], "sv": r[2]} for r in fetched]
+        source = {r[0]: (r[3] if r[1] else r[4]) for r in fetched}
+        names = {r[0]: (r[5], r[6]) for r in fetched}
         plan = plan_translations(rows)
         print(f"[{target}] {len(plan)} facts to translate", flush=True)
-        done = translate_missing(plan, target, translate)
+        done = translate_missing(plan, target, translate, names)
         cur.executemany(UPDATE_SQL, [(fact, source.get(sid), sid, target) for sid, fact in done.items()])
         conn.commit()
     print(f"[{target}] wrote {len(done)} machine-translated facts", flush=True)

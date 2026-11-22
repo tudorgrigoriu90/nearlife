@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from gbif.supabase_load_content import CONTENT_SQL  # noqa: E402
-from translate_facts import TARGET_LOCALES, plan_translations, translate_missing  # noqa: E402
+from translate_facts import TARGET_LOCALES, plan_translations, translate_missing, with_local_name  # noqa: E402
 
 
 def test_targets_are_the_second_languages_not_english_or_swedish():
@@ -68,3 +68,52 @@ def test_the_workflow_matrix_covers_every_target_language():
     wf = (Path(__file__).resolve().parents[2] / ".github" / "workflows" / "translate-facts.yml").read_text()
     block = wf[wf.index("locale: [") : wf.index("]", wf.index("locale: ["))]
     assert set(re.findall(r"[a-z]{2,3}", block.replace("locale", ""))) == set(TARGET_LOCALES)
+
+
+# T-391: the translator leaves an English common name it does not know untouched ("vendace",
+# "Twite"), so the Romanian card said "Coregon-mic" in its title and "vendace" in its text.
+def test_the_english_common_name_becomes_the_local_one():
+    assert (
+        with_local_name("Coregonus albula, cunoscut sub numele de vendace sau cel mai mic cisco.", "Vendace", "Coregon-mic")
+        == "Coregonus albula, cunoscut sub numele de coregon-mic sau cel mai mic cisco."
+    )
+    assert (
+        with_local_name("Twite (Linaria flavirostris) este o pasăre mică.", "Twite", "inăriță cu cioc galben")
+        == "Inăriță cu cioc galben (Linaria flavirostris) este o pasăre mică."
+    )
+
+
+def test_only_whole_words_and_never_without_a_local_name():
+    text = "Radishes and the robin; Robin's nest."
+    assert with_local_name(text, "Radish", "ridiche") == text  # part of a word
+    assert with_local_name(text, "Robin", None) == text
+    assert with_local_name(text, "Robin", "Robin") == text
+    assert with_local_name("A Red-backed shrike (Lanius collurio).", "Red-backed Shrike", "sfrâncioc roșiatic") == (
+        "A sfrâncioc roșiatic (Lanius collurio)."
+    )
+
+
+def test_a_name_starting_a_sentence_keeps_its_capital():
+    assert with_local_name("Il vit ici. Vendace est commun.", "vendace", "corégone blanc") == (
+        "Il vit ici. Corégone blanc est commun."
+    )
+
+
+def test_new_translations_use_the_local_name():
+    out = translate_missing([("a", "The twite is small.", "en")], "ro", lambda t, s, d: "Twite este mică.",
+                            names={"a": ("Twite", "inăriță cu cioc galben")})
+    assert out == {"a": "Inăriță cu cioc galben este mică."}
+
+
+def test_the_one_time_pass_changes_only_what_the_rule_changes():
+    from fix_translated_names import fixes
+
+    rows = [
+        ("a", "ro", "Cunoscut ca vendace.", "Vendace", "Coregon-mic"),
+        ("b", "ro", "O pasăre mică.", "Twite", "inăriță"),
+        ("c", "de", "Der Twite ist klein.", "Twite", "Berghänfling"),
+    ]
+    assert fixes(rows) == [
+        ("Cunoscut ca coregon-mic.", "a", "ro"),
+        ("Der Berghänfling ist klein.", "c", "de"),
+    ]

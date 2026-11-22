@@ -5453,6 +5453,21 @@ document until it is started, when it takes the next free `T-###`.
     settings before this (the group chips left NotifChoices).
   - ✅ Tests: rules 5, store 1, hook 4, Settings 2, This Week 3 + 1 (hook), notification choices 1.
 
+- **T-391 · Machine-translated facts name the species in English** — *Claude · S · `DONE` · deps: T-235*
+  - Director, 2026-11-22: the Romanian vendace card said "Coregon-mic" in its title and "vendace"
+    in its text (the twite: "Twite … este o pasăre"). Argos copies an English species name it does
+    not know, so the text kept the English name while the title has the language's own.
+  - ✅ `with_local_name` (pipeline/translate_facts.py) swaps the English common name for the local
+    one: whole words, any case, a capital at a sentence start, lower case elsewhere except in
+    languages that capitalise nouns (de, lb). New translations get it as they are written;
+    `pipeline/fix_translated_names.py` applies it to the facts written before (only
+    `wikipedia-translated` rows with both names; a language's own Wikipedia text is never edited)
+    and runs monthly after the names are filled in `species-names.yml`, so a name found later
+    reaches the text too.
+  - Not checked here: whether each local name itself is right (Wikidata's label; Wikimedia was
+    rate-limiting this session). A wrong name is a "Report a mistake" case (T-381).
+  - ✅ Tests: 5.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code
