@@ -5485,6 +5485,18 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Live (2026-11-22): the vendace's fried-fish photo was cleared. iNaturalist had no
     licence-clear photo for it either, so its card shows the fish glyph until a source has one.
 
+- **T-393 · Romanian names from Romanian Wikipedia's own text** — *Claude · S · `DONE` · deps: T-258*
+  - Director, 2026-11-22: insects, plants and the rest mostly show no Romanian name. GBIF and
+    Wikidata hold few (plants 411 of 2,584, insects 58 of 6,255); where none exists the title keeps
+    one name (Director: "if it does not exist, leave it"). Romanian Wikipedia often files a species
+    under its Latin name but says the popular one in the first sentence.
+  - ✅ `pipeline/names_from_facts.py`: from a Romanian Wikipedia fact (never a machine translation,
+    whose "names" are invented), the first name said right after the scientific name ("numită în
+    mod obișnuit scoruș de munte", "denumită popular țipirig") or right before it in brackets
+    ("Pirul târâtor (Elymus repens)"); empty slots only; nothing guessed when the sentence says it
+    otherwise. Monthly in `species-names.yml`, after the Wikidata names.
+  - ✅ Tests: 20 (real sentences: 14 names found, 5 left alone, empty input).
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code

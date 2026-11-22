@@ -50,6 +50,11 @@ jobs:
         if: always()
         run: python pipeline/build_wikidata_names.py --load
 
+      # Romanian names said in the first sentence of a Romanian Wikipedia fact; empty slots only.
+      - name: Romanian names from Romanian Wikipedia text (T-393)
+        if: always()
+        run: python pipeline/names_from_facts.py
+
       - name: Resolve species filed under another name (T-260)
         if: always()
         run: python pipeline/resolve_synonyms.py
