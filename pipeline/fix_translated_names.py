@@ -26,7 +26,7 @@ left join public.species_content en on en.species_id = t.species_id and en.local
 left join public.species_content sv on sv.species_id = t.species_id and sv.locale = 'sv'
 where t.fact_origin = 'wikipedia-translated' and t.fact is not null
   and ((en.common_name is not null and t.common_name is not null)
-       or (t.fact_source_url like '%%sv.wikipedia.org%%' and length(sv.common_name) >= 4))
+       or (length(sv.common_name) >= 4 and (t.fact_source_url like '%%sv.wikipedia.org%%' or sv.common_name ~ '[åäöÅÄÖ]')))
 """
 
 UPDATE_SQL = (
@@ -40,8 +40,10 @@ def fixes(rows: list[tuple]) -> list[tuple[str, str, str]]:
     out = []
     for species_id, locale, fact, en_name, local_name, sv_name, scientific, source in rows:
         fixed = with_local_name(fact, en_name, local_name, locale)
-        # The Swedish name only where the text came from Swedish (T-394).
-        if source and "sv.wikipedia.org" in source:
+        # The Swedish name where the text came from Swedish (T-394), or where å/ä/ö mark it as
+        # Swedish: a fact translated from Swedish can carry another source's link.
+        from_swedish = bool(source and "sv.wikipedia.org" in source)
+        if from_swedish or (sv_name and any(ch in sv_name.lower() for ch in "åäö")):
             fixed = without_swedish_name(fixed, sv_name, local_name, scientific, locale)
         if fixed != fact:
             out.append((fixed, species_id, locale))

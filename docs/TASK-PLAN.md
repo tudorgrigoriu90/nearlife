@@ -5496,6 +5496,8 @@ document until it is started, when it takes the next free `T-###`.
     ("Pirul târâtor (Elymus repens)"); empty slots only; nothing guessed when the sentence says it
     otherwise. Monthly in `species-names.yml`, after the Wikidata names.
   - ✅ Tests: 20 (real sentences: 14 names found, 5 left alone, empty input).
+  - ✅ Live (2026-11-22): scoruș de munte, țipirig, amiral, Pirul târâtor and the rest are on the
+    cards (`species_content.common_name`, ro).
 
 - **T-394 · Swedish names left in machine-translated text** — *Claude · XS · `DONE` · deps: T-391*
   - Seen with T-393: a fact from Swedish Wikipedia goes Swedish → English → target, and the Swedish
@@ -5506,6 +5508,10 @@ document until it is started, when it takes the next free `T-###`.
     oak, is a word elsewhere). New translations get it as they are written; the monthly
     `fix_translated_names.py` pass applies it to the facts written before.
   - ✅ Tests: 3.
+  - ✅ Live (2026-11-22), first run: the hepatica's Romanian fact still said "Blåsippa". It was
+    translated from Swedish but carries the English article's link (the source link follows the
+    English fact, added later). The pass now also takes a Swedish name with å, ä or ö in any
+    translated fact; without those letters, only in facts linked to Swedish Wikipedia. Test: 1.
 
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs

@@ -150,6 +150,12 @@ def test_the_one_time_pass_fixes_swedish_names_only_in_facts_from_swedish():
 
     rows = [
         ("h", "ro", "Blåsippa, Hepatica nobilis, este o plantă.", None, None, "blåsippa", "Hepatica nobilis", "https://sv.wikipedia.org/wiki/Bl%C3%A5sippa"),
-        ("x", "ro", "Blåsippa este și un cuvânt aici.", None, None, "blåsippa", "Hepatica nobilis", "https://en.wikipedia.org/wiki/Hepatica"),
+        # Credited to English Wikipedia but translated from Swedish: "å" gives the name away.
+        ("x", "ro", "Blåsippa, Hepatica nobilis, este.", None, None, "blåsippa", "Hepatica nobilis", "https://en.wikipedia.org/wiki/Anemone_hepatica"),
+        # Without å/ä/ö, a Swedish name in a fact from elsewhere may be a word of the language.
+        ("y", "de", "Die Linde ist ein Baum.", None, None, "linde", "Tilia cordata", "https://de.wikipedia.org/wiki/Linde"),
     ]
-    assert fixes(rows) == [("Hepatica nobilis este o plantă.", "h", "ro")]
+    assert fixes(rows) == [
+        ("Hepatica nobilis este o plantă.", "h", "ro"),
+        ("Hepatica nobilis este.", "x", "ro"),
+    ]
