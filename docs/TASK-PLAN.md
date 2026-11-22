@@ -5513,6 +5513,15 @@ document until it is started, when it takes the next free `T-###`.
     English fact, added later). The pass now also takes a Swedish name with å, ä or ö in any
     translated fact; without those letters, only in facts linked to Swedish Wikipedia. Test: 1.
 
+- **T-395 · The Store says so when it has no products yet** — *Claude · XS · `DONE` · deps: T-085*
+  - Director, 2026-11-22: Play's "Monetize with Play" (in-app products) opens only once the app is
+    in production. Until the products exist the SDK answers with none, and the Store showed an
+    empty page with only the reassurances.
+  - ✅ An empty product list shows "Purchases aren't available in this version of the app yet"
+    (sv too), as a build without the SDK already did; a failed read keeps its own error line. The
+    products are read by their Play ids at run time, so once they exist no new build is needed.
+  - ✅ Tests: 2.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code

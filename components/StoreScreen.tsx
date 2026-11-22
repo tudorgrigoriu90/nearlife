@@ -86,7 +86,11 @@ export default function StoreScreen({
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        {!canBuy ? <Text style={styles.note}>{tr('store.unavailable')}</Text> : null}
+        {/* No SDK, or no products yet: Play's products only exist once the app is in production
+            (T-395). A failed read says so itself (store.error). */}
+        {!canBuy || (products !== null && products.length === 0 && !error) ? (
+          <Text style={styles.note}>{tr('store.unavailable')}</Text>
+        ) : null}
         {products === null ? <ActivityIndicator color="#3a7d44" /> : null}
         {(products ?? []).map((p) => (
           <View key={p.sku} style={styles.card}>

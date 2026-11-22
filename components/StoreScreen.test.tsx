@@ -121,3 +121,21 @@ describe('StoreScreen after a payment', () => {
     jest.useRealTimers();
   });
 });
+
+// T-395: at launch the SDK works but Play has no products yet (they can only be created after the
+// app is in production). The Store said nothing at all; it says purchases are not here yet.
+describe('StoreScreen before the products exist', () => {
+  it('says purchases are not available yet when the store lists none', async () => {
+    await render(
+      <StoreScreen locale="en" gateway={gateway({ products: jest.fn().mockResolvedValue([]) })} entitlements={NO_ENTITLEMENTS} />,
+    );
+    await waitFor(() => expect(screen.getByText(tr('store.unavailable'))).toBeTruthy());
+    expect(screen.getByText(tr('paywall.freeMission'))).toBeTruthy();
+  });
+
+  it('says nothing of the kind once products are listed', async () => {
+    await render(<StoreScreen locale="en" gateway={gateway()} entitlements={NO_ENTITLEMENTS} />);
+    await waitFor(() => expect(screen.getByText('49,00 kr')).toBeTruthy());
+    expect(screen.queryByText(tr('store.unavailable'))).toBeNull();
+  });
+});
