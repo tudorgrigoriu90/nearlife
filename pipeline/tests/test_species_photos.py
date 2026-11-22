@@ -118,3 +118,27 @@ def test_a_photo_another_species_already_shows_is_a_miss():
     assert fresh_photo(FOUND, {FOUND["sourceUrl"]}) is None
     assert fresh_photo(FOUND, {"https://commons.wikimedia.org/wiki/File:Other.jpg"}) == FOUND
     assert fresh_photo(None, set()) is None
+
+
+# T-392: the vendace's Wikipedia lead image is a plate of fried vendace. A photo of the species as
+# food is not a photo of the living species: it is a miss, and iNaturalist is asked instead.
+def test_a_photo_of_the_species_as_food_is_a_miss():
+    from build_species_photos import unfit_photo
+
+    fried = {**FOUND, "sourceUrl": "https://commons.wikimedia.org/wiki/File:Finnish_fried_vendace_(Paistetut_muikut).jpg"}
+    assert unfit_photo(fried["sourceUrl"]) is True
+    assert fresh_photo(fried, set()) is None
+    for name in ["Smoked_eel.jpg", "Grilled-mackerel.JPG", "Pike_fillet.jpg", "Crayfish_party_food.jpg", "Herring_dish.jpg"]:
+        assert unfit_photo(f"https://commons.wikimedia.org/wiki/File:{name}") is True, name
+    # Whole words only: a radish, a meal moth and a mealybug are what they say.
+    for name in ["Radish_3371103037_4ab07db0bf_o.jpg", "Plodia_interpunctella_-_Indianmeal_moth.jpg",
+                 "Black_Garden_Ant_tending_Citrus_Mealybug_(16063538972).jpg", "Esox_lucius_in_lake.jpg"]:
+        assert unfit_photo(f"https://commons.wikimedia.org/wiki/File:{name}") is False, name
+    assert unfit_photo(None) is False
+
+
+def test_a_stored_food_photo_is_cleared_for_the_second_source():
+    from build_species_photos import CLEAR_UNFIT_SQL
+
+    assert "sources_tried = '{wikipedia}'" in CLEAR_UNFIT_SQL  # iNaturalist is asked next
+    assert "url = null" in CLEAR_UNFIT_SQL

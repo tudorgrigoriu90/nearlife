@@ -5468,6 +5468,18 @@ document until it is started, when it takes the next free `T-###`.
     rate-limiting this session). A wrong name is a "Report a mistake" case (T-381).
   - ✅ Tests: 5.
 
+- **T-392 · A fish shown cooked** — *Claude · XS · `DONE` · deps: T-202, T-220*
+  - Director, 2026-11-22: the vendace card's photo was a plate of fried vendace, the lead image of
+    its Wikipedia article (`Finnish_fried_vendace_(Paistetut_muikut).jpg`).
+  - ✅ `unfit_photo` (pipeline/build_species_photos.py): a file name naming food (fried, cooked,
+    smoked, fillet, dish, recipe, …; whole words, so a radish, a meal moth and a mealybug pass) is a
+    miss, from Wikipedia and iNaturalist alike, and the next source is asked. A stored food photo
+    is cleared at the start of the next run, so the iNaturalist pass replaces it. Live, it matches
+    one photo: the vendace.
+  - Left as they are: pinned insect specimens (52 catalogue photos), old botanical plates (44) and
+    museum specimens (3), which show the species, often the only free photo there is.
+  - ✅ Tests: 2.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code

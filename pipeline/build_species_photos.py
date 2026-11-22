@@ -23,9 +23,11 @@ already have hand-checked photos in Storage, which a generic lead-image pass wou
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
+from urllib.parse import unquote
 
 sys.path.insert(0, str(Path(__file__).parent))
 from media.licenses import app_license  # noqa: E402
@@ -96,6 +98,30 @@ def second_source_targets(rows: list[tuple], source: str) -> list[dict]:
     return [{"speciesId": r[0], "scientificName": r[1]} for r in pending]
 
 
+# A photo of the species as food (T-392): the vendace's lead image is a plate of fried vendace.
+# Matched on the file name, whole words only (a radish, a meal moth and a mealybug pass).
+_FOOD = re.compile(
+    r"(?<![a-z])(fried|frying|cooked|cooking|recipe|cuisine|dish|dishes|meal|meals|food|smoked|grilled|"
+    r"roasted|baked|fillets?|served|sushi|sashimi|caviar|soup|stew|marinated|pickled|canned|tinned|"
+    r"fishmonger|paistet\w*|stekt|r[öo]kt|gravad)(?![a-z])",
+    re.IGNORECASE,
+)
+
+# Clears a stored food photo so the second source looks again (`url is null`, Wikipedia tried).
+CLEAR_UNFIT_SQL = (
+    "update public.species_media set url = null, source_url = null, author = null, license = null, "
+    "sources_tried = '{wikipedia}', checked_at = now() where species_id = %s"
+)
+
+
+def unfit_photo(source_url: str | None) -> bool:
+    """Is this a photo of the species as food rather than as it lives (T-392)?"""
+    if not source_url:
+        return False
+    name = unquote(source_url.rsplit("/", 1)[-1]).replace("_", " ")
+    return _FOOD.search(name) is not None
+
+
 def fresh_photo(found: dict | None, used_sources: set[str]) -> dict | None:
     """The photo, unless another species already shows that file (T-254).
 
@@ -104,7 +130,7 @@ def fresh_photo(found: dict | None, used_sources: set[str]) -> dict | None:
     species with one picture look identical in the almanac and in the quiz, so the second one
     counts as a miss here and goes on to the next source.
     """
-    if found and found.get("sourceUrl") in used_sources:
+    if found and (found.get("sourceUrl") in used_sources or unfit_photo(found.get("sourceUrl"))):
         return None
     return found
 
@@ -173,6 +199,14 @@ def main() -> int:
             [r for r in curated_rows(json.loads(CURATED_MEDIA.read_text(encoding="utf-8")), base) if r["species_id"] in known],
         )
         conn.commit()
+
+        # Food photos stored before T-392 are cleared, so the second source below replaces them.
+        cur.execute("select species_id, source_url from public.species_media where source_url is not null")
+        unfit = [sid for sid, src in cur.fetchall() if unfit_photo(src)]
+        cur.executemany(CLEAR_UNFIT_SQL, [(sid,) for sid in unfit])
+        conn.commit()
+        if unfit:
+            print(f"{len(unfit)} photos of the species as food cleared: {', '.join(unfit)}", flush=True)
 
         cur.execute("select gbif_key, id from public.species where gbif_key is not null")
         id_by_key = {int(k): i for k, i in cur.fetchall()}
