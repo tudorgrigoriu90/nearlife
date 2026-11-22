@@ -5512,6 +5512,10 @@ document until it is started, when it takes the next free `T-###`.
     translated from Swedish but carries the English article's link (the source link follows the
     English fact, added later). The pass now also takes a Swedish name with å, ä or ö in any
     translated fact; without those letters, only in facts linked to Swedish Wikipedia. Test: 1.
+  - ✅ Live (2026-11-22), second run: the hepatica reads "Hepatica nobilis este o plantă care
+    creşte…". 181 Romanian translated facts still hold å/ä/ö: mostly place and author names
+    (Öland, Skåne, Småland, Schäffer, Göran), which are right, and a few Swedish names the model
+    mangled ("Daggbjörnberär", "gökbin"), which no longer match a stored name and are left.
 
 - **T-395 · The Store says so when it has no products yet** — *Claude · XS · `DONE` · deps: T-085*
   - Director, 2026-11-22: Play's "Monetize with Play" (in-app products) opens only once the app is
