@@ -5467,6 +5467,9 @@ document until it is started, when it takes the next free `T-###`.
   - Not checked here: whether each local name itself is right (Wikidata's label; Wikimedia was
     rate-limiting this session). A wrong name is a "Report a mistake" case (T-381).
   - ✅ Tests: 5.
+  - ✅ Live (2026-11-22): 31,056 translated facts had both names; 1,480 were given the local name.
+    The Romanian vendace now reads "cunoscut sub numele de coregon-mic", the twite "Inăriţă cu cioc
+    galben (Linaria flavirostris) este o pasăre mică".
 
 - **T-392 · A fish shown cooked** — *Claude · XS · `DONE` · deps: T-202, T-220*
   - Director, 2026-11-22: the vendace card's photo was a plate of fried vendace, the lead image of
@@ -5479,6 +5482,8 @@ document until it is started, when it takes the next free `T-###`.
   - Left as they are: pinned insect specimens (52 catalogue photos), old botanical plates (44) and
     museum specimens (3), which show the species, often the only free photo there is.
   - ✅ Tests: 2.
+  - ✅ Live (2026-11-22): the vendace's fried-fish photo was cleared. iNaturalist had no
+    licence-clear photo for it either, so its card shows the fish glyph until a source has one.
 
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
