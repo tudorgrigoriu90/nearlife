@@ -55,5 +55,10 @@ jobs:
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install argostranslate==1.9.6
 
+      # T-396: facts once translated from Swedish (Swedish → English → target) while the English
+      # fact now exists are cleared here, so the next step translates them from English directly.
+      - name: Clear translations made from Swedish where English now exists
+        run: python pipeline/retranslate_from_english.py "${{ matrix.locale }}" --apply
+
       - name: Translate missing facts
         run: python pipeline/translate_facts.py "${{ matrix.locale }}"

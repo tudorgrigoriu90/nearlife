@@ -5526,6 +5526,23 @@ document until it is started, when it takes the next free `T-###`.
     products are read by their Play ids at run time, so once they exist no new build is needed.
   - ✅ Tests: 2.
 
+- **T-396 · Facts translated from Swedish though English now exists** — *Claude · S · `DONE` · deps: T-235, T-259, T-276*
+  - Director, 2026-11-25: the duck mussel's Romanian text read "Șoarecele obişnuit al femeilor
+    (Anodonta Anatina) este cea mai folosită artă a șoarecilor mari din Suedia". It was Swedish
+    Wikipedia ("Vanlig dammussla … Sveriges vanligaste stormusselart") through Swedish → English →
+    Romanian: *mussla* became a mouse, *dam* ladies, *art* (species) art. When the facts were
+    translated (T-235) the English fact did not exist yet; it came with T-259, and the source-link
+    backfill (T-276) then credited the translation to the English article, which says something else.
+  - ✅ `pipeline/retranslate_from_english.py`: a translation is from Swedish when it holds what
+    survives translation (Latin family names such as Unionidae, numbers) that only the Swedish fact
+    has, or none of what only the English fact has. Those rows are cleared, and the same
+    `translate-facts.yml` job then translates them from English in one step, with the right link.
+    A row cleared by mistake is only translated again from English. Romanian estimate: about 13%
+    of the translations that have an English fact.
+  - Unchanged: a species with no English fact still goes Swedish → English → target; its card
+    already says "Machine-translated", and its link is the Swedish article.
+  - ✅ Tests: 4.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code
