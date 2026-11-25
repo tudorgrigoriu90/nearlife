@@ -5552,6 +5552,10 @@ document until it is started, when it takes the next free `T-###`.
   - ✅ Where the English fact gives nothing usable, the Swedish one is translated instead
     (`translate_with_fallback`), with the matching link, so no clearing can leave a card without a
     second-language fact it had. Test: 1.
+  - ✅ Live (2026-11-25), second run: Arabic facts left empty with an English source went from 442
+    to 124; for those the offline model gives nothing usable from the English or the Swedish fact,
+    and the card shows the first language only. Every other language checked (fa, ru, uk, bg, el,
+    th, ro) has none; Turkish one.
 
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
