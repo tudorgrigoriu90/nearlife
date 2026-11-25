@@ -28,7 +28,7 @@ jobs:
       EXPO_PUBLIC_SUPABASE_URL: https://subjdoiicfmiimtvlzsg.supabase.co
       EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_Wq-K09KGV8IDchkTicCkLA_22F8f5GB
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
