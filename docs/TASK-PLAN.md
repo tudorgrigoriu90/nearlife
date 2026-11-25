@@ -5541,7 +5541,14 @@ document until it is started, when it takes the next free `T-###`.
     of the translations that have an English fact.
   - Unchanged: a species with no English fact still goes Swedish → English → target; its card
     already says "Machine-translated", and its link is the Swedish article.
-  - ✅ Tests: 4.
+  - ✅ Tests: 4 + 1.
+  - ✅ Live (2026-11-25): the duck mussel reads "Midia de rață (Anodonta anatina) este o specie de
+    midii de apă dulce din familia Unionidae", linked to the English article. Latin-script
+    languages were left with no empty facts. Arabic was not: its script transliterates
+    "Unionidae", so the rule cleared 2,577 of 5,147 Arabic translations; 2,547 facts were written
+    again and 442 Arabic facts with an English source were left empty (Argos returned nothing
+    usable). In a non-Latin script (ar, fa, ps, ckb, ru, uk, bg, sr, el, th, am, ti) only what the
+    Swedish fact alone has now counts, and the Arabic job is run again to fill the gap.
 
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs

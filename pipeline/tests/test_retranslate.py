@@ -30,3 +30,13 @@ def test_numbers_that_only_the_swedish_fact_has_give_it_away():
 def test_without_anything_that_survives_translation_nothing_is_cleared():
     assert came_from_swedish("Un text oarecare.", "A plain sentence.", "En enkel mening.") is False
     assert came_from_swedish("Un text.", None, SV) is False  # no English fact: nothing to translate from
+
+
+# Live (2026-11-25): Arabic writes Latin family names in its own script, so "Unionidae" never
+# survives, and half of the Arabic translations were cleared. In a non-Latin script only what the
+# Swedish fact alone has (numbers) counts.
+def test_in_a_non_latin_script_a_missing_family_name_proves_nothing():
+    ar = "بلح البحر البطي (Anodonta anatina) هو نوع من بلح البحر في المياه العذبة في عائلة يونيونيداي."
+    assert came_from_swedish(ar, EN, SV, latin_script=False) is False
+    sv = "Siklöjan blir sällan längre än 20 centimeter och leker i november 1950."
+    assert came_from_swedish("نادرا ما يتجاوز 20 سم ويتكاثر في 1950.", "The vendace is a whitefish.", sv, latin_script=False) is True

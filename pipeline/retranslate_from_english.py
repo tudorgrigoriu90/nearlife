@@ -32,14 +32,21 @@ def _kept(text: str | None) -> set[str]:
     return set(_KEPT.findall(text or ""))
 
 
-def came_from_swedish(translated: str | None, en_fact: str | None, sv_fact: str | None) -> bool:
+# Languages written in another script: a Latin family name is transliterated, so its absence
+# proves nothing there (live, 2026-11-25: half of the Arabic translations were cleared on it).
+NON_LATIN = {"ar", "fa", "ps", "ckb", "ru", "uk", "bg", "sr", "el", "th", "am", "ti"}
+
+
+def came_from_swedish(
+    translated: str | None, en_fact: str | None, sv_fact: str | None, latin_script: bool = True
+) -> bool:
     if not translated or not en_fact:
         return False
     t, en, sv = _kept(translated), _kept(en_fact), _kept(sv_fact)
     only_sv, only_en = sv - en, en - sv
     if t & only_sv:
         return True
-    return bool(only_en) and not (t & only_en)
+    return latin_script and bool(only_en) and not (t & only_en)
 
 
 ROWS_SQL = """
@@ -69,7 +76,8 @@ def main(argv: list[str]) -> int:
     with psycopg.connect(dsn) as conn, conn.cursor() as cur:
         cur.execute(ROWS_SQL, (locale,))
         rows = cur.fetchall()
-        found = [sid for sid, tr, en, sv in rows if came_from_swedish(tr, en, sv)]
+        latin = locale not in NON_LATIN
+        found = [sid for sid, tr, en, sv in rows if came_from_swedish(tr, en, sv, latin)]
         if apply:
             cur.executemany(CLEAR_SQL, [(sid, locale) for sid in found])
             conn.commit()
