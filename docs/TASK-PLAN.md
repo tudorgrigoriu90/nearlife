@@ -5549,6 +5549,9 @@ document until it is started, when it takes the next free `T-###`.
     again and 442 Arabic facts with an English source were left empty (Argos returned nothing
     usable). In a non-Latin script (ar, fa, ps, ckb, ru, uk, bg, sr, el, th, am, ti) only what the
     Swedish fact alone has now counts, and the Arabic job is run again to fill the gap.
+  - ✅ Where the English fact gives nothing usable, the Swedish one is translated instead
+    (`translate_with_fallback`), with the matching link, so no clearing can leave a card without a
+    second-language fact it had. Test: 1.
 
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs

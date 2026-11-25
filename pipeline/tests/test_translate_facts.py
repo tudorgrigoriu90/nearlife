@@ -159,3 +159,22 @@ def test_the_one_time_pass_fixes_swedish_names_only_in_facts_from_swedish():
         ("Hepatica nobilis este o plantă.", "h", "ro"),
         ("Hepatica nobilis este.", "x", "ro"),
     ]
+
+
+# T-396 live: some English facts give nothing usable in Arabic; the Swedish one is tried then, and
+# the link follows the text actually translated.
+def test_a_failed_english_translation_falls_back_to_the_swedish_fact():
+    from translate_facts import translate_with_fallback
+
+    rows = [
+        {"species_id": "a", "en": "Hard sentence.", "sv": "Svår mening."},
+        {"species_id": "b", "en": "Easy one.", "sv": "Lätt."},
+        {"species_id": "c", "en": "Hard sentence.", "sv": None},
+    ]
+
+    def fake(text, src, dst):
+        return "" if text == "Hard sentence." else f"[{dst}] {text}"
+
+    done, used = translate_with_fallback(rows, "ar", fake, {})
+    assert done == {"a": "[ar] [en] Svår mening.", "b": "[ar] Easy one."}
+    assert used == {"a": "sv", "b": "en"}

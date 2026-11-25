@@ -44,6 +44,21 @@ def plan_translations(rows: list[dict]) -> list[tuple[str, str, str]]:
     return plan
 
 
+def translate_with_fallback(
+    rows: list[dict], target: str, translate: Translate, names: dict[str, tuple] | None
+) -> tuple[dict[str, str], dict[str, str]]:
+    """English first; where that gives nothing usable, the Swedish fact (T-396). Returns the facts
+    and, per species, the language actually translated, so the source link matches the text."""
+    done = translate_missing(plan_translations(rows), target, translate, names)
+    used = {sid: ("en" if next(r for r in rows if r["species_id"] == sid).get("en") else "sv") for sid in done}
+    retry = [(r["species_id"], r["sv"], "sv") for r in rows if r["species_id"] not in done and r.get("en") and r.get("sv")]
+    if retry:
+        more = translate_missing(retry, target, translate, names)
+        done.update(more)
+        used.update({sid: "sv" for sid in more})
+    return done, used
+
+
 # Languages that capitalise every noun: a common name keeps its stored capital mid-sentence.
 CAPITALISED_NOUNS = {"de", "lb"}
 
@@ -176,12 +191,11 @@ def main(argv: list[str]) -> int:
         cur.execute(MISSING_SQL, (target,))
         fetched = cur.fetchall()
         rows = [{"species_id": r[0], "en": r[1], "sv": r[2]} for r in fetched]
-        source = {r[0]: (r[3] if r[1] else r[4]) for r in fetched}
+        links = {r[0]: {"en": r[3], "sv": r[4]} for r in fetched}
         names = {r[0]: (r[5], r[6], r[7], r[8]) for r in fetched}
-        plan = plan_translations(rows)
-        print(f"[{target}] {len(plan)} facts to translate", flush=True)
-        done = translate_missing(plan, target, translate, names)
-        cur.executemany(UPDATE_SQL, [(fact, source.get(sid), sid, target) for sid, fact in done.items()])
+        print(f"[{target}] {len(plan_translations(rows))} facts to translate", flush=True)
+        done, used = translate_with_fallback(rows, target, translate, names)
+        cur.executemany(UPDATE_SQL, [(fact, links[sid][used[sid]], sid, target) for sid, fact in done.items()])
         conn.commit()
     print(f"[{target}] wrote {len(done)} machine-translated facts", flush=True)
     return 0
