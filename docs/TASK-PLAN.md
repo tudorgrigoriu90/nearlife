@@ -134,6 +134,10 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
   - Left for after production: the 24 products (PAYMENTS-SETUP Part E), RevenueCat import and the
     `full_game` / `family` entitlements (Part G), a license-tester purchase (Part I), then
     `REVENUECAT_ACCEPT_SANDBOX=false`.
+  - ✅ Director, 2026-11-27: the 24 one-time products exist in Play and are active, each with one
+    purchase option (Play's new one-time product model; `react-native-purchases` 10.14.0 handles
+    it, and the first purchase option is the backwards-compatible one). Next: RevenueCat import,
+    the two entitlements, a license-tester purchase.
 - **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · `DONE` · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - EU-hosted instance; IP anonymization enabled; project API key issued.
   - ✅ EU Cloud project created (Director-confirmed region); project API key (`phc_…`, a public
