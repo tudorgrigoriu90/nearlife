@@ -81,7 +81,9 @@ You do this on your computer, in the project folder (where you run `npx expo sta
 2. First product:
    - **Product ID:** `full_game` (exactly this; it can never be changed)
    - **Name:** Full Game. **Description:** Unlimited catching, one payment.
-   - **Price:** 49 SEK for Sweden. Let Google convert the other countries, or set them by hand.
+   - **Price:** 49 SEK for Sweden, **including moms**: the price the buyer sees. Entered without
+     VAT, Play adds 25% and rounds (49 became 59 kr, 99 became 125 kr). Let Google convert the
+     other countries, or set them by hand.
    - Save, then **Activate**.
 3. Second product: **Product ID** `family`, name Family, description "The Full Game for up to 5
    people", **99 SEK**. Save and **Activate**.

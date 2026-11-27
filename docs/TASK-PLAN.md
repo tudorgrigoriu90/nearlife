@@ -138,6 +138,11 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
     purchase option (Play's new one-time product model; `react-native-purchases` 10.14.0 handles
     it, and the first purchase option is the backwards-compatible one). Next: RevenueCat import,
     the two entitlements, a license-tester purchase.
+  - ✅ Imported into RevenueCat as non-consumable (a consumable is consumed on Play and can neither
+    be restored nor stays owned).
+  - Prices: the test phone showed 59 kr / 125 kr, the 49 / 99 entered without VAT plus Sweden's
+    25%. Director, 2026-11-27: 49 / 99 / 99 / 29 kr VAT-inclusive, as planned (ECONOMY.md); the
+    Director resets them in Play.
 - **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · `DONE` · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - EU-hosted instance; IP anonymization enabled; project API key issued.
   - ✅ EU Cloud project created (Director-confirmed region); project API key (`phc_…`, a public

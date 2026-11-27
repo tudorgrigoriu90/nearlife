@@ -52,6 +52,12 @@ had is fun. So:
   lower price pays off only if it **more than doubles** conversion. Prices live in the store
   consoles, not in the app (the app shows the store's localized price), so testing 79 SEK later is a
   console change, not a release. Occasional seasonal promos stay possible.
+- **The SEK prices are what the buyer pays, moms included (Director, 2026-11-27).** Entered as
+  49 / 99 without VAT, Play added Sweden's 25% and rounded: the test phone showed 59 kr and 125 kr.
+  The Director weighed keeping them (about 40 kr instead of 33 kr per Full Game after VAT and the
+  15% fee) and chose the plan: 49 kr Full Game, 99 kr Family, 99 kr All of Sweden, 29 kr a county,
+  all VAT-inclusive, because conversion is the first thing to learn. 59 kr is the first price to
+  test once conversion is known (above 3% after 2–3 months).
 - **Family in v1 (Director, 2026-10-29).** It was cut from v1 until single-player conversion was
   proven; the Director brought it forward because parents are the core audience. It is priced at
   2× the Full Game, as the original plan had it, and covers up to 5 people.
