@@ -5576,6 +5576,11 @@ document until it is started, when it takes the next free `T-###`.
     and the card shows the first language only. Every other language checked (fa, ru, uk, bg, el,
     th, ro) has none; Turkish one.
 
+- **T-397 · Version 1.0.0 for production** — *Claude · XS · `DONE` · deps: —*
+  - Director, 2026-11-27: the production release shows 1.0.0. `app.json` and `package.json` go from
+    0.1.0 to 1.0.0; the version code stays EAS-managed (`appVersionSource: remote`,
+    `autoIncrement` in the production profile), so only the next build is needed.
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code
