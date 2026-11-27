@@ -2,8 +2,8 @@
 const { chromium } = require('playwright');
 const { DEFS, mark: pinMark } = require('./mark.js');
 const COPY = {
-  en: { tag: 'The wildlife and plants active in your county, season by season.', sub: 'Over 8,000 Swedish species · No ads' },
-  sv: { tag: 'Djur och växter som är aktiva i ditt län, säsong för säsong.', sub: 'Över 8 000 svenska arter · Ingen reklam' },
+  en: { tag: 'The wildlife and plants active in your county, season by season.', sub: 'Over 10,000 Swedish species · No ads' },
+  sv: { tag: 'Djur och växter som är aktiva i ditt län, säsong för säsong.', sub: 'Över 10 000 svenska arter · Ingen reklam' },
 };
 const mark = `<svg viewBox="270 200 484 640" width="150" height="198"><defs>${DEFS}</defs>${pinMark()}</svg>`;
 const hills = `<svg viewBox="0 0 1024 500" width="1024" height="500" style="position:absolute;inset:0" preserveAspectRatio="none">

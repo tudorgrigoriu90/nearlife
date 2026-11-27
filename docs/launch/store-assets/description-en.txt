@@ -1,6 +1,6 @@
 Nearby is a calm, honest almanac of the wild things that share your patch of the world.
 
-Each season, discover the birds, mammals, insects, fish, plants, spiders, snails, frogs and lizards that are genuinely active in your county: over 8,000 Swedish species, in your own language. Never "here right now", always the true season. No feeds to doom-scroll, no ads, no subscription. Just a quiet nudge now and then when something worth noticing is around.
+Each season, discover the birds, mammals, insects, fish, plants, spiders, snails, frogs and lizards that are genuinely active in your county: over 10,000 Swedish species, in your own language. Never "here right now", always the true season. No feeds to doom-scroll, no ads, no subscription. Just a quiet nudge now and then when something worth noticing is around.
 
 • Spotted: build your county almanac as species come into season.
 • Caught: head out to a nearby public place that suits the species (a lake for a pike, a meadow for a butterfly) and land it with a quick, one-thumb skill game.

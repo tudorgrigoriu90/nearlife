@@ -26,13 +26,18 @@ function label(key, locale, vars = {}) {
 // Every string the walk taps; the test checks each exists in both languages.
 const LABEL_KEYS = [
   'onboarding.welcome.cta', 'onboarding.age.cta', 'onboarding.location.cta', 'onboarding.hometown.cta',
-  'onboarding.notif.cta', 'onboarding.firstSpotted.cta', 'card.findNearby', 'almanac.title',
-  'nav.settings', 'settings.counties', 'settings.store',
+  'onboarding.notif.cta', 'onboarding.firstSpotted.cta', 'card.back', 'nav.settings', 'settings.done',
+  'settings.counties', 'dual.toggle', 'interests.title', 'almanac.title', 'calendar.entry',
 ];
 
 // Växjö: resolves to Kronoberg, the content-voice benchmark county.
 const HOME = { latitude: 56.879, longitude: 14.806 };
 const COUNTY = 'Kronoberg';
+// The species the walk opens (T-398): a resident bird for the protection line, a swan for the card
+// in two languages; both are on Kronoberg's This Week list all year. Arabic is the largest
+// immigrant language in Sweden, so it is the second language shown.
+const SPECIES = { sv: { bird: 'Talgoxe', swan: 'Sångsvan' }, en: { bird: 'Great Tit', swan: 'Whooper Swan' } };
+const SECOND_LANGUAGE = 'العربية';
 
 async function tap(page, text) {
   // Exact first; some labels carry an icon in the same text node ("⚙ Settings").
@@ -43,16 +48,20 @@ async function tap(page, text) {
 
 async function settle(page) {
   await page.waitForLoadState('networkidle').catch(() => {});
+  // Every photo loaded, or the shot has empty cards (the This Week strips did).
+  await page.waitForFunction(() => [...document.images].every((i) => i.complete), null, { timeout: 15000 }).catch(() => {});
   await page.waitForTimeout(1500);
 }
 
 async function run(baseUrl, outDir, locale) {
   const L = (key, vars) => label(key, locale, vars);
+  const names = SPECIES[locale];
   // Required here, not at the top: CI installs Playwright only in the screenshot job.
   const { chromium } = require('playwright');
   const browser = await chromium.launch();
+  // 1:2, the tallest phone shot Play takes: a card's title and its text fit together.
   const ctx = await browser.newContext({
-    viewport: { width: 360, height: 640 },
+    viewport: { width: 360, height: 720 },
     deviceScaleFactor: 3,
     geolocation: HOME,
     permissions: ['geolocation', 'notifications'],
@@ -75,6 +84,14 @@ async function run(baseUrl, outDir, locale) {
       console.log((await page.innerText('body').catch(() => '')).slice(0, 400));
     }
   };
+  const back = async () => {
+    await page.getByText(L('card.back')).first().click();
+    await page.waitForTimeout(1200);
+  };
+  const home = async () => {
+    await page.goto(baseUrl, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(3000);
+  };
 
   await page.goto(baseUrl, { waitUntil: 'networkidle' });
   await tap(page, L('onboarding.welcome.cta'));
@@ -83,27 +100,42 @@ async function run(baseUrl, outDir, locale) {
   await tap(page, L('onboarding.location.cta'));
   await tap(page, L('onboarding.hometown.cta', { region: COUNTY }));
   await tap(page, L('onboarding.notif.cta'));
-  await shot('02-first-sighting', async () => {});
   await tap(page, L('onboarding.firstSpotted.cta'));
+  // The county catalogue (several pages) carries the protection level a card shows; let it land.
+  await page.waitForTimeout(8000);
 
   await shot('01-this-week', async () => {});
-  await shot('03-species', async () => {
-    // The first species row under the season's events.
-    await page.locator('[role=button]').filter({ hasText: /\S/ }).nth(2).click();
+  await shot('02-protected', async () => {
+    await tap(page, names.bird);
+    await page.getByText(locale === 'sv' ? /Fridlyst/ : /Protected/).first().waitFor({ timeout: 20000 });
   });
-  await shot('07-catch', async () => tap(page, L('card.findNearby')));
-  await page.goto(baseUrl, { waitUntil: 'networkidle' });
-  await settle(page);
-  await shot('04-almanac', async () => tap(page, L('almanac.title')));
-  await shot('05-counties', async () => {
+  await back();
+  await shot('04-show-me', async () => {
+    await tap(page, L('nav.settings'));
+    await page.locator('div').filter({ has: page.getByText(L('dual.toggle'), { exact: true }) }).getByRole('switch').last().click();
+    await page.waitForTimeout(1200);
+    await tap(page, SECOND_LANGUAGE);
+    await page.getByText(L('interests.title'), { exact: true }).scrollIntoViewIfNeeded();
+  });
+  await page.getByText(L('settings.done'), { exact: true }).locator('visible=true').first().click({ force: true });
+  await page.waitForTimeout(2000);
+  await shot('03-two-languages', async () => {
+    await tap(page, names.swan);
+    await page.waitForTimeout(4000);
+    // Down to the facts, the title still on screen: Swedish and Arabic one under the other.
+    await page.mouse.move(180, 400);
+    await page.mouse.wheel(0, 210);
+    await page.waitForTimeout(1000);
+  });
+  await home();
+  await shot('05-calendar', async () => {
+    await tap(page, L('almanac.title'));
+    await tap(page, L('calendar.entry'));
+  });
+  await home();
+  await shot('06-counties', async () => {
     await tap(page, L('nav.settings'));
     await tap(page, L('settings.counties'));
-  });
-  await page.goto(baseUrl, { waitUntil: 'networkidle' });
-  await settle(page);
-  await shot('06-store', async () => {
-    await tap(page, L('nav.settings'));
-    await tap(page, L('settings.store'));
   });
   await browser.close();
   return taken;

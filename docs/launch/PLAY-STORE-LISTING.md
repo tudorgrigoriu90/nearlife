@@ -24,7 +24,7 @@ and Play would keep those line breaks.
   Nearby är en lugn och ärlig almanacka över det vilda som delar din bit av världen.
 
   Varje säsong upptäcker du fåglarna, däggdjuren, insekterna, fiskarna, växterna, spindlarna,
-  sniglarna, grodorna och ödlorna som verkligen är aktiva i ditt län: över 8 000 svenska arter,
+  sniglarna, grodorna och ödlorna som verkligen är aktiva i ditt län: över 10 000 svenska arter,
   på ditt eget språk. Aldrig "här just nu", alltid den sanna säsongen. Inga flöden att fastna i,
   ingen reklam, ingen prenumeration. Bara en stilla påminnelse ibland när något värt att se är
   i farten.
@@ -51,7 +51,7 @@ and Play would keep those line breaks.
   Nearby is a calm, honest almanac of the wild things that share your patch of the world.
 
   Each season, discover the birds, mammals, insects, fish, plants, spiders, snails, frogs and
-  lizards that are genuinely active in your county: over 8,000 Swedish species, in your own
+  lizards that are genuinely active in your county: over 10,000 Swedish species, in your own
   language. Never "here right now", always the true season. No feeds to doom-scroll, no ads, no
   subscription. Just a quiet nudge now and then when something worth noticing is around.
 
@@ -84,9 +84,13 @@ and `node scripts/store-assets/feature.js`.
   (`assets/icon.png`, adaptive and themed Android icons), so store and phone match.
 - [x] **Feature graphic** 1024×500: `store-assets/feature-graphic-sv.png` on the Swedish listing,
   `feature-graphic-en.png` on the English one.
-- [x] **Phone screenshots** 1080×1920, from the real app (T-226): upload
-  `store-assets/screenshots/sv/1…6` to the Swedish listing and `screenshots/en/1…6` to the
-  English one, in number order. Retake with the **Store screenshots** workflow (Actions tab).
+- [x] **Phone screenshots** 1080×1920, from the real app (T-226), with a Swedish caption on the
+  green of the feature graphic (T-398): upload `store-assets/screenshots/sv/01…06` to the Swedish
+  listing, in number order: This Week, a card with the protected mark, a card in Swedish and
+  Arabic, "Visa mig", the nature calendar, the counties. Regenerate: build the web app, take the
+  raw shots with `node scripts/store-assets/screenshots.js <url> <dir> sv`, frame them with
+  `node scripts/store-assets/frames.js <dir> sv`. (Director, 2026-11-27: Swedish images only; the
+  English listing keeps `screenshots/en/`.)
 - [ ] (Optional) tablet screenshots, promo video.
 
 ## Data safety form (answers)

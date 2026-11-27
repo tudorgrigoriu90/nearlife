@@ -5581,6 +5581,22 @@ document until it is started, when it takes the next free `T-###`.
     0.1.0 to 1.0.0; the version code stays EAS-managed (`appVersionSource: remote`,
     `autoIncrement` in the production profile), so only the next build is needed.
 
+- **T-398 · New Swedish store graphics** — *Claude · S · `DONE` · deps: T-226*
+  - Director, 2026-11-27: update the Play graphics, Swedish images only.
+  - ✅ The screenshot walk (`scripts/store-assets/screenshots.js`) now shows what v1 has: This Week
+    with its photo strips (it waits for every image; the strips were empty), a card with the
+    protected mark (it waits for the county catalogue, which carries the level), a card in Swedish
+    and Arabic, "Visa mig", the nature calendar and the counties. The empty Store and the map-less
+    catch screen are out. Shots are 1:2 (360×720 at 3×), Play's tallest, so a card's title and
+    both texts fit.
+  - ✅ `scripts/store-assets/frames.js` puts each on the feature graphic's green under a Swedish
+    caption, at 1080×1920: "Se vad som är aktivt i ditt län den här säsongen", "Fridlysta arter –
+    och hur du skyddar dem", "Artkort på svenska och på ditt eget språk", "Visa bara det du gillar:
+    fåglar, fiskar, växter …", "Naturens kalender, månad för månad", "Utforska alla 21 län".
+  - ✅ The feature graphic and both store descriptions said "över 8 000 / over 8,000" species; now
+    10 000 / 10,000.
+  - ✅ Tests: 2 (each caption has its shot; no "just nu").
+
 > **Maintenance automation (v2, Director 2026-11-21).** Two kinds of automation. **GitHub Actions**
 > do the fixed, repeatable checks and open an issue labelled `automation` when something needs
 > attention (T-375 to T-377, T-379, T-380, T-383). **Claude scheduled tasks** (a fresh Claude Code
