@@ -103,7 +103,7 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
   - ⚠️ **Action for Director:** the `sb_secret_...` key was exposed in chat — **rotate it** in
     the dashboard. Not needed by the app (publishable key only); server jobs get a fresh secret
     via a CI secret later.
-- **T-004 · Create RevenueCat account & link store keys** — *Director · S · `IN-PROGRESS` (account + public key done 2026-10-29; Play linking, products, webhook pending) · deps: T-001, T-002 · [ECONOMY](ECONOMY.md), [TSD §1](TSD.md)*
+- **T-004 · Create RevenueCat account & link store keys** — *Director · S · `IN-PROGRESS` (account + public key done 2026-10-29; Play linked 2026-11-27; products, webhook pending) · deps: T-001, T-002 · [ECONOMY](ECONOMY.md), [TSD §1](TSD.md)*
   - RevenueCat project created; App Store + Play billing keys linked.
   - Verified free tier covers projected volume (<$2.5k/mo).
   - ✅ The RevenueCat project "Nearlife" exists. The public SDK key for the Play Store app is
@@ -115,6 +115,12 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
   - Cloud builds need `google-services.json`, which is gitignored. `app.config.js` now reads it
     from the EAS secret-file variable `GOOGLE_SERVICES_JSON` when set, and from the local file
     otherwise.
+  - ✅ Director, 2026-11-27: the Google service account is linked in RevenueCat and shows **valid
+    credentials** (PAYMENTS-SETUP Part F). The app is in open testing; Play's "Monetize with Play"
+    (products) opens only once it is in production, so the order is now: webhook + Supabase secret
+    (Part H), the RevenueCat secret key (LAUNCH-CHECKLIST 9c), restore behaviour (Part G.3); then,
+    after production, the 24 products, RevenueCat import + entitlements, a license-tester purchase,
+    and `REVENUECAT_ACCEPT_SANDBOX=false`.
 - **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · `DONE` · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - EU-hosted instance; IP anonymization enabled; project API key issued.
   - ✅ EU Cloud project created (Director-confirmed region); project API key (`phc_…`, a public
