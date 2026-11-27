@@ -140,9 +140,9 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
     the two entitlements, a license-tester purchase.
   - ✅ Imported into RevenueCat as non-consumable (a consumable is consumed on Play and can neither
     be restored nor stays owned).
-  - Prices: the test phone showed 59 kr / 125 kr, the 49 / 99 entered without VAT plus Sweden's
-    25%. Director, 2026-11-27: 49 / 99 / 99 / 29 kr VAT-inclusive, as planned (ECONOMY.md); the
-    Director resets them in Play.
+  - Prices: the test phone showed 59 kr / 125 kr, Play's conversion of the default price for
+    Sweden (not VAT: Play's price column already includes it). Director, 2026-11-27: 49 / 99 / 99
+    / 29 kr set on Sweden's row, as planned (ECONOMY.md).
 - **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · `DONE` · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - EU-hosted instance; IP anonymization enabled; project API key issued.
   - ✅ EU Cloud project created (Director-confirmed region); project API key (`phc_…`, a public
