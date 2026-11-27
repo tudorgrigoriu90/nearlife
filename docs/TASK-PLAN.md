@@ -121,6 +121,19 @@ The paid and free service accounts the stack depends on ([TSD §1](TSD.md)).
     (Part H), the RevenueCat secret key (LAUNCH-CHECKLIST 9c), restore behaviour (Part G.3); then,
     after production, the 24 products, RevenueCat import + entitlements, a license-tester purchase,
     and `REVENUECAT_ACCEPT_SANDBOX=false`.
+  - ✅ Director, 2026-11-27, everything that can be done before production:
+    - Webhook: `REVENUECAT_WEBHOOK_SECRET` in Supabase, the RevenueCat webhook to
+      `functions/v1/revenuecat-webhook` (both environments, all events); "Send test event" → 200.
+      (The first try gave 404: the function had been deleted from the dashboard by mistake;
+      redeployed by `deploy-functions.yml`, run 45997653024.)
+    - `REVENUECAT_SECRET_KEY` in Supabase: a **V1** secret key, because `delete-account` calls
+      `DELETE /v1/subscribers/{id}`; a V2 key does not work there. (A V2 key with only "Customer
+      information: read & write" would need the function moved to the v2 API; not done.)
+    - Transfer behaviour: "Transfer to new App User ID" (the default); sandbox behaviour not split;
+      sandbox testing access "Anybody" (on Play only license testers can make sandbox purchases).
+  - Left for after production: the 24 products (PAYMENTS-SETUP Part E), RevenueCat import and the
+    `full_game` / `family` entitlements (Part G), a license-tester purchase (Part I), then
+    `REVENUECAT_ACCEPT_SANDBOX=false`.
 - **T-005 · Create PostHog account (EU-hosted)** — *Director + Claude · XS · `DONE` · deps: — · [TSD §1](TSD.md), [PRIVACY §2](PRIVACY-COMPLIANCE.md)*
   - EU-hosted instance; IP anonymization enabled; project API key issued.
   - ✅ EU Cloud project created (Director-confirmed region); project API key (`phc_…`, a public
